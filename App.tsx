@@ -1,5 +1,8 @@
+import 'react-native-gesture-handler'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, ScrollView, View, Text, Button } from 'react-native'
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
 // Import agent from setup
 import { agent } from './src/veramo/setup'
@@ -8,7 +11,18 @@ interface Identifier {
   did: string
 }
 
-const App = () => {
+function HomeScreen({ navigation }) {
+  return (
+    <View>
+      <Button
+        title="Go to Settings"
+        onPress={() => navigation.navigate('Settings')}
+      />
+    </View>
+  );
+}
+
+function SettingsScreen({ navigation }) {
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
 
   // Add the new identifier to state
@@ -47,9 +61,28 @@ const App = () => {
             )}
           </View>
           <Button onPress={() => createIdentifier()} title={'Create Identifier'} />
+          <View style={{ alignItems: 'baseline', marginBottom: 50, marginTop: 100 }}>
+            <Button
+              title="Import Identifier"
+              onPress={() => navigation.navigate('ImportIdentity')}
+            />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
+  )
+}
+
+const Stack = createStackNavigator();
+
+const App = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   )
 }
 
