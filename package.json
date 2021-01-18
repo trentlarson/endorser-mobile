@@ -5,13 +5,26 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "postinstall": "rn-nodeify --install assert,buffer,process,crypto,stream,vm --hack",
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@zxing/text-encoding": "^0.9.0",
+    "assert": "^1.5.0",
+    "buffer": "^4.9.2",
+    "events": "^3.2.0",
+    "process": "^0.11.10",
     "react": "16.13.1",
-    "react-native": "0.63.4"
+    "react-native": "0.63.4",
+    "react-native-crypto": "^2.2.0",
+    "react-native-randombytes": "^3.6.0",
+    "react-native-sodium": "^0.3.9",
+    "react-native-sqlite-storage": "^5.0.0",
+    "readable-stream": "^1.0.33",
+    "stream-browserify": "^1.0.0",
+    "vm-browserify": "0.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
@@ -25,6 +38,7 @@
     "jest": "^25.1.0",
     "metro-react-native-babel-preset": "^0.59.0",
     "react-test-renderer": "16.13.1",
+    "rn-nodeify": "^10.2.0",
     "typescript": "^3.8.3"
   },
   "jest": {
@@ -37,5 +51,25 @@
       "json",
       "node"
     ]
+  },
+  "react-native": {
+    "crypto": "react-native-crypto",
+    "_stream_transform": "readable-stream/transform",
+    "_stream_readable": "readable-stream/readable",
+    "_stream_writable": "readable-stream/writable",
+    "_stream_duplex": "readable-stream/duplex",
+    "_stream_passthrough": "readable-stream/passthrough",
+    "stream": "stream-browserify",
+    "vm": "vm-browserify"
+  },
+  "browser": {
+    "crypto": "react-native-crypto",
+    "_stream_transform": "readable-stream/transform",
+    "_stream_readable": "readable-stream/readable",
+    "_stream_writable": "readable-stream/writable",
+    "_stream_duplex": "readable-stream/duplex",
+    "_stream_passthrough": "readable-stream/passthrough",
+    "stream": "stream-browserify",
+    "vm": "vm-browserify"
   }
 }
