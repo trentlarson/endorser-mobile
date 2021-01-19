@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler'
-import { entropyToMnemonic } from 'bip39'
+import { entropyToMnemonic, mnemonicToEntropy } from 'bip39'
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, ScrollView, View, Text, Button } from 'react-native'
+import { SafeAreaView, ScrollView, View, Text, TextInput, Button } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -30,6 +30,16 @@ function SettingsScreen({ navigation }) {
   const createIdentifier = async () => {
     const _id = await agent.didManagerCreate()
     setIdentifiers((s) => s.concat([_id]))
+  }
+
+  const deleteIdentifiers = async () => {
+    if (identifiers.length > 0) {
+      await agent.didManagerDelete(identifiers[0])
+      const _ids = await agent.didManagerFind()
+      setIdentifiers(_ids)
+    } else {
+      throw Error('There are no identifiers to delete.')
+    }
   }
 
   // Check for existing identifers on load and set them to state
@@ -72,6 +82,12 @@ function SettingsScreen({ navigation }) {
               title="Export Identifier"
               onPress={() => navigation.navigate('ExportIdentity')}
             />
+            {/** good for tests, bad for users
+            <Button
+              title="Delete Identifiers"
+              onPress={() => deleteIdentifiers()}
+            />
+            **/}
           </View>
         </View>
       </ScrollView>
@@ -104,7 +120,7 @@ function ExportIdentityScreen({ navigation }) {
           <View>
             <Text>{identifier.did}</Text>
             <Button title={'Export Identifier Mnemonic'} onPress={() => exportIdentifier()} />
-            <Text>{ mnemonic }</Text>
+            <Text selectable={true}>{ mnemonic }</Text>
           </View>
         ) : (
           <View> 
@@ -118,6 +134,7 @@ function ExportIdentityScreen({ navigation }) {
 
 function ImportIdentityScreen({ navigation }) {
   const [identifier, setIdentifier] = useState<Identifier>()
+  const [mnemonic, setMnemonic] = useState<String>('')
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
@@ -128,11 +145,17 @@ function ImportIdentityScreen({ navigation }) {
     getIdentifiers()
   }, [])
 
+  const importIdentifier = async () => {
+    const keyHex = mnemonicToEntropy(mnemonic)
+    const key = await agent.didManagerAddKey(keyHex)
+    console.log('new key', key)
+  }
+
   return (
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Identifiers</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Enter Mnemonic</Text>
           <View style={{ marginBottom: 50, marginTop: 20 }}>
             {identifier ? (
               <View>
@@ -141,7 +164,13 @@ function ImportIdentityScreen({ navigation }) {
               ) : (
               <View>
                 <Text>{identifier && identifier.did}</Text>
-                <Text>enter stuff</Text>
+                <TextInput
+                  multiline={true}
+                  style={{ borderWidth: 1, height: 100 }}
+                  onChangeText={(text) => setMnemonic(text)}
+                >
+                </TextInput>
+                <Button title={'Import from mnemonic'} onPress={() => importIdentifier()} />
               </View>
             )}
           </View>
