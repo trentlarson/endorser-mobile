@@ -1,12 +1,17 @@
 import 'react-native-gesture-handler'
+
 import { entropyToMnemonic, mnemonicToEntropy } from 'bip39'
+const EC = require('elliptic').ec
+import { toEthereumAddress } from 'did-jwt'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, ScrollView, View, Text, TextInput, Button } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
 
 // Import agent from setup
 import { agent } from './veramo/setup'
+
+const secp256k1 = new EC('secp256k1')
 
 interface Identifier {
   did: string
@@ -32,13 +37,11 @@ function SettingsScreen({ navigation }) {
     setIdentifiers((s) => s.concat([_id]))
   }
 
-  const deleteIdentifiers = async () => {
+  const deleteIdentifier = async () => {
     if (identifiers.length > 0) {
       await agent.didManagerDelete(identifiers[0])
       const _ids = await agent.didManagerFind()
       setIdentifiers(_ids)
-    } else {
-      throw Error('There are no identifiers to delete.')
     }
   }
 
@@ -49,7 +52,7 @@ function SettingsScreen({ navigation }) {
       setIdentifiers(_ids)
 
       // Inspect the id object in your debug tool
-      console.log('_ids:', _ids)
+      console.log('_ids:', JSON.stringify(_ids))
     }
     getIdentifiers()
   }, [])
@@ -68,7 +71,7 @@ function SettingsScreen({ navigation }) {
               ))
             ) : (
               <View>
-                <Text>No identifiers created yet</Text>
+                <Text>There are no identifiers.</Text>
                 <Button title={'Create Identifier'} onPress={() => createIdentifier()}  />
               </View>
             )}
@@ -76,17 +79,16 @@ function SettingsScreen({ navigation }) {
           <View style={{ alignItems: 'baseline', marginBottom: 50, marginTop: 100 }}>
             <Button
               title="Import Identifier"
-              onPress={() => navigation.navigate('ImportIdentity')}
+              onPress={() => navigation.navigate('Import Identifier')}
             />
             <Button
               title="Export Identifier"
-              onPress={() => navigation.navigate('ExportIdentity')}
+              onPress={() => navigation.navigate('Export Identifier')}
             />
             {/** good for tests, bad for users
-            <Button
-              title="Delete Identifiers"
-              onPress={() => deleteIdentifiers()}
+            <Button title="Delete Identifier" onPress={() => deleteIdentifier()}
             />
+            <Button title={'Create Identifier'} onPress={() => createIdentifier()}  />
             **/}
           </View>
         </View>
@@ -100,8 +102,8 @@ function ExportIdentityScreen({ navigation }) {
   const [mnemonic, setMnemonic] = useState<String>('')
 
   const exportIdentifier = async () => {
-    let key = entropyToMnemonic(identifier.keys[0].privateKeyHex)
-    setMnemonic(key)
+    let mnemonic = entropyToMnemonic(identifier.keys[0].privateKeyHex)
+    setMnemonic(mnemonic)
   }
 
   // Check for existing identifers on load and set them to state
@@ -120,11 +122,22 @@ function ExportIdentityScreen({ navigation }) {
           <View>
             <Text>{identifier.did}</Text>
             <Button title={'Export Identifier Mnemonic'} onPress={() => exportIdentifier()} />
-            <Text selectable={true}>{ mnemonic }</Text>
+            {mnemonic ? (
+              <TextInput
+                multiline={true}
+                style={{ borderWidth: 1, height: 80 }}
+                onChangeText={setMnemonic}
+                editable={false}
+              >
+              { mnemonic }
+              </TextInput>
+            ) : (
+              <View/>
+            )}
           </View>
         ) : (
           <View> 
-            <Text>No identifiers have been created yet.</Text>
+            <Text>There are no identifiers to export.</Text>
           </View>
         )}
       </View>
@@ -146,31 +159,51 @@ function ImportIdentityScreen({ navigation }) {
   }, [])
 
   const importIdentifier = async () => {
-    const keyHex = mnemonicToEntropy(mnemonic)
-    const key = await agent.didManagerAddKey(keyHex)
-    console.log('new key', key)
+
+    const keyHex: string = mnemonicToEntropy(mnemonic)
+
+    // returns a KeyPair from the elliptic.ec library
+    const keyPair = secp256k1.keyFromPrivate(keyHex, 'hex')
+    // this code is from did-provider-eth createIdentifier
+    const publicHex = keyPair.getPublic('hex')
+    const privateHex = keyPair.getPrivate('hex')
+    const address = toEthereumAddress(publicHex)
+    const newIdentifier: Omit<IIdentifier, 'provider'> = {
+      did: 'did:ethr:rinkeby:' + address,
+      keys: [{
+        kid: publicHex,
+        kms: 'local',
+        type: 'Secp256k1',
+        publicKeyHex: publicHex,
+        privateKeyHex: privateHex
+      }],
+      provider: 'did:ethr:rinkeby',
+      services: []
+    }
+    agent.didManagerImport(newIdentifier)
+    setIdentifier(newIdentifier)
   }
 
   return (
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Enter Mnemonic</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Mnemonic Seed</Text>
           <View style={{ marginBottom: 50, marginTop: 20 }}>
             {identifier ? (
               <View>
-                <Text>An identifier is already created.</Text>
+                <Text>You have an identifier, and only one is supported.</Text>
               </View>
               ) : (
               <View>
-                <Text>{identifier && identifier.did}</Text>
+                <Text>Enter your mnemonic:</Text>
                 <TextInput
                   multiline={true}
                   style={{ borderWidth: 1, height: 100 }}
-                  onChangeText={(text) => setMnemonic(text)}
+                  onChangeText={setMnemonic}
                 >
                 </TextInput>
-                <Button title={'Import from mnemonic'} onPress={() => importIdentifier()} />
+                <Button title={'Import from mnemonic'} onPress={importIdentifier} />
               </View>
             )}
           </View>
@@ -188,8 +221,8 @@ const App = () => {
       <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="ExportIdentity" component={ExportIdentityScreen} />
-        <Stack.Screen name="ImportIdentity" component={ImportIdentityScreen} />
+        <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
+        <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   )
