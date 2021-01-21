@@ -86,9 +86,8 @@ function SettingsScreen({ navigation }) {
               onPress={() => navigation.navigate('Export Identifier')}
             />
             {/** good for tests, bad for users
-            <Button title="Delete Identifier" onPress={() => deleteIdentifier()}
-            />
-            <Button title={'Create Identifier'} onPress={() => createIdentifier()}  />
+            <Button title="Delete ID" onPress={() => deleteIdentifier()} />
+            <Button title={'Create ID'} onPress={() => createIdentifier()} />
             **/}
           </View>
         </View>
@@ -120,8 +119,7 @@ function ExportIdentityScreen({ navigation }) {
       <View style={{ marginBottom: 50, marginTop: 20 }}>
         {identifier ? (
           <View>
-            <Text>{identifier.did}</Text>
-            <Button title={'Export Identifier Mnemonic'} onPress={() => exportIdentifier()} />
+            <Button title={'Click to Export Identifier Mnemonic Seed'} onPress={() => exportIdentifier()} />
             {mnemonic ? (
               <TextInput
                 multiline={true}
@@ -148,6 +146,7 @@ function ExportIdentityScreen({ navigation }) {
 function ImportIdentityScreen({ navigation }) {
   const [identifier, setIdentifier] = useState<Identifier>()
   const [mnemonic, setMnemonic] = useState<String>('')
+  const [idChanged, setIdChanged] = useState<boolean>(false)
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
@@ -182,6 +181,8 @@ function ImportIdentityScreen({ navigation }) {
     }
     agent.didManagerImport(newIdentifier)
     setIdentifier(newIdentifier)
+    setIdChanged(true)
+    setTimeout(navigation.popToTop, 1000)
   }
 
   return (
@@ -190,22 +191,29 @@ function ImportIdentityScreen({ navigation }) {
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Mnemonic Seed</Text>
           <View style={{ marginBottom: 50, marginTop: 20 }}>
-            {identifier ? (
-              <View>
-                <Text>You have an identifier, and only one is supported.</Text>
-              </View>
-              ) : (
-              <View>
-                <Text>Enter your mnemonic:</Text>
-                <TextInput
-                  multiline={true}
-                  style={{ borderWidth: 1, height: 100 }}
-                  onChangeText={setMnemonic}
-                >
-                </TextInput>
-                <Button title={'Import from mnemonic'} onPress={importIdentifier} />
-              </View>
-            )}
+            {idChanged ? (
+              <Text>Changed & Restarting...</Text>
+             ) : (
+              identifier ? (
+                <View>
+                  <Text>You have an identifier, and only one is supported.</Text>
+                </View>
+                ) : (
+                <View>
+                  <Text>Enter your mnemonic:</Text>
+                  <TextInput
+                    multiline={true}
+                    style={{ borderWidth: 1, height: 100 }}
+                    onChangeText={setMnemonic}
+                  >
+                  </TextInput>
+                  <Button
+                    title={'Click to Import from Mnemonic Seed'}
+                    onPress={importIdentifier} />
+                </View>
+                )
+             )
+            }
           </View>
         </View>
       </ScrollView>
