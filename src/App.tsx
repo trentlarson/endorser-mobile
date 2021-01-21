@@ -11,6 +11,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 // Import agent from setup
 import { agent, DID_PROVIDER } from './veramo/setup'
 
+const DEFAULT_DID_PROVIDER = 'did:ethr:rinkeby'
 const secp256k1 = new EC('secp256k1')
 
 interface Identifier {
@@ -21,7 +22,7 @@ function HomeScreen({ navigation }) {
   return (
     <View>
       <Button
-        title="Go to Settings"
+        title="Settings"
         onPress={() => navigation.navigate('Settings')}
       />
     </View>
@@ -168,7 +169,7 @@ function ImportIdentityScreen({ navigation }) {
     const privateHex = keyPair.getPrivate('hex')
     const address = toEthereumAddress(publicHex)
     const newIdentifier: Omit<IIdentifier, 'provider'> = {
-      did: DID_PROVIDER + ':' + address,
+      did: DEFAULT_DID_PROVIDER + ':' + address,
       keys: [{
         kid: publicHex,
         kms: 'local',
@@ -176,14 +177,14 @@ function ImportIdentityScreen({ navigation }) {
         publicKeyHex: publicHex,
         privateKeyHex: privateHex
       }],
-      provider: DID_PROVIDER,
+      provider: DEFAULT_DID_PROVIDER,
       services: []
     }
     agent.didManagerImport(newIdentifier)
     setIdentifier(newIdentifier)
     setIdChanged(true)
     // one reason redirect automatically is to force reload of ID (which doen't show if they go "back")
-    setTimeout(() => navigation.popToTop(), 1000)
+    setTimeout(() => navigation.popToTop(), 500)
   }
 
   return (
@@ -193,7 +194,7 @@ function ImportIdentityScreen({ navigation }) {
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Mnemonic Seed</Text>
           <View style={{ marginBottom: 50, marginTop: 20 }}>
             {idChanged ? (
-              <Text>Success!</Text>
+              <Text style={{ fontSize: 30 }}>Success!</Text>
              ) : (
               identifier ? (
                 <View>

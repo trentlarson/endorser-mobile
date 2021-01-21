@@ -30,10 +30,6 @@ import { createConnection } from 'typeorm'
 // You will need to get a project ID from infura https://www.infura.io
 const INFURA_PROJECT_ID = '0f439b3b9237480ea8eb9da7b1f3965a'
 
-export const NETWORK = 'rinkeby'
-
-export const DID_PROVIDER = 'did:ethr' + (NETWORK === 'mainnet' ? '' : ':' + NETWORK)
-
 
 // Create react native db connection
 const dbConnection = createConnection({
@@ -46,35 +42,48 @@ const dbConnection = createConnection({
 })
 
 
-let providers = {}
-providers[DID_PROVIDER] = new EthrDIDProvider({
-  defaultKms: 'local',
-  network: NETWORK,
-  rpcUrl: 'https://' + NETWORK + '.infura.io/v3/' + INFURA_PROJECT_ID,
-  gas: 1000001,
-  ttl: 60 * 60 * 24 * 30 * 12 + 1,
+function didProvider(netName) {
+  return 'did:ethr' + (netName === 'mainnet' ? '' : ':' + netName)
+}
+
+let networkNames = ['rinkeby']
+
+let didManagers = networkNames.map((networkName) => {
+
+  let providers = {}
+  providers[didProvider(networkName)] = new EthrDIDProvider({
+    defaultKms: 'local',
+    network: networkName,
+    rpcUrl: 'https://' + networkName + '.infura.io/v3/' + INFURA_PROJECT_ID,
+    gas: 1000001,
+    ttl: 60 * 60 * 24 * 30 * 12 + 1,
+  })
+
+  return new DIDManager({
+    store: new DIDStore(dbConnection),
+    defaultProvider: didProvider(networkName),
+    providers: providers,
+  })
 })
 
-export const agent = createAgent<IDIDManager & IKeyManager & IDataStore & IDataStoreORM & IResolver>({
-  plugins: [
-    new KeyManager({
-      store: new KeyStore(dbConnection),
-      kms: {
-        local: new KeyManagementSystem(),
-      },
+let didResolvers = networkNames.map((networkName) => {
+  return new DIDResolverPlugin({
+    resolver: new Resolver({
+      ethr: ethrDidResolver({
+        networks: [{ name: networkName, rpcUrl: 'https://' + networkName + '.infura.io/v3/' + INFURA_PROJECT_ID }],
+      }).ethr,
+      web: webDidResolver().web,
     }),
-    new DIDManager({
-      store: new DIDStore(dbConnection),
-      defaultProvider: DID_PROVIDER,
-      providers: providers,
-    }),
-    new DIDResolverPlugin({
-      resolver: new Resolver({
-        ethr: ethrDidResolver({
-          networks: [{ name: NETWORK, rpcUrl: 'https://' + NETWORK + '.infura.io/v3/' + INFURA_PROJECT_ID }],
-        }).ethr,
-        web: webDidResolver().web,
-      }),
-    }),
-  ],
+  })
 })
+
+let allPlugins = [
+  new KeyManager({
+    store: new KeyStore(dbConnection),
+    kms: {
+      local: new KeyManagementSystem(),
+    },
+  }),
+].concat(didManagers).concat(didResolvers)
+
+export const agent = createAgent<IDIDManager & IKeyManager & IDataStore & IDataStoreORM & IResolver>({ plugins: allPlugins })
