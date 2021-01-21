@@ -9,7 +9,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 
 // Import agent from setup
-import { agent } from './veramo/setup'
+import { agent, DID_PROVIDER } from './veramo/setup'
 
 const secp256k1 = new EC('secp256k1')
 
@@ -119,7 +119,7 @@ function ExportIdentityScreen({ navigation }) {
       <View style={{ marginBottom: 50, marginTop: 20 }}>
         {identifier ? (
           <View>
-            <Button title={'Click to Export Identifier Mnemonic Seed'} onPress={() => exportIdentifier()} />
+            <Button title={'Click to export identifier mnemonic seed'} onPress={() => exportIdentifier()} />
             {mnemonic ? (
               <TextInput
                 multiline={true}
@@ -168,7 +168,7 @@ function ImportIdentityScreen({ navigation }) {
     const privateHex = keyPair.getPrivate('hex')
     const address = toEthereumAddress(publicHex)
     const newIdentifier: Omit<IIdentifier, 'provider'> = {
-      did: 'did:ethr:rinkeby:' + address,
+      did: DID_PROVIDER + ':' + address,
       keys: [{
         kid: publicHex,
         kms: 'local',
@@ -176,13 +176,14 @@ function ImportIdentityScreen({ navigation }) {
         publicKeyHex: publicHex,
         privateKeyHex: privateHex
       }],
-      provider: 'did:ethr:rinkeby',
+      provider: DID_PROVIDER,
       services: []
     }
     agent.didManagerImport(newIdentifier)
     setIdentifier(newIdentifier)
     setIdChanged(true)
-    setTimeout(navigation.popToTop, 1000)
+    // one reason redirect automatically is to force reload of ID (which doen't show if they go "back")
+    setTimeout(() => navigation.popToTop(), 1000)
   }
 
   return (
@@ -192,15 +193,15 @@ function ImportIdentityScreen({ navigation }) {
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Mnemonic Seed</Text>
           <View style={{ marginBottom: 50, marginTop: 20 }}>
             {idChanged ? (
-              <Text>Changed & Restarting...</Text>
+              <Text>Success!</Text>
              ) : (
               identifier ? (
                 <View>
-                  <Text>You have an identifier, and only one is supported.</Text>
+                  <Text>You have an identifier, and you can only have one.</Text>
                 </View>
                 ) : (
                 <View>
-                  <Text>Enter your mnemonic:</Text>
+                  <Text>Enter mnemonic:</Text>
                   <TextInput
                     multiline={true}
                     style={{ borderWidth: 1, height: 100 }}
@@ -208,7 +209,7 @@ function ImportIdentityScreen({ navigation }) {
                   >
                   </TextInput>
                   <Button
-                    title={'Click to Import from Mnemonic Seed'}
+                    title={'Click to import from mnemonic seed'}
                     onPress={importIdentifier} />
                 </View>
                 )

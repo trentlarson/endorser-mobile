@@ -30,6 +30,10 @@ import { createConnection } from 'typeorm'
 // You will need to get a project ID from infura https://www.infura.io
 const INFURA_PROJECT_ID = '0f439b3b9237480ea8eb9da7b1f3965a'
 
+export const NETWORK = 'rinkeby'
+
+export const DID_PROVIDER = 'did:ethr' + (NETWORK === 'mainnet' ? '' : ':' + NETWORK)
+
 
 // Create react native db connection
 const dbConnection = createConnection({
@@ -42,6 +46,15 @@ const dbConnection = createConnection({
 })
 
 
+let providers = {}
+providers[DID_PROVIDER] = new EthrDIDProvider({
+  defaultKms: 'local',
+  network: NETWORK,
+  rpcUrl: 'https://' + NETWORK + '.infura.io/v3/' + INFURA_PROJECT_ID,
+  gas: 1000001,
+  ttl: 60 * 60 * 24 * 30 * 12 + 1,
+})
+
 export const agent = createAgent<IDIDManager & IKeyManager & IDataStore & IDataStoreORM & IResolver>({
   plugins: [
     new KeyManager({
@@ -52,21 +65,13 @@ export const agent = createAgent<IDIDManager & IKeyManager & IDataStore & IDataS
     }),
     new DIDManager({
       store: new DIDStore(dbConnection),
-      defaultProvider: 'did:ethr:rinkeby',
-      providers: {
-        'did:ethr:rinkeby': new EthrDIDProvider({
-          defaultKms: 'local',
-          network: 'rinkeby',
-          rpcUrl: 'https://rinkeby.infura.io/v3/' + INFURA_PROJECT_ID,
-          gas: 1000001,
-          ttl: 60 * 60 * 24 * 30 * 12 + 1,
-        }),
-      },
+      defaultProvider: DID_PROVIDER,
+      providers: providers,
     }),
     new DIDResolverPlugin({
       resolver: new Resolver({
         ethr: ethrDidResolver({
-          networks: [{ name: 'rinkeby', rpcUrl: 'https://rinkeby.infura.io/v3/' + INFURA_PROJECT_ID }],
+          networks: [{ name: NETWORK, rpcUrl: 'https://' + NETWORK + '.infura.io/v3/' + INFURA_PROJECT_ID }],
         }).ethr,
         web: webDidResolver().web,
       }),
