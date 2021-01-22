@@ -46,11 +46,10 @@ function didProvider(netName) {
   return 'did:ethr' + (netName === 'mainnet' ? '' : ':' + netName)
 }
 
-let networkNames = ['rinkeby']
+const NETWORK_NAMES = ['mainnet', 'rinkeby']
 
-let didManagers = networkNames.map((networkName) => {
-
-  let providers = {}
+const providers = {}
+NETWORK_NAMES.forEach((networkName) => {
   providers[didProvider(networkName)] = new EthrDIDProvider({
     defaultKms: 'local',
     network: networkName,
@@ -58,15 +57,15 @@ let didManagers = networkNames.map((networkName) => {
     gas: 1000001,
     ttl: 60 * 60 * 24 * 30 * 12 + 1,
   })
-
-  return new DIDManager({
-    store: new DIDStore(dbConnection),
-    defaultProvider: didProvider(networkName),
-    providers: providers,
-  })
 })
 
-let didResolvers = networkNames.map((networkName) => {
+const didManager = new DIDManager({
+  store: new DIDStore(dbConnection),
+  defaultProvider: didProvider(NETWORK_NAMES[0]),
+  providers: providers,
+})
+
+let didResolvers = NETWORK_NAMES.map((networkName) => {
   return new DIDResolverPlugin({
     resolver: new Resolver({
       ethr: ethrDidResolver({
@@ -84,6 +83,7 @@ let allPlugins = [
       local: new KeyManagementSystem(),
     },
   }),
-].concat(didManagers).concat(didResolvers)
+  didManager,
+].concat(didResolvers)
 
 export const agent = createAgent<IDIDManager & IKeyManager & IDataStore & IDataStoreORM & IResolver>({ plugins: allPlugins })
