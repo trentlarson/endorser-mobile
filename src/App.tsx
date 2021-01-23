@@ -1,17 +1,19 @@
 import 'react-native-gesture-handler'
 
-import { entropyToMnemonic, mnemonicToEntropy } from 'bip39'
+import * as bip32 from 'bip32'
+import * as bip39 from 'bip39'
 const EC = require('elliptic').ec
-import { toEthereumAddress } from 'did-jwt'
+import * as didJwt from 'did-jwt'
+import { HDNode } from '@ethersproject/hdnode'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, ScrollView, View, Text, TextInput, Button } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 
 // Import agent from setup
-import { agent, DID_PROVIDER } from './veramo/setup'
+import { agent } from './veramo/setup'
 
-const DEFAULT_DID_PROVIDER = 'did:ethr:rinkeby'
+const DEFAULT_DID_PROVIDER = 'did:ethr'
 const secp256k1 = new EC('secp256k1')
 
 interface Identifier {
@@ -102,7 +104,22 @@ function ExportIdentityScreen({ navigation }) {
   const [mnemonic, setMnemonic] = useState<String>('')
 
   const exportIdentifier = async () => {
-    let mnemonic = entropyToMnemonic(identifier.keys[0].privateKeyHex)
+
+    /**
+    // approach from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+    // ... doesn't work because hdNode.mnemonic is undefined
+    console.log("identifier.keys[0].privateKeyHex", identifier.keys[0].privateKeyHex)
+    const privBytes = Buffer.from(identifier.keys[0].privateKeyHex, 'hex')
+    const hdNode = HDNode.fromSeed(privBytes)
+    console.log('hdNode',hdNode)
+    const mnemonic = hdNode.mnemonic
+    console.log('mnemonic',mnemonic)
+    //const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
+    **/
+
+    // approach from bip39
+    const mnemonic = bip39.entropyToMnemonic(identifier.keys[0].privateKeyHex)
+
     setMnemonic(mnemonic)
   }
 
@@ -120,7 +137,7 @@ function ExportIdentityScreen({ navigation }) {
       <View style={{ marginBottom: 50, marginTop: 20 }}>
         {identifier ? (
           <View>
-            <Button title={'Click to export identifier mnemonic seed'} onPress={() => exportIdentifier()} />
+            <Button title={'Click to export identifier mnemonic'} onPress={() => exportIdentifier()} />
             {mnemonic ? (
               <TextInput
                 multiline={true}
@@ -160,14 +177,51 @@ function ImportIdentityScreen({ navigation }) {
 
   const importIdentifier = async () => {
 
-    const keyHex: string = mnemonicToEntropy(mnemonic)
-
+    // if you remove this, yarn remove bip39 bip32 ... and maybe EC stuff
+    /**
+    **/
+    // approach I pieced together
+    const keyHex: string = bip39.mnemonicToEntropy(mnemonic)
     // returns a KeyPair from the elliptic.ec library
     const keyPair = secp256k1.keyFromPrivate(keyHex, 'hex')
     // this code is from did-provider-eth createIdentifier
-    const publicHex = keyPair.getPublic('hex')
     const privateHex = keyPair.getPrivate('hex')
-    const address = toEthereumAddress(publicHex)
+    const publicHex = keyPair.getPublic('hex')
+    const address = didJwt.toEthereumAddress(publicHex)
+
+    // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+    //const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
+    // from Ethereum bip44 path
+    //const UPORT_ROOT_DERIVATION_PATH = "m/44'/60'/0'/0/0"
+
+    // if you remove this, yarn remove bip32 (& bip39 if not used in export)
+    /**
+    // approach from bip32 & bip39
+    const seed = bip39.mnemonicToSeedSync(mnemonic)
+    const root = bip32.fromSeed(seed)
+    const node = root.derivePath(UPORT_ROOT_DERIVATION_PATH)
+    const privateHex = node.privateKey.toString("hex")
+    const publicHex = node.publicKey.toString('hex')
+    const address = didJwt.toEthereumAddress(publicHex)
+    console.log('Address from didJwt.toEthereumAddress:', address)
+    **/
+
+    // if you remove this, yarn remove @ethersproject/hdnode
+    /**
+    // approach from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+    // ... doesn't work because it still doesn't import from uPort correctly, and it doesn't result in the same address as was exported
+    const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
+    const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
+    console.log('rootNode.privateKey', rootNode.privateKey)
+
+    // you can also quickly list the corresponding DID like so
+    console.log(`did:ethr:${rootNode.address}`)
+    console.log(`node`, rootNode)
+    const privateHex = rootNode.privateKey.substring(2)
+    const publicHex = rootNode.privateKey.substring(2)
+    const address = rootNode.address
+    **/
+
     const newIdentifier: Omit<IIdentifier, 'provider'> = {
       did: DEFAULT_DID_PROVIDER + ':' + address,
       keys: [{
@@ -183,6 +237,7 @@ function ImportIdentityScreen({ navigation }) {
     agent.didManagerImport(newIdentifier)
     setIdentifier(newIdentifier)
     setIdChanged(true)
+
     // one reason redirect automatically is to force reload of ID (which doen't show if they go "back")
     setTimeout(() => navigation.popToTop(), 500)
   }
@@ -191,7 +246,7 @@ function ImportIdentityScreen({ navigation }) {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Mnemonic Seed</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Mnemonic</Text>
           <View style={{ marginBottom: 50, marginTop: 20 }}>
             {idChanged ? (
               <Text style={{ fontSize: 30 }}>Success!</Text>
@@ -210,7 +265,7 @@ function ImportIdentityScreen({ navigation }) {
                   >
                   </TextInput>
                   <Button
-                    title={'Click to import from mnemonic seed'}
+                    title={'Click to import from mnemonic'}
                     onPress={importIdentifier} />
                 </View>
                 )

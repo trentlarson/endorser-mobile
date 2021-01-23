@@ -11,6 +11,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@ethersproject/hdnode": "^5.0.8",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/native": "^5.9.0",
     "@react-navigation/stack": "^5.13.0",
@@ -24,6 +25,7 @@
     "@veramo/kms-local-react-native": "^1.0.1",
     "@zxing/text-encoding": "^0.9.0",
     "assert": "^1.5.0",
+    "bip32": "^2.0.6",
     "bip39": "^3.0.3",
     "buffer": "^4.9.2",
     "ethr-did-resolver": "^3.0.3",
