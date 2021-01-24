@@ -10,8 +10,8 @@ import { SafeAreaView, ScrollView, View, Text, TextInput, Button } from 'react-n
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 
-// Import agent from setup
 import { agent } from './veramo/setup'
+import { CredentialsScreen } from './screens/SignSendToEndorser'
 
 const DEFAULT_DID_PROVIDER = 'did:ethr'
 const secp256k1 = new EC('secp256k1')
@@ -23,6 +23,10 @@ interface Identifier {
 function HomeScreen({ navigation }) {
   return (
     <View>
+      <Button
+        title="Credentials"
+        onPress={() => navigation.navigate('Credentials')}
+      />
       <Button
         title="Settings"
         onPress={() => navigation.navigate('Settings')}
@@ -142,7 +146,6 @@ function ExportIdentityScreen({ navigation }) {
               <TextInput
                 multiline={true}
                 style={{ borderWidth: 1, height: 80 }}
-                onChangeText={setMnemonic}
                 editable={false}
               >
               { mnemonic }
@@ -266,7 +269,8 @@ function ImportIdentityScreen({ navigation }) {
                   </TextInput>
                   <Button
                     title={'Click to import from mnemonic'}
-                    onPress={importIdentifier} />
+                    onPress={importIdentifier}
+                  />
                 </View>
                 )
              )
@@ -285,6 +289,7 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Credentials" component={CredentialsScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
         <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
