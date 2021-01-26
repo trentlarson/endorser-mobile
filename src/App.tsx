@@ -182,7 +182,6 @@ function ImportIdentityScreen({ navigation }) {
 
     // if you remove this, yarn remove bip39 bip32 ... and maybe EC stuff
     /**
-    **/
     // approach I pieced together
     const keyHex: string = bip39.mnemonicToEntropy(mnemonic)
     // returns a KeyPair from the elliptic.ec library
@@ -191,11 +190,10 @@ function ImportIdentityScreen({ navigation }) {
     const privateHex = keyPair.getPrivate('hex')
     const publicHex = keyPair.getPublic('hex')
     const address = didJwt.toEthereumAddress(publicHex)
+    **/
 
     // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
-    //const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
-    // from Ethereum bip44 path
-    //const UPORT_ROOT_DERIVATION_PATH = "m/44'/60'/0'/0/0"
+    const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 
     // if you remove this, yarn remove bip32 (& bip39 if not used in export)
     /**
@@ -210,20 +208,14 @@ function ImportIdentityScreen({ navigation }) {
     **/
 
     // if you remove this, yarn remove @ethersproject/hdnode
-    /**
     // approach from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
-    // ... doesn't work because it still doesn't import from uPort correctly, and it doesn't result in the same address as was exported
     const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
     const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
-    console.log('rootNode.privateKey', rootNode.privateKey)
 
-    // you can also quickly list the corresponding DID like so
-    console.log(`did:ethr:${rootNode.address}`)
-    console.log(`node`, rootNode)
+    console.log('node', rootNode)
     const privateHex = rootNode.privateKey.substring(2)
     const publicHex = rootNode.privateKey.substring(2)
     const address = rootNode.address
-    **/
 
     const newIdentifier: Omit<IIdentifier, 'provider'> = {
       did: DEFAULT_DID_PROVIDER + ':' + address,
