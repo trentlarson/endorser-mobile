@@ -26,19 +26,24 @@ import { Entities, KeyStore, DIDStore, IDataStoreORM } from '@veramo/data-store'
 // TypeORM is installed with @veramo/typeorm
 import { createConnection } from 'typeorm'
 
+import { Contact } from '../entity/contact'
+
 
 // You will need to get a project ID from infura https://www.infura.io
 const INFURA_PROJECT_ID = '0f439b3b9237480ea8eb9da7b1f3965a'
 
 
+const ALL_ENTITIES = Entities.concat([Contact])
+
+
 // Create react native db connection
-const dbConnection = createConnection({
+export const dbConnection = createConnection({
   type: 'react-native',
   database: 'veramo.sqlite',
   location: 'default',
   synchronize: true,
   logging: ['error', 'info', 'warn'],
-  entities: Entities,
+  entities: ALL_ENTITIES,
 })
 
 

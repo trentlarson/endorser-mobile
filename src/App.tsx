@@ -12,6 +12,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 
 import { agent } from './veramo/setup'
 import { CredentialsScreen } from './screens/SignSendToEndorser'
+import { ContactsScreen } from './screens/Contacts'
 
 const DEFAULT_DID_PROVIDER = 'did:ethr'
 const secp256k1 = new EC('secp256k1')
@@ -26,6 +27,10 @@ function HomeScreen({ navigation }) {
       <Button
         title="Credentials"
         onPress={() => navigation.navigate('Credentials')}
+      />
+      <Button
+        title="Contacts"
+        onPress={() => navigation.navigate('Contacts')}
       />
       <Button
         title="Settings"
@@ -46,7 +51,7 @@ function SettingsScreen({ navigation }) {
 
   const deleteIdentifier = async () => {
     if (identifiers.length > 0) {
-      await agent.didManagerDelete(identifiers[0])
+      await agent.didManagerDelete(identifiers[identifiers.length - 1])
       const _ids = await agent.didManagerFind()
       setIdentifiers(_ids)
     }
@@ -282,6 +287,7 @@ const App = () => {
       <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Credentials" component={CredentialsScreen} />
+        <Stack.Screen name="Contacts" component={ContactsScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
         <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
