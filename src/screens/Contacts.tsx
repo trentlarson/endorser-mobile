@@ -57,7 +57,7 @@ export function ContactsScreen({ navigation }) {
         </View>
         <View>
           { contacts.map((contact) => (
-            <View style={{ marginTop: 20 }}>
+            <View key={contact.did} style={{ marginTop: 20 }}>
               <Text>{contact.did}</Text>
               <Text>{contact.name}</Text>
             </View>
