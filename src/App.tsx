@@ -7,6 +7,7 @@ import * as didJwt from 'did-jwt'
 import { HDNode } from '@ethersproject/hdnode'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, ScrollView, View, Text, TextInput, Button } from 'react-native'
+import QRCode from 'react-native-qrcode-svg'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 
@@ -73,30 +74,44 @@ function SettingsScreen({ navigation }) {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Identifiers</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Identifier</Text>
           <View style={{ marginBottom: 50, marginTop: 20 }}>
             {identifiers && identifiers.length > 0 ? (
-              identifiers.map((id: Identifier) => (
-                <View key={id.did}>
-                  <Text>{id.did}</Text>
+              identifiers.map((id: Identifier) => {
+                const publicEncKey = Buffer.from(id.keys[0].publicKeyHex, 'hex').toString('base64')           
+                // this is uPort's QR code format
+                const shareId = {
+                  iss: id.did,
+                  own: {
+                    name: '',
+                    publicEncKey,
+                  },
+                }
+                return <View key={id.did} style={{ padding: 20 }}>
+                  <Text style={{ fontSize: 11, marginBottom: 20 }}>{id.did}</Text>
+                  <QRCode value={JSON.stringify(shareId)} size={310} />
                 </View>
-              ))
+              })
             ) : (
-              <View>
+              <View style={{ alignItems: 'baseline', marginTop: 10 }}>
                 <Text>There are no identifiers.</Text>
-                <Button title={'Create Identifier'} onPress={() => createIdentifier()}  />
+                <Button title={'Create Identifier'} onPress={() => createIdentifier()} />
               </View>
             )}
           </View>
-          <View style={{ alignItems: 'baseline', marginBottom: 50, marginTop: 100 }}>
-            <Button
-              title="Import Identifier"
-              onPress={() => navigation.navigate('Import Identifier')}
-            />
-            <Button
-              title="Export Identifier"
-              onPress={() => navigation.navigate('Export Identifier')}
-            />
+          <View style={{ alignItems: 'baseline', marginBottom: 50, marginTop: 10 }}>
+            { (!identifiers || identifiers.length == 0) &&
+              <Button
+                title="Import Identifier"
+                onPress={() => navigation.navigate('Import Identifier')}
+              />
+            }
+            { identifiers && identifiers.length > 0 &&
+              <Button
+                title="Export Identifier"
+                onPress={() => navigation.navigate('Export Identifier')}
+              />
+            }
             {/** good for tests, bad for users
             <Button title="Delete ID" onPress={() => deleteIdentifier()} />
             <Button title={'Create ID'} onPress={() => createIdentifier()} />
