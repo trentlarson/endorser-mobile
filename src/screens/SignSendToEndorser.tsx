@@ -114,7 +114,7 @@ export function CredentialsScreen({ navigation }) {
     const getIdentifiers = async () => {
       const _ids = await agent.didManagerFind()
       setIdentifiers(_ids)
-      setClaim(bvcClaim(identifiers[0] ? identifiers[0].did : 'UNKNOWN', TODAY_OR_PREV_START_DATE))
+      setClaim(bvcClaim(_ids[0] ? _ids[0].did : 'UNKNOWN', TODAY_OR_PREV_START_DATE))
     }
     getIdentifiers()
   }, [])
