@@ -10,4 +10,8 @@ Start Metro:
 Run ios:
 
 `cd ios; pod install; cd ..`
-`npx react-native run-ios`
+`yarn run ios`
+
+Clean:
+
+`./node_modules/.bin/react-native-clean-project`

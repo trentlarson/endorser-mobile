@@ -13,7 +13,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 
 import { agent } from './veramo/setup'
 import { CredentialsScreen } from './screens/SignSendToEndorser'
-import { ContactsScreen } from './screens/Contacts'
+import { ContactsScreen, ContactImportScreen } from './screens/Contacts'
 
 const DEFAULT_DID_PROVIDER = 'did:ethr'
 const secp256k1 = new EC('secp256k1')
@@ -83,12 +83,12 @@ function SettingsScreen({ navigation }) {
                 const shareId = {
                   iss: id.did,
                   own: {
-                    name: '',
                     publicEncKey,
                   },
                 }
                 return <View key={id.did} style={{ padding: 20 }}>
                   <Text style={{ fontSize: 11, marginBottom: 20 }}>{id.did}</Text>
+                  <Text style={{ marginBottom: 5 }}>Your info for sharing:</Text>
                   <QRCode value={JSON.stringify(shareId)} size={310} />
                 </View>
               })
@@ -300,12 +300,13 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Credentials" component={CredentialsScreen} />
+        <Stack.Screen name="Community Endorser" component={HomeScreen} />
+        <Stack.Screen name="ContactImport" component={ContactImportScreen} />
         <Stack.Screen name="Contacts" component={ContactsScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="Credentials" component={CredentialsScreen} />
         <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
         <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   )

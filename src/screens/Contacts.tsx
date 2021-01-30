@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import QRCodeScanner from 'react-native-qrcode-scanner'
 
 import { dbConnection } from '../veramo/setup.ts'
 import { Contact } from '../entity/contact'
@@ -32,6 +33,10 @@ export function ContactsScreen({ navigation }) {
   return (
     <SafeAreaView>
       <ScrollView>
+        <Button
+          title="Import"
+          onPress={() => navigation.navigate('ContactImport')}
+        />
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Contacts</Text>
           <Text>DID</Text>
@@ -52,7 +57,7 @@ export function ContactsScreen({ navigation }) {
           />
           <Button
             title='Create'
-            onPress={() => createContact()}
+            onPress={createContact}
           />
         </View>
         <View>
@@ -62,6 +67,40 @@ export function ContactsScreen({ navigation }) {
               <Text>{contact.name}</Text>
             </View>
           ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
+
+export function ContactImportScreen() {
+
+  const [contactInfo, setContactInfo] = useState<string>()
+  const [saved, setSaved] = useState<boolean>(false)
+
+  const createContact = async () => {
+    const contact = new Contact();
+    contact.did = contactInfo.iss
+
+    const conn = await dbConnection
+    let newContact = await conn.manager.save(contact)
+    setSaved(true)
+  }
+
+  const onSuccess = (e) => {
+    console.log('scanned data' + e.data);
+    const check = e.data.substring(0, 4);
+    console.log('scanned data prefix' + check);
+  }
+
+  return (
+    <SafeAreaView>
+      <ScrollView>
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Import Contact</Text>
+          <QRCodeScanner
+            onBarCodeRead={onSuccess}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
