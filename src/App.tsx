@@ -1,4 +1,5 @@
 import 'react-native-gesture-handler'
+import 'reflect-metadata'
 
 import * as bip32 from 'bip32'
 import * as bip39 from 'bip39'
@@ -10,16 +11,34 @@ import { SafeAreaView, ScrollView, View, Text, TextInput, Button } from 'react-n
 import QRCode from 'react-native-qrcode-svg'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
+import { Provider } from 'react-redux';
 
 import { agent } from './veramo/setup'
+import { Identifier, appSlice, appStore } from './veramo/appSlice.ts'
 import { CredentialsScreen } from './screens/SignSendToEndorser'
 import { ContactsScreen, ContactImportScreen } from './screens/Contacts'
 
 const DEFAULT_DID_PROVIDER = 'did:ethr'
 const secp256k1 = new EC('secp256k1')
 
-interface Identifier {
-  did: string
+const Stack = createStackNavigator();
+
+export default function App() {
+  return (
+    <Provider store={ appStore }>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="Community Endorser" component={HomeScreen} />
+          <Stack.Screen name="ContactImport" component={ContactImportScreen} />
+          <Stack.Screen name="Contacts" component={ContactsScreen} />
+          <Stack.Screen name="Credentials" component={CredentialsScreen} />
+          <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
+          <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Provider>
+  )
 }
 
 function HomeScreen({ navigation }) {
@@ -292,23 +311,3 @@ function ImportIdentityScreen({ navigation }) {
     </SafeAreaView>
   )
 }
-
-const Stack = createStackNavigator();
-
-const App = () => {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Community Endorser" component={HomeScreen} />
-        <Stack.Screen name="ContactImport" component={ContactImportScreen} />
-        <Stack.Screen name="Contacts" component={ContactsScreen} />
-        <Stack.Screen name="Credentials" component={CredentialsScreen} />
-        <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
-        <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  )
-}
-
-export default App

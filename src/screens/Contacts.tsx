@@ -1,16 +1,26 @@
+import { classToPlain } from 'class-transformer'
 import React, { useEffect, useState } from 'react'
 import { Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native';
 import QRCodeScanner from 'react-native-qrcode-scanner'
+import { useSelector } from 'react-redux'
 
 import { dbConnection } from '../veramo/setup.ts'
+import { appSlice, appStore } from '../veramo/appSlice.ts'
 import { Contact } from '../entity/contact'
 
 export function ContactsScreen({ navigation, route }) {
 
   const [contactDid, setContactDid] = useState<string>()
   const [contactName, setContactName] = useState<string>()
-  const [contacts, setContacts] = useState<Array<Contact>>([])
+
+  const allContacts = useSelector((state) => state.contacts)
+
+  const loadContacts = async () => {
+    const conn = await dbConnection
+    const foundContacts = await conn.manager.find(Contact)
+    appStore.dispatch(appSlice.actions.setIdentifiers(classToPlain(foundContacts)))
+  }
 
   const createContact = async () => {
     const contact = new Contact();
@@ -19,19 +29,15 @@ export function ContactsScreen({ navigation, route }) {
 
     const conn = await dbConnection
     let newContact = await conn.manager.save(contact)
-    setContacts((cs) => cs.concat(newContact))
+    loadContacts()
   }
 
-  const newContact = route && route.params && route.params.newContact
   useFocusEffect(
     React.useCallback(() => {
-      const getContacts = async () => {
-        const conn = await dbConnection
-        const allContacts = await conn.manager.find(Contact)
-        setContacts(allContacts)
+      if (appStore.getState().contacts && appStore.getState().contacts.length === 0) {
+        loadContacts()
       }
-      getContacts()
-    }, [newContact])
+    }, [appStore.getState().contacts])
   )
 
   return (
@@ -65,7 +71,7 @@ export function ContactsScreen({ navigation, route }) {
           />
         </View>
         <View>
-          { contacts.map((contact) => (
+          { allContacts && allContacts.map((contact) => (
             <View key={contact.did} style={{ marginTop: 20 }}>
               <Text>{contact.did}</Text>
               <Text>{contact.name}</Text>
@@ -96,8 +102,9 @@ export function ContactImportScreen({ navigation }) {
       contact.name = contactInfo.own && contactInfo.own.name
       const newContact = await conn.manager.save(contact)
       setSaved(true)
+      appStore.dispatch(appSlice.actions.setIdentifiers([]))
 
-      setTimeout(() => { navigation.navigate('Contacts', { newContact: true })}, 500)
+      setTimeout(() => { navigation.navigate('Contacts')}, 500)
     }
     saveAndRedirect()
   }
@@ -157,7 +164,7 @@ export function ContactImportScreen({ navigation }) {
               <Button
                 title='Create'
                 onPress={() => onSuccessfulQR({data:JSON.stringify({
-                  iss:"did:ethr:0x5d2c57851928f0981edcdf65e75e5e73d899cdbm",
+                  iss:"did:ethr:0x5d2c57851928f0981edcdf65e75e5e73d899cdbr",
                   own: {
                       "name": "Trent",
                       "publicEncKey": "Ua+sRNwveB4+X1g4bzOVPBofXf8hQMZs5xD5oXuZ9CA="
