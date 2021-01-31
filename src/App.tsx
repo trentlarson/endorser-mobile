@@ -65,7 +65,7 @@ function SettingsScreen({ navigation }) {
       setIdentifiers(_ids)
 
       // Inspect the id object in your debug tool
-      console.log('_ids:', JSON.stringify(_ids))
+      //console.log('_ids:', JSON.stringify(_ids))
     }
     getIdentifiers()
   }, [])
@@ -232,7 +232,6 @@ function ImportIdentityScreen({ navigation }) {
     const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
     const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
 
-    console.log('node', rootNode)
     const privateHex = rootNode.privateKey.substring(2)
     const publicHex = rootNode.privateKey.substring(2)
     const address = rootNode.address
