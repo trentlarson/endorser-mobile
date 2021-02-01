@@ -10,6 +10,7 @@ Start Metro:
 Run ios:
 
 `cd ios; pod install; cd ..`
+
 `yarn run ios`
 
 Clean:

@@ -124,7 +124,7 @@ export function CredentialsScreen({ navigation }) {
       <ScrollView>
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Credentials</Text>
-          <Text>{ identifiers[0] && `ID ${identifiers[0].did}`}</Text>
+          <Text style={{ fontSize: 13 }}>{ identifiers[0] && `For ${identifiers[0].did}`}</Text>
           { fetching ? (
               <View>
                 <Text>Saving to Endorser.ch...</Text>

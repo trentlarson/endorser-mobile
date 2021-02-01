@@ -23,7 +23,7 @@ export function ContactsScreen({ navigation, route }) {
   }
 
   const createContact = async () => {
-    const contact = new Contact();
+    const contact = new Contact()
     contact.did = contactDid
     contact.name = contactName
 
@@ -164,7 +164,7 @@ export function ContactImportScreen({ navigation }) {
               <Button
                 title='Create'
                 onPress={() => onSuccessfulQR({data:JSON.stringify({
-                  iss:"did:ethr:0x5d2c57851928f0981edcdf65e75e5e73d899cdbr",
+                  iss:"did:ethr:0x5d2c57851928f0981edcdf65e75e5e73d899cdbs",
                   own: {
                       "name": "Trent",
                       "publicEncKey": "Ua+sRNwveB4+X1g4bzOVPBofXf8hQMZs5xD5oXuZ9CA="

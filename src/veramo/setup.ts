@@ -27,13 +27,14 @@ import { Entities, KeyStore, DIDStore, IDataStoreORM } from '@veramo/data-store'
 import { createConnection } from 'typeorm'
 
 import { Contact } from '../entity/contact'
+import { Settings } from '../entity/settings'
 
 
 // You will need to get a project ID from infura https://www.infura.io
 const INFURA_PROJECT_ID = '0f439b3b9237480ea8eb9da7b1f3965a'
 
 
-const ALL_ENTITIES = Entities.concat([Contact])
+const ALL_ENTITIES = Entities.concat([Contact, Settings])
 
 
 // Create react native db connection
