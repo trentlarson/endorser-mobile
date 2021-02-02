@@ -45,26 +45,21 @@ const newIdentifier = (address: string, publicHex: string, privateHex: string): 
 
 const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: string) => {
 
-  return agent.didManagerImport(newId).then(async () => {
+  await agent.didManagerImport(newId)
 
-    const settings = new Settings()
-    settings.id = MASTER_COLUMN_VALUE
-    settings.mnemonic = mnemonic
-    const conn = await dbConnection
-
-    let newContact = await conn.manager.save(settings)
-
-    return newId
-  })
-
+  const settings = new Settings()
+  settings.id = MASTER_COLUMN_VALUE
+  settings.mnemonic = mnemonic
+  const conn = await dbConnection
+  let newContact = await conn.manager.save(settings)
 }
 
 // Import and existing ID
 const importAndStoreIdentifier = async (mnemonic: string) => {
 
-  // if you remove this, yarn remove bip39 bip32 ... and maybe EC stuff
+  // if you remove this, yarn remove bip39 and bip32 and maybe EC
   /**
-  // approach I pieced together
+  // an approach I pieced together
   const keyHex: string = bip39.mnemonicToEntropy(mnemonic)
   // returns a KeyPair from the elliptic.ec library
   const keyPair = secp256k1.keyFromPrivate(keyHex, 'hex')
@@ -75,29 +70,26 @@ const importAndStoreIdentifier = async (mnemonic: string) => {
   **/
 
   // if you remove this, yarn remove @ethersproject/hdnode
-  // approach from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
   /**
+  // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
   const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
   const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
-
   const privateHex = rootNode.privateKey.substring(2)
   const publicHex = rootNode.privateKey.substring(2)
   const address = rootNode.address
-  console.log('import publicHex', publicHex)
-  console.log('import address', address)
   **/
 
-  return bip39.mnemonicToSeed(mnemonic).then((seed: Buffer) => {
+  // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+  const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
+  const root = bip32.fromSeed(seed)
+  const node = root.derivePath(UPORT_ROOT_DERIVATION_PATH)
+  const privateHex = node.privateKey.toString("hex")
+  const publicHex = node.publicKey.toString("hex")
+  const address = didJwt.toEthereumAddress(publicHex)
 
-    // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
-    const root = bip32.fromSeed(seed)
-    const node = root.derivePath(UPORT_ROOT_DERIVATION_PATH)
-    const privateHex = node.privateKey.toString("hex")
-    const publicHex = node.publicKey.toString("hex")
-    const address = didJwt.toEthereumAddress(publicHex)
-    const newId = newIdentifier(address, publicHex, privateHex)
-    return storeIdentifier(newId, mnemonic)
-  })
+  const newId = newIdentifier(address, publicHex, privateHex)
+  storeIdentifier(newId, mnemonic)
+  return newId
 
 }
 
@@ -190,13 +182,16 @@ function SettingsScreen({ navigation }) {
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
-      const getIdentifiers = async () => {
-        const _ids = await agent.didManagerFind()
-        if (_ids.length > 0) {
-          setNewId(_ids[0])
-        }
+    const getIdentifiers = async () => {
+      const _ids = await agent.didManagerFind()
+      setIdentifiers(_ids.map(classToPlain))
+      const conn = await dbConnection
+      let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+      if (settings?.mnemonic) {
+        setHasMnemonic(true)
       }
-      getIdentifiers()
+    }
+    getIdentifiers()
   }, []) // Why does this loop infinitely even with classToPlain(identifiers) that doesn't change?
 
   return (
@@ -271,13 +266,9 @@ function ExportIdentityScreen({ navigation }) {
     /**
     // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
     // ... doesn't work because hdNode.mnemonic is undefined
-    console.log("identifier.keys[0].privateKeyHex", identifier.keys[0].privateKeyHex)
     const privBytes = Buffer.from(identifier.keys[0].privateKeyHex, 'hex')
     const hdNode = HDNode.fromSeed(privBytes)
-    console.log('hdNode',hdNode)
     const mnemonic = hdNode.mnemonic
-    console.log('mnemonic',mnemonic)
-    //const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
     **/
 
     const conn = await dbConnection
