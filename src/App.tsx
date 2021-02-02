@@ -62,38 +62,43 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 // Import and existing ID
 const importAndStoreIdentifier = async (mnemonic: string) => {
 
+  // if you remove this, yarn remove bip39 bip32 ... and maybe EC stuff
+  /**
+  // approach I pieced together
+  const keyHex: string = bip39.mnemonicToEntropy(mnemonic)
+  // returns a KeyPair from the elliptic.ec library
+  const keyPair = secp256k1.keyFromPrivate(keyHex, 'hex')
+  // this code is from did-provider-eth createIdentifier
+  const privateHex = keyPair.getPrivate('hex')
+  const publicHex = keyPair.getPublic('hex')
+  const address = didJwt.toEthereumAddress(publicHex)
+  **/
+
+  // if you remove this, yarn remove @ethersproject/hdnode
+  // approach from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+  /**
+  const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
+  const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
+
+  const privateHex = rootNode.privateKey.substring(2)
+  const publicHex = rootNode.privateKey.substring(2)
+  const address = rootNode.address
+  console.log('import publicHex', publicHex)
+  console.log('import address', address)
+  **/
+
   return bip39.mnemonicToSeed(mnemonic).then((seed: Buffer) => {
-    console.log("seed    ",seed)
-    console.log("seed hex",seed.toString('hex'))
 
     // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
     const root = bip32.fromSeed(seed)
-    console.log('root',root)
     const node = root.derivePath(UPORT_ROOT_DERIVATION_PATH)
-    console.log('node',node)
     const privateHex = node.privateKey.toString("hex")
     const publicHex = node.publicKey.toString("hex")
-    console.log('privateHex',privateHex)
-    console.log('publicHex',publicHex)
     const address = didJwt.toEthereumAddress(publicHex)
-    console.log('Address from didJwt.toEthereumAddress:', address)
-
     const newId = newIdentifier(address, publicHex, privateHex)
-
-    console.log("New ID", newId)
-    return newId
-
-  }).then((newId) => {
-
     return storeIdentifier(newId, mnemonic)
-
   })
 
-  //const entropy2 = bip39.mnemonicToEntropy(mnemonic)
-  //console.log("entropy2hex",entropy2)
-
-  //console.log("New ID", _id)
-  //setIdentifiers((s) => s.concat([_id]))
 }
 
 // Create a totally new ID
@@ -103,8 +108,6 @@ const createAndStoreIdentifier = async () => {
   //const id = await agent.didManagerCreate()
 
   const entropy = crypto.randomBytes(32)
-  console.log("entropy",entropy)
-  console.log("entropy hex",entropy.toString('hex'))
   const mnemonic = bip39.entropyToMnemonic(entropy)
 
   return importAndStoreIdentifier(mnemonic)
@@ -180,52 +183,21 @@ function SettingsScreen({ navigation }) {
     setIdentifiers((s) => s.concat([classToPlain(id)]))
     const conn = await dbConnection
     let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-console.log('settings',settings)
     if (settings?.mnemonic) {
       setHasMnemonic(true)
     }
   }
 
-  /**
+  // Check for existing identifers on load and set them to state
   useEffect(() => {
       const getIdentifiers = async () => {
         const _ids = await agent.didManagerFind()
-        setIdentifiers(_ids)
-
-        // Inspect the id object in your debug tool
-        //console.log('_ids:', JSON.stringify(_ids))
-
-        const conn = await dbConnection
-        let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-  console.log('settings',settings)
-        if (settings?.mnemonic) {
-          setHasMnemonic(true)
-        }
-      }
-      getIdentifiers()    
-  }, [])
-  **/
-
-  // Check for existing identifers on load and set them to state
-  useFocusEffect(
-    React.useCallback(() => {
-      const getIdentifiers = async () => {
-        const _ids = await agent.didManagerFind()
-        setIdentifiers(_ids)
-
-        // Inspect the id object in your debug tool
-        //console.log('_ids:', JSON.stringify(_ids))
-
-        const conn = await dbConnection
-        let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-  console.log('settings',settings)
-        if (settings?.mnemonic) {
-          setHasMnemonic(true)
+        if (_ids.length > 0) {
+          setNewId(_ids[0])
         }
       }
       getIdentifiers()
-    }, [])
-  )
+  }, []) // Why does this loop infinitely even with classToPlain(identifiers) that doesn't change?
 
   return (
     <SafeAreaView>
@@ -233,8 +205,8 @@ console.log('settings',settings)
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Identifier</Text>
           <View style={{ marginBottom: 50, marginTop: 20 }}>
-            {identifiers && identifiers.length > 0 ? (
-              identifiers.map((id: Identifier) => {
+            {identifiers?.length > 0 ? (
+              identifiers.map((id: Identifier, index: number) => {
                 const publicEncKey = Buffer.from(id.keys[0].publicKeyHex, 'hex').toString('base64')           
                 // this is uPort's QR code format
                 const shareId = {
@@ -259,9 +231,7 @@ console.log('settings',settings)
                 <Text>There are no identifiers.</Text>
                 <Button
                   title={'Create Identifier'}
-                  onPress={() => createAndStoreIdentifier().then((id) => {
-                    setNewId(id)
-                  })}
+                  onPress={() => createAndStoreIdentifier().then(setNewId)}
                 />
               </View>
             )}
@@ -283,9 +253,7 @@ console.log('settings',settings)
             **/}
             <Button title="Delete ID" onPress={deleteIdentifier} />
             <Button title="Create ID"
-              onPress={() => createAndStoreIdentifier((id) => {
-                setIdentifiers((s) => s.concat([classToPlain(id)]))
-              })}
+              onPress={() => createAndStoreIdentifier().then(setNewId)}
             />
           </View>
         </View>
@@ -315,10 +283,6 @@ function ExportIdentityScreen({ navigation }) {
     const conn = await dbConnection
     const settings = await conn.manager.find(Settings)
     const mnemonic = settings[0].mnemonic
-
-    //console.log("mnemonic 1", identifier.keys[0].privateKeyHex)
-    //console.log("mnemonic 2", identifier.keys[0].privateKeyHex.length)
-    console.log("mnemonic 3", bip39.mnemonicToEntropy(mnemonic))
 
     setMnemonic(mnemonic)
   }
@@ -375,53 +339,6 @@ function ImportIdentityScreen({ navigation }) {
   }, [])
 
   const importIdentifier = async () => {
-
-    // if you remove this, yarn remove bip39 bip32 ... and maybe EC stuff
-    /**
-    // approach I pieced together
-    const keyHex: string = bip39.mnemonicToEntropy(mnemonic)
-    // returns a KeyPair from the elliptic.ec library
-    const keyPair = secp256k1.keyFromPrivate(keyHex, 'hex')
-    // this code is from did-provider-eth createIdentifier
-    const privateHex = keyPair.getPrivate('hex')
-    const publicHex = keyPair.getPublic('hex')
-    const address = didJwt.toEthereumAddress(publicHex)
-    **/
-
-    // if you remove this, yarn remove bip32 (& bip39 if not used in export)
-    /**
-    // approach from bip32 & bip39
-    const seed = bip39.mnemonicToSeedSync(mnemonic)
-    const root = bip32.fromSeed(seed)
-    const node = root.derivePath(UPORT_ROOT_DERIVATION_PATH)
-    const privateHex = node.privateKey.toString("hex")
-    const publicHex = node.publicKey.toString("hex")
-    const address = didJwt.toEthereumAddress(publicHex)
-    **/
-
-    // if you remove this, yarn remove @ethersproject/hdnode
-    // approach from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
-    /**
-    const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
-    const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
-
-    const privateHex = rootNode.privateKey.substring(2)
-    const publicHex = rootNode.privateKey.substring(2)
-    const address = rootNode.address
-    console.log('import publicHex', publicHex)
-    console.log('import address', address)
-    **/
-
-    /**
-    const newIdentifier = newIdentifier(address, publicHex, privateHex)
-    agent.didManagerImport(newIdentifier)
-
-    const settings = new Settings()
-    settings.mnemonic = mnemonic
-    const conn = await dbConnection
-    let newContact = await conn.manager.save(settings)
-    **/
-
     importAndStoreIdentifier(mnemonic).then(() => {
       setIdentifier(newIdentifier)
       setIdChanged(true)
@@ -429,7 +346,6 @@ function ImportIdentityScreen({ navigation }) {
       // one reason redirect automatically is to force reload of ID (which doen't show if they go "back")
       setTimeout(() => navigation.popToTop(), 500)
     })
-
   }
 
   return (
