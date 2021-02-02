@@ -40,43 +40,57 @@ export function ContactsScreen({ navigation, route }) {
     }, [appStore.getState().contacts])
   )
 
+  const allContactText = (
+    allContacts?.map((contact) => (
+      `
+      ${contact.name}
+      ${contact.did}
+      `
+    )).join('\n\n')
+  )
+
   return (
     <SafeAreaView>
       <ScrollView>
-        <Button
-          title="Import"
-          onPress={() => navigation.navigate('ContactImport')}
-        />
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Contacts</Text>
-          <Text>DID</Text>
-          <TextInput
-            value={contactDid}
-            onChangeText={setContactDid}
-            editable
-            style={{ borderWidth: 1 }}
-            autoCapitalize='none'
-            autoCorrect={false}
-          />
-          <Text>Name</Text>
-          <TextInput
-            value={contactName}
-            onChangeText={setContactName}
-            editable
-            style={{ borderWidth: 1 }}
-          />
-          <Button
-            title='Create'
-            onPress={createContact}
-          />
+          <View style={styles.centeredView}>
+            <Button
+              title="Scan & Import"
+              onPress={() => navigation.navigate('ContactImport')}
+            />
+          <Text>Or</Text>
+          </View>
+          <View style={{ padding: 10 }}>
+            <Text>Name</Text>
+            <TextInput
+              value={contactName}
+              onChangeText={setContactName}
+              editable
+              style={{ borderWidth: 1 }}
+            />
+            <Text>DID</Text>
+            <TextInput
+              value={contactDid}
+              onChangeText={setContactDid}
+              editable
+              style={{ borderWidth: 1 }}
+              autoCapitalize='none'
+              autoCorrect={false}
+            />
+            <Button
+              title='Create'
+              onPress={createContact}
+            />
+          </View>
         </View>
         <View>
-          { allContacts && allContacts.map((contact) => (
-            <View key={contact.did} style={{ marginTop: 20 }}>
-              <Text>{contact.did}</Text>
-              <Text>{contact.name}</Text>
-            </View>
-          ))}
+          <TextInput
+            multiline={true}
+            editable={false}
+          >
+            { allContactText }
+          </TextInput>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -151,27 +165,29 @@ export function ContactImportScreen({ navigation }) {
             </View>
           </Modal>
 
-          {/**
-            <QRCodeScanner onBarCodeRead={onSuccessfulQR} />          
-          **/}
           { contactInfo ? (
               <View>
-                {/** 13 font fits on an iPhone without wrapping **/}
-                <Text style={{ fontSize: 13 }}>{contactInfo.iss || ''}</Text>
+                {/** fontSize 12 fits on an iPhone without wrapping **/}
                 <Text>Name: {(contactInfo.own && contactInfo.own.name) || ''}</Text>
+                <Text style={{ fontSize: 12 }}>{contactInfo.iss || ''}</Text>
               </View>
             ) : (
-              <Button
-                title='Create'
-                onPress={() => onSuccessfulQR({data:JSON.stringify({
-                  iss:"did:ethr:0x5d2c57851928f0981edcdf65e75e5e73d899cdbs",
-                  own: {
-                      "name": "Trent",
-                      "publicEncKey": "Ua+sRNwveB4+X1g4bzOVPBofXf8hQMZs5xD5oXuZ9CA="
+              <View>
+                <QRCodeScanner onBarCodeRead={onSuccessfulQR} />
+                {/**
+                <Button
+                  title='Fake It'
+                  onPress={() => onSuccessfulQR({data:JSON.stringify({
+                    iss:"did:ethr:0x5d2c57851928f0981edcdf65e75e5e73d899cdbs",
+                    own: {
+                        "name": "Trent",
+                        "publicEncKey": "Ua+sRNwveB4+X1g4bzOVPBofXf8hQMZs5xD5oXuZ9CA="
+                      }
                     }
-                  }
-                )})}
-              />
+                  )})}
+                />
+                **/}
+              </View>
             )
           }
         </View>

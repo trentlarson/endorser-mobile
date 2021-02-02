@@ -130,6 +130,7 @@ export default function App() {
           <Stack.Screen name="Contacts" component={ContactsScreen} />
           <Stack.Screen name="Credentials" component={CredentialsScreen} />
           <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
+          <Stack.Screen name="Help" component={HelpScreen} />
           <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
         </Stack.Navigator>
@@ -152,6 +153,10 @@ function HomeScreen({ navigation }) {
       <Button
         title="Settings"
         onPress={() => navigation.navigate('Settings')}
+      />
+      <Button
+        title="Help"
+        onPress={() => navigation.navigate('Help')}
       />
     </View>
   )
@@ -210,15 +215,20 @@ function SettingsScreen({ navigation }) {
                     publicEncKey,
                   },
                 }
-                return <View key={id.did} style={{ padding: 20 }}>
-                  <Text style={{ fontSize: 11, marginBottom: 20 }}>{id.did}</Text>
+                return <View key={id.did} style={{ padding: 10 }}>
+                  <Text
+                    style={{ fontSize: 12, marginBottom: 20 }}
+                    selectable={true}
+                  >
+                    {id.did}
+                  </Text>
                   { !hasMnemonic ? (
                     <Text style={{ padding: 10, color: 'red' }}>There is no backup available. We recommend you use a different seed.</Text>
                   ) : (
                     <Text></Text>
                   )}
                   <Text style={{ marginBottom: 5 }}>Your info for sharing:</Text>
-                  <QRCode value={JSON.stringify(shareId)} size={310} />
+                  <QRCode value={JSON.stringify(shareId)} size={350} />
                 </View>
               })
             ) : (
@@ -245,11 +255,11 @@ function SettingsScreen({ navigation }) {
               />
             }
             {/** good for tests, bad for users
-            **/}
             <Button title="Delete ID" onPress={deleteIdentifier} />
             <Button title="Create ID"
               onPress={() => createAndStoreIdentifier().then(setNewId)}
             />
+            **/}
           </View>
         </View>
       </ScrollView>
@@ -370,6 +380,23 @@ function ImportIdentityScreen({ navigation }) {
              )
             }
           </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
+
+function HelpScreen() {
+  return (
+    <SafeAreaView>
+      <ScrollView>
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>How do I start over?</Text>
+          <Text>Uninstall and reinstall the app.  Note that this will erase the identifier and contacts, so we recommend you export those first.</Text>
+        </View>
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>How do I export my contacts?</Text>
+          <Text>On the contact screen, "copy" the names and DIDs to your clipboard and send them to yourself (eg. by email).</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -15,7 +15,7 @@ function endorserLink(endorserId) {
 }
 
 export function CredentialsScreen({ navigation }) {
-  const [claim, setClaim] = useState<string>('')
+  const [claim, setClaim] = useState<string>('{}')
   const [endorserId, setEndorserId] = useState<string>(null)
   const [fetched, setFetched] = useState<boolean>(false)
   const [fetching, setFetching] = useState<boolean>(false)
@@ -114,7 +114,8 @@ export function CredentialsScreen({ navigation }) {
     const getIdentifiers = async () => {
       const _ids = await agent.didManagerFind()
       setIdentifiers(_ids)
-      setClaim(bvcClaim(_ids[0] ? _ids[0].did : 'UNKNOWN', TODAY_OR_PREV_START_DATE))
+      const claimObj = bvcClaim(_ids[0] ? _ids[0].did : 'UNKNOWN', TODAY_OR_PREV_START_DATE)
+      setClaim(JSON.stringify(claimObj))
     }
     getIdentifiers()
   }, [])
@@ -124,7 +125,7 @@ export function CredentialsScreen({ navigation }) {
       <ScrollView>
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Credentials</Text>
-          <Text style={{ fontSize: 13 }}>{ identifiers[0] && `For ${identifiers[0].did}`}</Text>
+          <Text style={{ fontSize: 12 }}>{ identifiers[0] && `For ${identifiers[0].did}`}</Text>
           { fetching ? (
               <View>
                 <Text>Saving to Endorser.ch...</Text>
@@ -174,7 +175,7 @@ export function CredentialsScreen({ navigation }) {
             style={{ borderWidth: 1, height: 300 }}
             onChangeText={setClaim}
           >
-            { JSON.stringify(claim, null, 2) }
+            { JSON.stringify(JSON.parse(claim), null, 2) }
           </TextInput>
         </View>
       </ScrollView>
