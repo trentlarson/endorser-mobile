@@ -124,59 +124,65 @@ export function CredentialsScreen({ navigation }) {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Credentials</Text>
-          <Text style={{ fontSize: 12 }}>{ identifiers[0] && `For ${identifiers[0].did}`}</Text>
-          { fetching ? (
-              <View>
-                <Text>Saving to Endorser.ch...</Text>
-                <ActivityIndicator size={'small'} />
-              </View>
-            ) : (
-              fetched ? (
-                endorserId ? (
-                  <Button
-                    title="Success!  Click here to see your claim on Endorser.ch"
-                    onPress={() => {
-                      Linking.openURL(endorserLink(endorserId)).catch(err =>
-                        setError(
-                          'Sorry, something went wrong trying to go to endorser.ch',
-                        ),
-                      )
-                    }}
-                  />
-                ) : (
-                  <Text>Got response from Endorser.ch...</Text>
-                )
-              ) : (
-                <Button
-                  title={'Click to sign & store'}
-                  onPress={() => signAndSend()}
-                />
-              )
-            )
-          }
-          { jwt ? (
+          { identifiers[0] ? (
             <View>
-              <Text>JWT</Text>
+              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Credentials</Text>
+              <Text style={{ fontSize: 12 }}>For {identifiers[0].did}</Text>
+              { fetching ? (
+                  <View>
+                    <Text>Saving to Endorser.ch...</Text>
+                    <ActivityIndicator size={'small'} />
+                  </View>
+                ) : (
+                  fetched ? (
+                    endorserId ? (
+                      <Button
+                        title="Success!  Click here to see your claim on Endorser.ch"
+                        onPress={() => {
+                          Linking.openURL(endorserLink(endorserId)).catch(err =>
+                            setError(
+                              'Sorry, something went wrong trying to go to endorser.ch',
+                            ),
+                          )
+                        }}
+                      />
+                    ) : (
+                      <Text>Got response from Endorser.ch...</Text>
+                    )
+                  ) : (
+                    <Button
+                      title={'Click to sign & store'}
+                      onPress={() => signAndSend()}
+                    />
+                  )
+                )
+              }
+              { jwt ? (
+                <View>
+                  <Text>JWT</Text>
+                  <TextInput
+                    multiline={true}
+                    style={{ borderWidth: 1, height: 300 }}
+                    editable={false}
+                  >
+                    { jwt }
+                  </TextInput>
+                </View>
+              ) : (
+                <Text/>
+              )}
+              <Text>Claim</Text>
               <TextInput
                 multiline={true}
                 style={{ borderWidth: 1, height: 300 }}
-                editable={false}
+                onChangeText={setClaim}
               >
-                { jwt }
+                { JSON.stringify(JSON.parse(claim), null, 2) }
               </TextInput>
             </View>
           ) : (
-            <Text/>
+            <Text>You must create an identifier (under Settings).</Text>
           )}
-          <Text>Claim</Text>
-          <TextInput
-            multiline={true}
-            style={{ borderWidth: 1, height: 300 }}
-            onChangeText={setClaim}
-          >
-            { JSON.stringify(JSON.parse(claim), null, 2) }
-          </TextInput>
         </View>
       </ScrollView>
     </SafeAreaView>

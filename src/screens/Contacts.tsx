@@ -88,6 +88,7 @@ export function ContactsScreen({ navigation, route }) {
           <TextInput
             multiline={true}
             editable={false}
+            style={{ fontSize: 12 }}
           >
             { allContactText }
           </TextInput>

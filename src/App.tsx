@@ -88,7 +88,8 @@ const importAndStoreIdentifier = async (mnemonic: string) => {
   const address = didJwt.toEthereumAddress(publicHex)
 
   const newId = newIdentifier(address, publicHex, privateHex)
-  storeIdentifier(newId, mnemonic)
+  // awaiting because otherwise the UI may not see that a mnemonic was created
+  await storeIdentifier(newId, mnemonic)
   return newId
 
 }
@@ -392,11 +393,19 @@ function HelpScreen() {
       <ScrollView>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I start over?</Text>
-          <Text>Uninstall and reinstall the app.  Note that this will erase the identifier and contacts, so we recommend you export those first.</Text>
+          <Text>Uninstall and reinstall the app.  Note that this will erase the identifier (under Settings) and contacts (under... Contacts), so we recommend you export those first.</Text>
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I export my contacts?</Text>
           <Text>On the contact screen, "copy" the names and DIDs to your clipboard and send them to yourself (eg. by email).</Text>
+        </View>
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>How do I import my contacts?</Text>
+          <Text>One-by-one, pasting from the exported contacts.</Text>
+        </View>
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>This is stupid (or fantastic). Who do I blame?</Text>
+          <Text>Trent, via CommunityEndorser@gmail.com</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
