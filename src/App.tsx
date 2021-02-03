@@ -6,8 +6,6 @@ import * as bip39 from 'bip39'
 import { classToPlain } from 'class-transformer'
 import * as crypto from 'crypto'
 import * as didJwt from 'did-jwt'
-import { HDNode } from '@ethersproject/hdnode'
-import { utils } from '@ethersproject/utils'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, ScrollView, View, Text, TextInput, Button } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
@@ -22,9 +20,7 @@ import { CredentialsScreen } from './screens/SignSendToEndorser'
 import { ContactsScreen, ContactImportScreen } from './screens/Contacts'
 
 const DEFAULT_DID_PROVIDER = 'did:ethr'
-const EC = require('elliptic').ec
 const MASTER_COLUMN_VALUE = 'master'
-const secp256k1 = new EC('secp256k1')
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
 const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 
@@ -57,9 +53,12 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 // Import and existing ID
 const importAndStoreIdentifier = async (mnemonic: string) => {
 
-  // if you remove this, yarn remove bip39 and bip32 and maybe EC
   /**
   // an approach I pieced together
+  // requires: yarn add elliptic
+  // ... plus:
+  // const EC = require('elliptic').ec
+  // const secp256k1 = new EC('secp256k1')
   const keyHex: string = bip39.mnemonicToEntropy(mnemonic)
   // returns a KeyPair from the elliptic.ec library
   const keyPair = secp256k1.keyFromPrivate(keyHex, 'hex')
@@ -69,9 +68,10 @@ const importAndStoreIdentifier = async (mnemonic: string) => {
   const address = didJwt.toEthereumAddress(publicHex)
   **/
 
-  // if you remove this, yarn remove @ethersproject/hdnode
   /**
   // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+  // requires: yarn add @ethersproject/hdnode
+  // ... plus: import { HDNode } from '@ethersproject/hdnode'
   const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
   const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
   const privateHex = rootNode.privateKey.substring(2)

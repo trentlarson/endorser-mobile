@@ -11,7 +11,6 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
-    "@ethersproject/hdnode": "^5.0.8",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/native": "^5.9.0",
     "@react-navigation/stack": "^5.13.0",
