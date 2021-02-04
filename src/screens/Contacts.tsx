@@ -1,6 +1,7 @@
 import { classToPlain } from 'class-transformer'
 import React, { useEffect, useState } from 'react'
 import { Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
+import Clipboard from '@react-native-community/clipboard';
 import { useFocusEffect } from '@react-navigation/native';
 import QRCodeScanner from 'react-native-qrcode-scanner'
 import { useSelector } from 'react-redux'
@@ -22,6 +23,19 @@ export function ContactsScreen({ navigation, route }) {
     appStore.dispatch(appSlice.actions.setIdentifiers(classToPlain(foundContacts)))
   }
 
+  const allContactText = () => (
+    allContacts?.map((contact) => (
+      `
+      ${contact.name}
+      ${contact.did}
+      `
+    )).join('\n\n')
+  )
+
+  const copyToClipboard = () => {
+    Clipboard.setString(allContactText())
+  }
+
   const createContact = async () => {
     const contact = new Contact()
     contact.did = contactDid
@@ -38,15 +52,6 @@ export function ContactsScreen({ navigation, route }) {
         loadContacts()
       }
     }, [appStore.getState().contacts])
-  )
-
-  const allContactText = (
-    allContacts?.map((contact) => (
-      `
-      ${contact.name}
-      ${contact.did}
-      `
-    )).join('\n\n')
   )
 
   return (
@@ -90,8 +95,16 @@ export function ContactsScreen({ navigation, route }) {
             editable={false}
             style={{ fontSize: 12 }}
           >
-            { allContactText }
+            { allContactText() }
           </TextInput>
+          { allContacts.length > 0 ? (
+            <Button
+              title="Copy to Clipboard"
+              onPress={copyToClipboard}
+            />
+          ) : (
+            <Text></Text>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

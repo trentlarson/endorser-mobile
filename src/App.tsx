@@ -198,7 +198,7 @@ function SettingsScreen({ navigation }) {
       }
     }
     getIdentifiers()
-  }, []) // Why does this loop infinitely even with classToPlain(identifiers) that doesn't change?
+  }, []) // Why does this loop infinitely with any variable, even with classToPlain(identifiers) that doesn't change?
 
   return (
     <SafeAreaView>
@@ -229,7 +229,7 @@ function SettingsScreen({ navigation }) {
                     <Text></Text>
                   )}
                   <Text style={{ marginBottom: 5 }}>Your info for sharing:</Text>
-                  <QRCode value={JSON.stringify(shareId)} size={350} />
+                  <QRCode value={JSON.stringify(shareId)} size={300} />
                 </View>
               })
             ) : (
@@ -397,7 +397,7 @@ function HelpScreen() {
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I export my contacts?</Text>
-          <Text>On the contact screen, "copy" the names and DIDs to your clipboard and send them to yourself (eg. by email).</Text>
+          <Text>On the contact screen, the names and DIDs to your clipboard (with the 'copy' button at the bottom) and send them to yourself (eg. by email).</Text>
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I import my contacts?</Text>
