@@ -128,7 +128,7 @@ export function CredentialsScreen({ navigation }) {
           { identifiers[0] ? (
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Credentials</Text>
-              <Text style={{ fontSize: 12 }}>For {identifiers[0].did}</Text>
+              <Text style={{ fontSize: 12 }}>{identifiers[0].did}</Text>
               { fetching ? (
                   <View>
                     <Text>Saving to Endorser.ch...</Text>
@@ -164,7 +164,6 @@ export function CredentialsScreen({ navigation }) {
                   <TextInput
                     multiline={true}
                     style={{ borderWidth: 1, height: 300 }}
-                    editable={false}
                   >
                     { jwt }
                   </TextInput>
