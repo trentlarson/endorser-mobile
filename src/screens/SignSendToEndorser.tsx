@@ -15,7 +15,7 @@ function endorserLink(endorserId) {
 }
 
 export function CredentialsScreen({ navigation }) {
-  const [claim, setClaim] = useState<string>('{}')
+  const [claimStr, setClaimStr] = useState<string>('{}')
   const [endorserId, setEndorserId] = useState<string>(null)
   const [fetched, setFetched] = useState<boolean>(false)
   const [fetching, setFetching] = useState<boolean>(false)
@@ -104,7 +104,8 @@ export function CredentialsScreen({ navigation }) {
 
     const signer = didJwt.SimpleSigner(identifiers[0].keys[0].privateKeyHex)
     const did: string = identifiers[0].did
-    const vcJwt: string = await didJwt.createJWT(vcPayload(did, claim),{ issuer: did, signer })
+    const vcClaim = JSON.parse(claimStr)
+    const vcJwt: string = await didJwt.createJWT(vcPayload(did, vcClaim),{ issuer: did, signer })
     setJwt(vcJwt)
     sendToEndorserSite(vcJwt)
   }
@@ -115,7 +116,7 @@ export function CredentialsScreen({ navigation }) {
       const _ids = await agent.didManagerFind()
       setIdentifiers(_ids)
       const claimObj = bvcClaim(_ids[0] ? _ids[0].did : 'UNKNOWN', TODAY_OR_PREV_START_DATE)
-      setClaim(JSON.stringify(claimObj))
+      setClaimStr(JSON.stringify(claimObj))
     }
     getIdentifiers()
   }, [])
@@ -175,9 +176,9 @@ export function CredentialsScreen({ navigation }) {
               <TextInput
                 multiline={true}
                 style={{ borderWidth: 1, height: 300 }}
-                onChangeText={setClaim}
+                onChangeText={setClaimStr}
               >
-                { JSON.stringify(JSON.parse(claim), null, 2) }
+                { JSON.stringify(JSON.parse(claimStr), null, 2) }
               </TextInput>
             </View>
           ) : (
