@@ -7,7 +7,7 @@ import { classToPlain } from 'class-transformer'
 import * as crypto from 'crypto'
 import * as didJwt from 'did-jwt'
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, ScrollView, View, Text, TextInput, Button } from 'react-native'
+import { Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import { NavigationContainer, useFocusEffect } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
@@ -392,12 +392,17 @@ function HelpScreen() {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>What is even the purpose of this thing?</Text>
+          <Text>This uses the power of cryptography to build confidence: when you make claims and your friends and family confirm those claims, you gain much more security, utility, and control in your online life.</Text>
+          <Text>For an example, look at <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/reportBestAttendance')}>this report of meeting attendance</Text>.  Attendees can see their info and their contacts' info but you cannot... until someone brings you into their confidence. So state some claims, confirm others' claims, and build a network of trust -- with trustworthy communications, all verifiable cryptographically.</Text>
+        </View>
+        <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I start over?</Text>
           <Text>Uninstall and reinstall the app.  Note that this will erase the identifier (under Settings) and contacts (under... Contacts), so we recommend you export those first.</Text>
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I export my contacts?</Text>
-          <Text>On the contact screen, the names and DIDs to your clipboard (with the 'copy' button at the bottom) and send them to yourself (eg. by email).</Text>
+          <Text>On the contact screen, copy the names and DIDs to your clipboard (with the 'copy' button at the bottom) and send them to yourself (eg. by email).</Text>
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I import my contacts?</Text>
