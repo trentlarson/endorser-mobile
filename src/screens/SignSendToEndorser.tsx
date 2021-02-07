@@ -4,7 +4,8 @@ import { DateTime } from 'luxon'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 
-import { agent } from '../veramo/setup'
+import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
+import { agent, dbConnection } from '../veramo/setup'
 
 const ENDORSER_API_SERVER = 'http://10.0.0.88:3000'
 const ENDORSER_VIEW_SERVER = 'http://10.0.0.88:3001'
@@ -20,6 +21,7 @@ export function CredentialsScreen({ navigation }) {
   const [fetched, setFetched] = useState<boolean>(false)
   const [fetching, setFetching] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
+  const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [jwt, setJwt] = useState<JWT>()
 
   let currentOrPreviousSat = DateTime.local()
@@ -115,6 +117,13 @@ export function CredentialsScreen({ navigation }) {
     const getIdentifiers = async () => {
       const _ids = await agent.didManagerFind()
       setIdentifiers(_ids)
+
+      const conn = await dbConnection
+      let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+      if (settings?.mnemonic) {
+        setHasMnemonic(true)
+      }
+
       const claimObj = bvcClaim(_ids[0] ? _ids[0].did : 'UNKNOWN', TODAY_OR_PREV_START_DATE)
       setClaimStr(JSON.stringify(claimObj))
     }
@@ -129,6 +138,11 @@ export function CredentialsScreen({ navigation }) {
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Credentials</Text>
               <Text style={{ fontSize: 12 }}>{identifiers[0].did}</Text>
+              { !hasMnemonic ? (
+                <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
+              ) : (
+                 <Text/>
+              )}
               { fetching ? (
                   <View>
                     <Text>Saving to Endorser.ch...</Text>

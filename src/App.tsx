@@ -17,14 +17,13 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { Provider } from 'react-redux';
 
 import * as pkg from '../package.json'
-import { Settings } from './entity/settings'
+import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { agent, dbConnection } from './veramo/setup'
 import { Identifier, appSlice, appStore } from './veramo/appSlice.ts'
 import { CredentialsScreen } from './screens/SignSendToEndorser'
 import { ContactsScreen, ContactImportScreen } from './screens/Contacts'
 
 const DEFAULT_DID_PROVIDER = 'did:ethr'
-const MASTER_COLUMN_VALUE = 'MASTER'
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
 const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 
@@ -214,11 +213,10 @@ function SettingsScreen({ navigation }) {
   useEffect(() => {
     const getIdentifiers = async () => {
       const _ids = await agent.didManagerFind()
+      setIdentifiers(_ids.map(classToPlain))
       const conn = await dbConnection
       let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
       if (settings?.mnemonic) {
-        // If they don't have the backup available, we'll ignore them.
-        setIdentifiers(_ids.map(classToPlain))
         setHasMnemonic(true)
       }
     }
@@ -307,7 +305,6 @@ function ExportIdentityScreen({ navigation }) {
       const conn = await dbConnection
       const settings = await conn.manager.find(Settings)
       const mnemonic = settings[0].mnemonic
-
       setMnemonic(mnemonic)
     }
     getMnemonic()
@@ -425,6 +422,10 @@ function HelpScreen() {
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I import my contacts?</Text>
           <Text>One-by-one, pasting from the exported contacts.</Text>
+        </View>
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>Why do I see warnings about a missing backup?</Text>
+          <Text>Without a backup, this identifier is gone forever if you lose this device, and with it you lose the ability to verify yourself and your claims and your credentials. Wipe your data ASAP (after exporting your contacts) and create a new one that you can start using to build reputation.</Text>
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I generate a different identifier?</Text>

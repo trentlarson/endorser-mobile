@@ -4,6 +4,8 @@ import { Entity, Column, BaseEntity, PrimaryColumn } from 'typeorm'
   There's only one Settings DB entry, with a column for each setting.
 **/
 
+export const MASTER_COLUMN_VALUE = 'MASTER'
+
 @Entity()
 export class Settings extends BaseEntity {
   // The ones in @veramo/data-store don't require explicit types but I get ColumnTypeUndefinedError
