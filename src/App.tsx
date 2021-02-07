@@ -1,3 +1,5 @@
+// Created from the setup in https://veramo.io/docs/guides/react_native
+
 import 'react-native-gesture-handler'
 import 'reflect-metadata'
 
@@ -8,11 +10,13 @@ import * as crypto from 'crypto'
 import * as didJwt from 'did-jwt'
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import Clipboard from '@react-native-community/clipboard';
 import QRCode from 'react-native-qrcode-svg'
 import { NavigationContainer, useFocusEffect } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { Provider } from 'react-redux';
 
+import * as pkg from '../package.json'
 import { Settings } from './entity/settings'
 import { agent, dbConnection } from './veramo/setup'
 import { Identifier, appSlice, appStore } from './veramo/appSlice.ts'
@@ -20,7 +24,7 @@ import { CredentialsScreen } from './screens/SignSendToEndorser'
 import { ContactsScreen, ContactImportScreen } from './screens/Contacts'
 
 const DEFAULT_DID_PROVIDER = 'did:ethr'
-const MASTER_COLUMN_VALUE = 'master'
+const MASTER_COLUMN_VALUE = 'MASTER'
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
 const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 
@@ -41,13 +45,32 @@ const newIdentifier = (address: string, publicHex: string, privateHex: string): 
 
 const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: string) => {
 
-  await agent.didManagerImport(newId)
+  try {
+    /**
+      First save the mnemonic, because: we've seen cases where the identifier import fails, and if they don't have the mnemonic then they can't restore their identifier, but maybe if the mnemonic is saved then they can export and import it through the UI.
+     **/
+    console.log('About to save settings...')
+    const settings = new Settings()
+    settings.id = MASTER_COLUMN_VALUE
+    settings.mnemonic = mnemonic
+    const conn = await dbConnection
+    console.log('... with settings DB connection ready...')
+    let newContact = await conn.manager.save(settings)
+    console.log('... settings saved.')
 
-  const settings = new Settings()
-  settings.id = MASTER_COLUMN_VALUE
-  settings.mnemonic = mnemonic
-  const conn = await dbConnection
-  let newContact = await conn.manager.save(settings)
+    console.log('About to import identifier...')
+    const savedId = await agent.didManagerImport(newId)
+    console.log('... identifier imported.')
+    return savedId
+  } catch (e) {
+    // In release mode, a thrown error didn't give any helpful info.
+
+    // I have seen cases where each of these give different, helpful info.
+    console.log('Error storing identifier, 1:', e)
+    console.log('Error storing identifier, 2: ' + e)
+    console.log('Error storing identifier, 3:', e.toString())
+    throw e
+  }
 }
 
 // Import and existing ID
@@ -88,9 +111,10 @@ const importAndStoreIdentifier = async (mnemonic: string) => {
   const address = didJwt.toEthereumAddress(publicHex)
 
   const newId = newIdentifier(address, publicHex, privateHex)
+
   // awaiting because otherwise the UI may not see that a mnemonic was created
-  await storeIdentifier(newId, mnemonic)
-  return newId
+  const savedId = await storeIdentifier(newId, mnemonic)
+  return savedId
 
 }
 
@@ -190,10 +214,11 @@ function SettingsScreen({ navigation }) {
   useEffect(() => {
     const getIdentifiers = async () => {
       const _ids = await agent.didManagerFind()
-      setIdentifiers(_ids.map(classToPlain))
       const conn = await dbConnection
       let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
       if (settings?.mnemonic) {
+        // If they don't have the backup available, we'll ignore them.
+        setIdentifiers(_ids.map(classToPlain))
         setHasMnemonic(true)
       }
     }
@@ -224,7 +249,7 @@ function SettingsScreen({ navigation }) {
                     {id.did}
                   </Text>
                   { !hasMnemonic ? (
-                    <Text style={{ padding: 10, color: 'red' }}>There is no backup available. We recommend you use a different seed.</Text>
+                    <Text style={{ padding: 10, color: 'red' }}>There is no backup available. We recommend you generate a different identifier. (See Help.)</Text>
                   ) : (
                     <Text></Text>
                   )}
@@ -269,56 +294,53 @@ function SettingsScreen({ navigation }) {
 }
 
 function ExportIdentityScreen({ navigation }) {
-  const [identifier, setIdentifier] = useState<Identifier>()
   const [mnemonic, setMnemonic] = useState<String>('')
+  const [show, setShow] = useState<String>(false)
 
-  const exportIdentifier = async () => {
-
-    /**
-    // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
-    // ... doesn't work because hdNode.mnemonic is undefined
-    const privBytes = Buffer.from(identifier.keys[0].privateKeyHex, 'hex')
-    const hdNode = HDNode.fromSeed(privBytes)
-    const mnemonic = hdNode.mnemonic
-    **/
-
-    const conn = await dbConnection
-    const settings = await conn.manager.find(Settings)
-    const mnemonic = settings[0].mnemonic
-
-    setMnemonic(mnemonic)
+  const copyToClipboard = () => {
+    Clipboard.setString(mnemonic)
   }
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
-    const getIdentifiers = async () => {
-      const _ids = await agent.didManagerFind()
-      setIdentifier(_ids[0])
+    const getMnemonic = async () => {
+      const conn = await dbConnection
+      const settings = await conn.manager.find(Settings)
+      const mnemonic = settings[0].mnemonic
+
+      setMnemonic(mnemonic)
     }
-    getIdentifiers()
+    getMnemonic()
   }, [])
 
   return (
     <View style={{ padding: 20 }}>
       <View style={{ marginBottom: 50, marginTop: 20 }}>
-        {identifier ? (
+        {mnemonic? (
           <View>
-            <Button title={'Click to export identifier mnemonic'} onPress={() => exportIdentifier()} />
-            {mnemonic ? (
-              <TextInput
-                multiline={true}
-                style={{ borderWidth: 1, height: 80 }}
-                editable={false}
-              >
-              { mnemonic }
-              </TextInput>
+            {show ? (
+              <View>
+                <TextInput
+                  multiline={true}
+                  style={{ borderWidth: 1, height: 100 }}
+                >
+                { mnemonic }
+                </TextInput>
+                <Button
+                  title="Copy to Clipboard"
+                  onPress={copyToClipboard}
+                />
+              </View>
             ) : (
-              <View/>
+              <View>
+                <Button title={'Click to show identifier mnemonic'} onPress={setShow} />
+                <Text>BEWARE: Anyone who gets hold of this mnemonic will be able to impersonate you and take over any digital holdings based on it. So only reveal it when you are in a private place out of sight of cameras and other eyes, and only record it in something private -- don't take a screenshot or send it to any online service.</Text>
+              </View>
             )}
           </View>
         ) : (
           <View> 
-            <Text>There are no identifiers to export.</Text>
+            <Text>There is no mnemonic to export.</Text>
           </View>
         )}
       </View>
@@ -394,11 +416,7 @@ function HelpScreen() {
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>What is even the purpose of this thing?</Text>
           <Text>This uses the power of cryptography to build confidence: when you make claims and your friends and family confirm those claims, you gain much more security, utility, and control in your online life.</Text>
-          <Text>For an example, look at <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/reportBestAttendance')}>this report of meeting attendance</Text>.  Attendees can see their info and their contacts' info but you cannot... until someone brings you into their confidence. So state some claims, confirm others' claims, and build a network of trust -- with trustworthy communications, all verifiable cryptographically.</Text>
-        </View>
-        <View style={{ padding: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>How do I start over?</Text>
-          <Text>Uninstall and reinstall the app.  Note that this will erase the identifier (under Settings) and contacts (under... Contacts), so we recommend you export those first.</Text>
+          <Text>For an example, look at <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/reportBestAttendance')}>this report of meeting attendance</Text>.  Attendees can see their own info and their contacts' info but you cannot see it... until someone brings you into their confidence. So... make some claims, confirm others' claims, and build a network of trust -- with trustworthy communications, all verifiable cryptographically.</Text>
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I export my contacts?</Text>
@@ -409,8 +427,18 @@ function HelpScreen() {
           <Text>One-by-one, pasting from the exported contacts.</Text>
         </View>
         <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>How do I generate a different identifier?</Text>
+          <Text>Note that this will erase the identifier (under Settings) and contacts (under... Contacts), so we recommend you export those first.</Text>
+          <Text>- On Android, you can go to the Storage in App Info and clear it. Remember to export your data!</Text>
+          <Text>- On iOS, the easiest way is to uninstall and reinstall the app. Remember to export your data!</Text>
+        </View>
+        <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>This is stupid (or fantastic). Who do I blame?</Text>
-          <Text>Trent, via CommunityEndorser@gmail.com</Text>
+          <Text>Trent, via: </Text><Text selectable={true}>CommunityEndorser@gmail.com</Text>
+        </View>
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>What is the version info?</Text>
+          <Text selectable={true}>{ pkg.version }</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -1,3 +1,5 @@
+// Created from the setup in https://veramo.io/docs/guides/react_native
+
 // Core interfaces
 import { createAgent, IDIDManager, IResolver, IDataStore, IKeyManager } from '@veramo/core'
 

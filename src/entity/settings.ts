@@ -9,7 +9,7 @@ export class Settings extends BaseEntity {
   // The ones in @veramo/data-store don't require explicit types but I get ColumnTypeUndefinedError
 
   /**
-    Single entry, so currently always 'master'
+    Currently this has a single entry so it's a constant string, eg "MASTER"
   **/
   @PrimaryColumn('text')
   //@ts-ignore

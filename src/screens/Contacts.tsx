@@ -89,11 +89,11 @@ export function ContactsScreen({ navigation, route }) {
             />
           </View>
         </View>
-        <View>
+        <View style={{ padding: 20 }}>
           <TextInput
             multiline={true}
             editable={false}
-            style={{ fontSize: 12 }}
+            style={{ borderWidth: (allContacts.length === 0 ? 0 : 1), fontSize: 12 }}
           >
             { allContactText() }
           </TextInput>
