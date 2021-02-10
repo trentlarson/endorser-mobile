@@ -21,6 +21,30 @@ platform :android do
     gradle(task: "test")
   end
 
+  # from https://thecodingmachine.github.io/react-native-boilerplate/docs/BetaBuild/#android
+  desc "Submit a new Beta Build to Play Store"
+  lane :beta do
+    store_password = prompt(text: "Signing Store Password: ", secure_text: true)
+    key_password = prompt(text: "Alias Key Password: ", secure_text: true)
+    releaseFilePath = File.join(Dir.pwd, "../app", "google-comm-endo-upload-key.keystore")
+    gradle(task: 'clean')
+    gradle(
+      task: 'assemble',
+      build_type: 'Release',
+      print_command: false,
+      properties: {
+        "android.injected.signing.store.file" => releaseFilePath,
+        "android.injected.signing.store.password" => store_password,
+        "android.injected.signing.key.alias" => "comm-endo-key",
+        "android.injected.signing.key.password" => key_password,
+      }
+    )
+    upload_to_play_store(
+      track: 'internal'
+    )
+  end
+
+=begin
   desc "Submit a new Beta Build to Crashlytics Beta"
   lane :beta do
     gradle(task: "clean assembleRelease")
@@ -35,4 +59,17 @@ platform :android do
     gradle(task: "clean assembleRelease")
     upload_to_play_store
   end
+
+    lane :distribute do
+        build_android_app(...) # build_android_app is a built-in fastlane action.
+
+        firebase_app_distribution(
+            app: "1:1094643115061:android:40b63cb5851f34ac887d7c",
+            testers: "larsontrent@gmail.com",
+            release_notes: "Lots of amazing new features to test out!"
+        )
+
+    end
+=end
+
 end

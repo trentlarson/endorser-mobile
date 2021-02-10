@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1094643115061",
+    "project_id": "pc-api-7249509642322112640-286",
+    "storage_bucket": "pc-api-7249509642322112640-286.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1094643115061:android:40b63cb5851f34ac887d7c",
+        "android_client_info": {
+          "package_name": "com.veramo_react_native"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1094643115061-qr2b5dodq445ov46p8fjm8s7j75htmpg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFLYeLfGQqh7ErvzXgy74H0Gx3yQAMEw8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1094643115061-qr2b5dodq445ov46p8fjm8s7j75htmpg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
