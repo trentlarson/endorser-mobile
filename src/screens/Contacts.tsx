@@ -20,7 +20,7 @@ export function ContactsScreen({ navigation, route }) {
   const loadContacts = async () => {
     const conn = await dbConnection
     const foundContacts = await conn.manager.find(Contact)
-    appStore.dispatch(appSlice.actions.setIdentifiers(classToPlain(foundContacts)))
+    appStore.dispatch(appSlice.actions.setContacts(classToPlain(foundContacts)))
   }
 
   const allContactText = () => (
@@ -130,7 +130,7 @@ export function ContactImportScreen({ navigation }) {
       contact.name = contactInfo.own && contactInfo.own.name
       const newContact = await conn.manager.save(contact)
       setSaved(true)
-      appStore.dispatch(appSlice.actions.setIdentifiers([]))
+      appStore.dispatch(appSlice.actions.setContacts([]))
 
       setTimeout(() => { navigation.navigate('Contacts')}, 500)
     }

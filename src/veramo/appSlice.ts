@@ -12,11 +12,21 @@ interface Payload<T> {
 
 export const appSlice = createSlice({
   name: 'app',
-  initialState: { contacts: [] },
+  initialState: {
+    contacts: [],
+    apiServer: 'http://10.0.0.88:3000',
+    viewServer: 'http://10.0.0.88:3001',
+  },
   reducers: {
-    setIdentifiers: (state, contents: Payload<Array<Identifier>>) => {
+    setContacts: (state, contents: Payload<Array<Identifier>>) => {
       state.contacts = contents.payload
-    }
+    },
+    setApiServer: (state, contents: Payload<string>) => {
+      state.apiServer = contents.payload
+    },
+    setViewServer: (state, contents: Payload<string>) => {
+      state.viewServer = contents.payload
+    },
   }
 })
 

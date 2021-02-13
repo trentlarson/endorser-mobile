@@ -285,6 +285,24 @@ function SettingsScreen({ navigation }) {
             />
             **/}
           </View>
+          <View>
+            <Text>API Server</Text>
+            <TextInput
+              style={{ borderWidth: 1 }}
+              onChangeText={(text) => {
+                appStore.dispatch(appSlice.actions.setApiServer(text))
+              }}>
+              { appStore.getState().apiServer }
+            </TextInput>
+            <Text>View Server</Text>
+            <TextInput
+              style={{ borderWidth: 1 }}
+              onChangeText={(text) => {
+                appStore.dispatch(appSlice.actions.setViewServer(text))
+              }}>
+              { appStore.getState().viewServer }
+            </TextInput>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

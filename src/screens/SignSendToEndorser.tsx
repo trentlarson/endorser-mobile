@@ -5,15 +5,10 @@ import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
+import { appSlice, appStore } from '../veramo/appSlice.ts'
 import { agent, dbConnection } from '../veramo/setup'
 
-const ENDORSER_API_SERVER = 'http://10.0.0.88:3000'
-const ENDORSER_VIEW_SERVER = 'http://10.0.0.88:3001'
 const debug = Debug('endorser-mobile:share-credential')
-
-function endorserLink(endorserId) {
-  return ENDORSER_VIEW_SERVER + '/reportClaim?claimId=' + endorserId
-}
 
 export function CredentialsScreen({ navigation }) {
   const [claimStr, setClaimStr] = useState<string>('{}')
@@ -23,6 +18,10 @@ export function CredentialsScreen({ navigation }) {
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [jwt, setJwt] = useState<JWT>()
+
+  const endorserViewLink = (endorserId) => {
+    return appStore.getState().viewServer + '/reportClaim?claimId=' + endorserId
+  }
 
   let currentOrPreviousSat = DateTime.local()
   if (currentOrPreviousSat.weekday < 6) {
@@ -63,7 +62,8 @@ export function CredentialsScreen({ navigation }) {
 
   async function sendToEndorserSite(jwt: string) {
     setFetching(true)
-    fetch(ENDORSER_API_SERVER + '/api/claim', {
+    const endorserApiServer = appStore.getState().apiServer
+    fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -71,20 +71,25 @@ export function CredentialsScreen({ navigation }) {
       },
       body: JSON.stringify({ jwtEncoded: jwt }),
     })
-    .then(resp => {
+    .then(async resp => {
       setFetching(false)
       setFetched(true)
       debug('Got endorser.ch status', resp.status)
-      return resp.json()
+      if (resp.ok) {
+        return resp.json()
+      } else {
+        const text = await resp.text()
+        throw Error('Got failure response code of ' + resp.status + ' with body text of ' + text)
+      }
     })
     .then(json => {
       debug('Got endorser.ch result', json)
       setEndorserId(json)
     })
     .catch(err => {
-      debug('Got error sending to endorser.ch', err)
+      debug('Got error sending to ' + endorserApiServer, err)
       throw Error(
-        'Sorry, got a problem with the endorser.ch response. ' + err,
+        'Sorry, got a problem with the response from ' + endorserApiServer + err,
       )
     })
     .finally(() => {
@@ -145,8 +150,8 @@ export function CredentialsScreen({ navigation }) {
               )}
               { fetching ? (
                   <View>
-                    <Text>Saving to Endorser.ch...</Text>
-                    <ActivityIndicator size={'small'} />
+                    <Text>Saving to Endorser.ch server...</Text>
+                    <ActivityIndicator size={'large'} />
                   </View>
                 ) : (
                   fetched ? (
@@ -154,7 +159,7 @@ export function CredentialsScreen({ navigation }) {
                       <Button
                         title="Success!  Click here to see your claim on Endorser.ch"
                         onPress={() => {
-                          Linking.openURL(endorserLink(endorserId)).catch(err =>
+                          Linking.openURL(endorserViewLink(endorserId)).catch(err =>
                             setError(
                               'Sorry, something went wrong trying to go to endorser.ch',
                             ),
