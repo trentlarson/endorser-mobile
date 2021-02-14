@@ -16,8 +16,10 @@ export const appSlice = createSlice({
     contacts: [],
     //apiServer: 'https://endorser.ch:3000',
     //viewServer: 'https://endorser.ch',
-    apiServer: 'http://10.0.0.88:3000',
-    viewServer: 'http://10.0.0.88:3001',
+    //apiServer: 'http://10.0.0.88:3000',
+    //viewServer: 'http://10.0.0.88:3001',
+    apiServer: 'http://127.0.0.1:3000',
+    viewServer: 'http://127.0.0.1:3001',
   },
   reducers: {
     setContacts: (state, contents: Payload<Array<Identifier>>) => {

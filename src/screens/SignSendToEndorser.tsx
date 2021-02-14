@@ -89,7 +89,7 @@ export function CredentialsScreen({ navigation }) {
     .catch(err => {
       debug('Got error sending to ' + endorserApiServer, err)
       throw Error(
-        'Sorry, got a problem with the response from ' + endorserApiServer + err,
+        'Sorry, got a problem with the response from ' + endorserApiServer + ' ' + err,
       )
     })
     .finally(() => {
@@ -148,35 +148,37 @@ export function CredentialsScreen({ navigation }) {
               ) : (
                  <Text/>
               )}
-              { fetching ? (
-                  <View>
-                    <Text>Saving to Endorser.ch server...</Text>
-                    <ActivityIndicator size={'large'} />
-                  </View>
-                ) : (
-                  fetched ? (
-                    endorserId ? (
-                      <Button
-                        title="Success!  Click here to see your claim on Endorser.ch"
-                        onPress={() => {
-                          Linking.openURL(endorserViewLink(endorserId)).catch(err =>
-                            setError(
-                              'Sorry, something went wrong trying to go to endorser.ch',
-                            ),
-                          )
-                        }}
-                      />
-                    ) : (
-                      <Text>Got response from Endorser.ch...</Text>
-                    )
+              <View style={{ padding: 10 }}>
+                { fetching ? (
+                    <View>
+                      <Text>Saving to Endorser.ch server...</Text>
+                      <ActivityIndicator size={'large'} />
+                    </View>
                   ) : (
-                    <Button
-                      title={'Click to sign & store'}
-                      onPress={() => signAndSend()}
-                    />
+                    fetched ? (
+                      endorserId ? (
+                        <Button
+                          title="Success!  Click here to see your claim on Endorser.ch"
+                          onPress={() => {
+                            Linking.openURL(endorserViewLink(endorserId)).catch(err =>
+                              setError(
+                                'Sorry, something went wrong trying to go to endorser.ch',
+                              ),
+                            )
+                          }}
+                        />
+                      ) : (
+                        <Text>Got response from Endorser.ch but something went wrong.  You might check your data.  If it's good it may be an error at Endorser.ch</Text>
+                      )
+                    ) : (
+                      <Button
+                        title={'Click to sign & store'}
+                        onPress={() => signAndSend()}
+                      />
+                    )
                   )
-                )
-              }
+                }
+              </View>
               { jwt ? (
                 <View>
                   <Text>JWT</Text>
