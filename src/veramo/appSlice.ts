@@ -14,6 +14,8 @@ export const appSlice = createSlice({
   name: 'app',
   initialState: {
     contacts: [],
+    //apiServer: 'https://endorser.ch:3000',
+    //viewServer: 'https://endorser.ch',
     apiServer: 'http://10.0.0.88:3000',
     viewServer: 'http://10.0.0.88:3001',
   },
