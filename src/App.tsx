@@ -231,7 +231,7 @@ function SettingsScreen({ navigation }) {
           <View style={{ marginBottom: 50, marginTop: 20 }}>
             {identifiers?.length > 0 ? (
               identifiers.map((id: Identifier, index: number) => {
-                const publicEncKey = Buffer.from(id.keys[0].publicKeyHex, 'hex').toString('base64')           
+                const publicEncKey = Buffer.from(id.keys[0].publicKeyHex, 'hex').toString('base64')
                 // this is uPort's QR code format
                 const shareId = {
                   iss: id.did,
@@ -286,7 +286,7 @@ function SettingsScreen({ navigation }) {
             **/}
           </View>
           <View>
-            <Text>API Server</Text>
+            <Text>Endorser API Server</Text>
             <TextInput
               style={{ borderWidth: 1 }}
               onChangeText={(text) => {
@@ -294,7 +294,7 @@ function SettingsScreen({ navigation }) {
               }}>
               { appStore.getState().apiServer }
             </TextInput>
-            <Text>View Server</Text>
+            <Text>Endorser View Server</Text>
             <TextInput
               style={{ borderWidth: 1 }}
               onChangeText={(text) => {
@@ -348,13 +348,13 @@ function ExportIdentityScreen({ navigation }) {
               </View>
             ) : (
               <View>
-                <Button title={'Click to show identifier mnemonic'} onPress={setShow} />
                 <Text>BEWARE: Anyone who gets hold of this mnemonic will be able to impersonate you and take over any digital holdings based on it. So only reveal it when you are in a private place out of sight of cameras and other eyes, and only record it in something private -- don't take a screenshot or send it to any online service.</Text>
+                <Button title={'Click to show identifier mnemonic'} onPress={setShow} />
               </View>
             )}
           </View>
         ) : (
-          <View> 
+          <View>
             <Text>There is no mnemonic to export.</Text>
           </View>
         )}

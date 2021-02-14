@@ -2,16 +2,17 @@ import Debug from 'debug'
 import * as didJwt from 'did-jwt'
 import { DateTime } from 'luxon'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Button, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
-import { appSlice, appStore } from '../veramo/appSlice.ts'
+import { appStore } from '../veramo/appSlice'
 import { agent, dbConnection } from '../veramo/setup'
 
 const debug = Debug('endorser-mobile:share-credential')
 
 export function CredentialsScreen({ navigation }) {
-  const [claimStr, setClaimStr] = useState<string>('{}')
+  const [claimStr, setClaimStr] = useState<string>('')
+  const [confirming, setConfirming] = useState<boolean>(false)
   const [endorserId, setEndorserId] = useState<string>(null)
   const [fetched, setFetched] = useState<boolean>(false)
   const [fetching, setFetching] = useState<boolean>(false)
@@ -49,13 +50,23 @@ export function CredentialsScreen({ navigation }) {
     }
   }
 
+  function setClaimToAttendance() {
+    const claimObj = bvcClaim(identifiers[0] ? identifiers[0].did : 'UNKNOWN', TODAY_OR_PREV_START_DATE)
+    setClaimStr(JSON.stringify(claimObj))
+  }
+
+  function setConfirmation() {
+    setClaimStr(JSON.stringify('Ummmm... Unimplemented'))
+    setConfirming(false)
+  }
+
   function vcPayload(did: string, claim: any): JwtCredentialPayload {
     return {
       sub: did,
       vc: {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         type: ['VerifiableCredential'],
-        credentialSubject: claim
+        credentialSubject: claim,
       }
     }
   }
@@ -128,9 +139,6 @@ export function CredentialsScreen({ navigation }) {
       if (settings?.mnemonic) {
         setHasMnemonic(true)
       }
-
-      const claimObj = bvcClaim(_ids[0] ? _ids[0].did : 'UNKNOWN', TODAY_OR_PREV_START_DATE)
-      setClaimStr(JSON.stringify(claimObj))
     }
     getIdentifiers()
   }, [])
@@ -149,57 +157,108 @@ export function CredentialsScreen({ navigation }) {
                  <Text/>
               )}
               <View style={{ padding: 10 }}>
-                { fetching ? (
-                    <View>
-                      <Text>Saving to Endorser.ch server...</Text>
-                      <ActivityIndicator size={'large'} />
-                    </View>
-                  ) : (
-                    fetched ? (
-                      endorserId ? (
-                        <Button
-                          title="Success!  Click here to see your claim on Endorser.ch"
-                          onPress={() => {
-                            Linking.openURL(endorserViewLink(endorserId)).catch(err =>
-                              setError(
-                                'Sorry, something went wrong trying to go to endorser.ch',
-                              ),
-                            )
-                          }}
-                        />
-                      ) : (
-                        <Text>Got response from Endorser.ch but something went wrong.  You might check your data.  If it's good it may be an error at Endorser.ch</Text>
-                      )
-                    ) : (
+                {
+                  fetched ? (
+                    endorserId ? (
                       <Button
-                        title={'Click to sign & store'}
-                        onPress={() => signAndSend()}
+                        title="Success!  Click here to see your claim on Endorser.ch"
+                        onPress={() => {
+                          Linking.openURL(endorserViewLink(endorserId)).catch(err =>
+                            setError(
+                              'Sorry, something went wrong trying to go to endorser.ch',
+                            ),
+                          )
+                        }}
                       />
+                    ) : ( /* fetched && !endorserId */
+                      <Text>Got response from Endorser.ch but something went wrong.  You might check your data.  If it's good it may be an error at Endorser.ch</Text>
+                    )
+                  ) : ( /* !fetched */
+                    fetching ? (
+                      <View>
+                        <Text>Saving to Endorser.ch server...</Text>
+                        <ActivityIndicator size={'large'} />
+                      </View>
+                    ) : ( /* !fetched && !fetching */
+                      <Text/>
                     )
                   )
                 }
+                <Modal
+                  animationType="slide"
+                  transparent={true}
+                  visible={confirming}
+                  onRequestClose={() => {
+                    Alert.alert("Modal has been closed.");
+                  }}
+                >
+                  <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                          <Text style={styles.modalText}>Save this contact?</Text>
+
+                          <TouchableHighlight
+                            style={styles.cancelButton}
+                            onPress={() => { setConfirming(false) }}
+                          >
+                            <Text>Cancel</Text>
+                          </TouchableHighlight>
+                          <TouchableHighlight
+                            style={styles.saveButton}
+                            onPress={setConfirmation}
+                          >
+                            <Text>Save</Text>
+                          </TouchableHighlight>
+                    </View>
+                  </View>
+                </Modal>
+                {
+                  !claimStr ? (
+                    <View>
+                      <Text>Select Claim</Text>
+                      <Button
+                        title={'Attend'}
+                        onPress={setClaimToAttendance}
+                      />
+                      <Button
+                        title={'Confirm'}
+                        onPress={() => setConfirming(true) }
+                      />
+                    </View>
+                  ) : ( /* claimStr */
+                    <View>
+                      <Button
+                        title={'Sign & Store'}
+                        onPress={signAndSend}
+                      />
+                      <Button
+                        title={'Reset'}
+                        onPress={() => setClaimStr('')}
+                      />
+                      <Text>Claim</Text>
+                      <TextInput
+                        multiline={true}
+                        style={{ borderWidth: 1, height: 300 }}
+                        onChangeText={setClaimStr}
+                      >
+                        { JSON.stringify(JSON.parse(claimStr), null, 2) }
+                      </TextInput>
+                      { jwt ? (
+                        <View>
+                          <Text>JWT</Text>
+                          <TextInput
+                            multiline={true}
+                            style={{ borderWidth: 1, height: 300 }}
+                          >
+                            { jwt }
+                          </TextInput>
+                        </View>
+                      ) : ( /* claimStr && !jwt */
+                        <Text/>
+                      )}
+                    </View>
+                  )
+                }
               </View>
-              { jwt ? (
-                <View>
-                  <Text>JWT</Text>
-                  <TextInput
-                    multiline={true}
-                    style={{ borderWidth: 1, height: 300 }}
-                  >
-                    { jwt }
-                  </TextInput>
-                </View>
-              ) : (
-                <Text/>
-              )}
-              <Text>Claim</Text>
-              <TextInput
-                multiline={true}
-                style={{ borderWidth: 1, height: 300 }}
-                onChangeText={setClaimStr}
-              >
-                { JSON.stringify(JSON.parse(claimStr), null, 2) }
-              </TextInput>
             </View>
           ) : (
             <Text>You must create an identifier (under Settings).</Text>
@@ -210,3 +269,47 @@ export function CredentialsScreen({ navigation }) {
   )
 }
 
+const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5
+  },
+  cancelButton: {
+    backgroundColor: "#F194FF",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  saveButton: {
+    backgroundColor: "#00FF00",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
+  }
+})
