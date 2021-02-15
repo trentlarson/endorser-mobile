@@ -8,6 +8,7 @@ import * as bip39 from 'bip39'
 import { classToPlain } from 'class-transformer'
 import * as crypto from 'crypto'
 import * as didJwt from 'did-jwt'
+import { HDNode } from '@ethersproject/hdnode'
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import Clipboard from '@react-native-community/clipboard';
@@ -81,6 +82,7 @@ const importAndStoreIdentifier = async (mnemonic: string) => {
   // ... plus:
   // const EC = require('elliptic').ec
   // const secp256k1 = new EC('secp256k1')
+  //
   const keyHex: string = bip39.mnemonicToEntropy(mnemonic)
   // returns a KeyPair from the elliptic.ec library
   const keyPair = secp256k1.keyFromPrivate(keyHex, 'hex')
@@ -92,29 +94,34 @@ const importAndStoreIdentifier = async (mnemonic: string) => {
 
   /**
   // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
-  // requires: yarn add @ethersproject/hdnode
-  // ... plus: import { HDNode } from '@ethersproject/hdnode'
-  const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
-  const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
-  const privateHex = rootNode.privateKey.substring(2)
-  const publicHex = rootNode.privateKey.substring(2)
-  const address = rootNode.address
-  **/
-
-  // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+  // ... which almost works but the didJwt.toEthereumAddress is wrong
+  // requires: yarn add bip32
+  // ... plus: import * as bip32 from 'bip32'
+  //
   const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
   const root = bip32.fromSeed(seed)
   const node = root.derivePath(UPORT_ROOT_DERIVATION_PATH)
   const privateHex = node.privateKey.toString("hex")
   const publicHex = node.publicKey.toString("hex")
-  const address = didJwt.toEthereumAddress(publicHex)
+  const address = didJwt.toEthereumAddress('0x' + publicHex)
+  **/
+
+  /**
+  // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+  // requires: yarn add @ethersproject/hdnode
+  // ... plus: import { HDNode } from '@ethersproject/hdnode'
+  **/
+  const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
+  const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
+  const privateHex = rootNode.privateKey.substring(2)
+  const publicHex = rootNode.privateKey.substring(2)
+  const address = rootNode.address
 
   const newId = newIdentifier(address, publicHex, privateHex)
 
   // awaiting because otherwise the UI may not see that a mnemonic was created
   const savedId = await storeIdentifier(newId, mnemonic)
   return savedId
-
 }
 
 // Create a totally new ID
@@ -241,7 +248,7 @@ function SettingsScreen({ navigation }) {
                 }
                 return <View key={id.did} style={{ padding: 10 }}>
                   <Text
-                    style={{ fontSize: 12, marginBottom: 20 }}
+                    style={{ fontSize: 11, marginBottom: 20 }}
                     selectable={true}
                   >
                     {id.did}
@@ -279,11 +286,11 @@ function SettingsScreen({ navigation }) {
               />
             }
             {/** good for tests, bad for users
+            **/}
             <Button title="Delete ID" onPress={deleteIdentifier} />
             <Button title="Create ID"
               onPress={() => createAndStoreIdentifier().then(setNewId)}
             />
-            **/}
           </View>
           <View>
             <Text>Endorser API Server</Text>
@@ -321,8 +328,8 @@ function ExportIdentityScreen({ navigation }) {
   useEffect(() => {
     const getMnemonic = async () => {
       const conn = await dbConnection
-      const settings = await conn.manager.find(Settings)
-      const mnemonic = settings[0].mnemonic
+      const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+      const mnemonic = settings.mnemonic
       setMnemonic(mnemonic)
     }
     getMnemonic()
@@ -378,7 +385,7 @@ function ImportIdentityScreen({ navigation }) {
   }, [])
 
   const importIdentifier = async () => {
-    importAndStoreIdentifier(mnemonic).then(() => {
+    importAndStoreIdentifier(mnemonic).then(newIdentifier => {
       setIdentifier(newIdentifier)
       setIdChanged(true)
 
