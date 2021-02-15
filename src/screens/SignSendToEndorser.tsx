@@ -1,10 +1,12 @@
 import Debug from 'debug'
 import * as didJwt from 'did-jwt'
-import { DateTime } from 'luxon'
+import { DateTime, Duration } from 'luxon'
+import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Button, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
+import * as utility from '../utility/utility'
 import { appStore } from '../veramo/appSlice'
 import { agent, dbConnection } from '../veramo/setup'
 
@@ -12,6 +14,7 @@ const debug = Debug('endorser-mobile:share-credential')
 
 export function CredentialsScreen({ navigation }) {
   const [claimStr, setClaimStr] = useState<string>('')
+  const [claimsConfirming, setClaimsConfirming] = useState<Array<String>>([])
   const [confirming, setConfirming] = useState<boolean>(false)
   const [endorserId, setEndorserId] = useState<string>(null)
   const [fetched, setFetched] = useState<boolean>(false)
@@ -19,15 +22,21 @@ export function CredentialsScreen({ navigation }) {
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [jwt, setJwt] = useState<JWT>()
+  const [loadedClaimsStarting, setLoadedClaimsStarting] = useState<DateTime>(null)
+  const [loadingRecentClaims, setLoadingRecentClaims] = useState<boolean>(false)
+  const [recentClaims, setRecentClaims] = useState<Array<any>>([])
+  const [recentHiddenCount, setRecentHiddenCount] = useState<number>(0)
 
   const endorserViewLink = (endorserId) => {
     return appStore.getState().viewServer + '/reportClaim?claimId=' + endorserId
   }
 
   let currentOrPreviousSat = DateTime.local()
-  if (currentOrPreviousSat.weekday < 6) {
+  let todayIsSaturday = true
+  if (currentOrPreviousSat.weekday !== 6) {
     // it's not Saturday, so let's default to last Saturday
     currentOrPreviousSat = currentOrPreviousSat.minus({week:1})
+    todayIsSaturday = false
   }
   const eventStartDateObj = currentOrPreviousSat.set({weekday:6}).set({hour:9}).startOf("hour")
   // Hack, but the full ISO pushes the length to 340 which crashes verifyJWT!  Crazy!
@@ -55,9 +64,59 @@ export function CredentialsScreen({ navigation }) {
     setClaimStr(JSON.stringify(claimObj))
   }
 
-  function setConfirmation() {
-    setClaimStr(JSON.stringify('Ummmm... Unimplemented'))
+  function unsetConfirmationsModal() {
     setConfirming(false)
+    setLoadedClaimsStarting(null)
+    setRecentClaims([])
+    setRecentHiddenCount(0)
+  }
+
+  function setConfirmations() {
+    setClaimStr(JSON.stringify('Ummmm... Unimplemented'))
+    unsetConfirmationsModal()
+  }
+
+  async function accessToken() {
+    const did: string = identifiers[0].did
+    const signer = didJwt.SimpleSigner(identifiers[0].keys[0].privateKeyHex)
+
+    const nowEpoch = Math.floor(Date.now() / 1000)
+    const tomorrowEpoch = nowEpoch + (60 * 60 * 24)
+
+    const uportTokenPayload = { exp: tomorrowEpoch, iat: nowEpoch, iss: did }
+    const jwt: string = await didJwt.createJWT(uportTokenPayload, { issuer: did, signer })
+    return jwt
+  }
+
+  async function loadRecentClaims() {
+    setLoadingRecentClaims(true)
+
+    let loadMoreEnding, loadMoreStarting
+    if (!loadedClaimsStarting) {
+      loadMoreEnding = DateTime.local()
+      loadMoreStarting = DateTime.local().startOf("day")
+    } else {
+      loadMoreEnding = loadedClaimsStarting
+      loadMoreStarting = loadedClaimsStarting.minus(Duration.fromISO("P1M")) // - 1 month
+    }
+    let loadMoreEndingStr = loadMoreEnding.toISO()
+    let loadMoreStartingStr = loadMoreStarting.toISO()
+
+    const endorserApiServer = appStore.getState().apiServer
+    const token = await accessToken()
+    fetch(endorserApiServer + '/api/claim/?issuedAt_greaterThanOrEqualTo=' + loadMoreStartingStr + "&issuedAt_lessThan=" + loadMoreEndingStr + "&excludeConfirmations=true", {
+      headers: {
+        "Content-Type": "application/json",
+        "Uport-Push-Token": token,
+      }})
+      .then(response => response.json())
+      .then(async (data) => {
+        const filteredData = R.reject(utility.containsHiddenDid, data)
+        setRecentClaims(R.concat(recentClaims, filteredData))
+        setRecentHiddenCount(count => count + data.length - filteredData.length)
+        setLoadedClaimsStarting(loadMoreStarting)
+      })
+      .finally(() => setLoadingRecentClaims(false))
   }
 
   function vcPayload(did: string, claim: any): JwtCredentialPayload {
@@ -74,11 +133,12 @@ export function CredentialsScreen({ navigation }) {
   async function sendToEndorserSite(jwt: string) {
     setFetching(true)
     const endorserApiServer = appStore.getState().apiServer
+    const token = accessToken()
     fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Uport-Push-Token': jwt,
+        'Uport-Push-Token': token,
       },
       body: JSON.stringify({ jwtEncoded: jwt }),
     })
@@ -150,7 +210,7 @@ export function CredentialsScreen({ navigation }) {
           { identifiers[0] ? (
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Credentials</Text>
-              <Text style={{ fontSize: 12 }}>{identifiers[0].did}</Text>
+              <Text style={{ fontSize: 11 }}>{identifiers[0].did}</Text>
               { !hasMnemonic ? (
                 <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
               ) : (
@@ -192,36 +252,63 @@ export function CredentialsScreen({ navigation }) {
                     Alert.alert("Modal has been closed.");
                   }}
                 >
+                  <ScrollView>
                   <View style={styles.centeredView}>
                     <View style={styles.modalView}>
-                          <Text style={styles.modalText}>Save this contact?</Text>
+                      <Text style={styles.modalText}>Confirmations</Text>
 
-                          <TouchableHighlight
-                            style={styles.cancelButton}
-                            onPress={() => { setConfirming(false) }}
-                          >
-                            <Text>Cancel</Text>
-                          </TouchableHighlight>
-                          <TouchableHighlight
-                            style={styles.saveButton}
-                            onPress={setConfirmation}
-                          >
-                            <Text>Save</Text>
-                          </TouchableHighlight>
+                      <View syle={{ textAlign: 'left' }}>
+                        { recentClaims.map(claim => <Text key={claim.id}>
+                            { utility.claimDescription(claim) }
+                          </Text>
+                        )}
+                        <Text style={{ padding:5 }}>{ recentHiddenCount > 0
+                          ? '(' + recentHiddenCount + ' are hidden)'
+                          : ''
+                        }</Text>
+                        { loadingRecentClaims
+                          ? <ActivityIndicator size={'large'} />
+                          : <Button
+                              title={'Load Previous to ' + (
+                                loadedClaimsStarting
+                                ? loadedClaimsStarting.toISO().substring(5, 10).replace('-', '/')
+                                : 'Now'
+                              )}
+                              onPress={loadRecentClaims}
+                            />
+                        }
+                      </View>
+
+                      <TouchableHighlight
+                        style={styles.cancelButton}
+                        onPress={unsetConfirmationsModal}
+                      >
+                        <Text>Cancel</Text>
+                      </TouchableHighlight>
+                      <TouchableHighlight
+                        style={styles.saveButton}
+                        onPress={setConfirmations}
+                      >
+                        <Text>Set</Text>
+                      </TouchableHighlight>
                     </View>
                   </View>
+                  </ScrollView>
                 </Modal>
                 {
                   !claimStr ? (
                     <View>
-                      <Text>Select Claim</Text>
+                      <Text>What are you claiming?</Text>
                       <Button
-                        title={'Attend'}
+                        title={'Attendance at ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' Meeting'}
                         onPress={setClaimToAttendance}
                       />
                       <Button
-                        title={'Confirm'}
-                        onPress={() => setConfirming(true) }
+                        title={'Confirmation of Other Claims'}
+                        onPress={() => {
+                          setConfirming(true)
+                          loadRecentClaims()
+                        }}
                       />
                     </View>
                   ) : ( /* claimStr */
@@ -234,7 +321,7 @@ export function CredentialsScreen({ navigation }) {
                         title={'Reset'}
                         onPress={() => setClaimStr('')}
                       />
-                      <Text>Claim</Text>
+                      <Text>Claim Details</Text>
                       <TextInput
                         multiline={true}
                         style={{ borderWidth: 1, height: 300 }}
@@ -311,5 +398,5 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: "center"
-  }
+  },
 })

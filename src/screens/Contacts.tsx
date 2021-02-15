@@ -93,7 +93,7 @@ export function ContactsScreen({ navigation, route }) {
           <TextInput
             multiline={true}
             editable={false}
-            style={{ borderWidth: (allContacts.length === 0 ? 0 : 1), fontSize: 12 }}
+            style={{ borderWidth: (allContacts.length === 0 ? 0 : 1), fontSize: 11 }}
           >
             { allContactText() }
           </TextInput>
@@ -181,9 +181,9 @@ export function ContactImportScreen({ navigation }) {
 
           { contactInfo ? (
               <View>
-                {/** fontSize 12 fits on an iPhone without wrapping **/}
                 <Text>Name: {(contactInfo.own && contactInfo.own.name) || ''}</Text>
-                <Text style={{ fontSize: 12 }}>{contactInfo.iss || ''}</Text>
+                {/** fontSize 11 fits on an iPhone without wrapping **/}
+                <Text style={{ fontSize: 11 }}>{contactInfo.iss || ''}</Text>
               </View>
             ) : (
               <View>
