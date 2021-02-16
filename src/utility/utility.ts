@@ -62,7 +62,6 @@ export const claimDescription = (claim) => {
     claim = claim.claim
   }
   let type = claim['@type']
-console.log('description for ', claim)
   if (type === "JoinAction") {
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
     eventOrganizer = eventOrganizer ? eventOrganizer : "";

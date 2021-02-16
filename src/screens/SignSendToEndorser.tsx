@@ -3,7 +3,7 @@ import * as didJwt from 'did-jwt'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Button, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
+import { ActivityIndicator, Button, FlatList, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
@@ -14,7 +14,6 @@ const debug = Debug('endorser-mobile:share-credential')
 
 export function CredentialsScreen({ navigation }) {
   const [claimStr, setClaimStr] = useState<string>('')
-  const [claimsConfirming, setClaimsConfirming] = useState<Array<String>>([])
   const [confirming, setConfirming] = useState<boolean>(false)
   const [endorserId, setEndorserId] = useState<string>(null)
   const [fetched, setFetched] = useState<boolean>(false)
@@ -26,6 +25,7 @@ export function CredentialsScreen({ navigation }) {
   const [loadingRecentClaims, setLoadingRecentClaims] = useState<boolean>(false)
   const [recentClaims, setRecentClaims] = useState<Array<any>>([])
   const [recentHiddenCount, setRecentHiddenCount] = useState<number>(0)
+  const [selectedClaimsToConfirm, setSelectedClaimsToConfirm] = useState<Array<number>>([])
 
   const endorserViewLink = (endorserId) => {
     return appStore.getState().viewServer + '/reportClaim?claimId=' + endorserId
@@ -188,6 +188,10 @@ export function CredentialsScreen({ navigation }) {
     sendToEndorserSite(vcJwt)
   }
 
+  function toggleSelectedClaim(claimIdStr) {
+    setSelectedClaimsToConfirm(record => R.set(R.lensProp(claimIdStr), !record[claimIdStr], record))
+  }
+
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
@@ -252,48 +256,58 @@ export function CredentialsScreen({ navigation }) {
                     Alert.alert("Modal has been closed.");
                   }}
                 >
-                  <ScrollView>
                   <View style={styles.centeredView}>
                     <View style={styles.modalView}>
-                      <Text style={styles.modalText}>Confirmations</Text>
-
                       <View syle={{ textAlign: 'left' }}>
-                        { recentClaims.map(claim => <Text key={claim.id}>
-                            { utility.claimDescription(claim) }
-                          </Text>
-                        )}
-                        <Text style={{ padding:5 }}>{ recentHiddenCount > 0
-                          ? '(' + recentHiddenCount + ' are hidden)'
-                          : ''
-                        }</Text>
-                        { loadingRecentClaims
-                          ? <ActivityIndicator size={'large'} />
-                          : <Button
-                              title={'Load Previous to ' + (
-                                loadedClaimsStarting
-                                ? loadedClaimsStarting.toISO().substring(5, 10).replace('-', '/')
-                                : 'Now'
-                              )}
-                              onPress={loadRecentClaims}
-                            />
-                        }
+                        <FlatList
+                          ListHeaderComponent={
+                            <Text style={styles.modalText}>Confirmations</Text>
+                          }
+                          data={recentClaims}
+                          ItemSeparatorComponent={() => <View style={styles.line} />}
+                          keyExtractor={item => item.id.toString()}
+                          renderItem={data =>
+                            <TouchableOpacity
+                              style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
+                              onPress={() => { toggleSelectedClaim(data.item.id.toString()) }}>
+                              <Text>{utility.claimDescription(data.item)}</Text>
+                            </TouchableOpacity>
+                          }
+                          ListFooterComponent={
+                            <View style={{ textAlign: 'center' }} >
+                              <Text style={{ padding:5 }}>{ recentHiddenCount > 0
+                                ? '(' + recentHiddenCount + ' are hidden)'
+                                : ''
+                              }</Text>
+                              { loadingRecentClaims
+                                ? <ActivityIndicator size={'large'} />
+                                : <Button
+                                    title={'Load Previous to ' + (
+                                      loadedClaimsStarting
+                                      ? loadedClaimsStarting.toISO().substring(5, 10).replace('-', '/')
+                                      : 'Now'
+                                    )}
+                                    onPress={loadRecentClaims}
+                                  />
+                              }
+                              <TouchableHighlight
+                                style={styles.cancelButton}
+                                onPress={unsetConfirmationsModal}
+                              >
+                                <Text>Cancel</Text>
+                              </TouchableHighlight>
+                              <TouchableHighlight
+                                style={styles.saveButton}
+                                onPress={setConfirmations}
+                              >
+                                <Text>Set</Text>
+                              </TouchableHighlight>
+                            </View>
+                          }
+                        />
                       </View>
-
-                      <TouchableHighlight
-                        style={styles.cancelButton}
-                        onPress={unsetConfirmationsModal}
-                      >
-                        <Text>Cancel</Text>
-                      </TouchableHighlight>
-                      <TouchableHighlight
-                        style={styles.saveButton}
-                        onPress={setConfirmations}
-                      >
-                        <Text>Set</Text>
-                      </TouchableHighlight>
                     </View>
                   </View>
-                  </ScrollView>
                 </Modal>
                 {
                   !claimStr ? (
@@ -378,17 +392,27 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5
   },
+  itemSelected: {
+    backgroundColor: "#88FFFF",
+  },
+  line: {
+    height: 0.8,
+    width: "100%",
+    backgroundColor: "rgba(0,0,0,0.9)"
+  },
   cancelButton: {
+    alignItems: 'center',
     backgroundColor: "#F194FF",
     borderRadius: 20,
     padding: 10,
-    elevation: 2
+    elevation: 2,
   },
   saveButton: {
+    alignItems: 'center',
     backgroundColor: "#00FF00",
     borderRadius: 20,
     padding: 10,
-    elevation: 2
+    elevation: 2,
   },
   textStyle: {
     color: "white",
