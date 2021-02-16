@@ -192,6 +192,12 @@ export function CredentialsScreen({ navigation }) {
     setSelectedClaimsToConfirm(record => R.set(R.lensProp(claimIdStr), !record[claimIdStr], record))
   }
 
+  function monthDayLoaded() {
+    return loadedClaimsStarting
+      ? loadedClaimsStarting.toISO().substring(5, 10).replace('-', '/')
+      : 'Now'
+  }
+
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
@@ -263,6 +269,9 @@ export function CredentialsScreen({ navigation }) {
                           ListHeaderComponent={
                             <Text style={styles.modalText}>Confirmations</Text>
                           }
+                          ListEmptyComponent={
+                            <Text>No visible claims found after { monthDayLoaded().toLowerCase() }.</Text>
+                          }
                           data={recentClaims}
                           ItemSeparatorComponent={() => <View style={styles.line} />}
                           keyExtractor={item => item.id.toString()}
@@ -282,11 +291,7 @@ export function CredentialsScreen({ navigation }) {
                               { loadingRecentClaims
                                 ? <ActivityIndicator size={'large'} />
                                 : <Button
-                                    title={'Load Previous to ' + (
-                                      loadedClaimsStarting
-                                      ? loadedClaimsStarting.toISO().substring(5, 10).replace('-', '/')
-                                      : 'Now'
-                                    )}
+                                    title={'Load Previous to ' + monthDayLoaded()}
                                     onPress={loadRecentClaims}
                                   />
                               }
