@@ -69,10 +69,15 @@ export function CredentialsScreen({ navigation }) {
     setLoadedClaimsStarting(null)
     setRecentClaims([])
     setRecentHiddenCount(0)
+    setSelectedClaimsToConfirm([])
   }
 
   function setConfirmations() {
-    setClaimStr(JSON.stringify('Ummmm... Unimplemented'))
+    const values = R.reject(R.isNil, Object.values(selectedClaimsToConfirm))
+    const claims = values.map(R.prop('claim'))
+    if (claims.length > 0) {
+      setClaimStr(JSON.stringify(claims))
+    }
     unsetConfirmationsModal()
   }
 
@@ -188,8 +193,13 @@ export function CredentialsScreen({ navigation }) {
     sendToEndorserSite(vcJwt)
   }
 
-  function toggleSelectedClaim(claimIdStr) {
-    setSelectedClaimsToConfirm(record => R.set(R.lensProp(claimIdStr), !record[claimIdStr], record))
+  function toggleSelectedClaim(claim) {
+    const claimIdStr = claim.id.toString()
+    const recordVal =
+      selectedClaimsToConfirm[claimIdStr]
+      ? undefined
+      : claim
+    setSelectedClaimsToConfirm(record => R.set(R.lensProp(claimIdStr), recordVal, record))
   }
 
   function monthDayLoaded() {
@@ -278,7 +288,7 @@ export function CredentialsScreen({ navigation }) {
                           renderItem={data =>
                             <TouchableOpacity
                               style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
-                              onPress={() => { toggleSelectedClaim(data.item.id.toString()) }}>
+                              onPress={() => { toggleSelectedClaim(data.item) }}>
                               <Text>{utility.claimDescription(data.item)}</Text>
                             </TouchableOpacity>
                           }
