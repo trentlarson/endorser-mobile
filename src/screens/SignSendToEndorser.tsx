@@ -73,10 +73,16 @@ export function CredentialsScreen({ navigation }) {
   }
 
   function setConfirmations() {
-    const values = R.reject(R.isNil, Object.values(selectedClaimsToConfirm))
+    const values = Object.values(selectedClaimsToConfirm)
     const claims = values.map(R.prop('claim'))
-    if (claims.length > 0) {
-      setClaimStr(JSON.stringify(claims))
+    const onlyGoodClaims = R.reject(R.isNil, claims)
+    if (onlyGoodClaims.length > 0) {
+      const fullClaim = {
+        "@context": "http://schema.org",
+        "@type": "AgreeAction",
+        "object": onlyGoodClaims
+      }
+      setClaimStr(JSON.stringify(fullClaim))
     }
     unsetConfirmationsModal()
   }
@@ -138,7 +144,7 @@ export function CredentialsScreen({ navigation }) {
   async function sendToEndorserSite(jwt: string) {
     setFetching(true)
     const endorserApiServer = appStore.getState().apiServer
-    const token = accessToken()
+    const token = await accessToken()
     fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
@@ -208,11 +214,27 @@ export function CredentialsScreen({ navigation }) {
       : 'Now'
   }
 
+  function formatClaimJson() {
+    if (claimStr) {
+      try {
+        return JSON.stringify(JSON.parse(claimStr), null, 2)
+      } catch (e) {
+        console.log('Got an error parsing JSON in claim input.', e)
+        setTimeout(() => { throw e }, 100) // show error, though they can minimize it
+        return claimStr
+      }
+    } else {
+      return ''
+    }
+  }
+
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
       const _ids = await agent.didManagerFind()
       setIdentifiers(_ids)
+      // This forces the DID to lowercase, useful for interacting with historical data.
+      //setIdentifiers(_ids.map(id => R.set(R.lensProp('did'), id.did.toLowerCase(), id)))
 
       const conn = await dbConnection
       let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
@@ -237,33 +259,6 @@ export function CredentialsScreen({ navigation }) {
                  <Text/>
               )}
               <View style={{ padding: 10 }}>
-                {
-                  fetched ? (
-                    endorserId ? (
-                      <Button
-                        title="Success!  Click here to see your claim on Endorser.ch"
-                        onPress={() => {
-                          Linking.openURL(endorserViewLink(endorserId)).catch(err =>
-                            setError(
-                              'Sorry, something went wrong trying to go to endorser.ch',
-                            ),
-                          )
-                        }}
-                      />
-                    ) : ( /* fetched && !endorserId */
-                      <Text>Got response from Endorser.ch but something went wrong.  You might check your data.  If it's good it may be an error at Endorser.ch</Text>
-                    )
-                  ) : ( /* !fetched */
-                    fetching ? (
-                      <View>
-                        <Text>Saving to Endorser.ch server...</Text>
-                        <ActivityIndicator size={'large'} />
-                      </View>
-                    ) : ( /* !fetched && !fetching */
-                      <Text/>
-                    )
-                  )
-                }
                 <Modal
                   animationType="slide"
                   transparent={true}
@@ -325,22 +320,52 @@ export function CredentialsScreen({ navigation }) {
                   </View>
                 </Modal>
                 {
-                  !claimStr ? (
-                    <View>
-                      <Text>What are you claiming?</Text>
+                  fetched ? (
+                    endorserId ? (
                       <Button
-                        title={'Attendance at ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' Meeting'}
-                        onPress={setClaimToAttendance}
-                      />
-                      <Button
-                        title={'Confirmation of Other Claims'}
+                        title="Success!  Click here to see your claim on Endorser.ch"
                         onPress={() => {
-                          setConfirming(true)
-                          loadRecentClaims()
+                          Linking.openURL(endorserViewLink(endorserId)).catch(err =>
+                            setError(
+                              'Sorry, something went wrong trying to go to endorser.ch',
+                            ),
+                          )
                         }}
                       />
-                    </View>
-                  ) : ( /* claimStr */
+                    ) : ( /* fetched && !endorserId */
+                      <Text>Got response from Endorser.ch but something went wrong.  You might check your data.  If it's good it may be an error at Endorser.ch</Text>
+                    )
+                  ) : ( /* !fetched */
+                    fetching ? (
+                      <View>
+                        <Text>Saving to Endorser.ch server...</Text>
+                        <ActivityIndicator size={'large'} />
+                      </View>
+                    ) : ( /* !fetched && !fetching */
+
+                      !claimStr ? (
+                        <View>
+                          <Text>What are you claiming?</Text>
+                          <Button
+                            title={'Attendance at ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' Meeting'}
+                            onPress={setClaimToAttendance}
+                          />
+                          <Button
+                            title={'Confirmation of Other Claims'}
+                            onPress={() => {
+                              setConfirming(true)
+                              loadRecentClaims()
+                            }}
+                          />
+                        </View>
+                      ) : ( /* !fetched && !fetching && claimStr */
+                        <View/>
+                      )
+                    )
+                  )
+                }
+                {
+                  claimStr ? (
                     <View>
                       <Button
                         title={'Sign & Store'}
@@ -356,22 +381,27 @@ export function CredentialsScreen({ navigation }) {
                         style={{ borderWidth: 1, height: 300 }}
                         onChangeText={setClaimStr}
                       >
-                        { JSON.stringify(JSON.parse(claimStr), null, 2) }
+                        { formatClaimJson() }
                       </TextInput>
-                      { jwt ? (
-                        <View>
-                          <Text>JWT</Text>
-                          <TextInput
-                            multiline={true}
-                            style={{ borderWidth: 1, height: 300 }}
-                          >
-                            { jwt }
-                          </TextInput>
-                        </View>
-                      ) : ( /* claimStr && !jwt */
-                        <Text/>
-                      )}
                     </View>
+                  ) : (
+                    <View/>
+                  )
+                }
+                {
+                  jwt ? (
+                    <View>
+                      <View style={{ marginTop: 800 }} />
+                      <Text>JWT</Text>
+                      <TextInput
+                        multiline={true}
+                        style={{ borderWidth: 1, height: 300 }}
+                      >
+                        { jwt }
+                      </TextInput>
+                    </View>
+                  ) : ( /* !jwt */
+                    <Text/>
                   )
                 }
               </View>
