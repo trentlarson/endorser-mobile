@@ -46,6 +46,15 @@ export function ContactsScreen({ navigation, route }) {
     loadContacts()
   }
 
+  const deleteContact = async () => {
+    if (allContacts.length > 0) {
+      const last = allContacts[allContacts.length - 1]
+      const conn = await dbConnection
+      await conn.manager.delete(Contact, { 'did' : last.did })
+      loadContacts()
+    }
+  }
+
   useFocusEffect(
     React.useCallback(() => {
       if (appStore.getState().contacts && appStore.getState().contacts.length === 0) {
@@ -98,10 +107,20 @@ export function ContactsScreen({ navigation, route }) {
             { allContactText() }
           </TextInput>
           { allContacts.length > 0 ? (
-            <Button
-              title="Copy to Clipboard"
-              onPress={copyToClipboard}
-            />
+            <View>
+              <Button
+                title="Copy to Clipboard"
+                onPress={copyToClipboard}
+              />
+              {/** good for tests, bad for users
+              <View style={{ marginTop: 200 }}>
+                <Button
+                  title="Delete Last Contact"
+                  onPress={deleteContact}
+                />
+              </View>
+              **/}
+            </View>
           ) : (
             <Text></Text>
           )}

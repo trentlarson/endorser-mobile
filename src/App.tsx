@@ -263,7 +263,7 @@ function SettingsScreen({ navigation }) {
                 </View>
               })
             ) : (
-              <View style={{ alignItems: 'baseline', marginTop: 10 }}>
+              <View style={{ marginTop: 10 }}>
                 <Text>There are no identifiers.</Text>
                 <Button
                   title={'Create Identifier'}
@@ -271,8 +271,6 @@ function SettingsScreen({ navigation }) {
                 />
               </View>
             )}
-          </View>
-          <View style={{ alignItems: 'baseline', marginBottom: 50, marginTop: 10 }}>
             { (!identifiers || identifiers.length == 0) &&
               <Button
                 title="Import Identifier"
@@ -280,19 +278,24 @@ function SettingsScreen({ navigation }) {
               />
             }
             { identifiers && identifiers.length > 0 &&
-              <Button
-                title="Export Identifier"
-                onPress={() => navigation.navigate('Export Identifier')}
-              />
+              <View style={{ marginTop: 200 }}>
+                <Button
+                  title="Export Identifier"
+                  onPress={() => navigation.navigate('Export Identifier')}
+                />
+              </View>
             }
             {/** good for tests, bad for users
+            <View style={{ marginTop: 200 }}>
+              <Button title="Create ID"
+                onPress={() => createAndStoreIdentifier().then(setNewId)}
+              />
+              <Button title="Delete Last ID" onPress={deleteIdentifier} />
+            </View>
             **/}
-            <Button title="Delete ID" onPress={deleteIdentifier} />
-            <Button title="Create ID"
-              onPress={() => createAndStoreIdentifier().then(setNewId)}
-            />
           </View>
           <View>
+            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Other</Text>
             <Text>Endorser API Server</Text>
             <TextInput
               style={{ borderWidth: 1 }}
@@ -450,13 +453,14 @@ function HelpScreen() {
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>Why do I see warnings about a missing backup?</Text>
-          <Text>Without a backup, this identifier is gone forever if you lose this device, and with it you lose the ability to verify yourself and your claims and your credentials. Wipe your data ASAP (after exporting your contacts) and create a new one that you can start using to build reputation.</Text>
+          <Text>Without a backup, this identifier is gone forever if you lose this device, and with it you lose the ability to verify yourself and your claims and your credentials. Wipe your data ASAP (after exporting your contacts) and create a new one that you can safely use to build reputation.</Text>
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I generate a different identifier?</Text>
           <Text>Note that this will erase the identifier (under Settings) and contacts (under... Contacts), so we recommend you export those first.</Text>
           <Text>- On Android, you can go to the Storage in App Info and clear it. Remember to export your data!</Text>
           <Text>- On iOS, the easiest way is to uninstall and reinstall the app. Remember to export your data!</Text>
+          <Text>(If you expect better functionality: yes, it's on the radar.)</Text>
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>This is stupid (or fantastic). Who do I blame?</Text>
