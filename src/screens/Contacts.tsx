@@ -1,19 +1,24 @@
 import { classToPlain } from 'class-transformer'
+import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
+import { ActivityIndicator, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import Clipboard from '@react-native-community/clipboard';
 import { useFocusEffect } from '@react-navigation/native';
 import QRCodeScanner from 'react-native-qrcode-scanner'
 import { useSelector } from 'react-redux'
 
-import { dbConnection } from '../veramo/setup.ts'
-import { appSlice, appStore } from '../veramo/appSlice.ts'
 import { Contact } from '../entity/contact'
+import * as utility from '../utility/utility'
+import { appSlice, appStore } from '../veramo/appSlice'
+import { agent, dbConnection } from '../veramo/setup'
 
 export function ContactsScreen({ navigation, route }) {
 
+  const [canSeeMe, setCanSeeMe] = useState<Record<string,boolean>>({})
   const [contactDid, setContactDid] = useState<string>()
   const [contactName, setContactName] = useState<string>()
+  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
+  const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
 
   const allContacts = useSelector((state) => state.contacts)
 
@@ -46,6 +51,66 @@ export function ContactsScreen({ navigation, route }) {
     loadContacts()
   }
 
+  const checkVisibility = async (did) => {
+    setLoadingAction(R.set(R.lensProp(did), true, loadingAction))
+    const endorserApiServer = appStore.getState().apiServer
+    const token = await utility.accessToken(identifiers[0])
+    fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + did, {
+      headers: {
+        "Content-Type": "application/json",
+        "Uport-Push-Token": token,
+      }
+    }).then(response => {
+      return response.json()
+      if (response.status !== 200) {
+        throw Error('There was an error from the server trying to set you as visible.')
+      }
+    }).then(result => {
+      setLoadingAction(R.set(R.lensProp(did), false, loadingAction))
+      setCanSeeMe(R.set(R.lensProp(did), result, canSeeMe))
+    })
+  }
+
+  const allowToSeeMe = async (did) => {
+    setLoadingAction(R.set(R.lensProp(did), true, loadingAction))
+    const endorserApiServer = appStore.getState().apiServer
+    const token = await utility.accessToken(identifiers[0])
+    fetch(endorserApiServer + '/api/report/canSeeMe', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        "Uport-Push-Token": token,
+      },
+      body: JSON.stringify({ did: did })
+    }).then(response => {
+      setLoadingAction(R.set(R.lensProp(did), false, loadingAction))
+      setCanSeeMe(R.omit([did], canSeeMe))
+      if (response.status !== 200) {
+        throw Error('There was an error from the server trying to set you as visible.')
+      }
+    })
+  }
+
+  const disallowToSeeMe = async (did) => {
+    setLoadingAction(R.set(R.lensProp(did), true, loadingAction))
+    const endorserApiServer = appStore.getState().apiServer
+    const token = await utility.accessToken(identifiers[0])
+    fetch(endorserApiServer + '/api/report/cannotSeeMe', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        "Uport-Push-Token": token,
+      },
+      body: JSON.stringify({ did: did })
+    }).then(response => {
+      setLoadingAction(R.set(R.lensProp(did), false, loadingAction))
+      setCanSeeMe(R.omit([did], canSeeMe))
+      if (response.status !== 200) {
+        throw Error('There was an error from the server trying to hide you.')
+      }
+    })
+  }
+
   const deleteContact = async () => {
     if (allContacts.length > 0) {
       const last = allContacts[allContacts.length - 1]
@@ -57,6 +122,9 @@ export function ContactsScreen({ navigation, route }) {
 
   useFocusEffect(
     React.useCallback(() => {
+
+      agent.didManagerFind().then(ids => setIdentifiers(ids))
+
       if (appStore.getState().contacts && appStore.getState().contacts.length === 0) {
         loadContacts()
       }
@@ -65,7 +133,6 @@ export function ContactsScreen({ navigation, route }) {
 
   return (
     <SafeAreaView>
-      <ScrollView>
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Contacts</Text>
           <View style={styles.centeredView}>
@@ -99,13 +166,46 @@ export function ContactsScreen({ navigation, route }) {
           </View>
         </View>
         <View style={{ padding: 20 }}>
-          <TextInput
-            multiline={true}
-            editable={false}
-            style={{ borderWidth: (allContacts.length === 0 ? 0 : 1), fontSize: 11 }}
-          >
-            { allContactText() }
-          </TextInput>
+          <FlatList
+            style={{ borderWidth: allContacts.length === 0 ? 0 : 1 }}
+            data={allContacts}
+            keyExtractor={contact => contact.did}
+            renderItem={data =>
+              <View style={{ padding: 20 }}>
+                <Text style={{ fontSize: 11 }}>
+                  {data.item.name + '\n' + data.item.did}
+                </Text>
+                {
+                  loadingAction[data.item.did]
+                  ? <ActivityIndicator size={'large'} />
+                  : <View style={styles.centeredView}>
+                    {
+                      R.isNil(canSeeMe[data.item.did])
+                      ? <Button style={{ textAlign: 'center', fontSize: 11 }}
+                        title="Can See Me?"
+                        onPress={() => {checkVisibility(data.item.did)}}
+                      />
+                      : <Text>{
+                        canSeeMe[data.item.did]
+                        ? `Yes, ${data.item.name} can see you.`
+                        : `No, ${data.item.name} cannot see you.`
+                      }
+                      </Text>
+                    }
+                    <Button style={{ textAlign: 'center', fontSize: 11 }}
+                      title="Allow to See Me"
+                      onPress={() => {allowToSeeMe(data.item.did)}}
+                    />
+                    <Button style={{ textAlign: 'center', fontSize: 11 }}
+                      title="Hide Me"
+                      onPress={() => {disallowToSeeMe(data.item.did)}}
+                    />
+                  </View>
+                }
+              </View>
+            }
+            ItemSeparatorComponent={() => <View style={styles.line}/>}
+          />
           { allContacts.length > 0 ? (
             <View>
               <Button
@@ -125,7 +225,6 @@ export function ContactsScreen({ navigation, route }) {
             <Text></Text>
           )}
         </View>
-      </ScrollView>
     </SafeAreaView>
   )
 }
@@ -207,7 +306,7 @@ export function ContactImportScreen({ navigation }) {
             ) : (
               <View>
                 <QRCodeScanner onBarCodeRead={onSuccessfulQR} />
-                {/**
+                {/** good for tests, bad for users
                 <Button
                   title='Fake It'
                   onPress={() => onSuccessfulQR({data:JSON.stringify({
@@ -271,5 +370,10 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: "center"
-  }
+  },
+  line: {
+    height: 0.8,
+    width: "100%",
+    backgroundColor: "rgba(0,0,0,0.9)"
+  },
 })

@@ -87,18 +87,6 @@ export function CredentialsScreen({ navigation }) {
     unsetConfirmationsModal()
   }
 
-  async function accessToken() {
-    const did: string = identifiers[0].did
-    const signer = didJwt.SimpleSigner(identifiers[0].keys[0].privateKeyHex)
-
-    const nowEpoch = Math.floor(Date.now() / 1000)
-    const tomorrowEpoch = nowEpoch + (60 * 60 * 24)
-
-    const uportTokenPayload = { exp: tomorrowEpoch, iat: nowEpoch, iss: did }
-    const jwt: string = await didJwt.createJWT(uportTokenPayload, { issuer: did, signer })
-    return jwt
-  }
-
   async function loadRecentClaims() {
     setLoadingRecentClaims(true)
 
@@ -114,7 +102,7 @@ export function CredentialsScreen({ navigation }) {
     let loadMoreStartingStr = loadMoreStarting.toISO()
 
     const endorserApiServer = appStore.getState().apiServer
-    const token = await accessToken()
+    const token = await accessToken(identifiers[0])
     fetch(endorserApiServer + '/api/claim/?issuedAt_greaterThanOrEqualTo=' + loadMoreStartingStr + "&issuedAt_lessThan=" + loadMoreEndingStr + "&excludeConfirmations=true", {
       headers: {
         "Content-Type": "application/json",
@@ -144,7 +132,7 @@ export function CredentialsScreen({ navigation }) {
   async function sendToEndorserSite(jwt: string) {
     setFetching(true)
     const endorserApiServer = appStore.getState().apiServer
-    const token = await accessToken()
+    const token = await accessToken(identifiers[0])
     fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
@@ -233,8 +221,6 @@ export function CredentialsScreen({ navigation }) {
     const getIdentifiers = async () => {
       const _ids = await agent.didManagerFind()
       setIdentifiers(_ids)
-      // This forces the DID to lowercase, useful for interacting with historical data.
-      //setIdentifiers(_ids.map(id => R.set(R.lensProp('did'), id.did.toLowerCase(), id)))
 
       const conn = await dbConnection
       let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)

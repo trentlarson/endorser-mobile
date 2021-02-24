@@ -1,3 +1,4 @@
+import * as didJwt from 'did-jwt'
 
 // This is used to check for hidden info.
 // See https://github.com/trentlarson/endorser-ch/blob/0cb626f803028e7d9c67f095858a9fc8542e3dbd/server/api/services/util.js#L6
@@ -78,4 +79,16 @@ export const claimDescription = (claim) => {
   } else {
     return JSON.stringify(claim)
   }
+}
+
+export const accessToken = async (identifier) => {
+  const did: string = identifier.did
+  const signer = didJwt.SimpleSigner(identifier.keys[0].privateKeyHex)
+
+  const nowEpoch = Math.floor(Date.now() / 1000)
+  const tomorrowEpoch = nowEpoch + (60 * 60 * 24)
+
+  const uportTokenPayload = { exp: tomorrowEpoch, iat: nowEpoch, iss: did }
+  const jwt: string = await didJwt.createJWT(uportTokenPayload, { issuer: did, signer })
+  return jwt
 }
