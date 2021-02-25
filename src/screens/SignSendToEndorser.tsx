@@ -102,7 +102,7 @@ export function CredentialsScreen({ navigation }) {
     let loadMoreStartingStr = loadMoreStarting.toISO()
 
     const endorserApiServer = appStore.getState().apiServer
-    const token = await accessToken(identifiers[0])
+    const token = await utility.accessToken(identifiers[0])
     fetch(endorserApiServer + '/api/claim/?issuedAt_greaterThanOrEqualTo=' + loadMoreStartingStr + "&issuedAt_lessThan=" + loadMoreEndingStr + "&excludeConfirmations=true", {
       headers: {
         "Content-Type": "application/json",
@@ -132,7 +132,7 @@ export function CredentialsScreen({ navigation }) {
   async function sendToEndorserSite(jwt: string) {
     setFetching(true)
     const endorserApiServer = appStore.getState().apiServer
-    const token = await accessToken(identifiers[0])
+    const token = await utility.accessToken(identifiers[0])
     fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
