@@ -203,6 +203,7 @@ function HomeScreen({ navigation }) {
 function SettingsScreen({ navigation }) {
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
+  const [name, setName] = useState<string>('')
 
   const deleteIdentifier = async () => {
     if (identifiers.length > 0) {
@@ -223,6 +224,12 @@ function SettingsScreen({ navigation }) {
     }
   }
 
+  const setNewName = async (name) => {
+    const conn = await dbConnection
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { name: name })
+    setName(name)
+  }
+
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
@@ -233,6 +240,9 @@ function SettingsScreen({ navigation }) {
       if (settings?.mnemonic) {
         setHasMnemonic(true)
       }
+      if (settings?.name) {
+        setName(settings?.name)
+      }
     }
     getIdentifiers()
   }, []) // Why does this loop infinitely with any variable, even with classToPlain(identifiers) that doesn't change?
@@ -241,8 +251,16 @@ function SettingsScreen({ navigation }) {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Identifier</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Info</Text>
           <View style={{ marginBottom: 50, marginTop: 20 }}>
+            <Text>Name</Text>
+            <TextInput
+              value={name ? name : ''}
+              onChangeText={setNewName}
+              editable
+              style={{ borderWidth: 1 }}
+            />
+            <Text style={{ marginTop: 20 }}>Identifier</Text>
             {identifiers?.length > 0 ? (
               identifiers.map((id: Identifier, index: number) => {
                 const publicEncKey = Buffer.from(id.keys[0].publicKeyHex, 'hex').toString('base64')
@@ -250,6 +268,7 @@ function SettingsScreen({ navigation }) {
                 const shareId = {
                   iss: id.did,
                   own: {
+                    name,
                     publicEncKey,
                   },
                 }
@@ -265,7 +284,7 @@ function SettingsScreen({ navigation }) {
                   ) : (
                     <Text></Text>
                   )}
-                  <Text style={{ marginBottom: 5 }}>Your info for sharing:</Text>
+                  <Text style={{ marginBottom: 5 }}>Your Info</Text>
                   <QRCode value={JSON.stringify(shareId)} size={300} />
                 </View>
               })
@@ -285,7 +304,7 @@ function SettingsScreen({ navigation }) {
               />
             }
             { identifiers && identifiers.length > 0 &&
-              <View style={{ marginTop: 200 }}>
+              <View style={{ marginTop: 100 }}>
                 <Button
                   title="Export Identifier"
                   onPress={() => navigation.navigate('Export Identifier')}

@@ -23,4 +23,8 @@ export class Settings extends BaseEntity {
   @Column('text', { nullable: true })
   //@ts-ignore
   mnemonic: string
+
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  name: string
 }
