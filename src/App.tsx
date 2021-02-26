@@ -76,7 +76,7 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 }
 
 // Import and existing ID
-const importAndStoreIdentifier = async (mnemonic: string) => {
+const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) => {
 
   /**
   // an approach I pieced together
@@ -117,7 +117,10 @@ const importAndStoreIdentifier = async (mnemonic: string) => {
   const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
   const privateHex = rootNode.privateKey.substring(2)
   const publicHex = rootNode.privateKey.substring(2)
-  const address = rootNode.address
+  let address = rootNode.address
+  if (toLowercase) {
+    address = address.toLowerCase()
+  }
 
   const newId = newIdentifier(address, publicHex, privateHex)
 
@@ -393,7 +396,7 @@ function ImportIdentityScreen({ navigation }) {
   }, [])
 
   const importIdentifier = async () => {
-    importAndStoreIdentifier(mnemonic).then(newIdentifier => {
+    importAndStoreIdentifier(mnemonic, makeLowercase).then(newIdentifier => {
       setIdentifier(newIdentifier)
       setIdChanged(true)
 
