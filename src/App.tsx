@@ -11,8 +11,10 @@ import * as didJwt from 'did-jwt'
 import { HDNode } from '@ethersproject/hdnode'
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
-import Clipboard from '@react-native-community/clipboard';
+import Clipboard from '@react-native-community/clipboard'
+import { CheckBox } from 'react-native-elements'
 import QRCode from 'react-native-qrcode-svg'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { NavigationContainer, useFocusEffect } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { Provider } from 'react-redux';
@@ -154,18 +156,20 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <Provider store={ appStore }>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name="Community Endorser" component={HomeScreen} />
-          <Stack.Screen name="ContactImport" component={ContactImportScreen} />
-          <Stack.Screen name="Contacts" component={ContactsScreen} />
-          <Stack.Screen name="Credentials" component={CredentialsScreen} />
-          <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
-          <Stack.Screen name="Help" component={HelpScreen} />
-          <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
-          <Stack.Screen name="Settings" component={SettingsScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator>
+            <Stack.Screen name="Community Endorser" component={HomeScreen} />
+            <Stack.Screen name="ContactImport" component={ContactImportScreen} />
+            <Stack.Screen name="Contacts" component={ContactsScreen} />
+            <Stack.Screen name="Credentials" component={CredentialsScreen} />
+            <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
+            <Stack.Screen name="Help" component={HelpScreen} />
+            <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
     </Provider>
   )
 }
@@ -375,6 +379,7 @@ function ExportIdentityScreen({ navigation }) {
 
 function ImportIdentityScreen({ navigation }) {
   const [identifier, setIdentifier] = useState<Identifier>()
+  const [makeLowercase, setMakeLowercase] = useState<boolean>(false)
   const [mnemonic, setMnemonic] = useState<String>('')
   const [idChanged, setIdChanged] = useState<boolean>(false)
 
@@ -419,6 +424,11 @@ function ImportIdentityScreen({ navigation }) {
                     onChangeText={setMnemonic}
                   >
                   </TextInput>
+                  <CheckBox
+                    title='Convert to Lowercase'
+                    checked={makeLowercase}
+                    onPress={() => setMakeLowercase(!makeLowercase)}
+                  />
                   <Button
                     title={'Click to import from mnemonic'}
                     onPress={importIdentifier}
@@ -453,7 +463,7 @@ function HelpScreen() {
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>Why do I see warnings about a missing backup?</Text>
-          <Text>Without a backup, this identifier is gone forever if you lose this device, and with it you lose the ability to verify yourself and your claims and your credentials. Wipe your data ASAP (after exporting your contacts) and create a new one that you can safely use to build reputation.</Text>
+          <Text>Without a backup, this identifier is gone forever if you lose this device, and with it you lose the ability to verify yourself and your claims and your credentials. We beg of you: wipe your data now (after exporting your contacts) and create a new one that you can safely use to build reputation.</Text>
         </View>
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I generate a different identifier?</Text>
