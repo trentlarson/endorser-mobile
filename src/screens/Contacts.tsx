@@ -14,13 +14,27 @@ import { agent, dbConnection } from '../veramo/setup'
 
 export function ContactsScreen({ navigation, route }) {
 
-  const [canSeeMe, setCanSeeMe] = useState<Record<string,boolean>>({})
   const [contactDid, setContactDid] = useState<string>()
   const [contactName, setContactName] = useState<string>()
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
 
   const allContacts = useSelector((state) => state.contacts)
+
+  const setContactInState = async (contact) => {
+    const newContactEntity = new Contact()
+    {
+      // fill in with contact info
+      const keys = Object.keys(contact)
+      for (key of keys) {
+        newContactEntity[key] = contact[key]
+      }
+    }
+    const conn = await dbConnection
+    await conn.manager.save(newContactEntity)
+
+    appStore.dispatch(appSlice.actions.setContact(classToPlain(contact)))
+  }
 
   const loadContacts = async () => {
     const conn = await dbConnection
@@ -45,17 +59,18 @@ export function ContactsScreen({ navigation, route }) {
     const contact = new Contact()
     contact.did = contactDid
     contact.name = contactName
+    //the seesMe value is unknown
 
     const conn = await dbConnection
     let newContact = await conn.manager.save(contact)
     loadContacts()
   }
 
-  const checkVisibility = async (did) => {
-    setLoadingAction(R.set(R.lensProp(did), true, loadingAction))
+  const checkVisibility = async (contact) => {
+    setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
-    fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + did, {
+    fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + contact.did, {
       headers: {
         "Content-Type": "application/json",
         "Uport-Push-Token": token,
@@ -66,13 +81,16 @@ export function ContactsScreen({ navigation, route }) {
         throw Error('There was an error from the server trying to set you as visible.')
       }
     }).then(result => {
-      setLoadingAction(R.set(R.lensProp(did), false, loadingAction))
-      setCanSeeMe(R.set(R.lensProp(did), result, canSeeMe))
+      setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
+
+      const newContact = R.clone(contact)
+      newContact.seesMe = result
+      setContactInState(newContact)
     })
   }
 
-  const allowToSeeMe = async (did) => {
-    setLoadingAction(R.set(R.lensProp(did), true, loadingAction))
+  const allowToSeeMe = async (contact) => {
+    setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
     fetch(endorserApiServer + '/api/report/canSeeMe', {
@@ -81,18 +99,21 @@ export function ContactsScreen({ navigation, route }) {
         "Content-Type": "application/json",
         "Uport-Push-Token": token,
       },
-      body: JSON.stringify({ did: did })
+      body: JSON.stringify({ did: contact.did })
     }).then(response => {
-      setLoadingAction(R.set(R.lensProp(did), false, loadingAction))
-      setCanSeeMe(R.omit([did], canSeeMe))
+      setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
       if (response.status !== 200) {
         throw Error('There was an error from the server trying to set you as visible.')
+      } else {
+        const newContact = R.clone(contact)
+        newContact.seesMe = true
+        setContactInState(newContact)
       }
     })
   }
 
-  const disallowToSeeMe = async (did) => {
-    setLoadingAction(R.set(R.lensProp(did), true, loadingAction))
+  const disallowToSeeMe = async (contact) => {
+    setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
     fetch(endorserApiServer + '/api/report/cannotSeeMe', {
@@ -101,12 +122,15 @@ export function ContactsScreen({ navigation, route }) {
         "Content-Type": "application/json",
         "Uport-Push-Token": token,
       },
-      body: JSON.stringify({ did: did })
+      body: JSON.stringify({ did: contact.did })
     }).then(response => {
-      setLoadingAction(R.set(R.lensProp(did), false, loadingAction))
-      setCanSeeMe(R.omit([did], canSeeMe))
+      setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
       if (response.status !== 200) {
         throw Error('There was an error from the server trying to hide you.')
+      } else {
+        const newContact = R.clone(contact)
+        newContact.seesMe = false
+        setContactInState(newContact)
       }
     })
   }
@@ -180,26 +204,28 @@ export function ContactsScreen({ navigation, route }) {
                   ? <ActivityIndicator size={'large'} />
                   : <View style={styles.centeredView}>
                     {
-                      R.isNil(canSeeMe[data.item.did])
+                      R.isNil(data.item.seesMe)
                       ? <Button style={{ textAlign: 'center', fontSize: 11 }}
-                        title="Can See Me?"
-                        onPress={() => {checkVisibility(data.item.did)}}
+                        title={`Can ${data.item.name} See Me?`}
+                        onPress={() => {checkVisibility(data.item)}}
                       />
-                      : <Text>{
-                        canSeeMe[data.item.did]
-                        ? `Yes, ${data.item.name} can see you.`
-                        : `No, ${data.item.name} cannot see you.`
-                      }
-                      </Text>
+                      : <View>
+                        <Text>{
+                          `${data.item.name} can${data.item.seesMe ?'' : 'not'} see you.`
+                        }</Text>
+                        {
+                          data.item.seesMe
+                          ? <Button style={{ textAlign: 'center', fontSize: 11 }}
+                            title="(Hide Me)"
+                            onPress={() => {disallowToSeeMe(data.item)}}
+                          />
+                          : <Button style={{ textAlign: 'center', fontSize: 11 }}
+                            title="(Unhide Me)"
+                            onPress={() => {allowToSeeMe(data.item)}}
+                          />
+                        }
+                      </View>
                     }
-                    <Button style={{ textAlign: 'center', fontSize: 11 }}
-                      title="Allow to See Me"
-                      onPress={() => {allowToSeeMe(data.item.did)}}
-                    />
-                    <Button style={{ textAlign: 'center', fontSize: 11 }}
-                      title="Hide Me"
-                      onPress={() => {disallowToSeeMe(data.item.did)}}
-                    />
                   </View>
                 }
               </View>

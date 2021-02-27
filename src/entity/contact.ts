@@ -10,4 +10,11 @@ export class Contact extends BaseEntity {
   @Column('text', { nullable: true })
   //@ts-ignore
   name: string
+
+  /**
+   * Cache of whether they are able to see this person on the server.
+   */
+  @Column('boolean', { nullable: true })
+  //@ts-ignore
+  seesMe: boolean
 }
