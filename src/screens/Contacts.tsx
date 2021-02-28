@@ -205,25 +205,29 @@ export function ContactsScreen({ navigation, route }) {
                   : <View style={styles.centeredView}>
                     {
                       R.isNil(data.item.seesMe)
-                      ? <Button style={{ textAlign: 'center', fontSize: 11 }}
+                      ? <Button style={{ textAlign: 'center' }}
                         title={`Can ${data.item.name} See Me?`}
                         onPress={() => {checkVisibility(data.item)}}
                       />
                       : <View>
-                        <Text>{
+                        <Text style={{ textAlign: 'center' }}>{
                           `${data.item.name} can${data.item.seesMe ?'' : 'not'} see you.`
                         }</Text>
                         {
                           data.item.seesMe
-                          ? <Button style={{ textAlign: 'center', fontSize: 11 }}
+                          ? <Button
                             title="(Hide Me)"
                             onPress={() => {disallowToSeeMe(data.item)}}
                           />
-                          : <Button style={{ textAlign: 'center', fontSize: 11 }}
+                          : <Button
                             title="(Unhide Me)"
                             onPress={() => {allowToSeeMe(data.item)}}
                           />
                         }
+                        <Button
+                          title={`(Double-check)`}
+                          onPress={() => {checkVisibility(data.item)}}
+                        />
                       </View>
                     }
                   </View>
