@@ -3,11 +3,11 @@ import * as didJwt from 'did-jwt'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Button, FlatList, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Button, FlatList, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
-import { appStore } from '../veramo/appSlice'
+import { appSlice, appStore } from '../veramo/appSlice'
 import { agent, dbConnection } from '../veramo/setup'
 
 const debug = Debug('endorser-mobile:share-credential')
@@ -74,17 +74,21 @@ export function CredentialsScreen({ navigation }) {
 
   function setConfirmations() {
     const values = Object.values(selectedClaimsToConfirm)
-    const claims = values.map(R.prop('claim'))
-    const onlyGoodClaims = R.reject(R.isNil, claims)
-    if (onlyGoodClaims.length > 0) {
-      const fullClaim = {
-        "@context": "http://schema.org",
-        "@type": "AgreeAction",
-        "object": onlyGoodClaims
+    if (values.length === 0) {
+      Alert.alert("Select a Claim", "In order to confirm, you must select at least one claim.")
+    } else {
+      const claims = values.map(R.prop('claim'))
+      const onlyGoodClaims = R.reject(R.isNil, claims)
+      if (onlyGoodClaims.length > 0) {
+        const fullClaim = {
+          "@context": "http://schema.org",
+          "@type": "AgreeAction",
+          "object": onlyGoodClaims
+        }
+        setClaimStr(JSON.stringify(fullClaim))
       }
-      setClaimStr(JSON.stringify(fullClaim))
+      unsetConfirmationsModal()
     }
-    unsetConfirmationsModal()
   }
 
   async function loadRecentClaims() {
@@ -110,9 +114,9 @@ export function CredentialsScreen({ navigation }) {
       }})
       .then(response => response.json())
       .then(async (data) => {
-        const filteredData = R.reject(utility.containsHiddenDid, data)
-        setRecentClaims(R.concat(recentClaims, filteredData))
-        setRecentHiddenCount(count => count + data.length - filteredData.length)
+        const dataWithoutHidden = R.reject(utility.containsHiddenDid, data)
+        setRecentClaims(R.concat(recentClaims, dataWithoutHidden))
+        setRecentHiddenCount(count => count + data.length - dataWithoutHidden.length)
         setLoadedClaimsStarting(loadMoreStarting)
       })
       .finally(() => setLoadingRecentClaims(false))
@@ -270,7 +274,7 @@ export function CredentialsScreen({ navigation }) {
                             <TouchableOpacity
                               style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
                               onPress={() => { toggleSelectedClaim(data.item) }}>
-                              <Text>{utility.claimDescription(data.item)}</Text>
+                              <Text>{utility.claimDescription(data.item, identifiers, appStore.getState().contacts || [])}</Text>
                             </TouchableOpacity>
                           }
                           ListFooterComponent={
@@ -316,6 +320,7 @@ export function CredentialsScreen({ navigation }) {
                               'Sorry, something went wrong trying to go to endorser.ch',
                             ),
                           )
+                          setFetched(false)
                         }}
                       />
                     ) : ( /* fetched && !endorserId */
@@ -331,7 +336,7 @@ export function CredentialsScreen({ navigation }) {
 
                       !claimStr ? (
                         <View>
-                          <Text>What are you claiming?</Text>
+                          <Text>What do you want to assert?</Text>
                           <Button
                             title={'Attendance at ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' Meeting'}
                             onPress={setClaimToAttendance}
@@ -341,6 +346,7 @@ export function CredentialsScreen({ navigation }) {
                             onPress={() => {
                               setConfirming(true)
                               loadRecentClaims()
+                              utility.loadContacts(appSlice, appStore, dbConnection)
                             }}
                           />
                         </View>

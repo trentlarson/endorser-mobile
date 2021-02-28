@@ -19,7 +19,7 @@ export function ContactsScreen({ navigation, route }) {
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
 
-  const allContacts = useSelector((state) => state.contacts)
+  const allContacts = useSelector((state) => state.contacts || [])
 
   const setContactInState = async (contact) => {
     const newContactEntity = new Contact()
@@ -36,14 +36,8 @@ export function ContactsScreen({ navigation, route }) {
     appStore.dispatch(appSlice.actions.setContact(classToPlain(contact)))
   }
 
-  const loadContacts = async () => {
-    const conn = await dbConnection
-    const foundContacts = await conn.manager.find(Contact)
-    appStore.dispatch(appSlice.actions.setContacts(classToPlain(foundContacts)))
-  }
-
   const allContactText = () => (
-    allContacts?.map((contact) => (
+    allContacts.map((contact) => (
       `
       ${contact.name}
       ${contact.did}
@@ -63,7 +57,7 @@ export function ContactsScreen({ navigation, route }) {
 
     const conn = await dbConnection
     let newContact = await conn.manager.save(contact)
-    loadContacts()
+    utility.loadContacts(appSlice, appStore, dbConnection)
   }
 
   const checkVisibility = async (contact) => {
@@ -140,7 +134,7 @@ export function ContactsScreen({ navigation, route }) {
       const last = allContacts[allContacts.length - 1]
       const conn = await dbConnection
       await conn.manager.delete(Contact, { 'did' : last.did })
-      loadContacts()
+      utility.loadContacts(appSlice, appStore, dbConnection)
     }
   }
 
@@ -149,9 +143,8 @@ export function ContactsScreen({ navigation, route }) {
 
       agent.didManagerFind().then(ids => setIdentifiers(ids))
 
-      if (appStore.getState().contacts && appStore.getState().contacts.length === 0) {
-        loadContacts()
-      }
+      utility.loadContacts(appSlice, appStore, dbConnection)
+
     }, [appStore.getState().contacts])
   )
 
@@ -205,10 +198,16 @@ export function ContactsScreen({ navigation, route }) {
                   : <View style={styles.centeredView}>
                     {
                       R.isNil(data.item.seesMe)
-                      ? <Button style={{ textAlign: 'center' }}
-                        title={`Can ${data.item.name} See Me?`}
-                        onPress={() => {checkVisibility(data.item)}}
-                      />
+                      ? <View>
+                        <Button style={{ textAlign: 'center' }}
+                          title={`Can ${data.item.name} See Me?`}
+                          onPress={() => {checkVisibility(data.item)}}
+                        />
+                        <Button
+                          title="Make Me Visible"
+                          onPress={() => {allowToSeeMe(data.item)}}
+                        />
+                      </View>
                       : <View>
                         <Text style={{ textAlign: 'center' }}>{
                           `${data.item.name} can${data.item.seesMe ?'' : 'not'} see you.`
@@ -225,7 +224,7 @@ export function ContactsScreen({ navigation, route }) {
                           />
                         }
                         <Button
-                          title={`(Double-check)`}
+                          title={`(Double-Check Visibility)`}
                           onPress={() => {checkVisibility(data.item)}}
                         />
                       </View>

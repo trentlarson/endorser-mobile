@@ -1,8 +1,16 @@
+import { classToPlain } from 'class-transformer'
 import * as didJwt from 'did-jwt'
+import * as R from 'ramda'
+
+import { Contact } from '../entity/contact'
 
 // This is used to check for hidden info.
 // See https://github.com/trentlarson/endorser-ch/blob/0cb626f803028e7d9c67f095858a9fc8542e3dbd/server/api/services/util.js#L6
 const HIDDEN_DID = 'did:none:HIDDEN'
+
+function isDid(value) {
+  return value && value.startsWith("did:") && (value.substring(5).indexOf(":") > -1)
+}
 
 // return first 3 chars + "..." + last 3 chars
 const firstAndLast3 = (text) => {
@@ -50,20 +58,34 @@ export const containsHiddenDid = (obj) => {
 
 // take DID and extract address and return first and last 3 chars
 export const firstAndLast3OfDid = (did) => {
-  if (isHiddenDid(did)) {
+  if (!isDid(did)) {
+    return did
+  } else if (isHiddenDid(did)) {
     return "(HIDDEN)"
   } else {
     return firstAndLast3(did.split(":")[2].substring(2))
   }
 }
 
-export const claimDescription = (claim) => {
+export const claimDescription = (claim, identifiers, contacts) => {
   if (claim.claim) {
     // probably a Verified Credential
     claim = claim.claim
   }
   let type = claim['@type']
   if (type === "JoinAction") {
+    let contactInfo = firstAndLast3OfDid(claim.agent.did)
+    const myId = R.find(i => i.did === claim.agent.did, identifiers)
+    if (myId) {
+      contactInfo += " (you)"
+    } else {
+      const contact = R.find(c => c.did === claim.agent.did, contacts)
+      if (contact) {
+        contactInfo += " (" + contact.name + ")"
+      } else {
+        contactInfo += " (?)"
+      }
+    }
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
     eventOrganizer = eventOrganizer ? eventOrganizer : "";
     let eventName = claim.event && claim.event.name;
@@ -72,7 +94,7 @@ export const claimDescription = (claim) => {
     fullEvent = fullEvent ? " at " + fullEvent : "";
     let eventDate = claim.event && claim.event.startTime;
     eventDate = eventDate ? " at " + eventDate : "";
-    return firstAndLast3OfDid(claim.agent.did) + fullEvent + eventDate;
+    return contactInfo + fullEvent + eventDate;
   } else if (type === "Tenure") {
     var polygon = claim.spatialUnit.geo.polygon
     return firstAndLast3OfDid(claim.party.did) + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
@@ -91,4 +113,12 @@ export const accessToken = async (identifier) => {
   const uportTokenPayload = { exp: tomorrowEpoch, iat: nowEpoch, iss: did }
   const jwt: string = await didJwt.createJWT(uportTokenPayload, { issuer: did, signer })
   return jwt
+}
+
+export const loadContacts = async (appSlice, appStore, dbConnection) => {
+  if (!appStore.getState().contacts) {
+    const conn = await dbConnection
+    const foundContacts = await conn.manager.find(Contact)
+    await appStore.dispatch(appSlice.actions.setContacts(classToPlain(foundContacts)))
+  }
 }
