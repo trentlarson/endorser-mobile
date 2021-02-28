@@ -2,9 +2,6 @@
 
 import 'react-native-gesture-handler'
 import 'reflect-metadata'
-import * as bip39 from 'bip39'
-import * as crypto from 'crypto'
-import { HDNode } from '@ethersproject/hdnode'
 import React from 'react'
 import { Button, Linking, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'

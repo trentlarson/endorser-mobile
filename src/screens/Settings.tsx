@@ -1,13 +1,17 @@
+import * as bip39 from 'bip39'
+import * as crypto from 'crypto'
+import { HDNode } from '@ethersproject/hdnode'
 import React, { useEffect, useState } from "react"
-import { appSlice, appStore, Identifier } from "../veramo/appSlice"
-import { agent, dbConnection } from "../veramo/setup"
 import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
 import { CheckBox } from "react-native-elements"
-import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
 import Clipboard from "@react-native-community/clipboard"
 import { IIdentifier  } from "@veramo/core"
+
+import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
+import { appSlice, appStore, Identifier } from "../veramo/appSlice"
+import { agent, dbConnection } from "../veramo/setup"
 
 const DEFAULT_DID_PROVIDER = 'did:ethr'
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
@@ -239,10 +243,10 @@ export function SettingsScreen({navigation}) {
             }
             {/** good for tests, bad for users
              <View style={{ marginTop: 200 }}>
-             <Button title="Create ID"
-             onPress={() => createAndStoreIdentifier().then(setNewId)}
-             />
-             <Button title="Delete Last ID" onPress={deleteIdentifier} />
+               <Button title="Create ID"
+               onPress={() => createAndStoreIdentifier().then(setNewId)}
+               />
+               <Button title="Delete Last ID" onPress={deleteIdentifier} />
              </View>
              **/}
           </View>
