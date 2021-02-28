@@ -1,8 +1,9 @@
 import * as bip39 from 'bip39'
 import * as crypto from 'crypto'
 import { HDNode } from '@ethersproject/hdnode'
+import * as R from 'ramda'
 import React, { useEffect, useState } from "react"
-import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
+import { Button, FlatList, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
 import { CheckBox } from "react-native-elements"
 import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
@@ -10,6 +11,7 @@ import Clipboard from "@react-native-community/clipboard"
 import { IIdentifier  } from "@veramo/core"
 
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
+import * as utility from "../utility/utility"
 import { appSlice, appStore, Identifier } from "../veramo/appSlice"
 import { agent, dbConnection } from "../veramo/setup"
 
@@ -128,49 +130,84 @@ const createAndStoreIdentifier = async () => {
   return importAndStoreIdentifier(mnemonic)
 }
 
+// uPort's QR code format
+function uportJwtPayload(did, name, publicKeyHex) {
+  const publicEncKey = Buffer.from(publicKeyHex, 'hex').toString('base64')
+  return {
+    iat: Date.now(),
+    iss: did,
+    own: {
+      name,
+      publicEncKey,
+    },
+  }
+}
+
 export function SettingsScreen({navigation}) {
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [name, setName] = useState<string>('')
+  const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
 
   const deleteIdentifier = async () => {
     if (identifiers.length > 0) {
-      await agent.didManagerDelete(identifiers[identifiers.length - 1])
+      const oldIdent = identifiers[identifiers.length - 1]
+      await agent.didManagerDelete(oldIdent)
       const conn = await dbConnection
       await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {mnemonic: null})
-      const _ids = await agent.didManagerFind()
-      setIdentifiers(_ids)
+      const ids = await agent.didManagerFind()
+      setIdentifiers(ids)
+      setQrJwts(jwts => R.omit([oldIdent.did], jwts))
     }
   }
 
-  const setNewId = async (id) => {
-    setIdentifiers((s) => s.concat([classToPlain(id)]))
+  const setNewId = async (ident) => {
+    setIdentifiers((s) => s.concat([classToPlain(ident)]))
     const conn = await dbConnection
     let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
     if (settings?.mnemonic) {
       setHasMnemonic(true)
     }
+
+    const sharePayload = uportJwtPayload(ident, name, ident.keys[0].publicKeyHex)
+    setQrJwtForPayload(ident, sharePayload)
   }
 
   const setNewName = async (name) => {
     const conn = await dbConnection
     await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {name: name})
     setName(name)
+    identifiers.forEach(ident => {
+      const sharePayload = uportJwtPayload(ident, name, ident.keys[0].publicKeyHex)
+      setQrJwtForPayload(ident, sharePayload)
+    })
+  }
+
+  const setQrJwtForPayload = async (identifier, payload) => {
+    const newJwt = await utility.createJwt(identifier, payload)
+    setQrJwts(jwts => R.set(R.lensProp(identifier.did), newJwt, jwts))
   }
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
-      const _ids = await agent.didManagerFind()
-      setIdentifiers(_ids.map(classToPlain))
+      const ids = await agent.didManagerFind()
+      const pojoIds = ids.map(classToPlain)
+      setIdentifiers(pojoIds)
+
       const conn = await dbConnection
       let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
       if (settings?.mnemonic) {
         setHasMnemonic(true)
       }
       if (settings?.name) {
-        setName(settings?.name)
+        await setName(settings?.name)
       }
+
+      pojoIds.forEach(ident => {
+        const sharePayload = uportJwtPayload(ident.did, name, ident.keys[0].publicKeyHex)
+        setQrJwtForPayload(ident, sharePayload)
+      })
     }
     getIdentifiers()
   }, []) // Why does this loop infinitely with any variable, even with classToPlain(identifiers) that doesn't change?
@@ -189,57 +226,41 @@ export function SettingsScreen({navigation}) {
               style={{borderWidth: 1}}
             />
             <Text style={{marginTop: 20}}>Identifier</Text>
-            {identifiers?.length > 0 ? (
-              identifiers.map((id: Identifier, index: number) => {
-                const publicEncKey = Buffer.from(id.keys[0].publicKeyHex, 'hex').toString('base64')
-                // uPort's QR code format
-                const shareId = {
-                  iat: Date.now(),
-                  iss: id.did,
-                  own: {
-                    name,
-                    publicEncKey,
-                  },
-                }
-                return <View key={id.did} style={{padding: 10}}>
-                  <Text
-                    style={{fontSize: 11, marginBottom: 20}}
-                    selectable={true}
-                  >
-                    {id.did}
-                  </Text>
-                  {!hasMnemonic ? (
-                    <Text style={{padding: 10, color: 'red'}}>There is no backup available. We
-                      recommend you generate a different identifier. (See Help.)</Text>
-                  ) : (
-                    <Text></Text>
-                  )}
-                  <Text style={{marginBottom: 5}}>Your Info</Text>
-                  <QRCode value={JSON.stringify(shareId)} size={300}/>
+            {
+              R.isEmpty(qrJwts)
+              ?
+                <View>
+                  <Text>There are no identifiers.</Text>
+                  <Button
+                    title={'Create Identifier'}
+                    onPress={() => createAndStoreIdentifier().then(setNewId)}
+                  />
                 </View>
-              })
-            ) : (
-              <View style={{marginTop: 10}}>
-                <Text>There are no identifiers.</Text>
-                <Button
-                  title={'Create Identifier'}
-                  onPress={() => createAndStoreIdentifier().then(setNewId)}
-                />
-              </View>
-            )}
+              :
+                <View>
+                  { Object.keys(qrJwts).map(id =>
+                    <View style={{ marginTop: 40, marginBottom: 60 }}>
+                      <Text style={{ fontSize: 11, marginTop: 20, marginBottom: 20 }}>{id}</Text>
+                      <Text style={{ marginBottom: 20 }}>Your Info</Text>
+                      <QRCode value={qrJwts[id]} size={300}/>
+                    </View>
+                  )}
+                </View>
+            }
+
             {(!identifiers || identifiers.length == 0) &&
-            <Button
-              title="Import Identifier"
-              onPress={() => navigation.navigate('Import Identifier')}
-            />
+              <Button
+                title="Import Identifier"
+                onPress={() => navigation.navigate('Import Identifier')}
+              />
             }
             {identifiers && identifiers.length > 0 &&
-            <View style={{marginTop: 100}}>
-              <Button
-              title="Export Identifier"
-              onPress={() => navigation.navigate('Export Identifier')}
-              />
-            </View>
+              <View style={{marginTop: 100}}>
+                <Button
+                title="Export Identifier"
+                onPress={() => navigation.navigate('Export Identifier')}
+                />
+              </View>
             }
             {/** good for tests, bad for users
              <View style={{ marginTop: 200 }}>
@@ -342,8 +363,8 @@ export function ImportIdentityScreen({navigation}) {
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
-      const _ids = await agent.didManagerFind()
-      setIdentifier(_ids[0])
+      const ids = await agent.didManagerFind()
+      setIdentifier(ids[0])
     }
     getIdentifiers()
   }, [])

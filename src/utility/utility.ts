@@ -132,3 +132,9 @@ export const loadContacts = async (appSlice, appStore, dbConnection) => {
     await appStore.dispatch(appSlice.actions.setContacts(classToPlain(foundContacts)))
   }
 }
+
+export const createJwt = async (identifier: IIdentifier, payload: any): string => {
+  const signer = didJwt.SimpleSigner(identifier.keys[0].privateKeyHex)
+  const did: string = identifier.did
+  return didJwt.createJWT(payload,{ issuer: did, signer })
+}
