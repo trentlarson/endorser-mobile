@@ -74,7 +74,7 @@ export function CredentialsScreen({ navigation }) {
 
   function setConfirmations() {
     const values = Object.values(selectedClaimsToConfirm)
-    if (values.length === 0) {
+    if (!anyTrue(values)) {
       Alert.alert("Select a Claim", "In order to confirm, you must select at least one claim.")
     } else {
       const claims = values.map(R.prop('claim'))
@@ -89,6 +89,10 @@ export function CredentialsScreen({ navigation }) {
       }
       unsetConfirmationsModal()
     }
+  }
+
+  function anyTrue(values) {
+    return R.any(R.identity, values)
   }
 
   async function loadRecentClaims() {

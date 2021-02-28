@@ -67,6 +67,27 @@ export const firstAndLast3OfDid = (did) => {
   }
 }
 
+const UNKNOWN_CONTACT = "?"
+
+// always returns text; if unknown then UNKNOWN_CONTACT
+function didInfo(did, identifiers, contacts) {
+  const myId = R.find(i => i.did === did, identifiers)
+  if (myId) {
+    return "you"
+  } else {
+    const contact = R.find(c => c.did === did, contacts)
+    if (contact) {
+      return contact.name
+    } else {
+      return UNKNOWN_CONTACT
+    }
+  }
+}
+
+function didInContext(did, identifiers, contacts) {
+  return firstAndLast3OfDid(did) + " (" + didInfo(did, identifiers, contacts) + ")"
+}
+
 export const claimDescription = (claim, identifiers, contacts) => {
   if (claim.claim) {
     // probably a Verified Credential
@@ -74,18 +95,7 @@ export const claimDescription = (claim, identifiers, contacts) => {
   }
   let type = claim['@type']
   if (type === "JoinAction") {
-    let contactInfo = firstAndLast3OfDid(claim.agent.did)
-    const myId = R.find(i => i.did === claim.agent.did, identifiers)
-    if (myId) {
-      contactInfo += " (you)"
-    } else {
-      const contact = R.find(c => c.did === claim.agent.did, contacts)
-      if (contact) {
-        contactInfo += " (" + contact.name + ")"
-      } else {
-        contactInfo += " (?)"
-      }
-    }
+    const contactInfo = didInContext(claim.agent.did, identifiers, contacts)
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
     eventOrganizer = eventOrganizer ? eventOrganizer : "";
     let eventName = claim.event && claim.event.name;
@@ -97,7 +107,7 @@ export const claimDescription = (claim, identifiers, contacts) => {
     return contactInfo + fullEvent + eventDate;
   } else if (type === "Tenure") {
     var polygon = claim.spatialUnit.geo.polygon
-    return firstAndLast3OfDid(claim.party.did) + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
+    return didInContext(claim.party.did, identifiers, contacts) + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
   } else {
     return JSON.stringify(claim)
   }
