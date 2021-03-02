@@ -3,12 +3,12 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 
 platform :ios, '10.0'
 
-target 'Veramo_React_Native' do
+target 'EndorserMobile' do
   config = use_native_modules!
 
   use_react_native!(:path => config["reactNativePath"])
 
-  target 'Veramo_React_NativeTests' do
+  target 'EndorserMobileTests' do
     inherit! :complete
     # Pods for testing
   end
@@ -27,10 +27,10 @@ target 'Veramo_React_Native' do
 
 end
 
-target 'Veramo_React_Native-tvOS' do
-  # Pods for Veramo_React_Native-tvOS
+target 'EndorserMobile-tvOS' do
+  # Pods for EndorserMobile-tvOS
 
-  target 'Veramo_React_Native-tvOSTests' do
+  target 'EndorserMobile-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
   end

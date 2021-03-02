@@ -7,19 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		00E356F31AD99517003FC87E /* Veramo_React_NativeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* Veramo_React_NativeTests.m */; };
-		015E6B07F49C92D9D35AD500 /* libPods-Veramo_React_Native-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2ECF51F95A6189D3FCFF29A5 /* libPods-Veramo_React_Native-tvOS.a */; };
+		00E356F31AD99517003FC87E /* EndorserMobileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* EndorserMobileTests.m */; };
+		015E6B07F49C92D9D35AD500 /* libPods-EndorserMobile-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2ECF51F95A6189D3FCFF29A5 /* libPods-EndorserMobile-tvOS.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		2DCD954D1E0B4F2C00145EB5 /* Veramo_React_NativeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* Veramo_React_NativeTests.m */; };
-		3C365BF7A52622CAD0B2D0A1 /* libPods-Veramo_React_Native-Veramo_React_NativeTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E0B3ABB1EE6BC1C6BD2B2DFC /* libPods-Veramo_React_Native-Veramo_React_NativeTests.a */; };
-		6A69C888F94DCEEEAAA36688 /* libPods-Veramo_React_Native-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 62D03979F60F330A6CFC5863 /* libPods-Veramo_React_Native-tvOSTests.a */; };
+		2DCD954D1E0B4F2C00145EB5 /* EndorserMobileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* EndorserMobileTests.m */; };
+		3C365BF7A52622CAD0B2D0A1 /* libPods-EndorserMobile-EndorserMobileTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E0B3ABB1EE6BC1C6BD2B2DFC /* libPods-EndorserMobile-EndorserMobileTests.a */; };
+		6A69C888F94DCEEEAAA36688 /* libPods-EndorserMobile-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 62D03979F60F330A6CFC5863 /* libPods-EndorserMobile-tvOSTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		A10996CDA48DB8BAB3F098D8 /* libPods-Veramo_React_Native.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA1BF9B8CC25D149A806BD81 /* libPods-Veramo_React_Native.a */; };
+		A10996CDA48DB8BAB3F098D8 /* libPods-EndorserMobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA1BF9B8CC25D149A806BD81 /* libPods-EndorserMobile.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,45 +28,45 @@
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
-			remoteInfo = Veramo_React_Native;
+			remoteInfo = EndorserMobile;
 		};
 		2D02E4911E0B4A5D006451C7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 2D02E47A1E0B4A5D006451C7;
-			remoteInfo = "Veramo_React_Native-tvOS";
+			remoteInfo = "EndorserMobile-tvOS";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
-		00E356EE1AD99517003FC87E /* Veramo_React_NativeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Veramo_React_NativeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		00E356EE1AD99517003FC87E /* EndorserMobileTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EndorserMobileTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		00E356F21AD99517003FC87E /* Veramo_React_NativeTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Veramo_React_NativeTests.m; sourceTree = "<group>"; };
-		024AD9346CD463E487641DD3 /* Pods-Veramo_React_Native-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Veramo_React_Native-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-Veramo_React_Native-tvOS/Pods-Veramo_React_Native-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* Veramo_React_Native.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Veramo_React_Native.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Veramo_React_Native/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Veramo_React_Native/AppDelegate.m; sourceTree = "<group>"; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Veramo_React_Native/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Veramo_React_Native/Info.plist; sourceTree = "<group>"; };
-		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Veramo_React_Native/main.m; sourceTree = "<group>"; };
-		2D02E47B1E0B4A5D006451C7 /* Veramo_React_Native-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Veramo_React_Native-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2D02E4901E0B4A5D006451C7 /* Veramo_React_Native-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Veramo_React_Native-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2ECF51F95A6189D3FCFF29A5 /* libPods-Veramo_React_Native-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Veramo_React_Native-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		455CF4D93C91489C1C12BC95 /* Pods-Veramo_React_Native.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Veramo_React_Native.debug.xcconfig"; path = "Target Support Files/Pods-Veramo_React_Native/Pods-Veramo_React_Native.debug.xcconfig"; sourceTree = "<group>"; };
-		4C80E6D126461682AC449ABD /* Pods-Veramo_React_Native-Veramo_React_NativeTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Veramo_React_Native-Veramo_React_NativeTests.release.xcconfig"; path = "Target Support Files/Pods-Veramo_React_Native-Veramo_React_NativeTests/Pods-Veramo_React_Native-Veramo_React_NativeTests.release.xcconfig"; sourceTree = "<group>"; };
-		5630F4C619A878A160949C53 /* Pods-Veramo_React_Native.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Veramo_React_Native.release.xcconfig"; path = "Target Support Files/Pods-Veramo_React_Native/Pods-Veramo_React_Native.release.xcconfig"; sourceTree = "<group>"; };
-		62D03979F60F330A6CFC5863 /* libPods-Veramo_React_Native-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Veramo_React_Native-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Veramo_React_Native/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		A1A5266EB8F6EE26B62895A6 /* Pods-Veramo_React_Native-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Veramo_React_Native-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-Veramo_React_Native-tvOSTests/Pods-Veramo_React_Native-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
-		A9CA74C743F6E57D261082AB /* Pods-Veramo_React_Native-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Veramo_React_Native-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-Veramo_React_Native-tvOSTests/Pods-Veramo_React_Native-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
-		C643EBBE380680CBBEE14422 /* Pods-Veramo_React_Native-Veramo_React_NativeTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Veramo_React_Native-Veramo_React_NativeTests.debug.xcconfig"; path = "Target Support Files/Pods-Veramo_React_Native-Veramo_React_NativeTests/Pods-Veramo_React_Native-Veramo_React_NativeTests.debug.xcconfig"; sourceTree = "<group>"; };
-		E0B3ABB1EE6BC1C6BD2B2DFC /* libPods-Veramo_React_Native-Veramo_React_NativeTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Veramo_React_Native-Veramo_React_NativeTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		00E356F21AD99517003FC87E /* EndorserMobileTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EndorserMobileTests.m; sourceTree = "<group>"; };
+		024AD9346CD463E487641DD3 /* Pods-EndorserMobile-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-EndorserMobile-tvOS/Pods-EndorserMobile-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* EndorserMobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EndorserMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = EndorserMobile/AppDelegate.h; sourceTree = "<group>"; };
+		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = EndorserMobile/AppDelegate.m; sourceTree = "<group>"; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = EndorserMobile/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = EndorserMobile/Info.plist; sourceTree = "<group>"; };
+		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = EndorserMobile/main.m; sourceTree = "<group>"; };
+		2D02E47B1E0B4A5D006451C7 /* EndorserMobile-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EndorserMobile-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D02E4901E0B4A5D006451C7 /* EndorserMobile-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EndorserMobile-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2ECF51F95A6189D3FCFF29A5 /* libPods-EndorserMobile-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-EndorserMobile-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		455CF4D93C91489C1C12BC95 /* Pods-EndorserMobile.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile.debug.xcconfig"; path = "Target Support Files/Pods-EndorserMobile/Pods-EndorserMobile.debug.xcconfig"; sourceTree = "<group>"; };
+		4C80E6D126461682AC449ABD /* Pods-EndorserMobile-EndorserMobileTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile-EndorserMobileTests.release.xcconfig"; path = "Target Support Files/Pods-EndorserMobile-EndorserMobileTests/Pods-EndorserMobile-EndorserMobileTests.release.xcconfig"; sourceTree = "<group>"; };
+		5630F4C619A878A160949C53 /* Pods-EndorserMobile.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile.release.xcconfig"; path = "Target Support Files/Pods-EndorserMobile/Pods-EndorserMobile.release.xcconfig"; sourceTree = "<group>"; };
+		62D03979F60F330A6CFC5863 /* libPods-EndorserMobile-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-EndorserMobile-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = EndorserMobile/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		A1A5266EB8F6EE26B62895A6 /* Pods-EndorserMobile-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-EndorserMobile-tvOSTests/Pods-EndorserMobile-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
+		A9CA74C743F6E57D261082AB /* Pods-EndorserMobile-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-EndorserMobile-tvOSTests/Pods-EndorserMobile-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C643EBBE380680CBBEE14422 /* Pods-EndorserMobile-EndorserMobileTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile-EndorserMobileTests.debug.xcconfig"; path = "Target Support Files/Pods-EndorserMobile-EndorserMobileTests/Pods-EndorserMobile-EndorserMobileTests.debug.xcconfig"; sourceTree = "<group>"; };
+		E0B3ABB1EE6BC1C6BD2B2DFC /* libPods-EndorserMobile-EndorserMobileTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-EndorserMobile-EndorserMobileTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
-		F4714DFF9989DE9BC75C6E77 /* Pods-Veramo_React_Native-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Veramo_React_Native-tvOS.release.xcconfig"; path = "Target Support Files/Pods-Veramo_React_Native-tvOS/Pods-Veramo_React_Native-tvOS.release.xcconfig"; sourceTree = "<group>"; };
-		FA1BF9B8CC25D149A806BD81 /* libPods-Veramo_React_Native.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Veramo_React_Native.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4714DFF9989DE9BC75C6E77 /* Pods-EndorserMobile-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile-tvOS.release.xcconfig"; path = "Target Support Files/Pods-EndorserMobile-tvOS/Pods-EndorserMobile-tvOS.release.xcconfig"; sourceTree = "<group>"; };
+		FA1BF9B8CC25D149A806BD81 /* libPods-EndorserMobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-EndorserMobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,7 +74,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C365BF7A52622CAD0B2D0A1 /* libPods-Veramo_React_Native-Veramo_React_NativeTests.a in Frameworks */,
+				3C365BF7A52622CAD0B2D0A1 /* libPods-EndorserMobile-EndorserMobileTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,7 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A10996CDA48DB8BAB3F098D8 /* libPods-Veramo_React_Native.a in Frameworks */,
+				A10996CDA48DB8BAB3F098D8 /* libPods-EndorserMobile.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,7 +90,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				015E6B07F49C92D9D35AD500 /* libPods-Veramo_React_Native-tvOS.a in Frameworks */,
+				015E6B07F49C92D9D35AD500 /* libPods-EndorserMobile-tvOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,20 +98,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A69C888F94DCEEEAAA36688 /* libPods-Veramo_React_Native-tvOSTests.a in Frameworks */,
+				6A69C888F94DCEEEAAA36688 /* libPods-EndorserMobile-tvOSTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		00E356EF1AD99517003FC87E /* Veramo_React_NativeTests */ = {
+		00E356EF1AD99517003FC87E /* EndorserMobileTests */ = {
 			isa = PBXGroup;
 			children = (
-				00E356F21AD99517003FC87E /* Veramo_React_NativeTests.m */,
+				00E356F21AD99517003FC87E /* EndorserMobileTests.m */,
 				00E356F01AD99517003FC87E /* Supporting Files */,
 			);
-			path = Veramo_React_NativeTests;
+			path = EndorserMobileTests;
 			sourceTree = "<group>";
 		};
 		00E356F01AD99517003FC87E /* Supporting Files */ = {
@@ -122,7 +122,7 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		13B07FAE1A68108700A75B9A /* Veramo_React_Native */ = {
+		13B07FAE1A68108700A75B9A /* EndorserMobile */ = {
 			isa = PBXGroup;
 			children = (
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
@@ -133,7 +133,7 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
 			);
-			name = Veramo_React_Native;
+			name = EndorserMobile;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
@@ -141,10 +141,10 @@
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
-				FA1BF9B8CC25D149A806BD81 /* libPods-Veramo_React_Native.a */,
-				E0B3ABB1EE6BC1C6BD2B2DFC /* libPods-Veramo_React_Native-Veramo_React_NativeTests.a */,
-				2ECF51F95A6189D3FCFF29A5 /* libPods-Veramo_React_Native-tvOS.a */,
-				62D03979F60F330A6CFC5863 /* libPods-Veramo_React_Native-tvOSTests.a */,
+				FA1BF9B8CC25D149A806BD81 /* libPods-EndorserMobile.a */,
+				E0B3ABB1EE6BC1C6BD2B2DFC /* libPods-EndorserMobile-EndorserMobileTests.a */,
+				2ECF51F95A6189D3FCFF29A5 /* libPods-EndorserMobile-tvOS.a */,
+				62D03979F60F330A6CFC5863 /* libPods-EndorserMobile-tvOSTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -159,9 +159,9 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* Veramo_React_Native */,
+				13B07FAE1A68108700A75B9A /* EndorserMobile */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
-				00E356EF1AD99517003FC87E /* Veramo_React_NativeTests */,
+				00E356EF1AD99517003FC87E /* EndorserMobileTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				905B5FC93C19A15F3B1E0BDE /* Pods */,
@@ -174,10 +174,10 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* Veramo_React_Native.app */,
-				00E356EE1AD99517003FC87E /* Veramo_React_NativeTests.xctest */,
-				2D02E47B1E0B4A5D006451C7 /* Veramo_React_Native-tvOS.app */,
-				2D02E4901E0B4A5D006451C7 /* Veramo_React_Native-tvOSTests.xctest */,
+				13B07F961A680F5B00A75B9A /* EndorserMobile.app */,
+				00E356EE1AD99517003FC87E /* EndorserMobileTests.xctest */,
+				2D02E47B1E0B4A5D006451C7 /* EndorserMobile-tvOS.app */,
+				2D02E4901E0B4A5D006451C7 /* EndorserMobile-tvOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -185,14 +185,14 @@
 		905B5FC93C19A15F3B1E0BDE /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				455CF4D93C91489C1C12BC95 /* Pods-Veramo_React_Native.debug.xcconfig */,
-				5630F4C619A878A160949C53 /* Pods-Veramo_React_Native.release.xcconfig */,
-				C643EBBE380680CBBEE14422 /* Pods-Veramo_React_Native-Veramo_React_NativeTests.debug.xcconfig */,
-				4C80E6D126461682AC449ABD /* Pods-Veramo_React_Native-Veramo_React_NativeTests.release.xcconfig */,
-				024AD9346CD463E487641DD3 /* Pods-Veramo_React_Native-tvOS.debug.xcconfig */,
-				F4714DFF9989DE9BC75C6E77 /* Pods-Veramo_React_Native-tvOS.release.xcconfig */,
-				A9CA74C743F6E57D261082AB /* Pods-Veramo_React_Native-tvOSTests.debug.xcconfig */,
-				A1A5266EB8F6EE26B62895A6 /* Pods-Veramo_React_Native-tvOSTests.release.xcconfig */,
+				455CF4D93C91489C1C12BC95 /* Pods-EndorserMobile.debug.xcconfig */,
+				5630F4C619A878A160949C53 /* Pods-EndorserMobile.release.xcconfig */,
+				C643EBBE380680CBBEE14422 /* Pods-EndorserMobile-EndorserMobileTests.debug.xcconfig */,
+				4C80E6D126461682AC449ABD /* Pods-EndorserMobile-EndorserMobileTests.release.xcconfig */,
+				024AD9346CD463E487641DD3 /* Pods-EndorserMobile-tvOS.debug.xcconfig */,
+				F4714DFF9989DE9BC75C6E77 /* Pods-EndorserMobile-tvOS.release.xcconfig */,
+				A9CA74C743F6E57D261082AB /* Pods-EndorserMobile-tvOSTests.debug.xcconfig */,
+				A1A5266EB8F6EE26B62895A6 /* Pods-EndorserMobile-tvOSTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -200,9 +200,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		00E356ED1AD99517003FC87E /* Veramo_React_NativeTests */ = {
+		00E356ED1AD99517003FC87E /* EndorserMobileTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "Veramo_React_NativeTests" */;
+			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "EndorserMobileTests" */;
 			buildPhases = (
 				DB9A8348F39AA00A1E992053 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
@@ -215,14 +215,14 @@
 			dependencies = (
 				00E356F51AD99517003FC87E /* PBXTargetDependency */,
 			);
-			name = Veramo_React_NativeTests;
-			productName = Veramo_React_NativeTests;
-			productReference = 00E356EE1AD99517003FC87E /* Veramo_React_NativeTests.xctest */;
+			name = EndorserMobileTests;
+			productName = EndorserMobileTests;
+			productReference = 00E356EE1AD99517003FC87E /* EndorserMobileTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		13B07F861A680F5B00A75B9A /* Veramo_React_Native */ = {
+		13B07F861A680F5B00A75B9A /* EndorserMobile */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Veramo_React_Native" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "EndorserMobile" */;
 			buildPhases = (
 				8645AC49F11C01FA54AE5FE8 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
@@ -236,14 +236,14 @@
 			);
 			dependencies = (
 			);
-			name = Veramo_React_Native;
-			productName = Veramo_React_Native;
-			productReference = 13B07F961A680F5B00A75B9A /* Veramo_React_Native.app */;
+			name = EndorserMobile;
+			productName = EndorserMobile;
+			productReference = 13B07F961A680F5B00A75B9A /* EndorserMobile.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2D02E47A1E0B4A5D006451C7 /* Veramo_React_Native-tvOS */ = {
+		2D02E47A1E0B4A5D006451C7 /* EndorserMobile-tvOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "Veramo_React_Native-tvOS" */;
+			buildConfigurationList = 2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "EndorserMobile-tvOS" */;
 			buildPhases = (
 				0CCE0E61D1C288D803F46EA9 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F122414F3F0027D42C /* Start Packager */,
@@ -256,14 +256,14 @@
 			);
 			dependencies = (
 			);
-			name = "Veramo_React_Native-tvOS";
-			productName = "Veramo_React_Native-tvOS";
-			productReference = 2D02E47B1E0B4A5D006451C7 /* Veramo_React_Native-tvOS.app */;
+			name = "EndorserMobile-tvOS";
+			productName = "EndorserMobile-tvOS";
+			productReference = 2D02E47B1E0B4A5D006451C7 /* EndorserMobile-tvOS.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2D02E48F1E0B4A5D006451C7 /* Veramo_React_Native-tvOSTests */ = {
+		2D02E48F1E0B4A5D006451C7 /* EndorserMobile-tvOSTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "Veramo_React_Native-tvOSTests" */;
+			buildConfigurationList = 2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "EndorserMobile-tvOSTests" */;
 			buildPhases = (
 				C2F2285BC8283C93C503D3EF /* [CP] Check Pods Manifest.lock */,
 				2D02E48C1E0B4A5D006451C7 /* Sources */,
@@ -275,9 +275,9 @@
 			dependencies = (
 				2D02E4921E0B4A5D006451C7 /* PBXTargetDependency */,
 			);
-			name = "Veramo_React_Native-tvOSTests";
-			productName = "Veramo_React_Native-tvOSTests";
-			productReference = 2D02E4901E0B4A5D006451C7 /* Veramo_React_Native-tvOSTests.xctest */;
+			name = "EndorserMobile-tvOSTests";
+			productName = "EndorserMobile-tvOSTests";
+			productReference = 2D02E4901E0B4A5D006451C7 /* EndorserMobile-tvOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -307,7 +307,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Veramo_React_Native" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "EndorserMobile" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -320,10 +320,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* Veramo_React_Native */,
-				00E356ED1AD99517003FC87E /* Veramo_React_NativeTests */,
-				2D02E47A1E0B4A5D006451C7 /* Veramo_React_Native-tvOS */,
-				2D02E48F1E0B4A5D006451C7 /* Veramo_React_Native-tvOSTests */,
+				13B07F861A680F5B00A75B9A /* EndorserMobile */,
+				00E356ED1AD99517003FC87E /* EndorserMobileTests */,
+				2D02E47A1E0B4A5D006451C7 /* EndorserMobile-tvOS */,
+				2D02E48F1E0B4A5D006451C7 /* EndorserMobile-tvOSTests */,
 			);
 		};
 /* End PBXProject section */
@@ -392,7 +392,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Veramo_React_Native-tvOS-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-EndorserMobile-tvOS-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -428,7 +428,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Veramo_React_Native-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-EndorserMobile-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -441,7 +441,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Veramo_React_Native-Veramo_React_NativeTests/Pods-Veramo_React_Native-Veramo_React_NativeTests-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-EndorserMobile-EndorserMobileTests/Pods-EndorserMobile-EndorserMobileTests-resources.sh",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf",
@@ -482,7 +482,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Veramo_React_Native-Veramo_React_NativeTests/Pods-Veramo_React_Native-Veramo_React_NativeTests-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-EndorserMobile-EndorserMobileTests/Pods-EndorserMobile-EndorserMobileTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		B18F52D218A99E51AC13BABF /* [CP] Copy Pods Resources */ = {
@@ -491,7 +491,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Veramo_React_Native/Pods-Veramo_React_Native-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-EndorserMobile/Pods-EndorserMobile-resources.sh",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf",
@@ -532,7 +532,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Veramo_React_Native/Pods-Veramo_React_Native-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-EndorserMobile/Pods-EndorserMobile-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		C2F2285BC8283C93C503D3EF /* [CP] Check Pods Manifest.lock */ = {
@@ -550,7 +550,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Veramo_React_Native-tvOSTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-EndorserMobile-tvOSTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -572,7 +572,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Veramo_React_Native-Veramo_React_NativeTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-EndorserMobile-EndorserMobileTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -624,7 +624,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				00E356F31AD99517003FC87E /* Veramo_React_NativeTests.m in Sources */,
+				00E356F31AD99517003FC87E /* EndorserMobileTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -650,7 +650,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2DCD954D1E0B4F2C00145EB5 /* Veramo_React_NativeTests.m in Sources */,
+				2DCD954D1E0B4F2C00145EB5 /* EndorserMobileTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -659,12 +659,12 @@
 /* Begin PBXTargetDependency section */
 		00E356F51AD99517003FC87E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 13B07F861A680F5B00A75B9A /* Veramo_React_Native */;
+			target = 13B07F861A680F5B00A75B9A /* EndorserMobile */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
 		2D02E4921E0B4A5D006451C7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2D02E47A1E0B4A5D006451C7 /* Veramo_React_Native-tvOS */;
+			target = 2D02E47A1E0B4A5D006451C7 /* EndorserMobile-tvOS */;
 			targetProxy = 2D02E4911E0B4A5D006451C7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -672,14 +672,14 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C643EBBE380680CBBEE14422 /* Pods-Veramo_React_Native-Veramo_React_NativeTests.debug.xcconfig */;
+			baseConfigurationReference = C643EBBE380680CBBEE14422 /* Pods-EndorserMobile-EndorserMobileTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = Veramo_React_NativeTests/Info.plist;
+				INFOPLIST_FILE = EndorserMobileTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -689,17 +689,17 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Veramo_React_Native.app/Veramo_React_Native";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EndorserMobile.app/EndorserMobile";
 			};
 			name = Debug;
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4C80E6D126461682AC449ABD /* Pods-Veramo_React_Native-Veramo_React_NativeTests.release.xcconfig */;
+			baseConfigurationReference = 4C80E6D126461682AC449ABD /* Pods-EndorserMobile-EndorserMobileTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
-				INFOPLIST_FILE = Veramo_React_NativeTests/Info.plist;
+				INFOPLIST_FILE = EndorserMobileTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -709,20 +709,20 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Veramo_React_Native.app/Veramo_React_Native";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EndorserMobile.app/EndorserMobile";
 			};
 			name = Release;
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 455CF4D93C91489C1C12BC95 /* Pods-Veramo_React_Native.debug.xcconfig */;
+			baseConfigurationReference = 455CF4D93C91489C1C12BC95 /* Pods-EndorserMobile.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = GM3FS5JQPH;
 				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = Veramo_React_Native/Info.plist;
+				INFOPLIST_FILE = EndorserMobile/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -730,7 +730,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = Veramo_React_Native;
+				PRODUCT_NAME = EndorserMobile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -739,13 +739,13 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5630F4C619A878A160949C53 /* Pods-Veramo_React_Native.release.xcconfig */;
+			baseConfigurationReference = 5630F4C619A878A160949C53 /* Pods-EndorserMobile.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = GM3FS5JQPH;
-				INFOPLIST_FILE = Veramo_React_Native/Info.plist;
+				INFOPLIST_FILE = EndorserMobile/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -753,7 +753,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = Veramo_React_Native;
+				PRODUCT_NAME = EndorserMobile;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -761,7 +761,7 @@
 		};
 		2D02E4971E0B4A5E006451C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 024AD9346CD463E487641DD3 /* Pods-Veramo_React_Native-tvOS.debug.xcconfig */;
+			baseConfigurationReference = 024AD9346CD463E487641DD3 /* Pods-EndorserMobile-tvOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -772,14 +772,14 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_TESTABILITY = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "Veramo_React_Native-tvOS/Info.plist";
+				INFOPLIST_FILE = "EndorserMobile-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.Veramo_React_Native-tvOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.EndorserMobile-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				TARGETED_DEVICE_FAMILY = 3;
@@ -789,7 +789,7 @@
 		};
 		2D02E4981E0B4A5E006451C7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F4714DFF9989DE9BC75C6E77 /* Pods-Veramo_React_Native-tvOS.release.xcconfig */;
+			baseConfigurationReference = F4714DFF9989DE9BC75C6E77 /* Pods-EndorserMobile-tvOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -800,14 +800,14 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "Veramo_React_Native-tvOS/Info.plist";
+				INFOPLIST_FILE = "EndorserMobile-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.Veramo_React_Native-tvOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.EndorserMobile-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				TARGETED_DEVICE_FAMILY = 3;
@@ -817,7 +817,7 @@
 		};
 		2D02E4991E0B4A5E006451C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A9CA74C743F6E57D261082AB /* Pods-Veramo_React_Native-tvOSTests.debug.xcconfig */;
+			baseConfigurationReference = A9CA74C743F6E57D261082AB /* Pods-EndorserMobile-tvOSTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -827,24 +827,24 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_TESTABILITY = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "Veramo_React_Native-tvOSTests/Info.plist";
+				INFOPLIST_FILE = "EndorserMobile-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.Veramo_React_Native-tvOSTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.EndorserMobile-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Veramo_React_Native-tvOS.app/Veramo_React_Native-tvOS";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EndorserMobile-tvOS.app/EndorserMobile-tvOS";
 				TVOS_DEPLOYMENT_TARGET = 10.1;
 			};
 			name = Debug;
 		};
 		2D02E49A1E0B4A5E006451C7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A1A5266EB8F6EE26B62895A6 /* Pods-Veramo_React_Native-tvOSTests.release.xcconfig */;
+			baseConfigurationReference = A1A5266EB8F6EE26B62895A6 /* Pods-EndorserMobile-tvOSTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -854,17 +854,17 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "Veramo_React_Native-tvOSTests/Info.plist";
+				INFOPLIST_FILE = "EndorserMobile-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.Veramo_React_Native-tvOSTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.EndorserMobile-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Veramo_React_Native-tvOS.app/Veramo_React_Native-tvOS";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EndorserMobile-tvOS.app/EndorserMobile-tvOS";
 				TVOS_DEPLOYMENT_TARGET = 10.1;
 			};
 			name = Release;
@@ -985,7 +985,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "Veramo_React_NativeTests" */ = {
+		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "EndorserMobileTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				00E356F61AD99517003FC87E /* Debug */,
@@ -994,7 +994,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Veramo_React_Native" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "EndorserMobile" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -1003,7 +1003,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "Veramo_React_Native-tvOS" */ = {
+		2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "EndorserMobile-tvOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2D02E4971E0B4A5E006451C7 /* Debug */,
@@ -1012,7 +1012,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "Veramo_React_Native-tvOSTests" */ = {
+		2D02E4BB1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "EndorserMobile-tvOSTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2D02E4991E0B4A5E006451C7 /* Debug */,
@@ -1021,7 +1021,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Veramo_React_Native" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "EndorserMobile" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,

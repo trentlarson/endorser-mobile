@@ -129,7 +129,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.veramo_react_native"
+        applicationId "ch.endorser.mobile"
         minSdkVersion rootProject.ext.minSdkVersion
         missingDimensionStrategy 'react-native-camera', 'general'
         targetSdkVersion rootProject.ext.targetSdkVersion

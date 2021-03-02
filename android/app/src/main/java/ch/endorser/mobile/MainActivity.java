@@ -1,4 +1,4 @@
-package com.veramo_react_native;
+package ch.endorser.mobile;
 
 import com.facebook.react.ReactActivity;
 
@@ -10,6 +10,6 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "Veramo_React_Native";
+    return "EndorserMobile";
   }
 }

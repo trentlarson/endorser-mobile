@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-               BuildableName = "Veramo_React_Native-tvOS.app"
-               BlueprintName = "Veramo_React_Native-tvOS"
-               ReferencedContainer = "container:Veramo_React_Native.xcodeproj">
+               BuildableName = "EndorserMobile-tvOS.app"
+               BlueprintName = "EndorserMobile-tvOS"
+               ReferencedContainer = "container:EndorserMobile.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D02E48F1E0B4A5D006451C7"
-               BuildableName = "Veramo_React_Native-tvOSTests.xctest"
-               BlueprintName = "Veramo_React_Native-tvOSTests"
-               ReferencedContainer = "container:Veramo_React_Native.xcodeproj">
+               BuildableName = "EndorserMobile-tvOSTests.xctest"
+               BlueprintName = "EndorserMobile-tvOSTests"
+               ReferencedContainer = "container:EndorserMobile.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-            BuildableName = "Veramo_React_Native-tvOS.app"
-            BlueprintName = "Veramo_React_Native-tvOS"
-            ReferencedContainer = "container:Veramo_React_Native.xcodeproj">
+            BuildableName = "EndorserMobile-tvOS.app"
+            BlueprintName = "EndorserMobile-tvOS"
+            ReferencedContainer = "container:EndorserMobile.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-            BuildableName = "Veramo_React_Native-tvOS.app"
-            BlueprintName = "Veramo_React_Native-tvOS"
-            ReferencedContainer = "container:Veramo_React_Native.xcodeproj">
+            BuildableName = "EndorserMobile-tvOS.app"
+            BlueprintName = "EndorserMobile-tvOS"
+            ReferencedContainer = "container:EndorserMobile.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
