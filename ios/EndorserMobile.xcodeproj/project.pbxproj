@@ -687,7 +687,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.endorser.EndorserMobile";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EndorserMobile.app/EndorserMobile";
 			};
@@ -707,7 +707,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.endorser.EndorserMobile";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EndorserMobile.app/EndorserMobile";
 			};
@@ -729,8 +729,8 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = ch.endorser.mobile;
-				PRODUCT_NAME = EndorserMobile;
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.endorser.EndorserMobile";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -752,8 +752,8 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = ch.endorser.mobile;
-				PRODUCT_NAME = EndorserMobile;
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.endorser.EndorserMobile";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -779,7 +779,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.EndorserMobile-tvOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.endorser.EndorserMobile-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				TARGETED_DEVICE_FAMILY = 3;
@@ -807,7 +807,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.EndorserMobile-tvOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.endorser.EndorserMobile-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				TARGETED_DEVICE_FAMILY = 3;
@@ -834,7 +834,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.EndorserMobile-tvOSTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.endorser.EndorserMobile-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EndorserMobile-tvOS.app/EndorserMobile-tvOS";
@@ -861,7 +861,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.EndorserMobile-tvOSTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.endorser.EndorserMobile-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EndorserMobile-tvOS.app/EndorserMobile-tvOS";

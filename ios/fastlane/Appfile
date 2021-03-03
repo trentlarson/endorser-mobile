@@ -1,4 +1,4 @@
-app_identifier("org.reactjs.native.example.Veramo-React-Native") # The bundle identifier of your app
+app_identifier("ch.endorser.EndorserMobile") # The bundle identifier of your app
 apple_id("communityendorser@gmail.com") # Your Apple email address
 
 itc_team_id("122655138") # App Store Connect Team ID
