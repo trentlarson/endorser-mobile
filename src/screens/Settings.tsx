@@ -37,30 +37,30 @@ const newIdentifier = (address: string, publicHex: string, privateHex: string): 
 const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: string) => {
 
   try {
-  /**
-    First save the mnemonic, because: we've seen cases where the identifier import fails, and if they don't have the mnemonic then they can't restore their identifier, but maybe if the mnemonic is saved then they can export and import it through the UI.
-   **/
-  console.log('About to save settings...')
-  const settings = new Settings()
-  settings.id = MASTER_COLUMN_VALUE
-  settings.mnemonic = mnemonic
-  const conn = await dbConnection
-  console.log('... with settings DB connection ready...')
-  let newContact = await conn.manager.save(settings)
-  console.log('... settings saved.')
+    /**
+      First save the mnemonic, because: we've seen cases where the identifier import fails, and if they don't have the mnemonic then they can't restore their identifier, but maybe if the mnemonic is saved then they can export and import it through the UI.
+     **/
+    console.log('About to save settings...')
+    const settings = new Settings()
+    settings.id = MASTER_COLUMN_VALUE
+    settings.mnemonic = mnemonic
+    const conn = await dbConnection
+    console.log('... with settings DB connection ready...')
+    let newContact = await conn.manager.save(settings)
+    console.log('... settings saved.')
 
-  console.log('About to import identifier...')
-  const savedId = await agent.didManagerImport(newId)
-  console.log('... identifier imported.')
-  return savedId
+    console.log('About to import identifier...')
+    const savedId = await agent.didManagerImport(newId)
+    console.log('... identifier imported.')
+    return savedId
   } catch (e) {
-  // In release mode, a thrown error didn't give any helpful info.
+    // In release mode, a thrown error didn't give any helpful info.
 
-  // I have seen cases where each of these give different, helpful info.
-  console.log('Error storing identifier, 1:', e)
-  console.log('Error storing identifier, 2: ' + e)
-  console.log('Error storing identifier, 3:', e.toString())
-  throw e
+    // I have seen cases where each of these give different, helpful info.
+    console.log('Error storing identifier, 1:', e)
+    console.log('Error storing identifier, 2: ' + e)
+    console.log('Error storing identifier, 3:', e.toString())
+    throw e
   }
 }
 
@@ -108,7 +108,7 @@ const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) 
   const publicHex = rootNode.privateKey.substring(2)
   let address = rootNode.address
   if (toLowercase) {
-  address = address.toLowerCase()
+    address = address.toLowerCase()
   }
 
   const newId = newIdentifier(address, publicHex, privateHex)
