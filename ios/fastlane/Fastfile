@@ -19,14 +19,14 @@ platform :ios do
 
   desc "Push a new beta build to TestFlight"
   lane :beta do
-    increment_build_number(xcodeproj: "Veramo_React_Native.xcodeproj")
-    build_app(workspace: "Veramo_React_Native.xcworkspace", scheme: "Veramo_React_Native", export_xcargs: "-allowProvisioningUpdates")
+    increment_build_number(xcodeproj: "EndorserMobile.xcodeproj")
+    build_app(workspace: "EndorserMobile.xcworkspace", scheme: "EndorserMobile", export_xcargs: "-allowProvisioningUpdates")
     upload_to_testflight
   end
 
   lane :release do
-    build_app(scheme: "Veramo_React_Native",
-              workspace: "Veramo_React_Native.xcworkspace")
+    build_app(scheme: "EndorserMobile",
+              workspace: "EndorserMobile.xcworkspace")
     upload_to_app_store
   end
 
