@@ -1,2 +1,2 @@
 json_key_file("/Users/tlarson/dev/home/endorser-mobile/android/pc-api-7249509642322112640-286-534d849dfda0.json") # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
-package_name("com.veramo_react_native") # e.g. com.krausefx.app
+package_name("ch.endorser.mobile") # e.g. com.krausefx.app
