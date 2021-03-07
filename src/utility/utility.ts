@@ -8,6 +8,8 @@ import { Contact } from '../entity/contact'
 // See https://github.com/trentlarson/endorser-ch/blob/0cb626f803028e7d9c67f095858a9fc8542e3dbd/server/api/services/util.js#L6
 const HIDDEN_DID = 'did:none:HIDDEN'
 
+export const ENDORSER_JWT_URL_LOCATION = "/contact?jwt="
+
 function isDid(value) {
   return value && value.startsWith("did:") && (value.substring(5).indexOf(":") > -1)
 }

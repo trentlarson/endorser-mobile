@@ -1,4 +1,5 @@
 import { classToPlain } from 'class-transformer'
+import * as didJwt from 'did-jwt'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
@@ -19,7 +20,8 @@ export function ContactsScreen({ navigation, route }) {
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
 
-  const allContacts = useSelector((state) => state.contacts || [])
+  const allContacts = useSelector((state) => state.contacts)
+  const allContactsOrEmpty = () => allContacts || []
 
   const setContactInState = async (contact) => {
     const newContactEntity = new Contact()
@@ -37,7 +39,7 @@ export function ContactsScreen({ navigation, route }) {
   }
 
   const allContactText = () => (
-    allContacts.map((contact) => (
+    allContactsOrEmpty().map((contact) => (
       `
       ${contact.name}
       ${contact.did}
@@ -130,8 +132,8 @@ export function ContactsScreen({ navigation, route }) {
   }
 
   const deleteContact = async () => {
-    if (allContacts.length > 0) {
-      const last = allContacts[allContacts.length - 1]
+    if (allContactsOrEmpty().length > 0) {
+      const last = allContactsOrEmpty()[allContactsOrEmpty().length - 1]
       const conn = await dbConnection
       await conn.manager.delete(Contact, { 'did' : last.did })
       utility.loadContacts(appSlice, appStore, dbConnection)
@@ -150,16 +152,19 @@ export function ContactsScreen({ navigation, route }) {
 
   return (
     <SafeAreaView>
+      <ScrollView>
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Contacts</Text>
-          <View style={styles.centeredView}>
+          <View style={{ padding: 20 }}>
             <Button
               title="Scan & Import"
               onPress={() => navigation.navigate('ContactImport')}
             />
-          <Text>Or</Text>
           </View>
-          <View style={{ padding: 10 }}>
+          <View style={{ alignItems: "center" }}>
+            <Text>or enter by hand:</Text>
+          </View>
+          <View>
             <Text>Name</Text>
             <TextInput
               value={contactName}
@@ -176,7 +181,10 @@ export function ContactsScreen({ navigation, route }) {
               autoCapitalize='none'
               autoCorrect={false}
             />
+          </View>
+          <View style={{ alignItems: "center" }}>
             <Button
+              style={{ alignItems: "center" }}
               title='Create'
               onPress={createContact}
             />
@@ -184,8 +192,8 @@ export function ContactsScreen({ navigation, route }) {
         </View>
         <View style={{ padding: 20 }}>
           <FlatList
-            style={{ borderWidth: allContacts.length === 0 ? 0 : 1 }}
-            data={allContacts}
+            style={{ borderWidth: allContactsOrEmpty().length === 0 ? 0 : 1 }}
+            data={allContactsOrEmpty()}
             keyExtractor={contact => contact.did}
             renderItem={data =>
               <View style={{ padding: 20 }}>
@@ -235,14 +243,14 @@ export function ContactsScreen({ navigation, route }) {
             }
             ItemSeparatorComponent={() => <View style={styles.line}/>}
           />
-          { allContacts.length > 0 ? (
+          { allContactsOrEmpty().length > 0 ? (
             <View>
               <Button
                 title="Copy to Clipboard"
                 onPress={copyToClipboard}
               />
               {/** good for tests, bad for users
-              <View style={{ marginTop: 200 }}>
+              <View style={{ marginTop: 5 }}>
                 <Button
                   title="Delete Last Contact"
                   onPress={deleteContact}
@@ -254,18 +262,34 @@ export function ContactsScreen({ navigation, route }) {
             <Text></Text>
           )}
         </View>
+      </ScrollView>
     </SafeAreaView>
   )
 }
 
 export function ContactImportScreen({ navigation }) {
 
-  const [contactInfo, setContactInfo] = useState<any>()
+  const qrPrefixes = [
+    appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION,
+    "https://id.uport.me/req/",
+  ]
+
+  const [contactInfo, setContactInfo] = useState<Contact>()
   const [saved, setSaved] = useState<boolean>(false)
 
   const onSuccessfulQR = async (e) => {
-    const data = JSON.parse(e.data)
-    setContactInfo(data)
+    var jwtText = e.data
+    qrPrefixes.forEach((prefix) => {
+      if (jwtText.startsWith(prefix)) {
+        jwtText = jwtText.substring(prefix.length)
+      }
+    })
+
+    // JWT format: { header, payload, signature, data }
+    const jwt = didJwt.decodeJWT(jwtText)
+
+    const payload = jwt.payload
+    setContactInfo(payload)
   }
 
   const onAccept = () => {
@@ -277,7 +301,7 @@ export function ContactImportScreen({ navigation }) {
       contact.name = contactInfo.own && contactInfo.own.name
       const newContact = await conn.manager.save(contact)
       setSaved(true)
-      appStore.dispatch(appSlice.actions.setContacts([]))
+      appStore.dispatch(appSlice.actions.setContacts(null)) // force reload
 
       setTimeout(() => { navigation.navigate('Contacts')}, 500)
     }
@@ -334,7 +358,8 @@ export function ContactImportScreen({ navigation }) {
               </View>
             ) : (
               <View>
-                <QRCodeScanner onBarCodeRead={onSuccessfulQR} />
+                <QRCodeScanner onRead={onSuccessfulQR} reactivate={true} />
+                {/** Setting reactivate to true because sometimes it reads incorrectly, so we'll just try again. **/}
                 {/** good for tests, bad for users
                 <Button
                   title='Fake It'

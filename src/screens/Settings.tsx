@@ -146,7 +146,8 @@ function uportJwtPayload(did, name, publicKeyHex) {
 export function SettingsScreen({navigation}) {
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
-  const [name, setName] = useState<string>('')
+  const [inputName, setInputName] = useState<string>('')
+  const [storedName, setStoredName] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
 
   const deleteIdentifier = async () => {
@@ -169,23 +170,25 @@ export function SettingsScreen({navigation}) {
       setHasMnemonic(true)
     }
 
-    const sharePayload = uportJwtPayload(ident, name, ident.keys[0].publicKeyHex)
+    const sharePayload = uportJwtPayload(ident, inputName, ident.keys[0].publicKeyHex)
     setQrJwtForPayload(ident, sharePayload)
   }
 
-  const setNewName = async (name) => {
+  const storeNewName = async () => {
     const conn = await dbConnection
-    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {name: name})
-    setName(name)
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {name: inputName})
     identifiers.forEach(ident => {
-      const sharePayload = uportJwtPayload(ident, name, ident.keys[0].publicKeyHex)
+      const sharePayload = uportJwtPayload(ident, inputName, ident.keys[0].publicKeyHex)
       setQrJwtForPayload(ident, sharePayload)
     })
+    setStoredName(inputName)
   }
 
   const setQrJwtForPayload = async (identifier, payload) => {
     const newJwt = await utility.createJwt(identifier, payload)
-    setQrJwts(jwts => R.set(R.lensProp(identifier.did), newJwt, jwts))
+    const viewPrefix = appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION
+    const qrJwt = viewPrefix + newJwt
+    setQrJwts(jwts => R.set(R.lensProp(identifier.did), qrJwt, jwts))
   }
 
   // Check for existing identifers on load and set them to state
@@ -201,11 +204,12 @@ export function SettingsScreen({navigation}) {
         setHasMnemonic(true)
       }
       if (settings?.name) {
-        await setName(settings?.name)
+        setStoredName(settings?.name)
+        setInputName(settings?.name)
       }
 
       pojoIds.forEach(ident => {
-        const sharePayload = uportJwtPayload(ident.did, name, ident.keys[0].publicKeyHex)
+        const sharePayload = uportJwtPayload(ident.did, settings?.name, ident.keys[0].publicKeyHex)
         setQrJwtForPayload(ident, sharePayload)
       })
     }
@@ -220,11 +224,16 @@ export function SettingsScreen({navigation}) {
           <View style={{marginBottom: 50, marginTop: 20}}>
             <Text>Name</Text>
             <TextInput
-              value={name ? name : ''}
-              onChangeText={setNewName}
+              value={inputName ? inputName : ''}
+              onChangeText={setInputName}
               editable
               style={{borderWidth: 1}}
             />
+            <Button
+              title={ 'Save' + (inputName === storedName ? 'd' : '') }
+              onPress={storeNewName}
+            />
+            <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%' }}/>
             <Text style={{marginTop: 20}}>Identifier</Text>
             {
               R.isEmpty(qrJwts)
@@ -239,7 +248,7 @@ export function SettingsScreen({navigation}) {
               :
                 <View>
                   { Object.keys(qrJwts).map(id =>
-                    <View style={{ marginTop: 40, marginBottom: 60 }}>
+                    <View key={id} style={{ marginTop: 40, marginBottom: 60 }}>
                       <Text style={{ fontSize: 11, marginTop: 20, marginBottom: 20 }}>{id}</Text>
                       <Text style={{ marginBottom: 20 }}>Your Info</Text>
                       <QRCode value={qrJwts[id]} size={300}/>
