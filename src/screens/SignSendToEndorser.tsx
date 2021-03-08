@@ -350,7 +350,7 @@ export function CredentialsScreen({ navigation }) {
                             onPress={() => {
                               setConfirming(true)
                               loadRecentClaims()
-                              utility.loadContacts(appSlice, appStore, dbConnection)
+                              utility.loadContacts(appSlice, appStore, dbConnection, true)
                             }}
                           />
                         </View>

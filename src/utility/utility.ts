@@ -127,10 +127,10 @@ export const accessToken = async (identifier) => {
   return jwt
 }
 
-export const loadContacts = async (appSlice, appStore, dbConnection) => {
-  if (!appStore.getState().contacts) {
+export const loadContacts = async (appSlice, appStore, dbConnection, useCached) => {
+  if (!appStore.getState().contacts || !useCached) {
     const conn = await dbConnection
-    const foundContacts = await conn.manager.find(Contact)
+    const foundContacts = await conn.manager.find(Contact, {order: {name:'ASC'}})
     await appStore.dispatch(appSlice.actions.setContacts(classToPlain(foundContacts)))
   }
 }

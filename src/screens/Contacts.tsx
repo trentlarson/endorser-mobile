@@ -20,18 +20,12 @@ export function ContactsScreen({ navigation, route }) {
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
 
-  const allContacts = useSelector((state) => state.contacts)
-  const allContactsOrEmpty = () => allContacts || []
+  const allContacts = useSelector((state) => state.contacts || [])
 
   const setContactInState = async (contact) => {
     const newContactEntity = new Contact()
-    {
-      // fill in with contact info
-      const keys = Object.keys(contact)
-      for (key of keys) {
-        newContactEntity[key] = contact[key]
-      }
-    }
+    // fill in with contact info
+    Object.assign(newContactEntity, contact)
     const conn = await dbConnection
     await conn.manager.save(newContactEntity)
 
@@ -39,7 +33,7 @@ export function ContactsScreen({ navigation, route }) {
   }
 
   const allContactText = () => (
-    allContactsOrEmpty().map((contact) => (
+    allContacts.map((contact) => (
       `
       ${contact.name}
       ${contact.did}
@@ -74,7 +68,7 @@ export function ContactsScreen({ navigation, route }) {
     }).then(response => {
       return response.json()
       if (response.status !== 200) {
-        throw Error('There was an error from the server trying to set you as visible.')
+        throw Error('There was an error from the server trying to check visibility.')
       }
     }).then(result => {
       setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
@@ -132,8 +126,8 @@ export function ContactsScreen({ navigation, route }) {
   }
 
   const deleteContact = async () => {
-    if (allContactsOrEmpty().length > 0) {
-      const last = allContactsOrEmpty()[allContactsOrEmpty().length - 1]
+    if (allContacts.length > 0) {
+      const last = allContacts[allContacts.length - 1]
       const conn = await dbConnection
       await conn.manager.delete(Contact, { 'did' : last.did })
       utility.loadContacts(appSlice, appStore, dbConnection)
@@ -147,7 +141,7 @@ export function ContactsScreen({ navigation, route }) {
 
       utility.loadContacts(appSlice, appStore, dbConnection)
 
-    }, [appStore.getState().contacts])
+    }, [])
   )
 
   return (
@@ -190,76 +184,71 @@ export function ContactsScreen({ navigation, route }) {
             />
           </View>
         </View>
-        <View style={{ padding: 20 }}>
-          <FlatList
-            style={{ borderWidth: allContactsOrEmpty().length === 0 ? 0 : 1 }}
-            data={allContactsOrEmpty()}
-            keyExtractor={contact => contact.did}
-            renderItem={data =>
+        {/** good for tests, bad for users
+        **/}
+        <View>
+          <View style={{ marginTop: 5 }}>
+            <Button
+              title="Delete Last Contact"
+              onPress={deleteContact}
+            />
+          </View>
+        </View>
+        <View style={{ padding: 10 }}>
+          { allContacts && allContacts.length > 0
+            ? <View>
+                <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%' }}/>
+                <Text>All Contacts</Text>
+                <Button title="Copy All to Clipboard" onPress={copyToClipboard} />
+              </View>
+            : <View/>
+          }
+          { allContacts.map(contact => <View style={{ borderWidth: 1 }}>
               <View style={{ padding: 20 }}>
                 <Text style={{ fontSize: 11 }}>
-                  {data.item.name + '\n' + data.item.did}
+                  {contact.name + '\n' + contact.did}
                 </Text>
                 {
-                  loadingAction[data.item.did]
-                  ? <ActivityIndicator size={'large'} />
+                  loadingAction[contact.did]
+                  ? <ActivityIndicator color="#000000" />
                   : <View style={styles.centeredView}>
                     {
-                      R.isNil(data.item.seesMe)
+                      R.isNil(contact.seesMe)
                       ? <View>
                         <Button style={{ textAlign: 'center' }}
-                          title={`Can ${data.item.name} See Me?`}
-                          onPress={() => {checkVisibility(data.item)}}
+                          title={`Can ${contact.name} See My Activity?`}
+                          onPress={() => {checkVisibility(contact)}}
                         />
                         <Button
                           title="Make Me Visible"
-                          onPress={() => {allowToSeeMe(data.item)}}
+                          onPress={() => {allowToSeeMe(contact)}}
                         />
                       </View>
                       : <View>
                         <Text style={{ textAlign: 'center' }}>{
-                          `${data.item.name} can${data.item.seesMe ?'' : 'not'} see you.`
+                          `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity.`
                         }</Text>
                         {
-                          data.item.seesMe
+                          contact.seesMe
                           ? <Button
                             title="(Hide Me)"
-                            onPress={() => {disallowToSeeMe(data.item)}}
+                            onPress={() => {disallowToSeeMe(contact)}}
                           />
                           : <Button
                             title="(Unhide Me)"
-                            onPress={() => {allowToSeeMe(data.item)}}
+                            onPress={() => {allowToSeeMe(contact)}}
                           />
                         }
                         <Button
                           title={`(Double-Check Visibility)`}
-                          onPress={() => {checkVisibility(data.item)}}
+                          onPress={() => {checkVisibility(contact)}}
                         />
                       </View>
                     }
                   </View>
                 }
               </View>
-            }
-            ItemSeparatorComponent={() => <View style={styles.line}/>}
-          />
-          { allContactsOrEmpty().length > 0 ? (
-            <View>
-              <Button
-                title="Copy to Clipboard"
-                onPress={copyToClipboard}
-              />
-              {/** good for tests, bad for users
-              <View style={{ marginTop: 5 }}>
-                <Button
-                  title="Delete Last Contact"
-                  onPress={deleteContact}
-                />
-              </View>
-              **/}
             </View>
-          ) : (
-            <Text></Text>
           )}
         </View>
       </ScrollView>
