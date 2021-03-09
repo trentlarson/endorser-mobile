@@ -17,6 +17,7 @@ export function ContactsScreen({ navigation, route }) {
 
   const [contactDid, setContactDid] = useState<string>()
   const [contactName, setContactName] = useState<string>()
+  const [contactPubKeyBase64, setContactPubKeyBase64] = useState<string>()
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
 
@@ -37,6 +38,7 @@ export function ContactsScreen({ navigation, route }) {
       `
       ${contact.name}
       ${contact.did}
+      ${contact.pubKeyBase64}
       `
     )).join('\n\n')
   )
@@ -49,6 +51,7 @@ export function ContactsScreen({ navigation, route }) {
     const contact = new Contact()
     contact.did = contactDid
     contact.name = contactName
+    contact.pubKeyBase64 = contactPubKeyBase64
     //the seesMe value is unknown
 
     const conn = await dbConnection
@@ -159,7 +162,7 @@ export function ContactsScreen({ navigation, route }) {
             <Text>or enter by hand:</Text>
           </View>
           <View>
-            <Text>Name</Text>
+            <Text>Name (optional)</Text>
             <TextInput
               value={contactName}
               onChangeText={setContactName}
@@ -175,6 +178,15 @@ export function ContactsScreen({ navigation, route }) {
               autoCapitalize='none'
               autoCorrect={false}
             />
+            <Text>Public Key (base64-encoded, optional)</Text>
+            <TextInput
+              value={contactPubKeyBase64}
+              onChangeText={setContactPubKeyBase64}
+              editable
+              style={{ borderWidth: 1 }}
+              autoCapitalize='none'
+              autoCorrect={false}
+            />
           </View>
           <View style={{ alignItems: "center" }}>
             <Button
@@ -184,16 +196,15 @@ export function ContactsScreen({ navigation, route }) {
             />
           </View>
         </View>
-        {/** good for tests, bad for users
-        **/}
-        <View>
-          <View style={{ marginTop: 5 }}>
-            <Button
-              title="Delete Last Contact"
-              onPress={deleteContact}
-            />
-          </View>
-        </View>
+        { utility.TEST_MODE
+          ? <View style={{ marginTop: 5 }}>
+              <Button
+                title="Delete Last Contact"
+                onPress={deleteContact}
+              />
+            </View>
+          : <View/>
+        }
         <View style={{ padding: 10 }}>
           { allContacts && allContacts.length > 0
             ? <View>
@@ -203,10 +214,13 @@ export function ContactsScreen({ navigation, route }) {
               </View>
             : <View/>
           }
-          { allContacts.map(contact => <View style={{ borderWidth: 1 }}>
+          { allContacts.map(contact => (
+            <View style={{ borderWidth: 1 }} key={contact.did}>
               <View style={{ padding: 20 }}>
                 <Text style={{ fontSize: 11 }}>
-                  {contact.name + '\n' + contact.did}
+                  { (contact.name || '(no name)')
+                    + '\n' + contact.did
+                    + '\n' + (contact.pubKeyBase64 || '(no public key)')}
                 </Text>
                 {
                   loadingAction[contact.did]
@@ -249,7 +263,7 @@ export function ContactsScreen({ navigation, route }) {
                 }
               </View>
             </View>
-          )}
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -266,8 +280,11 @@ export function ContactImportScreen({ navigation }) {
   const [contactInfo, setContactInfo] = useState<Contact>()
   const [saved, setSaved] = useState<boolean>(false)
 
-  const onSuccessfulQR = async (e) => {
-    var jwtText = e.data
+  const onSuccessfulQrEvent = async (e) => {
+    onSuccessfulQrText(e.data)
+  }
+
+  const onSuccessfulQrText = async (jwtText) => {
     qrPrefixes.forEach((prefix) => {
       if (jwtText.startsWith(prefix)) {
         jwtText = jwtText.substring(prefix.length)
@@ -288,6 +305,7 @@ export function ContactImportScreen({ navigation }) {
       const contact = new Contact()
       contact.did = contactInfo.iss
       contact.name = contactInfo.own && contactInfo.own.name
+      contact.pubKeyBase64 = contactInfo.own && contactInfo.own.publicEncKey
       const newContact = await conn.manager.save(contact)
       setSaved(true)
       appStore.dispatch(appSlice.actions.setContacts(null)) // force reload
@@ -342,26 +360,21 @@ export function ContactImportScreen({ navigation }) {
           { contactInfo ? (
               <View>
                 <Text>Name: {(contactInfo.own && contactInfo.own.name) || ''}</Text>
+                <Text style={{ fontSize: 11 }}>Key: {(contactInfo.own && contactInfo.own.publicEncKey) || ''}</Text>
                 {/** fontSize 11 fits on an iPhone without wrapping **/}
                 <Text style={{ fontSize: 11 }}>{contactInfo.iss || ''}</Text>
               </View>
             ) : (
               <View>
-                <QRCodeScanner onRead={onSuccessfulQR} reactivate={true} />
+                <QRCodeScanner onRead={onSuccessfulQrEvent} reactivate={true} />
                 {/** Setting reactivate to true because sometimes it reads incorrectly, so we'll just try again. **/}
-                {/** good for tests, bad for users
-                <Button
-                  title='Fake It'
-                  onPress={() => onSuccessfulQR({data:JSON.stringify({
-                    iss:"did:ethr:0x5d2c57851928f0981edcdf65e75e5e73d899cdbs",
-                    own: {
-                        "name": "Trent",
-                        "publicEncKey": "Ua+sRNwveB4+X1g4bzOVPBofXf8hQMZs5xD5oXuZ9CA="
-                      }
-                    }
-                  )})}
-                />
-                **/}
+                { utility.TEST_MODE
+                  ? <Button
+                      title='Fake It'
+                      onPress={() => onSuccessfulQrText("http://10.0.0.88:3001/contact?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJpYXQiOjE2MTUyNjMwODc3OTMsImlzcyI6ImRpZDpldGhyOjB4M2YyMDVFMTgwOGU4NWVDREFmYTU0MGYyZEE1N0JkQzhkOWQyZDUxRCIsIm93biI6eyJuYW1lIjoiU3R1ZmYiLCJwdWJsaWNFbmNLZXkiOiJnM1oxbUpzSDlzRVVXM1ZremtXb2tZenlKRUdGUUFidG9QcnFqT0s3RWs0PSJ9fQ.h27enm55_0Bd06UJHAQWRmULwidOOhHNe2reqjYTAcVJvQ0aUTCEmP88HlJcZ3bUa-VbrXT76sqV6i19bQZ_PA")}
+                    />
+                  : <View/>
+                }
               </View>
             )
           }

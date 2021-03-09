@@ -271,14 +271,15 @@ export function SettingsScreen({navigation}) {
                 />
               </View>
             }
-            {/** good for tests, bad for users
-             <View style={{ marginTop: 200 }}>
-               <Button title="Create ID"
-               onPress={() => createAndStoreIdentifier().then(setNewId)}
-               />
-               <Button title="Delete Last ID" onPress={deleteIdentifier} />
-             </View>
-             **/}
+            { utility.TEST_MODE
+              ? <View style={{ marginTop: 200 }}>
+                  <Button title="Create ID"
+                    onPress={() => createAndStoreIdentifier().then(setNewId)}
+                  />
+                  <Button title="Delete Last ID" onPress={deleteIdentifier} />
+                </View>
+              : <View/>
+            }
           </View>
           <View>
             <Text style={{fontSize: 30, fontWeight: 'bold'}}>Other</Text>
