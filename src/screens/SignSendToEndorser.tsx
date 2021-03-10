@@ -245,7 +245,7 @@ export function CredentialsScreen({ navigation }) {
         <View style={{ padding: 20 }}>
           { identifiers[0] ? (
             <View>
-              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Credentials</Text>
+              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Claims</Text>
               <Text style={{ fontSize: 11 }}>{identifiers[0].did}</Text>
               { !hasMnemonic ? (
                 <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>

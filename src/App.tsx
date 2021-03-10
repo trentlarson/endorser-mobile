@@ -41,7 +41,7 @@ export default function App() {
             <Stack.Screen name="Community Endorser" component={HomeScreen} />
             <Stack.Screen name="ContactImport" component={ContactImportScreen} />
             <Stack.Screen name="Contacts" component={ContactsScreen} />
-            <Stack.Screen name="Credentials" component={CredentialsScreen} />
+            <Stack.Screen name="Claims" component={CredentialsScreen} />
             <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
@@ -57,8 +57,8 @@ function HomeScreen({ navigation }) {
   return (
     <View>
       <Button
-        title="Credentials"
-        onPress={() => navigation.navigate('Credentials')}
+        title="Claims"
+        onPress={() => navigation.navigate('Claims')}
       />
       <Button
         title="Contacts"

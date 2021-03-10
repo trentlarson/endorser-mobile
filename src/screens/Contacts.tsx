@@ -230,7 +230,7 @@ export function ContactsScreen({ navigation, route }) {
                       R.isNil(contact.seesMe)
                       ? <View>
                         <Button style={{ textAlign: 'center' }}
-                          title={`Can ${contact.name} See My Activity?`}
+                          title={`Can ${contact.name || 'They'} See My Activity?`}
                           onPress={() => {checkVisibility(contact)}}
                         />
                         <Button

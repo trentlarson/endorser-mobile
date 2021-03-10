@@ -8,16 +8,16 @@ import { Contact } from '../entity/contact'
 // See https://github.com/trentlarson/endorser-ch/blob/0cb626f803028e7d9c67f095858a9fc8542e3dbd/server/api/services/util.js#L6
 const HIDDEN_DID = 'did:none:HIDDEN'
 
-//export const DEFAULT_ENDORSER_API_SERVER = 'https://endorser.ch:3000'
-//export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
-export const DEFAULT_ENDORSER_API_SERVER = 'http://10.0.0.88:3000'
-export const DEFAULT_ENDORSER_VIEW_SERVER = 'http://10.0.0.88:3001'
+export const DEFAULT_ENDORSER_API_SERVER = 'https://endorser.ch:3000'
+export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
+//export const DEFAULT_ENDORSER_API_SERVER = 'http://10.0.0.88:3000'
+//export const DEFAULT_ENDORSER_VIEW_SERVER = 'http://10.0.0.88:3001'
 //export const DEFAULT_ENDORSER_API_SERVER = 'http://127.0.0.1:3000'
 //export const DEFAULT_ENDORSER_VIEW_SERVER = 'http://127.0.0.1:3001'
 //export const DEFAULT_ENDORSER_API_SERVER = 'http://192.168.43.114:3000'
 //export const DEFAULT_ENDORSER_VIEW_SERVER = 'http://192.168.43.114:3001'
 
-export const TEST_MODE = true
+export const TEST_MODE = false
 
 export const ENDORSER_JWT_URL_LOCATION = '/contact?jwt='
 
