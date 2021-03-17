@@ -3,7 +3,7 @@ import * as crypto from 'crypto'
 import { HDNode } from '@ethersproject/hdnode'
 import * as R from 'ramda'
 import React, { useEffect, useState } from "react"
-import { Button, FlatList, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
+import { ActivityIndicator, Button, FlatList, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
 import { CheckBox } from "react-native-elements"
 import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
@@ -144,6 +144,7 @@ function uportJwtPayload(did, name, publicKeyHex) {
 }
 
 export function SettingsScreen({navigation}) {
+  const [creatingId, setCreatingId] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [inputName, setInputName] = useState<string>('')
@@ -216,12 +217,23 @@ export function SettingsScreen({navigation}) {
     getIdentifiers()
   }, []) // Why does this loop infinitely with any variable, even with classToPlain(identifiers) that doesn't change?
 
+  useEffect(() => {
+    const createIdentifier = async () => {
+      createAndStoreIdentifier()
+      .then(setNewId)
+      .then(() => setCreatingId(false))
+    }
+    if (creatingId) {
+      createIdentifier()
+    }
+  }, [creatingId])
+
   return (
     <SafeAreaView>
       <ScrollView>
         <View style={{padding: 20}}>
-          <Text style={{fontSize: 30, fontWeight: 'bold'}}>Info</Text>
-          <View style={{marginBottom: 50, marginTop: 20}}>
+          <Text style={{fontSize: 30, fontWeight: 'bold'}}>Your Info</Text>
+          <View style={{ marginTop: 20 }}>
             <Text>Name</Text>
             <TextInput
               value={inputName ? inputName : ''}
@@ -229,53 +241,51 @@ export function SettingsScreen({navigation}) {
               editable
               style={{borderWidth: 1}}
             />
-            <Button
-              title={ 'Save' + (inputName === storedName ? 'd' : '') }
-              onPress={storeNewName}
-            />
-            <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%' }}/>
-            <Text style={{marginTop: 20}}>Identifier</Text>
+            { inputName === storedName
+              ? <View/>
+              : <View>
+                <Button title="Save" onPress={storeNewName} />
+                <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', marginBottom: 20 }}/>
+              </View>
+            }
+          </View>
+          <View style={{ marginTop: 20 }}>
             {
-              R.isEmpty(qrJwts)
+              R.isEmpty(identifiers)
               ?
                 <View>
                   <Text>There are no identifiers.</Text>
-                  <Button
-                    title={'Create Identifier'}
-                    onPress={() => createAndStoreIdentifier().then(setNewId)}
-                  />
+                  { creatingId
+                    ? <ActivityIndicator size={'large'}/>
+                    : <View>
+                      <Button title={'Create Identifier'} onPress={() => { setCreatingId(true) }} />
+                      <Button title="Import Identifier" onPress={() => navigation.navigate('Import Identifier')}
+                      />
+                    </View>
+                  }
                 </View>
               :
-                <View>
+                <View style={{ marginBottom: 60 }}>
+                  <Text>Identifier</Text>
                   { Object.keys(qrJwts).map(id =>
-                    <View key={id} style={{ marginTop: 40, marginBottom: 60 }}>
+                    <View key={id} style={{ marginTop: 40 }}>
                       <Text style={{ fontSize: 11, marginTop: 20, marginBottom: 20 }}>{id}</Text>
                       <Text style={{ marginBottom: 20 }}>Your Info</Text>
                       <QRCode value={qrJwts[id]} size={300}/>
                     </View>
                   )}
+                  <View style={{marginTop: 40}}>
+                    <Button
+                    title="Export Identifier"
+                    onPress={() => navigation.navigate('Export Identifier')}
+                    />
+                  </View>
                 </View>
             }
 
-            {(!identifiers || identifiers.length == 0) &&
-              <Button
-                title="Import Identifier"
-                onPress={() => navigation.navigate('Import Identifier')}
-              />
-            }
-            {identifiers && identifiers.length > 0 &&
-              <View style={{marginTop: 100}}>
-                <Button
-                title="Export Identifier"
-                onPress={() => navigation.navigate('Export Identifier')}
-                />
-              </View>
-            }
             { utility.TEST_MODE
               ? <View style={{ marginTop: 200 }}>
-                  <Button title="Create ID"
-                    onPress={() => createAndStoreIdentifier().then(setNewId)}
-                  />
+                  <Button title="Create ID" onPress={() => { setCreatingId(true) }} />
                   <Button title="Delete Last ID" onPress={deleteIdentifier} />
                 </View>
               : <View/>
