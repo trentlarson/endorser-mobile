@@ -23,12 +23,19 @@ Clean:
 
 To Release:
 
-- Update version in package.json
+- In package.json, update version
+- In src/utility/utility.ts: check servers, TEST_MODE is false
 - ios
-  - Update CFBundleShortVersionString and CFBundleVersion in ios/PRODUCT/Info.plist (if that's not done by fastlane beta)
+  - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString
   - `cd ios; bundle exec fastlane beta; cd ..`
+  - Note that CFBundleVersion is done by fastlane beta.
+  - Screenshot on different simulator: `yarn run ios --simulator="iPhone 8"`
+    6.5" (eg. iPhone 11)
+    take at 361x780 then scale to 1284x2778
+    5.5" (eg. iPhone 8)
+    ... 361x642 or 400x712 ... 1242x2208
 - android
   - In the android folder, put pc-api-7249509642322112640-286-534d849dfda0.json
   - In the android/app folder, put google-comm-endo-upload-key.keystore
-  - Update versionCode & versionName in android/app/build.gradle
+  - In android/app/build.gradle, update versionCode & versionName
   - `cd android; bundle exec fastlane beta; cd ..`
