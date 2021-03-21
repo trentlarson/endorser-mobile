@@ -19,8 +19,6 @@ const DEFAULT_DID_PROVIDER = 'did:ethr'
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
 const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 
-var setStatus = () => ''
-
 const newIdentifier = (address: string, publicHex: string, privateHex: string): Omit<IIdentifier, 'provider'> => {
   return {
     did: DEFAULT_DID_PROVIDER + ':' + address,
@@ -50,11 +48,9 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
     console.log('... with settings DB connection ready...')
     let newContact = await conn.manager.save(settings)
     console.log('... settings saved.')
-    setStatus(s => s + '\n ... saved mnemonic...')
 
     console.log('About to import identifier...')
     const savedId = await agent.didManagerImport(newId)
-    setStatus(s => s + '\n ... imported new ID...')
     console.log('... identifier imported.')
     return savedId
   } catch (e) {
@@ -107,9 +103,7 @@ const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) 
   // ... plus: import { HDNode } from '@ethersproject/hdnode'
   **/
   const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
-  setStatus(s => s + '\n ... created HDNode...')
   const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
-  setStatus(s => s + '\n ... derived root HDNode...')
   const privateHex = rootNode.privateKey.substring(2)
   const publicHex = rootNode.privateKey.substring(2)
   let address = rootNode.address
@@ -118,11 +112,9 @@ const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) 
   }
 
   const newId = newIdentifier(address, publicHex, privateHex)
-  setStatus(s => s + '\n ... got new identifier ' + address + '...')
 
   // awaiting because otherwise the UI may not see that a mnemonic was created
   const savedId = await storeIdentifier(newId, mnemonic)
-  setStatus(s => s + '\n ... saved ID...')
   return savedId
 }
 
@@ -133,9 +125,7 @@ const createAndStoreIdentifier = async () => {
   //const id = await agent.didManagerCreate()
 
   const entropy = crypto.randomBytes(32)
-  setStatus(s => s + '\n Created entropy...')
   const mnemonic = bip39.entropyToMnemonic(entropy)
-  setStatus(s => s + '\n ... set mnemonic...')
 
   return importAndStoreIdentifier(mnemonic)
 }
@@ -181,7 +171,6 @@ export function SettingsScreen({navigation}) {
     if (settings?.mnemonic) {
       setHasMnemonic(true)
     }
-    setStatus(s => s + '\n ... stored in DB...')
 
     const sharePayload = uportJwtPayload(ident, inputName, ident.keys[0].publicKeyHex)
     setQrJwtForPayload(ident, sharePayload)
@@ -199,7 +188,6 @@ export function SettingsScreen({navigation}) {
 
   const setQrJwtForPayload = async (identifier, payload) => {
     const newJwt = await utility.createJwt(identifier, payload)
-    setStatus(s => s + '\n ... created JWT.')
     const viewPrefix = appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION
     const qrJwt = viewPrefix + newJwt
     setQrJwts(jwts => R.set(R.lensProp(identifier.did), qrJwt, jwts))
@@ -240,8 +228,6 @@ export function SettingsScreen({navigation}) {
       createIdentifier()
     }
   }, [creatingId])
-
-  setStatus = setCreateStatus
 
   return (
     <SafeAreaView>
