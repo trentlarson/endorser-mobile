@@ -259,10 +259,11 @@ export function SettingsScreen({navigation}) {
                   { creatingId
                     ? <View>
                       <Text>{createStatus}</Text>
-                      <ActivityIndicator size={'large'}/>
+                      <ActivityIndicator size="large" color="#00ff00" />
                     </View>
                     : <View>
                       <Button title="Create Identifier" onPress={() => { setCreatingId(true) }} />
+                      <View style={{ padding: 5 }} />
                       <Button title="Import Identifier" onPress={() => navigation.navigate('Import Identifier')}
                       />
                     </View>
@@ -273,7 +274,7 @@ export function SettingsScreen({navigation}) {
                   <Text>Identifier</Text>
                   { Object.keys(qrJwts).map(id =>
                     <View key={id} style={{ marginTop: 40 }}>
-                      <Text style={{ fontSize: 11, marginTop: 20, marginBottom: 20 }}>{id}</Text>
+                      <Text style={{ fontSize: 11, marginTop: 20, marginBottom: 20 }} selectable={true}>{id}</Text>
                       <Text style={{ marginBottom: 20 }}>Your Info</Text>
                       <QRCode value={qrJwts[id]} size={300}/>
                     </View>
@@ -290,6 +291,7 @@ export function SettingsScreen({navigation}) {
             { utility.TEST_MODE
               ? <View style={{ marginTop: 200 }}>
                   <Button title="Create ID" onPress={() => { setCreatingId(true) }} />
+                  <View style={{ padding: 5 }} />
                   <Button title="Delete Last ID" onPress={deleteIdentifier} />
                 </View>
               : <View/>

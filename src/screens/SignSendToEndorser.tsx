@@ -288,7 +288,7 @@ export function CredentialsScreen({ navigation }) {
                                 : ''
                               }</Text>
                               { loadingRecentClaims
-                                ? <ActivityIndicator size={'large'} />
+                                ? <ActivityIndicator size="large" color="#00ff00" />
                                 : <Button
                                     title={'Load Previous to ' + monthDayLoaded()}
                                     onPress={loadRecentClaims}
@@ -334,7 +334,7 @@ export function CredentialsScreen({ navigation }) {
                     fetching ? (
                       <View>
                         <Text>Saving to Endorser.ch server...</Text>
-                        <ActivityIndicator size={'large'} />
+                        <ActivityIndicator size="large" color="#00ff00" />
                       </View>
                     ) : ( /* !fetched && !fetching */
 
@@ -345,6 +345,7 @@ export function CredentialsScreen({ navigation }) {
                             title={'Attendance at ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' Meeting'}
                             onPress={setClaimToAttendance}
                           />
+                          <View style={{ padding: 5 }} />
                           <Button
                             title={'Confirmation of Other Claims'}
                             onPress={() => {
@@ -363,10 +364,12 @@ export function CredentialsScreen({ navigation }) {
                 {
                   claimStr ? (
                     <View>
+                      <View style={{ padding: 5 }} />
                       <Button
                         title={'Sign & Store'}
                         onPress={signAndSend}
                       />
+                      <View style={{ padding: 5 }} />
                       <Button
                         title={'Reset'}
                         onPress={() => setClaimStr('')}
