@@ -113,9 +113,15 @@ function HelpScreen() {
           <Text style={{ fontWeight: 'bold' }}>This is stupid (or fantastic). Who do I blame?</Text>
           <Text>Trent, via: </Text><Text selectable={true}>CommunityEndorser@gmail.com</Text>
         </View>
+
         <View style={{ padding: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>What is the version info?</Text>
+          <Text style={{ fontWeight: 'bold' }}>What is this version info?</Text>
           <Text selectable={true}>{ pkg.version }</Text>
+        </View>
+
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>Do I need to upgrade?</Text>
+          <Text>Double-check in <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://play.google.com/store/apps/details?id=ch.endorser.mobile')}>the Play Store</Text>.</Text>
         </View>
 
       </ScrollView>

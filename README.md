@@ -24,11 +24,12 @@ Clean:
 To Release:
 
 - In package.json, update version
-- In src/utility/utility.ts: check servers, TEST_MODE is false
+- In src/utility/utility.ts: servers are endorser.ch, TEST_MODE is false
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString
-  - `cd ios; bundle exec fastlane beta; cd ..`
   - (Note that CFBundleVersion is done by fastlane beta.)
+  - `cd ios; bundle exec fastlane beta; cd ..`
+  - To create a new release: under App description under "Build" and to the right, click the red icon to remove that version, then add another version.
   - Screenshot on different simulator: `yarn run ios --simulator="iPhone 8"`
     6.5" (eg. iPhone 11)
     take at 361x780 then scale to 1284x2778
