@@ -3,7 +3,7 @@
 import 'react-native-gesture-handler'
 import 'reflect-metadata'
 import React from 'react'
-import { Button, Linking, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
@@ -111,17 +111,29 @@ function HelpScreen() {
 
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>This is stupid (or fantastic). Who do I blame?</Text>
-          <Text>Trent, via: </Text><Text selectable={true}>CommunityEndorser@gmail.com</Text>
+          <Text>Trent, via:</Text>
+          <Text selectable={true}>CommunityEndorser@gmail.com</Text>
         </View>
+
+        { Platform.OS === 'android'
+          ?
+            <View style={{ padding: 20 }}>
+              <Text style={{ fontWeight: 'bold' }}>Do I need to upgrade?</Text>
+              <Text>Double-check in <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://play.google.com/store/apps/details?id=ch.endorser.mobile')}>the Play Store</Text>.</Text>
+            </View>
+          : Platform.OS === 'ios'
+            ?
+              <View style={{ padding: 20 }}>
+               <Text style={{ fontWeight: 'bold' }}>Do I need to upgrade?</Text>
+               <Text>Double-check in <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://apps.apple.com/us/app/endorser-mobile/id1556368693')}>the App Store</Text>.</Text>
+              </View>
+            :
+              <Text/>
+       }
 
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>What is this version info?</Text>
           <Text selectable={true}>{ pkg.version }</Text>
-        </View>
-
-        <View style={{ padding: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>Do I need to upgrade?</Text>
-          <Text>Double-check in <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://play.google.com/store/apps/details?id=ch.endorser.mobile')}>the Play Store</Text>.</Text>
         </View>
 
       </ScrollView>
