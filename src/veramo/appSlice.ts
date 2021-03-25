@@ -21,9 +21,14 @@ export const appSlice = createSlice({
     apiServer: utility.DEFAULT_ENDORSER_API_SERVER,
     viewServer: utility.DEFAULT_ENDORSER_VIEW_SERVER,
 
+    logMessage: '',
+
     testMode: false,
   },
   reducers: {
+    addLog: (state, contents: Payload<string>) => {
+      state.logMessage += "\n" + contents.payload
+    },
     setContacts: (state, contents: Payload<Array<Contact>>) => {
       state.contacts = contents.payload
     },
