@@ -3,7 +3,7 @@ import * as crypto from 'crypto'
 import { HDNode } from '@ethersproject/hdnode'
 import * as R from 'ramda'
 import React, { useEffect, useState } from "react"
-import { ActivityIndicator, Button, FlatList, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
+import { ActivityIndicator, Alert, Button, FlatList, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
 import { CheckBox } from "react-native-elements"
 import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
@@ -151,6 +151,7 @@ export function SettingsScreen({navigation}) {
   const [inputName, setInputName] = useState<string>('')
   const [storedName, setStoredName] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
+  const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
 
   const deleteIdentifier = async () => {
     if (identifiers.length > 0) {
@@ -229,6 +230,16 @@ export function SettingsScreen({navigation}) {
     }
   }, [creatingId])
 
+  useEffect(() => {
+    const setNewTestMode = async (setting) => {
+      appStore.dispatch(appSlice.actions.setTestMode(setting))
+      if (setting) {
+        Alert.alert('Beware! In test mode you have the ability to delete your data and lose it.')
+      }
+    }
+    setNewTestMode(isInTestMode)
+  }, [isInTestMode])
+
   return (
     <SafeAreaView>
       <ScrollView>
@@ -288,7 +299,7 @@ export function SettingsScreen({navigation}) {
                 </View>
             }
 
-            { utility.TEST_MODE
+            { isInTestMode
               ? <View style={{ marginTop: 200 }}>
                   <Button title="Create ID" onPress={() => { setCreatingId(true) }} />
                   <View style={{ padding: 5 }} />
@@ -315,6 +326,11 @@ export function SettingsScreen({navigation}) {
               }}>
               {appStore.getState().viewServer}
             </TextInput>
+            <CheckBox
+              title='Test Mode'
+              checked={isInTestMode}
+              onPress={() => {setIsInTestMode(!isInTestMode)}}
+            />
           </View>
         </View>
       </ScrollView>

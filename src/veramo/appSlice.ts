@@ -20,6 +20,8 @@ export const appSlice = createSlice({
 
     apiServer: utility.DEFAULT_ENDORSER_API_SERVER,
     viewServer: utility.DEFAULT_ENDORSER_VIEW_SERVER,
+
+    testMode: false,
   },
   reducers: {
     setContacts: (state, contents: Payload<Array<Contact>>) => {
@@ -34,6 +36,9 @@ export const appSlice = createSlice({
     },
     setViewServer: (state, contents: Payload<string>) => {
       state.viewServer = contents.payload
+    },
+    setTestMode: (state, contents: Payload<boolean>) => {
+      state.testMode = contents.payload
     },
   }
 })

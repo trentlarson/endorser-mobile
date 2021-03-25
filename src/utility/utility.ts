@@ -17,8 +17,6 @@ export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
 //export const DEFAULT_ENDORSER_API_SERVER = 'http://192.168.43.114:3000'
 //export const DEFAULT_ENDORSER_VIEW_SERVER = 'http://192.168.43.114:3001'
 
-export const TEST_MODE = false
-
 export const ENDORSER_JWT_URL_LOCATION = '/contact?jwt='
 
 function isDid(value) {
