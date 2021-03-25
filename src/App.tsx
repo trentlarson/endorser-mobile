@@ -5,6 +5,7 @@ import 'reflect-metadata'
 import React from 'react'
 import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import VersionNumber from 'react-native-version-number';
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { Provider } from 'react-redux';
@@ -133,7 +134,7 @@ function HelpScreen() {
 
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>What is this version info?</Text>
-          <Text selectable={true}>{ pkg.version }</Text>
+          <Text selectable={true}>{ pkg.version }.{ VersionNumber.buildVersion }</Text>
         </View>
 
       </ScrollView>

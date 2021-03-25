@@ -26,7 +26,7 @@ To Release:
 - In package.json, update version
 - In src/utility/utility.ts: servers are endorser.ch, TEST_MODE is false
 - ios
-  - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString
+  - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json
   - (Note that CFBundleVersion is done by fastlane beta.)
   - `cd ios; bundle exec fastlane beta; cd ..`
   - To create a new release: under App description under "Build" and to the right, click the red icon to remove that version, then add another version.
@@ -39,7 +39,7 @@ To Release:
 - android
   - In the android folder, put pc-api-7249509642322112640-286-534d849dfda0.json
   - In the android/app folder, put google-comm-endo-upload-key.keystore
-  - In android/app/build.gradle, update versionCode & versionName
+  - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number)
   - `cd android; bundle exec fastlane beta; cd ..`
   - To create a new release & upload, do one of these in Google Play Console:
     - In Production, "Create new release" (unless it says "Edit release")
