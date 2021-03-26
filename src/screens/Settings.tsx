@@ -49,6 +49,108 @@ function uportJwtPayload(did, name, publicKeyHex) {
   }
 }
 
+const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: string) => {
+
+  try {
+    /**
+      First save the mnemonic, because: we've seen cases where the identifier import fails, and if they don't have the mnemonic then they can't restore their identifier, but maybe if the mnemonic is saved then they can export and import it through the UI.
+     **/
+    const settings = new Settings()
+    settings.id = MASTER_COLUMN_VALUE
+    settings.mnemonic = mnemonic
+
+    const conn = await dbConnection
+    appStore.dispatch(appSlice.actions.addLog("... got DB connection..."))
+
+    let newContact = await conn.manager.save(settings)
+    appStore.dispatch(appSlice.actions.addLog("... mnemonic saved..."))
+
+    const savedId = await agent.didManagerImport(newId)
+    appStore.dispatch(appSlice.actions.addLog("... identifier imported by DID Manager..."))
+
+    return savedId
+  } catch (e) {
+    // In release mode, a thrown error didn't give any helpful info.
+    appStore.dispatch(appSlice.actions.addLog("Got error in storeIdentifier: " + e))
+
+    // I have seen cases where each of these give different, helpful info.
+    console.log('Error storing identifier, 1:', e)
+    console.log('Error storing identifier, 2: ' + e)
+    console.log('Error storing identifier, 3:', e.toString())
+    throw e
+  }
+}
+
+// Import and existing ID
+const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) => {
+
+  /**
+  // an approach I pieced together
+  // requires: yarn add elliptic
+  // ... plus:
+  // const EC = require('elliptic').ec
+  // const secp256k1 = new EC('secp256k1')
+  //
+  const keyHex: string = bip39.mnemonicToEntropy(mnemonic)
+  // returns a KeyPair from the elliptic.ec library
+  const keyPair = secp256k1.keyFromPrivate(keyHex, 'hex')
+  // this code is from did-provider-eth createIdentifier
+  const privateHex = keyPair.getPrivate('hex')
+  const publicHex = keyPair.getPublic('hex')
+  const address = didJwt.toEthereumAddress(publicHex)
+  **/
+
+  /**
+  // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+  // ... which almost works but the didJwt.toEthereumAddress is wrong
+  // requires: yarn add bip32
+  // ... plus: import * as bip32 from 'bip32'
+  //
+  const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
+  const root = bip32.fromSeed(seed)
+  const node = root.derivePath(UPORT_ROOT_DERIVATION_PATH)
+  const privateHex = node.privateKey.toString("hex")
+  const publicHex = node.publicKey.toString("hex")
+  const address = didJwt.toEthereumAddress('0x' + publicHex)
+  **/
+
+  /**
+  // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+  // requires: yarn add @ethersproject/hdnode
+  // ... plus: import { HDNode } from '@ethersproject/hdnode'
+  **/
+  const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
+  const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
+  const privateHex = rootNode.privateKey.substring(2)
+  const publicHex = rootNode.privateKey.substring(2)
+  let address = rootNode.address
+  if (toLowercase) {
+    address = address.toLowerCase()
+  }
+  appStore.dispatch(appSlice.actions.addLog("... derived keys and address..."))
+
+  const newId = newIdentifier(address, publicHex, privateHex)
+  appStore.dispatch(appSlice.actions.addLog("... created new ID..."))
+
+  // awaiting because otherwise the UI may not see that a mnemonic was created
+  const savedId = await storeIdentifier(newId, mnemonic)
+  appStore.dispatch(appSlice.actions.addLog("... stored new ID..."))
+  return savedId
+}
+
+// Create a totally new ID
+const createAndStoreIdentifier = async () => {
+
+  // This doesn't give us the entropy/seed.
+  //const id = await agent.didManagerCreate()
+
+  const entropy = crypto.randomBytes(32)
+  const mnemonic = bip39.entropyToMnemonic(entropy)
+  appStore.dispatch(appSlice.actions.addLog("... generated mnemonic..."))
+
+  return importAndStoreIdentifier(mnemonic)
+}
+
 export function SettingsScreen({navigation}) {
   const [createStatus, setCreateStatus] = useState<string>('')
   const [creatingId, setCreatingId] = useState<boolean>(false)
@@ -58,106 +160,6 @@ export function SettingsScreen({navigation}) {
   const [storedName, setStoredName] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
-
-  const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: string) => {
-
-    try {
-      /**
-        First save the mnemonic, because: we've seen cases where the identifier import fails, and if they don't have the mnemonic then they can't restore their identifier, but maybe if the mnemonic is saved then they can export and import it through the UI.
-       **/
-      console.log('About to save settings...')
-      const settings = new Settings()
-      settings.id = MASTER_COLUMN_VALUE
-      settings.mnemonic = mnemonic
-      const conn = await dbConnection
-      console.log('... with settings DB connection ready...')
-      let newContact = await conn.manager.save(settings)
-      console.log('... settings saved.')
-
-      console.log('About to import identifier...')
-      const savedId = await agent.didManagerImport(newId)
-      console.log('... identifier imported.')
-      return savedId
-    } catch (e) {
-      // In release mode, a thrown error didn't give any helpful info.
-
-      // I have seen cases where each of these give different, helpful info.
-      console.log('Error storing identifier, 1:', e)
-      console.log('Error storing identifier, 2: ' + e)
-      console.log('Error storing identifier, 3:', e.toString())
-      throw e
-    }
-  }
-
-  // Import and existing ID
-  const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) => {
-
-    /**
-    // an approach I pieced together
-    // requires: yarn add elliptic
-    // ... plus:
-    // const EC = require('elliptic').ec
-    // const secp256k1 = new EC('secp256k1')
-    //
-    const keyHex: string = bip39.mnemonicToEntropy(mnemonic)
-    // returns a KeyPair from the elliptic.ec library
-    const keyPair = secp256k1.keyFromPrivate(keyHex, 'hex')
-    // this code is from did-provider-eth createIdentifier
-    const privateHex = keyPair.getPrivate('hex')
-    const publicHex = keyPair.getPublic('hex')
-    const address = didJwt.toEthereumAddress(publicHex)
-    **/
-
-    /**
-    // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
-    // ... which almost works but the didJwt.toEthereumAddress is wrong
-    // requires: yarn add bip32
-    // ... plus: import * as bip32 from 'bip32'
-    //
-    const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
-    const root = bip32.fromSeed(seed)
-    const node = root.derivePath(UPORT_ROOT_DERIVATION_PATH)
-    const privateHex = node.privateKey.toString("hex")
-    const publicHex = node.publicKey.toString("hex")
-    const address = didJwt.toEthereumAddress('0x' + publicHex)
-    **/
-
-    /**
-    // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
-    // requires: yarn add @ethersproject/hdnode
-    // ... plus: import { HDNode } from '@ethersproject/hdnode'
-    **/
-    const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
-    const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
-    const privateHex = rootNode.privateKey.substring(2)
-    const publicHex = rootNode.privateKey.substring(2)
-    let address = rootNode.address
-    if (toLowercase) {
-      address = address.toLowerCase()
-    }
-    appStore.dispatch(appSlice.actions.addLog("... derived keys and address..."))
-
-    const newId = newIdentifier(address, publicHex, privateHex)
-    appStore.dispatch(appSlice.actions.addLog("... created new ID..."))
-
-    // awaiting because otherwise the UI may not see that a mnemonic was created
-    const savedId = await storeIdentifier(newId, mnemonic)
-    appStore.dispatch(appSlice.actions.addLog("... stored new ID..."))
-    return savedId
-  }
-
-  // Create a totally new ID
-  const createAndStoreIdentifier = async () => {
-
-    // This doesn't give us the entropy/seed.
-    //const id = await agent.didManagerCreate()
-
-    const entropy = crypto.randomBytes(32)
-    const mnemonic = bip39.entropyToMnemonic(entropy)
-    appStore.dispatch(appSlice.actions.addLog("... generated mnemonic..."))
-
-    return importAndStoreIdentifier(mnemonic)
-  }
 
   const deleteIdentifier = async () => {
     if (identifiers.length > 0) {
@@ -320,7 +322,7 @@ export function SettingsScreen({navigation}) {
             <Text style={{fontSize: 30, fontWeight: 'bold'}}>Other</Text>
 
             <View style={{ marginBottom: 20 }}>
-              <Text selectable={true}>Version { pkg.version }.{ VersionNumber.buildVersion }</Text>
+              <Text selectable={true}>Version { pkg.version } ({ VersionNumber.buildVersion })</Text>
             </View>
 
             <Text>Endorser API Server</Text>
@@ -428,7 +430,9 @@ export function ImportIdentityScreen({navigation}) {
   }, [])
 
   const importIdentifier = async () => {
+    appStore.dispatch(appSlice.actions.addLog("Importing identifier..."))
     importAndStoreIdentifier(mnemonic, makeLowercase).then(newIdentifier => {
+      appStore.dispatch(appSlice.actions.addLog("... totally finished importing identifier."))
       setIdentifier(newIdentifier)
       setIdChanged(true)
 
