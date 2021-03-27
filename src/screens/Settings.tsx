@@ -55,9 +55,12 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
     /**
       First save the mnemonic, because: we've seen cases where the identifier import fails, and if they don't have the mnemonic then they can't restore their identifier, but maybe if the mnemonic is saved then they can export and import it through the UI.
      **/
+    appStore.dispatch(appSlice.actions.addLog("... about to create Settings entity..."))
+
     const settings = new Settings()
     settings.id = MASTER_COLUMN_VALUE
     settings.mnemonic = mnemonic
+    appStore.dispatch(appSlice.actions.addLog("... created Settings entity..."))
 
     const conn = await dbConnection
     appStore.dispatch(appSlice.actions.addLog("... got DB connection..."))

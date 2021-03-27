@@ -41,6 +41,8 @@ To Release:
   - In the android/app folder, put google-comm-endo-upload-key.keystore
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number)
   - `cd android; bundle exec fastlane beta; cd ..`
-  - To create a new release & upload, do one of these in Google Play Console:
-    - In Production, "Create new release" (unless it says "Edit release")
-    - In "Releases overview" under "Latest releases" click arrow on right of next release.
+  - To create a new release & upload:
+    - Do one of these in Google Play Console:
+      - In Production, "Create new release" (unless it says "Edit release")
+      - In "Releases overview" under "Latest releases" click arrow on right of next release.
+    - After uploading, "Save", "Review Release", then "Rollout to Production".
