@@ -12,7 +12,6 @@ import { Provider } from 'react-redux';
 
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
-import { agent, dbConnection } from './veramo/setup'
 import { appStore } from './veramo/appSlice.ts'
 import { CredentialsScreen } from './screens/SignSendToEndorser'
 import { ContactImportScreen, ContactsScreen } from './screens/Contacts'

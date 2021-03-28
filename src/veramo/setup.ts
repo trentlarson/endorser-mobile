@@ -31,24 +31,26 @@ import { createConnection } from 'typeorm'
 import { Contact } from '../entity/contact'
 import { Settings } from '../entity/settings'
 
+import { Initial1616938713828 } from '../migration/1616938713828-initial'
+import { SettingsContacts1616967972293 } from '../migration/1616967972293-settings-contacts'
 
 // You will need to get a project ID from infura https://www.infura.io
 const INFURA_PROJECT_ID = '0f439b3b9237480ea8eb9da7b1f3965a'
 
-
 const ALL_ENTITIES = Entities.concat([Contact, Settings])
 
 
-// Create react native db connection
-export const dbConnection = createConnection({
-  type: 'react-native',
-  database: 'veramo.sqlite',
-  location: 'default',
-  synchronize: true,
-  logging: ['error', 'info', 'warn'],
-  entities: ALL_ENTITIES,
-})
 
+// Create react native DB connection configured by ormconfig.js
+export const dbConnection = createConnection({
+  database: 'endorser-mobile.sqlite',
+  entities: ALL_ENTITIES,
+  location: 'default',
+  logging: ['error', 'info', 'warn'],
+  migrations: [ Initial1616938713828, SettingsContacts1616967972293 ],
+  migrationsRun: true,
+  type: 'react-native',
+})
 
 function didProvider(netName) {
   return 'did:ethr' + (netName === 'mainnet' ? '' : ':' + netName)

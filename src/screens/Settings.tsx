@@ -73,8 +73,11 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 
     return savedId
   } catch (e) {
+
+    // For some reason, we don't see any error pop-up when we get here (at least in prod, both iOS and Android).
+
     // In release mode, a thrown error didn't give any helpful info.
-    appStore.dispatch(appSlice.actions.addLog("Got error in storeIdentifier: " + e))
+    appStore.dispatch(appSlice.actions.addLog("Got error in Settings.storeIdentifier: " + e))
 
     // I have seen cases where each of these give different, helpful info.
     console.log('Error storing identifier, 1:', e)

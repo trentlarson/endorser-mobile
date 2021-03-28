@@ -6,10 +6,10 @@
     "android": "react-native run-android",
     "clean": "./node_modules/.bin/react-native-clean-project",
     "ios": "react-native run-ios",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "postinstall": "rn-nodeify --install assert,buffer,process,crypto,stream,vm --hack",
     "start": "react-native start",
-    "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "test": "jest"
   },
   "dependencies": {
     "@ethersproject/hdnode": "^5.0.9",
