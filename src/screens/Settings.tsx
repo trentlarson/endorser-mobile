@@ -9,12 +9,12 @@ import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
 import Clipboard from "@react-native-community/clipboard"
 import VersionNumber from 'react-native-version-number'
-import { IIdentifier  } from "@veramo/core"
+import { IIdentifier } from "@veramo/core"
 
 import * as pkg from '../../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
-import { appSlice, appStore, Identifier } from "../veramo/appSlice"
+import { appSlice, appStore } from "../veramo/appSlice"
 import { agent, dbConnection } from "../veramo/setup"
 
 const DEFAULT_DID_PROVIDER = 'did:ethr'
@@ -160,7 +160,7 @@ const createAndStoreIdentifier = async () => {
 export function SettingsScreen({navigation}) {
   const [createStatus, setCreateStatus] = useState<string>('')
   const [creatingId, setCreatingId] = useState<boolean>(false)
-  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
+  const [identifiers, setIdentifiers] = useState<Omit<IIdentifier, 'provider'>[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [inputName, setInputName] = useState<string>('')
   const [storedName, setStoredName] = useState<string>('')
@@ -255,6 +255,7 @@ export function SettingsScreen({navigation}) {
     }
     setNewTestMode(isInTestMode)
   }, [isInTestMode])
+
 
   return (
     <SafeAreaView>
@@ -421,7 +422,7 @@ export function ExportIdentityScreen({navigation}) {
 }
 
 export function ImportIdentityScreen({navigation}) {
-  const [identifier, setIdentifier] = useState<Identifier>()
+  const [identifier, setIdentifier] = useState<Omit<IIdentifier, 'provider'>>()
   const [makeLowercase, setMakeLowercase] = useState<boolean>(false)
   const [mnemonic, setMnemonic] = useState<String>('')
   const [idChanged, setIdChanged] = useState<boolean>(false)
