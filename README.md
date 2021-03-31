@@ -30,6 +30,7 @@ To Release:
   - (Note that CFBundleVersion is done by fastlane beta.)
   - `cd ios; bundle exec fastlane beta; cd ..`
   - To create a new release: under App description under "Build" and to the right, click the red icon to remove that version, then add another version.
+    - Submit it for review, and after they approve the review then you can test in TestFlight or release.
   - Screenshot on different simulator: `yarn run ios --simulator="iPhone 8"`
     6.5" (eg. iPhone 11)
     take at 361x780 then scale to 1284x2778
@@ -37,6 +38,7 @@ To Release:
     ... 361x642 or 400x712 ... 1242x2208
   - Add screenshots to version control.
 - android
+  - In node_modules/@veramo/data-store, all Entity() calls need the name inside.
   - In the android folder, put pc-api-7249509642322112640-286-534d849dfda0.json
   - In the android/app folder, put google-comm-endo-upload-key.keystore
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number)
