@@ -6,7 +6,8 @@ import { Entity, Column, BaseEntity, PrimaryColumn } from 'typeorm'
 
 export const MASTER_COLUMN_VALUE = 'MASTER'
 
-@Entity()
+// The default is to use the class name but somehow Android loses the name in the apk.
+@Entity("settings")
 export class Settings extends BaseEntity {
   // The ones in @veramo/data-store don't require explicit types but I get ColumnTypeUndefinedError
 

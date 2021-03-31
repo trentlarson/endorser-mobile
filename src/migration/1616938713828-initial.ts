@@ -26,6 +26,9 @@ const INITIAL_SQL = [
 
 export class Initial1616938713828 implements MigrationInterface {
 
+  // The default is to use the class name but somehow Android loses the name in the apk.
+  public name = "Initial1616938713828"
+
   public async up(queryRunner: QueryRunner): Promise<any> {
     console.log('Starting initial migration...')
     const initialProms = INITIAL_SQL.map(async (sql, index) => {

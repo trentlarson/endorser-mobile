@@ -2,6 +2,9 @@ import {MigrationInterface, QueryRunner} from "typeorm";
 
 export class SettingsContacts1616967972293 implements MigrationInterface {
 
+  // The default is to use the class name but somehow Android loses the name in the apk.
+  public name = "SettingsContacts1616967972293"
+
   public async up(queryRunner: QueryRunner): Promise<any> {
     const settingsSql = "CREATE TABLE \"settings\" (\"id\" text PRIMARY KEY NOT NULL, \"mnemonic\" text, \"name\" text)"
     let result
