@@ -48,3 +48,7 @@ To Release:
       - In Production, "Create new release" (unless it says "Edit release")
       - In "Releases overview" under "Latest releases" click arrow on right of next release.
     - After uploading, "Save", "Review Release", then "Rollout to Production".
+
+- ... and after that upload:
+  - Bump the version in package.json as well as the Android files.
+  - Make sure to commit those changes to git.
