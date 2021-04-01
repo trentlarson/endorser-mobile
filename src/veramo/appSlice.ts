@@ -4,6 +4,15 @@ import { configureStore, createSlice } from '@reduxjs/toolkit'
 import { Contact } from '../entity/contact'
 import * as utility from '../utility/utility'
 
+const DEFAULT_ENDORSER_API_SERVER = 'https://endorser.ch:3000'
+const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
+//const DEFAULT_ENDORSER_API_SERVER = 'http://192.168.1.8:3000'
+//const DEFAULT_ENDORSER_VIEW_SERVER = 'http://192.168.1.8:3001'
+//const DEFAULT_ENDORSER_API_SERVER = 'http://127.0.0.1:3000'
+//const DEFAULT_ENDORSER_VIEW_SERVER = 'http://127.0.0.1:3001'
+//const DEFAULT_ENDORSER_API_SERVER = 'http://192.168.43.114:3000'
+//const DEFAULT_ENDORSER_VIEW_SERVER = 'http://192.168.43.114:3001'
+
 // for contents set in reducers
 interface Payload<T> {
   type: string;
