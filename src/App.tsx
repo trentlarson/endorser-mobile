@@ -39,7 +39,7 @@ export default function App() {
         <NavigationContainer>
           <Stack.Navigator>
             <Stack.Screen name="Community Endorser" component={HomeScreen} />
-            <Stack.Screen name="ContactImport" component={ContactImportScreen} />
+            <Stack.Screen name="Contact Import" component={ContactImportScreen} />
             <Stack.Screen name="Contacts" component={ContactsScreen} />
             <Stack.Screen name="Claims" component={CredentialsScreen} />
             <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
