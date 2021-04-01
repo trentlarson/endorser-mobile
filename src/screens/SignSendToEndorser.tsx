@@ -137,11 +137,16 @@ export function CredentialsScreen({ navigation }) {
     }
   }
 
-  async function sendToEndorserSite(jwt: string) {
+  /**
+   * return promise of claim ID from Endorser server
+   */
+  async function sendToEndorserSite(jwt: string): Promise<string> {
     setFetching(true)
+    appStore.dispatch(appSlice.actions.addLog("Starting the send to Endorser server..."))
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
-    fetch(endorserApiServer + '/api/claim', {
+    appStore.dispatch(appSlice.actions.addLog("... sending to server..."))
+    return fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -150,19 +155,24 @@ export function CredentialsScreen({ navigation }) {
       body: JSON.stringify({ jwtEncoded: jwt }),
     })
     .then(async resp => {
+      appStore.dispatch(appSlice.actions.addLog("... got server response..."))
       setFetching(false)
       setFetched(true)
       debug('Got endorser.ch status', resp.status)
+      appStore.dispatch(appSlice.actions.addLog("... got server status " + resp.status + "..."))
       if (resp.ok) {
+        appStore.dispatch(appSlice.actions.addLog("... finished the send to Endorser server."))
         return resp.json()
       } else {
         const text = await resp.text()
+        appStore.dispatch(appSlice.actions.addLog("... finished with error text: " + text))
         throw Error('Got failure response code of ' + resp.status + ' with body text of ' + text)
       }
     })
     .then(json => {
       debug('Got endorser.ch result', json)
       setEndorserId(json)
+      return json
     })
     .catch(err => {
       debug('Got error sending to ' + endorserApiServer, err)
@@ -176,23 +186,41 @@ export function CredentialsScreen({ navigation }) {
 
   }
 
-  async function signAndSend() {
-    /**
-    // would like to use https://www.npmjs.com/package/did-jwt-vc
-    // but: "TypeError: Object is not a constructor (evaluating 'new EthrDID')"
-    const issuer: Issuer = new EthrDID({
-      address: '0xf1232f840f3ad7d23fcdaa84d6c66dac24efb198',
-      privateKey: 'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75'
-    })
-    const vcJwt: JWT = await createVerifiableCredentialJwt(vcPayload, issuer)
-    **/
+  /**
+   * return claim ID from Endorser server
+   */
+  async function signAndSend(): string {
+    try {
+      /**
+      // would like to use https://www.npmjs.com/package/did-jwt-vc
+      // but: "TypeError: Object is not a constructor (evaluating 'new EthrDID')"
+      const issuer: Issuer = new EthrDID({
+        address: '0xf1232f840f3ad7d23fcdaa84d6c66dac24efb198',
+        privateKey: 'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75'
+      })
+      const vcJwt: JWT = await createVerifiableCredentialJwt(vcPayload, issuer)
+      **/
 
-    const signer = didJwt.SimpleSigner(identifiers[0].keys[0].privateKeyHex)
-    const did: string = identifiers[0].did
-    const vcClaim = JSON.parse(claimStr)
-    const vcJwt: string = await didJwt.createJWT(vcPayload(did, vcClaim),{ issuer: did, signer })
-    setJwt(vcJwt)
-    sendToEndorserSite(vcJwt)
+      appStore.dispatch(appSlice.actions.addLog("Starting the signing & sending..."))
+      const signer = didJwt.SimpleSigner(identifiers[0].keys[0].privateKeyHex)
+      const did: string = identifiers[0].did
+      const vcClaim = JSON.parse(claimStr)
+      appStore.dispatch(appSlice.actions.addLog("... created signer and now signing..."))
+      const vcJwt: string = await didJwt.createJWT(vcPayload(did, vcClaim),{ issuer: did, signer })
+      setJwt(vcJwt)
+      appStore.dispatch(appSlice.actions.addLog("... created signed JWT and now sending..."))
+      let result = await sendToEndorserSite(vcJwt)
+      appStore.dispatch(appSlice.actions.addLog("... finished the signing & sending with result: " + JSON.stringify(result)))
+      return result
+    } catch (e) {
+      appStore.dispatch(appSlice.actions.addLog("Got error in SignSendToEndorser.signAndSend: " + e))
+
+      // I have seen cases where each of these give different, helpful info.
+      console.log('Error storing identifier, 1:', e)
+      console.log('Error storing identifier, 2: ' + e)
+      console.log('Error storing identifier, 3:', e.toString())
+      throw e
+    }
   }
 
   function toggleSelectedClaim(claim) {
@@ -257,9 +285,7 @@ export function CredentialsScreen({ navigation }) {
                   animationType="slide"
                   transparent={true}
                   visible={confirming}
-                  onRequestClose={() => {
-                    Alert.alert("Modal has been closed.");
-                  }}
+                  onRequestClose={unsetConfirmationsModal}
                 >
                   <View style={styles.centeredView}>
                     <View style={styles.modalView}>
