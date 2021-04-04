@@ -128,13 +128,19 @@ export function ContactsScreen({ navigation, route }) {
     })
   }
 
-  const deleteContact = async () => {
+  const deleteFirstContact = async () => {
     if (allContacts.length > 0) {
-      const last = allContacts[allContacts.length - 1]
+      const first = allContacts[0]
       const conn = await dbConnection
-      await conn.manager.delete(Contact, { 'did' : last.did })
+      await conn.manager.delete(Contact, { 'did' : first.did })
       utility.loadContacts(appSlice, appStore, dbConnection)
     }
+  }
+
+  const deleteContact = async (did) => {
+    const conn = await dbConnection
+    await conn.manager.delete(Contact, { 'did' : did })
+    utility.loadContacts(appSlice, appStore, dbConnection)
   }
 
   useFocusEffect(
@@ -199,8 +205,8 @@ export function ContactsScreen({ navigation, route }) {
         { appStore.getState().testMode
           ? <View style={{ marginTop: 5 }}>
               <Button
-                title="Delete Last Contact"
-                onPress={deleteContact}
+                title="Delete First Contact"
+                onPress={deleteFirstContact}
               />
             </View>
           : <View/>
@@ -214,7 +220,7 @@ export function ContactsScreen({ navigation, route }) {
               </View>
             : <View/>
           }
-          { allContacts.map(contact => (
+          { allContacts.map((contact, index) => (
             <View style={{ borderWidth: 1 }} key={contact.did}>
               <View style={{ padding: 20 }}>
                 <Text style={{ fontSize: 11 }}>
@@ -228,36 +234,42 @@ export function ContactsScreen({ navigation, route }) {
                   : <View style={styles.centeredView}>
                     {
                       R.isNil(contact.seesMe)
-                      ? <View>
-                        <Button style={{ textAlign: 'center' }}
-                          title={`Can ${contact.name || 'They'} See My Activity?`}
-                          onPress={() => {checkVisibility(contact)}}
-                        />
-                        <Button
-                          title="Make Me Visible"
-                          onPress={() => {allowToSeeMe(contact)}}
-                        />
-                      </View>
-                      : <View>
-                        <Text style={{ textAlign: 'center' }}>{
-                          `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity.`
-                        }</Text>
-                        {
-                          contact.seesMe
-                          ? <Button
-                            title="(Hide Me)"
-                            onPress={() => {disallowToSeeMe(contact)}}
+                      ?
+                        <View>
+                          <Button style={{ textAlign: 'center' }}
+                            title={`Can ${contact.name || 'They'} See My Activity?`}
+                            onPress={() => {checkVisibility(contact)}}
                           />
-                          : <Button
-                            title="(Unhide Me)"
+                          <Button
+                            title="Make Me Visible"
                             onPress={() => {allowToSeeMe(contact)}}
                           />
-                        }
-                        <Button
-                          title={`(Double-Check Visibility)`}
-                          onPress={() => {checkVisibility(contact)}}
-                        />
-                      </View>
+                        </View>
+                      :
+                        <View>
+                          <Text style={{ textAlign: 'center' }}>{
+                            `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity.`
+                          }</Text>
+                          {
+                            contact.seesMe
+                            ? <Button
+                              title="(Hide Me)"
+                              onPress={() => {disallowToSeeMe(contact)}}
+                            />
+                            : <Button
+                              title="(Unhide Me)"
+                              onPress={() => {allowToSeeMe(contact)}}
+                            />
+                          }
+                          <Button
+                            title={`(Double-Check Visibility)`}
+                            onPress={() => {checkVisibility(contact)}}
+                          />
+                        </View>
+                    }
+                    { appStore.getState().testMode
+                      ? <View><Button title={'Delete'} onPress={() => deleteContact(contact.did)}/></View>
+                      : <View/>
                     }
                   </View>
                 }
