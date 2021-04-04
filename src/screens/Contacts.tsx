@@ -155,7 +155,7 @@ export function ContactsScreen({ navigation, route }) {
           <View style={{ padding: 20 }}>
             <Button
               title="Scan & Import"
-              onPress={() => navigation.navigate('ContactImport')}
+              onPress={() => navigation.navigate('Contact Import')}
             />
           </View>
           <View style={{ alignItems: "center" }}>

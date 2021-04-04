@@ -27,8 +27,8 @@ export const appSlice = createSlice({
     // it'll be null if we haven't even loaded from the DB yet.
     contacts: null as Array<Contact> | null,
 
-    apiServer: utility.DEFAULT_ENDORSER_API_SERVER,
-    viewServer: utility.DEFAULT_ENDORSER_VIEW_SERVER,
+    apiServer: DEFAULT_ENDORSER_API_SERVER,
+    viewServer: DEFAULT_ENDORSER_VIEW_SERVER,
 
     logMessage: '',
 
