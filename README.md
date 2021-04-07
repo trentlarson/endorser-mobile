@@ -40,16 +40,17 @@ To Release:
   - `cd android; bundle exec fastlane beta; cd ..`
   - To create a new release & upload:
     - Do one of these in Google Play Console:
-      - In Production, "Create new release" (unless it says "Edit release")
-      - In "Releases overview" under "Latest releases" click arrow on right of next release.
-    - After uploading, "Save", "Review Release", then "Rollout to Production".
+      - In Internal testing, "Edit release", or
+      - In Production, "Create new release" or "Edit release", or
+      - In "Releases overview" under "Latest releases" click arrow on right of next release. (When do we see this?)
+    - After uploading, "Save", "Review Release", then "Rollout to internal testing" or "Rollout to Production".
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json
   - (Note that CFBundleVersion is done by fastlane beta.)
   - `cd ios; bundle exec fastlane beta; cd ..`
   - To create a new release
     - Have a test build?  IDK... maybe don't click 'Expire'
-    - In App Connect -> App Store next to iOS App, click the "+" 
+    - In App Connect -> App Store next to iOS App, click the "+"
     - Under App description next to "Build" and to the right, click the red icon to remove that version, then add another version.
     - Submit it for review, and after they approve the review then you can test in TestFlight or release.
   - Screenshot on different simulator: `yarn run ios --simulator="iPhone 8"`
@@ -61,6 +62,7 @@ To Release:
 
 - ... and after that upload:
   - Make sure to commit those changes to git.
+  - Bump the version.
 
 - ... and if it's a final release:
-  - Bump the version (eg to snapshot) in: package.json, android/app/build.gradle, ios/EndorserMobile/Info.plist
+  - Bump the version (eg to "snapshot") in: package.json, android/app/build.gradle, ios/EndorserMobile/Info.plist
