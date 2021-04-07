@@ -286,11 +286,6 @@ export function ContactImportScreen({ navigation }) {
 
   const CURRENT_JWT_PREFIX = appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION
 
-  const qrPrefixes = [
-    CURRENT_JWT_PREFIX,
-    "https://id.uport.me/req/",
-  ]
-
   const [contactInfo, setContactInfo] = useState<Contact>()
   const [saved, setSaved] = useState<boolean>(false)
 
@@ -299,11 +294,13 @@ export function ContactImportScreen({ navigation }) {
   }
 
   const onSuccessfulQrText = async (jwtText) => {
-    qrPrefixes.forEach((prefix) => {
-      if (jwtText.startsWith(prefix)) {
-        jwtText = jwtText.substring(prefix.length)
-      }
-    })
+    const endorserContextLoc = jwtText.indexOf(utility.ENDORSER_JWT_URL_LOCATION)
+    if (endorserContextLoc > -1) {
+      jwtText = jwtText.substring(endorserContextLoc + utility.ENDORSER_JWT_URL_LOCATION.length)
+    }
+    if (jwtText.startsWith(utility.UPORT_JWT_PREFIX)) {
+      jwtText = jwtText.substring(prefix.length)
+    }
 
     // JWT format: { header, payload, signature, data }
     const jwt = didJwt.decodeJWT(jwtText)
@@ -380,7 +377,7 @@ export function ContactImportScreen({ navigation }) {
               </View>
             ) : (
               <View>
-                <QRCodeScanner onRead={onSuccessfulQrEvent} reactivate={true} />
+                <QRCodeScanner onRead={onSuccessfulQrEvent} />
                 {/** Setting reactivate to true because sometimes it reads incorrectly, so we'll just try again. **/}
                 { appStore.getState().testMode
                   ? <Button
