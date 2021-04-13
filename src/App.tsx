@@ -16,6 +16,7 @@ import { appStore } from './veramo/appSlice.ts'
 import { CredentialsScreen } from './screens/SignSendToEndorser'
 import { ContactImportScreen, ContactsScreen } from './screens/Contacts'
 import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./screens/Settings";
+import { ReportScreen } from './screens/ReportFromEndorser'
 
 
 
@@ -41,10 +42,11 @@ export default function App() {
             <Stack.Screen name="Community Endorser" component={HomeScreen} />
             <Stack.Screen name="Contact Import" component={ContactImportScreen} />
             <Stack.Screen name="Contacts" component={ContactsScreen} />
-            <Stack.Screen name="Claims" component={CredentialsScreen} />
+            <Stack.Screen name="Claim" component={CredentialsScreen} />
             <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
+            <Stack.Screen name="Report" component={ReportScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
           </Stack.Navigator>
         </NavigationContainer>
@@ -57,9 +59,14 @@ function HomeScreen({ navigation }) {
   return (
     <View>
       <Button
-        title="Claims"
-        onPress={() => navigation.navigate('Claims')}
+        title="Claim"
+        onPress={() => navigation.navigate('Claim')}
       />
+      <Button
+        title="Report"
+        onPress={() => navigation.navigate('Report')}
+      />
+      <View style={{ marginTop: 100 }}/>
       <Button
         title="Contacts"
         onPress={() => navigation.navigate('Contacts')}

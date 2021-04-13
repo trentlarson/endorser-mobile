@@ -3,8 +3,8 @@ import * as didJwt from 'did-jwt'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
-import Clipboard from '@react-native-community/clipboard';
-import { useFocusEffect } from '@react-navigation/native';
+import Clipboard from '@react-native-community/clipboard'
+import { useFocusEffect } from '@react-navigation/native'
 import QRCodeScanner from 'react-native-qrcode-scanner'
 import { useSelector } from 'react-redux'
 
@@ -69,10 +69,10 @@ export function ContactsScreen({ navigation, route }) {
         "Uport-Push-Token": token,
       }
     }).then(response => {
-      return response.json()
       if (response.status !== 200) {
         throw Error('There was an error from the server trying to check visibility.')
       }
+      return response.json()
     }).then(result => {
       setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
 
