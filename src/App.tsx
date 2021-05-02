@@ -123,6 +123,47 @@ function HelpScreen() {
         </View>
 
         <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>Who else do we have to thank?</Text>
+          <Text style={{ padding: 5 }}>
+            Specs like&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://www.w3.org/TR/vc-data-model/')}>
+              Verifiable Credentials
+            </Text>
+            &nbsp;supported by&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://www.w3.org/')}>
+              W3C
+            </Text>
+            &nbsp;and&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://trustoverip.org/')}>
+              the Apache Trust over IP Foundation
+            </Text>
+            &nbsp;and&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://sovrin.org/')}>
+              Sovrin
+            </Text>
+            &nbsp;and initiated by&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://internetidentityworkshop.com/')}>
+              IIW
+            </Text>
+          </Text>
+          <Text style={{ padding: 5 }}>
+            <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://veramo.io')}>
+              Veramo
+            </Text>
+            &nbsp;and its predecessor&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://uport.me')}>
+              uPort
+            </Text>
+          </Text>
+          <Text style={{ padding: 5 }}>
+            <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://reactnative.dev/')}>
+              React-Native
+            </Text>
+            &nbsp;and Android and iOS
+          </Text>
+        </View>
+
+        <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>What info should I provide in feedback?</Text>
           <Text selectable={true}>Version { pkg.version } ({ VersionNumber.buildVersion })</Text>
         </View>
