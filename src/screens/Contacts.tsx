@@ -174,6 +174,7 @@ export function ContactsScreen({ navigation, route }) {
               onChangeText={setContactName}
               editable
               style={{ borderWidth: 1 }}
+              autoCapitalize={'words'}
             />
             <Text>DID</Text>
             <TextInput
@@ -181,7 +182,7 @@ export function ContactsScreen({ navigation, route }) {
               onChangeText={setContactDid}
               editable
               style={{ borderWidth: 1 }}
-              autoCapitalize='none'
+              autoCapitalize={'none'}
               autoCorrect={false}
             />
             <Text>Public Key (base64-encoded, optional)</Text>
@@ -190,7 +191,7 @@ export function ContactsScreen({ navigation, route }) {
               onChangeText={setContactPubKeyBase64}
               editable
               style={{ borderWidth: 1 }}
-              autoCapitalize='none'
+              autoCapitalize={'none'}
               autoCorrect={false}
             />
           </View>

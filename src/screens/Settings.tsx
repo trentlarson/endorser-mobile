@@ -465,6 +465,7 @@ export function ImportIdentityScreen({navigation}) {
                 <View>
                   <Text>Enter mnemonic:</Text>
                   <TextInput
+                    autoCapitalize={'none'}
                     multiline={true}
                     style={{borderWidth: 1, height: 100}}
                     onChangeText={setMnemonic}
