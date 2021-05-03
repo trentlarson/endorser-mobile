@@ -1,7 +1,7 @@
 
 # Endorser Mobile
 
-## Build & Run
+## Dev Build & Run
 
 `yarn install`
 
@@ -20,6 +20,25 @@ Run android:
 Clean:
 
 `./node_modules/.bin/react-native-clean-project`
+
+
+
+
+## Test
+
+- Without an Endorser.ch server
+  - Create IDs, export, and import.
+  - Create contacts.
+- With an Endorser.ch server
+  - Run endorser-ch test/test.sh, then copy the endorser-ch-test-local.sqlite3 to endorser-ch-dev.sqlite3, then run the server.
+  - Import via the mnemonic, eg. #3 from endorser-ch test/util.js
+  - Submit claims & confirmations.
+  - Run report searches for the individual, eg. for 'carp'
+
+
+
+
+## Package & Deploy
 
 To Do First Release:
 
