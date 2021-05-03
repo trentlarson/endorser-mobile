@@ -5,9 +5,8 @@ import { useFocusEffect } from '@react-navigation/native'
 import * as utility from '../utility/utility'
 import { appStore } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
-import { MyCredentialsScreen } from './MyCredentials'
 
-export function ReportScreen({ navigation }) {
+export function MyCredentialsScreen({ navigation }) {
 
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loading, setLoading] = useState<boolean>(false)
@@ -18,7 +17,8 @@ export function ReportScreen({ navigation }) {
     setLoading(true)
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
-    fetch(endorserApiServer + '/api/claim?claimContents=' + searchTerm, {
+    const searchParam = searchTerm ? '&claimContents=' + encodeURIComponent(searchTerm) : ''
+    fetch(endorserApiServer + '/api/claim?subject=' + identifiers[0].did + searchParam, {
       method: 'GET',
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +45,8 @@ export function ReportScreen({ navigation }) {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search All</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search</Text>
+          <Text>Filter (optional)</Text>
           <TextInput
             autoCapitalize={'none'}
             value={searchTerm}
@@ -69,18 +70,6 @@ export function ReportScreen({ navigation }) {
               </View>
           }
         </View>
-        { identifiers.length > 0
-          ?
-            <View style={{ padding: 20 }}>
-              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Mine</Text>
-              <Button
-                title="My Credentials"
-                onPress={() => navigation.navigate('My Credentials')}
-              />
-            </View>
-          :
-            <View/>
-        }
       </ScrollView>
     </SafeAreaView>
   )
