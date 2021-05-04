@@ -112,7 +112,7 @@ export const claimDescription = (claim, identifiers, contacts) => {
     var polygon = claim.spatialUnit.geo.polygon
     return didInContext(claim.party.did, identifiers, contacts) + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
   } else {
-    return JSON.stringify(claim)
+    return (claim['@type'] || "Unknown Type") + "\n" + JSON.stringify(claim)
   }
 }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Button, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 
 import * as utility from '../utility/utility'
@@ -43,34 +43,56 @@ export function MyCredentialsScreen({ navigation }) {
 
   return (
     <SafeAreaView>
-      <ScrollView>
-        <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search</Text>
-          <Text>Filter (optional)</Text>
-          <TextInput
-            autoCapitalize={'none'}
-            value={searchTerm}
-            onChangeText={setSearchTerm}
-            editable
-            style={{ borderWidth: 1 }}
-          />
-          {
-            loading
-            ?
-              <ActivityIndicator color="#00ff00" />
-            :
-              <View>
-                <Button
-                  title="Search"
-                  onPress={searchEndorser}
-                />
-                <Text>
-                  { JSON.stringify(searchResults) }
-                </Text>
-              </View>
-          }
-        </View>
-      </ScrollView>
+      <View style={{ padding: 20 }}>
+        <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search</Text>
+        <Text>Filter (optional)</Text>
+        <TextInput
+          autoCapitalize={'none'}
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+          editable
+          style={{ borderWidth: 1 }}
+        />
+        {
+          loading
+          ?
+            <ActivityIndicator color="#00ff00" />
+          :
+            <View>
+              <Button
+                title="Search"
+                onPress={searchEndorser}
+              />
+              <FlatList
+                ListHeaderComponent={
+                  <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Matching Claims</Text>
+                }
+                ListEmptyComponent={
+                  <Text>None</Text>
+                }
+                data={searchResults}
+                ItemSeparatorComponent={() => <View style={styles.line} />}
+                keyExtractor={item => item.id.toString()}
+                renderItem={data =>
+                  <Pressable onPress={() => navigation.navigate('Claim Details', { fullClaim: data.item })}>
+                    <Text>{utility.claimDescription(data.item, identifiers, appStore.getState().contacts || [])}</Text>
+                  </Pressable>
+                }
+                ListFooterComponent={
+                  <View/>
+                }
+              />
+            </View>
+        }
+      </View>
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  line: {
+    height: 0.8,
+    width: "100%",
+    backgroundColor: "rgba(0,0,0,0.9)"
+  },
+})

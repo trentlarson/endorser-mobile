@@ -13,6 +13,7 @@ import { Provider } from 'react-redux';
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { appStore } from './veramo/appSlice.ts'
+import { ClaimDetailsScreen } from './screens/ClaimDetails'
 import { CredentialsScreen } from './screens/SignSendToEndorser'
 import { ContactImportScreen, ContactsScreen } from './screens/Contacts'
 import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./screens/Settings";
@@ -44,6 +45,7 @@ export default function App() {
             <Stack.Screen name="Contact Import" component={ContactImportScreen} />
             <Stack.Screen name="Contacts" component={ContactsScreen} />
             <Stack.Screen name="Claims" component={CredentialsScreen} />
+            <Stack.Screen name="Claim Details" component={ClaimDetailsScreen} />
             <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
