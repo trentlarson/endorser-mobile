@@ -379,7 +379,6 @@ export function ContactImportScreen({ navigation }) {
             ) : (
               <View>
                 <QRCodeScanner onRead={onSuccessfulQrEvent} />
-                {/** Setting reactivate to true because sometimes it reads incorrectly, so we'll just try again. **/}
                 { appStore.getState().testMode
                   ? <Button
                       title='Fake It'

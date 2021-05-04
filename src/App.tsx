@@ -19,6 +19,7 @@ import { ContactImportScreen, ContactsScreen } from './screens/Contacts'
 import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./screens/Settings";
 import { MyCredentialsScreen } from './screens/MyCredentials'
 import { ReportScreen } from './screens/ReportFromEndorser'
+import { ScanPresentationScreen, VerifiablePresentationScreen } from './screens/VerifiablePresentation'
 
 
 
@@ -51,7 +52,9 @@ export default function App() {
             <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
             <Stack.Screen name="My Credentials" component={MyCredentialsScreen} />
             <Stack.Screen name="Reports from Endorser.ch server" component={ReportScreen} />
+            <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="Verifiable Presentation" component={VerifiablePresentationScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

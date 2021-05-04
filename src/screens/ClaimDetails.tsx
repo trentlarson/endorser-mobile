@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { SafeAreaView, ScrollView, Text, View } from 'react-native'
 import QRCode from "react-native-qrcode-svg"
 
-export function ClaimDetailsScreen({ route, navigation }) {
+export function ClaimDetailsScreen({ navigation, route }) {
 
   const { fullClaim } = route.params
 

@@ -81,6 +81,13 @@ export function ReportScreen({ navigation }) {
           :
             <View/>
         }
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Scan Others</Text>
+          <Button
+            title="Scan Presentation"
+            onPress={() => navigation.navigate('Scan Presentation')}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   )
