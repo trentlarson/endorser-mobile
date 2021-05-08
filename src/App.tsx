@@ -13,13 +13,13 @@ import { Provider } from 'react-redux';
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { appStore } from './veramo/appSlice.ts'
-import { ClaimDetailsScreen } from './screens/ClaimDetails'
+import { PresentCredentialScreen } from './screens/PresentCredential'
 import { CredentialsScreen } from './screens/SignSendToEndorser'
 import { ContactImportScreen, ContactsScreen } from './screens/Contacts'
 import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./screens/Settings";
 import { MyCredentialsScreen } from './screens/MyCredentials'
 import { ReportScreen } from './screens/ReportFromEndorser'
-import { ScanPresentationScreen, VerifiablePresentationScreen } from './screens/VerifiablePresentation'
+import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
 
 
 
@@ -46,15 +46,15 @@ export default function App() {
             <Stack.Screen name="Contact Import" component={ContactImportScreen} />
             <Stack.Screen name="Contacts" component={ContactsScreen} />
             <Stack.Screen name="Claims" component={CredentialsScreen} />
-            <Stack.Screen name="Claim Details" component={ClaimDetailsScreen} />
             <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
             <Stack.Screen name="My Credentials" component={MyCredentialsScreen} />
+            <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
             <Stack.Screen name="Reports from Endorser.ch server" component={ReportScreen} />
             <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
-            <Stack.Screen name="Verifiable Presentation" component={VerifiablePresentationScreen} />
+            <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

@@ -126,17 +126,6 @@ export function CredentialsScreen({ navigation }) {
       .finally(() => setLoadingRecentClaims(false))
   }
 
-  function vcPayload(did: string, claim: any): JwtCredentialPayload {
-    return {
-      sub: did,
-      vc: {
-        '@context': ['https://www.w3.org/2018/credentials/v1'],
-        type: ['VerifiableCredential'],
-        credentialSubject: claim,
-      }
-    }
-  }
-
   /**
    * return promise of claim ID from Endorser server
    */
@@ -206,7 +195,7 @@ export function CredentialsScreen({ navigation }) {
       const did: string = identifiers[0].did
       const vcClaim = JSON.parse(claimStr)
       appStore.dispatch(appSlice.actions.addLog("... created signer and now signing..."))
-      const vcJwt: string = await didJwt.createJWT(vcPayload(did, vcClaim),{ issuer: did, signer })
+      const vcJwt: string = await didJwt.createJWT(utility.vcPayload(did, vcClaim),{ issuer: did, signer })
       setJwt(vcJwt)
       appStore.dispatch(appSlice.actions.addLog("... created signed JWT and now sending..."))
       let result = await sendToEndorserSite(vcJwt)

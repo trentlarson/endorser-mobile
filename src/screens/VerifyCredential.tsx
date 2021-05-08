@@ -12,7 +12,7 @@ export function ScanPresentationScreen({ navigation }) {
   }
 
   const onSuccessfulQrText = async (claimText) => {
-    navigation.navigate('Verifiable Presentation', { vp: claimText })
+    navigation.navigate('Verify Credential', { vp: claimText })
   }
 
   return (
@@ -34,7 +34,7 @@ export function ScanPresentationScreen({ navigation }) {
   )
 }
 
-export function VerifiablePresentationScreen({ navigation, route }) {
+export function VerifyCredentialScreen({ navigation, route }) {
 
   const { vp } = route.params
 

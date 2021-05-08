@@ -24,6 +24,12 @@ export const isHiddenDid = (did) => {
   return did === HIDDEN_DID
 }
 
+// insert a space in front of any capital letters (and capitalize first letter, just in case)
+// return '' for null or undefined input
+export const capitalizeAndInsertSpacesBeforeCaps = (text) =>{
+  return !text ? '' : text[0].toUpperCase() + text.substr(1).replace(/([A-Z])/g, ' $1')
+}
+
 // return true for any nested string where func(input) === true
 function testRecursivelyOnString(func, input) {
 
@@ -35,7 +41,7 @@ function testRecursivelyOnString(func, input) {
     var result = []
     if (!Array.isArray(input)) {
       // it's an object
-      for (key in input) {
+      for (const key in input) {
         if (testRecursivelyOnString(func, input[key])) {
           return true
         }
@@ -88,15 +94,24 @@ function didInfo(did, identifiers, contacts) {
 }
 
 function didInContext(did, identifiers, contacts) {
-  return firstAndLast3OfDid(did) + " (" + didInfo(did, identifiers, contacts) + ")"
+  return didInfo(did, identifiers, contacts) + " (" + firstAndLast3OfDid(did) + ")"
 }
 
-export const claimDescription = (claim, identifiers, contacts) => {
+/**
+ return readable description of claim if possible
+ identifiers is a list of objects with a 'did' field, each representhing the user
+ contacts is a list of objects with a 'did' field for others and a 'name' field for their name
+ extraTitle is optional
+ **/
+export const claimDescription = (claim, identifiers, contacts, extraTitle) => {
   if (claim.claim) {
     // probably a Verified Credential
     claim = claim.claim
   }
-  let type = claim['@type']
+  let type = claim['@type'] || 'UnknownType'
+  let prefix = capitalizeAndInsertSpacesBeforeCaps(type) + (extraTitle || '') + '\n'
+
+  let details
   if (type === "JoinAction") {
     const contactInfo = didInContext(claim.agent.did, identifiers, contacts)
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
@@ -107,13 +122,14 @@ export const claimDescription = (claim, identifiers, contacts) => {
     fullEvent = fullEvent ? " at " + fullEvent : "";
     let eventDate = claim.event && claim.event.startTime;
     eventDate = eventDate ? " at " + eventDate : "";
-    return contactInfo + fullEvent + eventDate;
+    details = contactInfo + fullEvent + eventDate;
   } else if (type === "Tenure") {
     var polygon = claim.spatialUnit.geo.polygon
-    return didInContext(claim.party.did, identifiers, contacts) + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
+    details = didInContext(claim.party.did, identifiers, contacts) + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
   } else {
-    return (claim['@type'] || "Unknown Type") + "\n" + JSON.stringify(claim)
+    details = JSON.stringify(claim)
   }
+  return prefix + details
 }
 
 export const accessToken = async (identifier) => {
@@ -133,6 +149,17 @@ export const loadContacts = async (appSlice, appStore, dbConnection, useCached) 
     const conn = await dbConnection
     const foundContacts = await conn.manager.find(Contact, {order: {name:'ASC'}})
     await appStore.dispatch(appSlice.actions.setContacts(classToPlain(foundContacts)))
+  }
+}
+
+export const vcPayload = (did: string, claim: any): JwtCredentialPayload => {
+  return {
+    sub: did,
+    vc: {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      type: ['VerifiableCredential'],
+      credentialSubject: claim,
+    }
   }
 }
 

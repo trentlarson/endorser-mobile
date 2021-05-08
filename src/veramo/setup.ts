@@ -22,6 +22,9 @@ import { Resolver } from 'did-resolver'
 import { getResolver as ethrDidResolver } from 'ethr-did-resolver'
 import { getResolver as webDidResolver } from 'web-did-resolver'
 
+// for VCs and VPs https://veramo.io/docs/api/credential-w3c
+import { CredentialIssuer } from '@veramo/credential-w3c'
+
 // Storage plugin using TypeOrm
 import { Entities, KeyStore, DIDStore, IDataStoreORM } from '@veramo/data-store'
 
@@ -87,6 +90,7 @@ let didResolvers = NETWORK_NAMES.map((networkName) => {
 })
 
 let allPlugins = [
+  new CredentialIssuer(),
   new KeyManager({
     store: new KeyStore(dbConnection),
     kms: {

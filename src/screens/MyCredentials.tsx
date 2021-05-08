@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Button, Dimensions, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 
 import * as utility from '../utility/utility'
@@ -35,15 +35,20 @@ export function MyCredentialsScreen({ navigation }) {
     })
   }
 
+  const isUser = (did) => did === identifiers[0].did
+
   useFocusEffect(
     React.useCallback(() => {
       agent.didManagerFind().then(ids => setIdentifiers(ids))
     }, [])
   )
 
+  // Hack because without this it doesn't scroll to the bottom: https://stackoverflow.com/a/67244863/845494
+  const screenHeight = Dimensions.get('window').height - 200
+
   return (
     <SafeAreaView>
-      <View style={{ padding: 20 }}>
+      <View style={{ padding: 20, height: screenHeight }}>
         <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search</Text>
         <Text>Filter (optional)</Text>
         <TextInput
@@ -56,7 +61,7 @@ export function MyCredentialsScreen({ navigation }) {
         {
           loading
           ?
-            <ActivityIndicator color="#00ff00" />
+            <ActivityIndicator color="#00FF00" />
           :
             <View>
               <Button
@@ -64,22 +69,30 @@ export function MyCredentialsScreen({ navigation }) {
                 onPress={searchEndorser}
               />
               <FlatList
-                ListHeaderComponent={
-                  <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Matching Claims</Text>
-                }
+                data={searchResults}
+                keyExtractor={item => item.id.toString()}
+                ItemSeparatorComponent={() => <View style={styles.line} />}
                 ListEmptyComponent={
                   <Text>None</Text>
                 }
-                data={searchResults}
-                ItemSeparatorComponent={() => <View style={styles.line} />}
-                keyExtractor={item => item.id.toString()}
-                renderItem={data =>
-                  <Pressable onPress={() => navigation.navigate('Claim Details', { fullClaim: data.item })}>
-                    <Text>{utility.claimDescription(data.item, identifiers, appStore.getState().contacts || [])}</Text>
-                  </Pressable>
+                ListHeaderComponent={
+                  <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Matching Claims</Text>
                 }
-                ListFooterComponent={
-                  <View/>
+                renderItem={data =>
+                  <Pressable onPress={ () =>
+                    isUser(data.item.issuer)
+                    ? navigation.navigate('Present Credential', { fullClaim: data.item })
+                    : null
+                  }>
+                    <Text style={{ backgroundColor: (isUser(data.item.issuer) ? "#CCFFCC" : "#FFFFFF") }}>{
+                      utility.claimDescription(
+                        data.item,
+                        identifiers,
+                        appStore.getState().contacts || [],
+                        isUser(data.item.issuer) ? '' : ' (issued by a someone else)'
+                      )
+                    }</Text>
+                  </Pressable>
                 }
               />
             </View>
