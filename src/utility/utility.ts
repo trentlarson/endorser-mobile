@@ -11,7 +11,7 @@ const HIDDEN_DID = 'did:none:HIDDEN'
 export const ENDORSER_JWT_URL_LOCATION = '/contact?jwt='
 export const UPORT_JWT_PREFIX = 'https://id.uport.me/req/'
 
-function isDid(value) {
+export function isDid(value) {
   return value && value.startsWith("did:") && (value.substring(5).indexOf(":") > -1)
 }
 
