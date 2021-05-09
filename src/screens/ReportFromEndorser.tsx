@@ -16,9 +16,8 @@ export function ReportScreen({ navigation }) {
 
   const searchEndorser = async () => {
     setLoading(true)
-    const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
-    fetch(endorserApiServer + '/api/claim?claimContents=' + searchTerm, {
+    fetch(appStore.getState().apiServer + '/api/claim?claimContents=' + searchTerm, {
       method: 'GET',
       headers: {
         "Content-Type": "application/json",
@@ -72,9 +71,9 @@ export function ReportScreen({ navigation }) {
         { identifiers.length > 0
           ?
             <View style={{ padding: 20 }}>
-              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Mine</Text>
+              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Your Credentials</Text>
               <Button
-                title="My Credentials"
+                title="Search"
                 onPress={() => navigation.navigate('My Credentials')}
               />
             </View>
@@ -84,7 +83,7 @@ export function ReportScreen({ navigation }) {
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Scan Others</Text>
           <Button
-            title="Scan Presentation"
+            title="Scan"
             onPress={() => navigation.navigate('Scan Presentation')}
           />
         </View>

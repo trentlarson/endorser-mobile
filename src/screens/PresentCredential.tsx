@@ -3,6 +3,7 @@ import { ActivityIndicator, SafeAreaView, ScrollView, Text, View } from 'react-n
 import QRCode from "react-native-qrcode-svg"
 import { useFocusEffect } from '@react-navigation/native'
 
+import { appStore } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
 
 export function PresentCredentialScreen({ navigation, route }) {
@@ -24,6 +25,7 @@ export function PresentCredentialScreen({ navigation, route }) {
         const vc = await agent.createVerifiableCredential({
           credential: {
             credentialSubject: fullClaim.claim,
+            id: appStore.getState().apiServer + '/api/claim/' + fullClaim.id,
             issuer: { id: fullClaim.issuer },
           }
         })
