@@ -53,11 +53,11 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const vp = JSON.parse(vpStr)
 
   const [error, setError] = useState<string>('')
+  const [endorserId, setEndorserId] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(true)
   const [nonHiddenIdList, setNonHiddenIdList] = useState([])
   const [numHidden, setNumHidden] = useState<number>(0)
   const [visibleTo, setVisibleTo] = useState<string[]>([])
-  const [endorserId, setEndorserId] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(true)
 
   useFocusEffect(
     React.useCallback(() => {
@@ -91,12 +91,10 @@ export function VerifyCredentialScreen({ navigation, route }) {
               }
             })
             .then(result => {
-              console.log("result", result);
               let resultList1 = result.result || []
               let resultList2 = R.reject(utility.isHiddenDid, resultList1)
               setNonHiddenIdList(resultList2)
               setNumHidden(resultList1.length - resultList2.length)
-              console.log("nonHiddenIdList", resultList2);
 
               setVisibleTo(result.resultVisibleToDids || [])
             })
@@ -119,15 +117,12 @@ export function VerifyCredentialScreen({ navigation, route }) {
       <ScrollView>
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Verification</Text>
-          <Text>{ endorserId ? 'ID # ' + endorserId : ''}</Text>
-          <Text>{ vpStr }</Text>
-          <View style={{ height: 0.8, width: "100%", backgroundColor: "rgba(0,0,0,0.9)" }} />
-          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Confirmations</Text>
           {
             loading
             ? <ActivityIndicator color="#00FF00" />
-            : <View/>
+            : <View style={{ marginTop: 20}}/>
           }
+          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
           <View style={{ padding: 5 }}>
             {
               nonHiddenIdList.map(did => <Text key={did} style={{ fontSize: 11 }} selectable={true}>{did}</Text>)
@@ -147,6 +142,10 @@ export function VerifyCredentialScreen({ navigation, route }) {
             }
           </View>
           <Text>{ error }</Text>
+          <View style={{ height: 0.8, width: "100%", backgroundColor: "#000000", marginTop: 200, marginBottom: 100 }} />
+          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Details</Text>
+          <Text>{ endorserId ? 'Credential ' + endorserId : ''}</Text>
+          <Text selectable={true}>{ vpStr }</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

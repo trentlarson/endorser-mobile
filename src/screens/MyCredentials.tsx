@@ -76,7 +76,7 @@ export function MyCredentialsScreen({ navigation }) {
                   <Text>None</Text>
                 }
                 ListHeaderComponent={
-                  <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Matching Claims</Text>
+                  <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
                 }
                 renderItem={data =>
                   <Pressable onPress={ () =>
@@ -84,7 +84,7 @@ export function MyCredentialsScreen({ navigation }) {
                     ? navigation.navigate('Present Credential', { fullClaim: data.item })
                     : null
                   }>
-                    <Text style={{ backgroundColor: (isUser(data.item.issuer) ? "#CCFFCC" : "#FFFFFF") }}>{
+                    <Text style={{ color: (isUser(data.item.issuer) ? "#0000FF" : "default") }}>{
                       utility.claimDescription(
                         data.item,
                         identifiers,
