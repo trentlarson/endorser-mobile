@@ -31,6 +31,8 @@ import { Entities, KeyStore, DIDStore, IDataStoreORM } from '@veramo/data-store'
 // TypeORM is installed with @veramo/typeorm
 import { createConnection } from 'typeorm'
 
+import * as R from 'ramda'
+
 import { Contact } from '../entity/contact'
 import { Settings } from '../entity/settings'
 
@@ -55,15 +57,19 @@ export const dbConnection = createConnection({
   type: 'react-native',
 })
 
-function didProvider(netName) {
+function didProviderName(netName) {
   return 'did:ethr' + (netName === 'mainnet' ? '' : ':' + netName)
 }
 
 const NETWORK_NAMES = ['mainnet', 'rinkeby']
 
+const DEFAULT_DID_PROVIDER_NETWORK_NAME = 'mainnet'
+
+export const DEFAULT_DID_PROVIDER_NAME = didProviderName(DEFAULT_DID_PROVIDER_NETWORK_NAME)
+
 const providers = {}
 NETWORK_NAMES.forEach((networkName) => {
-  providers[didProvider(networkName)] = new EthrDIDProvider({
+  providers[didProviderName(networkName)] = new EthrDIDProvider({
     defaultKms: 'local',
     network: networkName,
     rpcUrl: 'https://' + networkName + '.infura.io/v3/' + INFURA_PROJECT_ID,
@@ -74,18 +80,29 @@ NETWORK_NAMES.forEach((networkName) => {
 
 const didManager = new DIDManager({
   store: new DIDStore(dbConnection),
-  defaultProvider: didProvider(NETWORK_NAMES[0]),
+  defaultProvider: DEFAULT_DID_PROVIDER_NAME,
   providers: providers,
 })
 
-let didResolvers = NETWORK_NAMES.map((networkName) => {
-  return new DIDResolverPlugin({
-    resolver: new Resolver({
+const basicDidResolvers = NETWORK_NAMES.map((networkName) =>
+  [
+    networkName,
+    new Resolver({
       ethr: ethrDidResolver({
         networks: [{ name: networkName, rpcUrl: 'https://' + networkName + '.infura.io/v3/' + INFURA_PROJECT_ID }],
       }).ethr,
       web: webDidResolver().web,
-    }),
+    })
+  ]
+)
+
+const basicResolverMap = R.fromPairs(basicDidResolvers)
+
+export const DEFAULT_BASIC_RESOLVER = basicResolverMap[DEFAULT_DID_PROVIDER_NETWORK_NAME]
+
+const agentDidResolvers = NETWORK_NAMES.map((networkName) => {
+  return new DIDResolverPlugin({
+    resolver: basicResolverMap[networkName],
   })
 })
 
@@ -98,6 +115,6 @@ let allPlugins = [
     },
   }),
   didManager,
-].concat(didResolvers)
+].concat(agentDidResolvers)
 
 export const agent = createAgent<IDIDManager & IKeyManager & IDataStore & IDataStoreORM & IResolver>({ plugins: allPlugins })

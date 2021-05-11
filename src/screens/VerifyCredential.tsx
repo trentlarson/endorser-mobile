@@ -1,3 +1,4 @@
+import didJwt from 'did-jwt'
 import * as R from 'ramda'
 import React, { useState } from 'react'
 import { ActivityIndicator, Button, SafeAreaView, ScrollView, Text, View } from 'react-native'
@@ -6,7 +7,7 @@ import { useFocusEffect } from '@react-navigation/native'
 
 import * as utility from '../utility/utility'
 import { appStore } from '../veramo/appSlice'
-import { agent } from '../veramo/setup'
+import { agent, DEFAULT_BASIC_RESOLVER } from '../veramo/setup'
 
 export function ScanPresentationScreen({ navigation }) {
 
@@ -52,7 +53,10 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const { vpStr } = route.params
   const vp = JSON.parse(vpStr)
 
-  const [error, setError] = useState<string>('')
+  const [confirmError, setConfirmError] = useState<string>('')
+  const [detectedSigInvalid, setDetectedSigInvalid] = useState<boolean>(false)
+  const [detectedSigProblem, setDetectedSigProblem] = useState<boolean>(false)
+  const [detectedSigValid, setDetectedSigValid] = useState<boolean>(false)
   const [endorserId, setEndorserId] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [nonHiddenIdList, setNonHiddenIdList] = useState([])
@@ -64,45 +68,70 @@ export function VerifyCredentialScreen({ navigation, route }) {
       async function verifyAll() {
 
         setLoading(true)
-        setError('')
+        setConfirmError('')
+        setDetectedSigInvalid(false)
+        setDetectedSigProblem(false)
+        setDetectedSigValid(false)
 
-        let identifiers = await agent.didManagerFind()
+        {
+          // this checks the JWT
 
-        const endorserSubstring = '/api/claim/'
-        const endorIndex = !vp.id ? -1 : vp.id.indexOf(endorserSubstring)
-        if (vp['type']
-            && vp['type'].findIndex(elem => elem === 'VerifiableCredential') > -1
-            && endorIndex > -1) {
-          const endorId = vp.id.substring(endorIndex + endorserSubstring.length)
-          setEndorserId(endorId)
+          try {
+            let verifiedResponse = await didJwt.verifyJWT(vp.proof.jwt, {resolver: DEFAULT_BASIC_RESOLVER, audience: vp.issuer.id})
 
-          const url = appStore.getState().apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + endorId
-          const userToken = await utility.accessToken(identifiers[0])
-          await fetch(url, {
-            headers: {
-              "Content-Type": "application/json",
-              "Uport-Push-Token": userToken
-            }})
-            .then(response => {
-              if (response.status === 200) {
-                return response.json()
-              } else {
-                throw ('Got bad response status of ' + response.status)
-              }
-            })
-            .then(result => {
-              let resultList1 = result.result || []
-              let resultList2 = R.reject(utility.isHiddenDid, resultList1)
-              setNonHiddenIdList(resultList2)
-              setNumHidden(resultList1.length - resultList2.length)
+            // if we're here, it must have passed validation
+            setDetectedSigValid(true)
+          } catch (e) {
+            setDetectedSigProblem(true)
+            if (e.toString().indexOf('Signature invalid for JWT') > -1) {
+              setDetectedSigInvalid(true)
+            } else {
+              console.log('Got unknown error verifying JWT:', e)
+            }
+          }
+        }
 
-              setVisibleTo(result.resultVisibleToDids || [])
-            })
-            .catch(e => {
-              console.log('Something went wrong trying to access data.', e)
-              setError('Something went wrong trying to access data.')
-            })
+        {
+          // this retrieves confirmations
 
+          let identifiers = await agent.didManagerFind()
+
+          const endorserSubstring = '/api/claim/'
+          const endorIndex = !vp.id ? -1 : vp.id.indexOf(endorserSubstring)
+          if (vp['type']
+              && vp['type'].findIndex(elem => elem === 'VerifiableCredential') > -1
+              && endorIndex > -1) {
+            const endorId = vp.id.substring(endorIndex + endorserSubstring.length)
+            setEndorserId(endorId)
+
+            const url = appStore.getState().apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + endorId
+            const userToken = await utility.accessToken(identifiers[0])
+            await fetch(url, {
+              headers: {
+                "Content-Type": "application/json",
+                "Uport-Push-Token": userToken
+              }})
+              .then(response => {
+                if (response.status === 200) {
+                  return response.json()
+                } else {
+                  throw ('Got bad response status of ' + response.status)
+                }
+              })
+              .then(result => {
+                let resultList1 = result.result || []
+                let resultList2 = R.reject(utility.isHiddenDid, resultList1)
+                setNonHiddenIdList(resultList2)
+                setNumHidden(resultList1.length - resultList2.length)
+
+                setVisibleTo(result.resultVisibleToDids || [])
+              })
+              .catch(e => {
+                console.log('Something went wrong trying to access data.', e)
+                setConfirmError('Something went wrong trying to access data.')
+              })
+
+          }
         }
         setLoading(false)
       }
@@ -122,6 +151,13 @@ export function VerifyCredentialScreen({ navigation, route }) {
             ? <ActivityIndicator color="#00FF00" />
             : <View style={{ marginTop: 20}}/>
           }
+          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Validity</Text>
+          <Text>
+            Valid Signature? &nbsp;
+            { detectedSigValid ? 'Yes' : '' }
+            { detectedSigInvalid ? 'No, the signature is fraudulent!' : '' }
+            { detectedSigProblem ? 'No, there is some problem here.' : '' }
+          </Text>
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
           <View style={{ padding: 5 }}>
             {
@@ -141,7 +177,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
               visibleTo.map(did => <Text key={did} style={{ fontSize: 11 }} selectable={true}>{did}</Text>)
             }
           </View>
-          <Text>{ error }</Text>
+          <Text>{ confirmError }</Text>
           <View style={{ height: 0.8, width: "100%", backgroundColor: "#000000", marginTop: 200, marginBottom: 100 }} />
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Details</Text>
           <Text>{ endorserId ? 'Credential ' + endorserId : ''}</Text>

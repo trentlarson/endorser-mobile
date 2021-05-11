@@ -15,15 +15,14 @@ import * as pkg from '../../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
 import { appSlice, appStore } from "../veramo/appSlice"
-import { agent, dbConnection } from "../veramo/setup"
+import { agent, dbConnection, DEFAULT_DID_PROVIDER_NAME } from "../veramo/setup"
 
-const DEFAULT_DID_PROVIDER = 'did:ethr'
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
 const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 
 const newIdentifier = (address: string, publicHex: string, privateHex: string): Omit<IIdentifier, 'provider'> => {
   return {
-    did: DEFAULT_DID_PROVIDER + ':' + address,
+    did: DEFAULT_DID_PROVIDER_NAME + ':' + address,
     keys: [{
       kid: publicHex,
       kms: 'local',
@@ -31,7 +30,7 @@ const newIdentifier = (address: string, publicHex: string, privateHex: string): 
       publicKeyHex: publicHex,
       privateKeyHex: privateHex
     }],
-    provider: DEFAULT_DID_PROVIDER,
+    provider: DEFAULT_DID_PROVIDER_NAME,
     services: []
   }
 }

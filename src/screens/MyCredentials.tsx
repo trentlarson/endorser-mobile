@@ -84,7 +84,7 @@ export function MyCredentialsScreen({ navigation }) {
                     ? navigation.navigate('Present Credential', { fullClaim: data.item })
                     : null
                   }>
-                    <Text style={{ color: (isUser(data.item.issuer) ? "#0000FF" : "default") }}>{
+                    <Text style={{ color: (isUser(data.item.issuer) ? "blue" : "black") }}>{
                       utility.claimDescription(
                         data.item,
                         identifiers,
