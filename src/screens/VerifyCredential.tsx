@@ -1,4 +1,5 @@
 import didJwt from 'did-jwt'
+import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useState } from 'react'
 import { ActivityIndicator, Button, SafeAreaView, ScrollView, Text, View } from 'react-native'
@@ -58,6 +59,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [detectedSigProblem, setDetectedSigProblem] = useState<boolean>(false)
   const [detectedSigValid, setDetectedSigValid] = useState<boolean>(false)
   const [endorserId, setEndorserId] = useState<string>('')
+  const [howLongAgo, setHowLongAgo] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [nonHiddenIdList, setNonHiddenIdList] = useState([])
   const [numHidden, setNumHidden] = useState<number>(0)
@@ -72,9 +74,16 @@ export function VerifyCredentialScreen({ navigation, route }) {
         setDetectedSigInvalid(false)
         setDetectedSigProblem(false)
         setDetectedSigValid(false)
+        setHowLongAgo('')
 
         {
-          // this checks the JWT
+          // this checks the JWT time
+          const then = DateTime.fromISO(vp.issuanceDate)
+          setHowLongAgo(then.toRelativeCalendar())
+        }
+
+        {
+          // this checks the JWT signature
 
           try {
             let verifiedResponse = await didJwt.verifyJWT(vp.proof.jwt, {resolver: DEFAULT_BASIC_RESOLVER, audience: vp.issuer.id})
@@ -153,10 +162,13 @@ export function VerifyCredentialScreen({ navigation, route }) {
           }
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Validity</Text>
           <Text>
-            Valid Signature? &nbsp;
+            Valid Signature: &nbsp;
             { detectedSigValid ? 'Yes' : '' }
             { detectedSigInvalid ? 'No, the signature is fraudulent!' : '' }
             { detectedSigProblem ? 'No, there is some problem here.' : '' }
+          </Text>
+          <Text>
+            When: { howLongAgo }
           </Text>
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
           <View style={{ padding: 5 }}>
