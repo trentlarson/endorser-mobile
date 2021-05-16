@@ -2,7 +2,7 @@ import * as bip39 from 'bip39'
 import * as crypto from 'crypto'
 import { HDNode } from '@ethersproject/hdnode'
 import * as R from 'ramda'
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Alert, Button, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
 import { CheckBox } from "react-native-elements"
 import { classToPlain } from "class-transformer"
@@ -157,6 +157,7 @@ const createAndStoreIdentifier = async () => {
 }
 
 export function SettingsScreen({navigation}) {
+
   const [createStatus, setCreateStatus] = useState<string>('')
   const [creatingId, setCreatingId] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Omit<IIdentifier, 'provider'>[]>([])
@@ -165,6 +166,14 @@ export function SettingsScreen({navigation}) {
   const [storedName, setStoredName] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
+
+  // from https://reactnative.dev/docs/direct-manipulation#setnativeprops-to-clear-textinput-value
+  const inputApiRef = useRef()
+  const setApiTextToTestServer = useCallback(() => {
+    const URL = 'https://test.endorser.ch:8000'
+    inputApiRef.current.setNativeProps({ text: URL })
+    appStore.dispatch(appSlice.actions.setApiServer(URL))
+  })
 
   const deleteIdentifier = async () => {
     if (identifiers.length > 0) {
@@ -333,25 +342,40 @@ export function SettingsScreen({navigation}) {
 
             <Text>Endorser API Server</Text>
             <TextInput
-              style={{borderWidth: 1}}
+              defaultValue={ appStore.getState().apiServer }
               onChangeText={(text) => {
                 appStore.dispatch(appSlice.actions.setApiServer(text))
-              }}>
-              {appStore.getState().apiServer}
-            </TextInput>
+              }}
+              ref={inputApiRef}
+              style={{borderWidth: 1}}
+            />
             <Text>Endorser View Server</Text>
             <TextInput
-              style={{borderWidth: 1}}
+              defaultValue={ appStore.getState().viewServer }
               onChangeText={(text) => {
                 appStore.dispatch(appSlice.actions.setViewServer(text))
-              }}>
-              {appStore.getState().viewServer}
+              }}
+              style={{borderWidth: 1}}
+            >
             </TextInput>
             <CheckBox
               title='Test Mode'
               checked={isInTestMode}
               onPress={() => {setIsInTestMode(!isInTestMode)}}
             />
+
+            {
+            isInTestMode
+            ?
+              <View style={{ padding: 10 }}>
+                <Button
+                  title='Set API Server to public test server'
+                  onPress={setApiTextToTestServer}
+                />
+              </View>
+            :
+              <View/>
+            }
 
             <Text>Log</Text>
             <Text selectable={true}>{ appStore.getState().logMessage }</Text>
