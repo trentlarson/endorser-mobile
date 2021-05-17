@@ -175,12 +175,14 @@ export function SettingsScreen({navigation}) {
     appStore.dispatch(appSlice.actions.setApiServer(URL))
   })
 
-  const deleteIdentifier = async () => {
+  const deleteLastIdentifier = async () => {
     if (identifiers.length > 0) {
       const oldIdent = identifiers[identifiers.length - 1]
       await agent.didManagerDelete(oldIdent)
-      const conn = await dbConnection
-      await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {mnemonic: null})
+      if (identifiers.length === 1) {
+        const conn = await dbConnection
+        await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {mnemonic: null})
+      }
       const ids = await agent.didManagerFind()
       setIdentifiers(ids)
       setQrJwts(jwts => R.omit([oldIdent.did], jwts))
@@ -307,15 +309,23 @@ export function SettingsScreen({navigation}) {
                 </View>
               :
                 <View style={{ marginBottom: 60 }}>
+
                   <Text>Identifier</Text>
+
+                  { !hasMnemonic ? (
+                    <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
+                  ) : (
+                     <Text/>
+                  )}
+
                   { Object.keys(qrJwts).map(id =>
-                    <View key={id} style={{ marginTop: 40 }}>
+                    <View key={id} style={{ marginTop: 10 }}>
                       <Text style={{ fontSize: 11, marginTop: 20, marginBottom: 20 }} selectable={true}>{id}</Text>
                       <Text style={{ marginBottom: 20 }}>Your Info</Text>
                       <QRCode value={qrJwts[id]} size={300}/>
                     </View>
                   )}
-                  <View style={{marginTop: 40}}>
+                  <View style={{marginTop: 20}}>
                     <Button
                     title="Export Identifier"
                     onPress={() => navigation.navigate('Export Identifier')}
@@ -328,36 +338,18 @@ export function SettingsScreen({navigation}) {
               ? <View style={{ marginTop: 200 }}>
                   <Button title="Create ID" onPress={() => { setCreatingId(true) }} />
                   <View style={{ padding: 5 }} />
-                  <Button title="Delete Last ID" onPress={deleteIdentifier} />
+                  <Button title="Delete Last ID" onPress={deleteLastIdentifier} />
                 </View>
               : <View/>
             }
           </View>
           <View>
-            <Text style={{fontSize: 30, fontWeight: 'bold'}}>Other</Text>
+            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Other</Text>
 
             <View style={{ marginBottom: 20 }}>
               <Text selectable={true}>Version { pkg.version } ({ VersionNumber.buildVersion })</Text>
             </View>
 
-            <Text>Endorser API Server</Text>
-            <TextInput
-              defaultValue={ appStore.getState().apiServer }
-              onChangeText={(text) => {
-                appStore.dispatch(appSlice.actions.setApiServer(text))
-              }}
-              ref={inputApiRef}
-              style={{borderWidth: 1}}
-            />
-            <Text>Endorser View Server</Text>
-            <TextInput
-              defaultValue={ appStore.getState().viewServer }
-              onChangeText={(text) => {
-                appStore.dispatch(appSlice.actions.setViewServer(text))
-              }}
-              style={{borderWidth: 1}}
-            >
-            </TextInput>
             <CheckBox
               title='Test Mode'
               checked={isInTestMode}
@@ -368,17 +360,36 @@ export function SettingsScreen({navigation}) {
             isInTestMode
             ?
               <View style={{ padding: 10 }}>
+                <Text>Endorser API Server</Text>
+                <TextInput
+                  defaultValue={ appStore.getState().apiServer }
+                  onChangeText={(text) => {
+                    appStore.dispatch(appSlice.actions.setApiServer(text))
+                  }}
+                  ref={inputApiRef}
+                  style={{borderWidth: 1}}
+                />
+                <Text>Endorser View Server</Text>
+                <TextInput
+                  defaultValue={ appStore.getState().viewServer }
+                  onChangeText={(text) => {
+                    appStore.dispatch(appSlice.actions.setViewServer(text))
+                  }}
+                  style={{borderWidth: 1}}
+                >
+                </TextInput>
+
                 <Button
                   title='Set API Server to public test server'
                   onPress={setApiTextToTestServer}
                 />
+
+                <Text>Log</Text>
+                <Text selectable={true}>{ appStore.getState().logMessage }</Text>
               </View>
             :
               <View/>
             }
-
-            <Text>Log</Text>
-            <Text selectable={true}>{ appStore.getState().logMessage }</Text>
           </View>
         </View>
       </ScrollView>
