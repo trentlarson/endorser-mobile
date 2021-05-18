@@ -1,6 +1,12 @@
 
 # Endorser Mobile
 
+A mobile app for recording claims and reporting on them
+
+For the reporting facility, we use the [endorser-ch APIs](https://github.com/trentlarson/endorser-ch).
+
+
+
 ## Dev Build & Run
 
 `yarn install`
@@ -30,11 +36,13 @@ Clean:
   - Create IDs, export, and import.
   - Create contacts.
 - With an Endorser.ch server
-  - Run endorser-ch test/test.sh, then copy the endorser-ch-test-local.sqlite3 to endorser-ch-dev.sqlite3, then run the server.
+  - On a public test server
+    - Run in Test Mode (under Settings) and click the button to choose the test server.
+  - On your machine
+    - Run endorser-ch test/test.sh, then copy the endorser-ch-test-local.sqlite3 to endorser-ch-dev.sqlite3, then run the server.
   - Import via the mnemonic, eg. #3 from endorser-ch test/util.js
   - Submit claims & confirmations.
   - Run report searches for the individual, eg. for 'carp'
-
 
 
 
