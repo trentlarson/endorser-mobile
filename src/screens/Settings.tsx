@@ -2,8 +2,8 @@ import * as bip39 from 'bip39'
 import * as crypto from 'crypto'
 import { HDNode } from '@ethersproject/hdnode'
 import * as R from 'ramda'
-import React, { useEffect, useState } from "react"
-import { ActivityIndicator, Alert, Button, FlatList, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { ActivityIndicator, Alert, Button, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
 import { CheckBox } from "react-native-elements"
 import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
@@ -15,15 +15,14 @@ import * as pkg from '../../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
 import { appSlice, appStore } from "../veramo/appSlice"
-import { agent, dbConnection } from "../veramo/setup"
+import { agent, dbConnection, DEFAULT_DID_PROVIDER_NAME } from "../veramo/setup"
 
-const DEFAULT_DID_PROVIDER = 'did:ethr'
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
 const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 
 const newIdentifier = (address: string, publicHex: string, privateHex: string): Omit<IIdentifier, 'provider'> => {
   return {
-    did: DEFAULT_DID_PROVIDER + ':' + address,
+    did: DEFAULT_DID_PROVIDER_NAME + ':' + address,
     keys: [{
       kid: publicHex,
       kms: 'local',
@@ -31,7 +30,7 @@ const newIdentifier = (address: string, publicHex: string, privateHex: string): 
       publicKeyHex: publicHex,
       privateKeyHex: privateHex
     }],
-    provider: DEFAULT_DID_PROVIDER,
+    provider: DEFAULT_DID_PROVIDER_NAME,
     services: []
   }
 }
@@ -158,6 +157,7 @@ const createAndStoreIdentifier = async () => {
 }
 
 export function SettingsScreen({navigation}) {
+
   const [createStatus, setCreateStatus] = useState<string>('')
   const [creatingId, setCreatingId] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Omit<IIdentifier, 'provider'>[]>([])
@@ -167,12 +167,22 @@ export function SettingsScreen({navigation}) {
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
 
-  const deleteIdentifier = async () => {
+  // from https://reactnative.dev/docs/direct-manipulation#setnativeprops-to-clear-textinput-value
+  const inputApiRef = useRef()
+  const setApiTextToTestServer = useCallback(() => {
+    const URL = 'https://test.endorser.ch:8000'
+    inputApiRef.current.setNativeProps({ text: URL })
+    appStore.dispatch(appSlice.actions.setApiServer(URL))
+  })
+
+  const deleteLastIdentifier = async () => {
     if (identifiers.length > 0) {
       const oldIdent = identifiers[identifiers.length - 1]
       await agent.didManagerDelete(oldIdent)
-      const conn = await dbConnection
-      await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {mnemonic: null})
+      if (identifiers.length === 1) {
+        const conn = await dbConnection
+        await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {mnemonic: null})
+      }
       const ids = await agent.didManagerFind()
       setIdentifiers(ids)
       setQrJwts(jwts => R.omit([oldIdent.did], jwts))
@@ -299,15 +309,23 @@ export function SettingsScreen({navigation}) {
                 </View>
               :
                 <View style={{ marginBottom: 60 }}>
+
                   <Text>Identifier</Text>
+
+                  { !hasMnemonic ? (
+                    <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
+                  ) : (
+                     <Text/>
+                  )}
+
                   { Object.keys(qrJwts).map(id =>
-                    <View key={id} style={{ marginTop: 40 }}>
+                    <View key={id} style={{ marginTop: 10 }}>
                       <Text style={{ fontSize: 11, marginTop: 20, marginBottom: 20 }} selectable={true}>{id}</Text>
                       <Text style={{ marginBottom: 20 }}>Your Info</Text>
                       <QRCode value={qrJwts[id]} size={300}/>
                     </View>
                   )}
-                  <View style={{marginTop: 40}}>
+                  <View style={{marginTop: 20}}>
                     <Button
                     title="Export Identifier"
                     onPress={() => navigation.navigate('Export Identifier')}
@@ -320,42 +338,58 @@ export function SettingsScreen({navigation}) {
               ? <View style={{ marginTop: 200 }}>
                   <Button title="Create ID" onPress={() => { setCreatingId(true) }} />
                   <View style={{ padding: 5 }} />
-                  <Button title="Delete Last ID" onPress={deleteIdentifier} />
+                  <Button title="Delete Last ID" onPress={deleteLastIdentifier} />
                 </View>
               : <View/>
             }
           </View>
           <View>
-            <Text style={{fontSize: 30, fontWeight: 'bold'}}>Other</Text>
+            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Other</Text>
 
             <View style={{ marginBottom: 20 }}>
               <Text selectable={true}>Version { pkg.version } ({ VersionNumber.buildVersion })</Text>
             </View>
 
-            <Text>Endorser API Server</Text>
-            <TextInput
-              style={{borderWidth: 1}}
-              onChangeText={(text) => {
-                appStore.dispatch(appSlice.actions.setApiServer(text))
-              }}>
-              {appStore.getState().apiServer}
-            </TextInput>
-            <Text>Endorser View Server</Text>
-            <TextInput
-              style={{borderWidth: 1}}
-              onChangeText={(text) => {
-                appStore.dispatch(appSlice.actions.setViewServer(text))
-              }}>
-              {appStore.getState().viewServer}
-            </TextInput>
             <CheckBox
               title='Test Mode'
               checked={isInTestMode}
               onPress={() => {setIsInTestMode(!isInTestMode)}}
             />
 
-            <Text>Log</Text>
-            <Text selectable={true}>{ appStore.getState().logMessage }</Text>
+            {
+            isInTestMode
+            ?
+              <View style={{ padding: 10 }}>
+                <Text>Endorser API Server</Text>
+                <TextInput
+                  defaultValue={ appStore.getState().apiServer }
+                  onChangeText={(text) => {
+                    appStore.dispatch(appSlice.actions.setApiServer(text))
+                  }}
+                  ref={inputApiRef}
+                  style={{borderWidth: 1}}
+                />
+                <Text>Endorser View Server</Text>
+                <TextInput
+                  defaultValue={ appStore.getState().viewServer }
+                  onChangeText={(text) => {
+                    appStore.dispatch(appSlice.actions.setViewServer(text))
+                  }}
+                  style={{borderWidth: 1}}
+                >
+                </TextInput>
+
+                <Button
+                  title='Set API Server to public test server'
+                  onPress={setApiTextToTestServer}
+                />
+
+                <Text>Log</Text>
+                <Text selectable={true}>{ appStore.getState().logMessage }</Text>
+              </View>
+            :
+              <View/>
+            }
           </View>
         </View>
       </ScrollView>
@@ -465,6 +499,7 @@ export function ImportIdentityScreen({navigation}) {
                 <View>
                   <Text>Enter mnemonic:</Text>
                   <TextInput
+                    autoCapitalize={'none'}
                     multiline={true}
                     style={{borderWidth: 1, height: 100}}
                     onChangeText={setMnemonic}

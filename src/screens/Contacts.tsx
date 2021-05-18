@@ -2,9 +2,9 @@ import { classToPlain } from 'class-transformer'
 import * as didJwt from 'did-jwt'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
-import Clipboard from '@react-native-community/clipboard';
-import { useFocusEffect } from '@react-navigation/native';
+import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
+import { useFocusEffect } from '@react-navigation/native'
 import QRCodeScanner from 'react-native-qrcode-scanner'
 import { useSelector } from 'react-redux'
 
@@ -69,10 +69,10 @@ export function ContactsScreen({ navigation, route }) {
         "Uport-Push-Token": token,
       }
     }).then(response => {
-      return response.json()
       if (response.status !== 200) {
         throw Error('There was an error from the server trying to check visibility.')
       }
+      return response.json()
     }).then(result => {
       setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
 
@@ -174,6 +174,7 @@ export function ContactsScreen({ navigation, route }) {
               onChangeText={setContactName}
               editable
               style={{ borderWidth: 1 }}
+              autoCapitalize={'words'}
             />
             <Text>DID</Text>
             <TextInput
@@ -181,7 +182,7 @@ export function ContactsScreen({ navigation, route }) {
               onChangeText={setContactDid}
               editable
               style={{ borderWidth: 1 }}
-              autoCapitalize='none'
+              autoCapitalize={'none'}
               autoCorrect={false}
             />
             <Text>Public Key (base64-encoded, optional)</Text>
@@ -190,7 +191,7 @@ export function ContactsScreen({ navigation, route }) {
               onChangeText={setContactPubKeyBase64}
               editable
               style={{ borderWidth: 1 }}
-              autoCapitalize='none'
+              autoCapitalize={'none'}
               autoCorrect={false}
             />
           </View>
@@ -378,7 +379,6 @@ export function ContactImportScreen({ navigation }) {
             ) : (
               <View>
                 <QRCodeScanner onRead={onSuccessfulQrEvent} />
-                {/** Setting reactivate to true because sometimes it reads incorrectly, so we'll just try again. **/}
                 { appStore.getState().testMode
                   ? <Button
                       title='Fake It'
