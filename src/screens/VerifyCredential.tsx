@@ -59,11 +59,14 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const vp = JSON.parse(vpStr)
 
   const [confirmError, setConfirmError] = useState<string>('')
+  const [credentialSubject, setCredentialSubject] = useState<any>(undefined)
+  const [credentialSubjectsMatch, setCredentialSubjectsMatch] = useState<boolean>(false)
   const [detectedSigInvalid, setDetectedSigInvalid] = useState<boolean>(false)
   const [detectedSigProblem, setDetectedSigProblem] = useState<boolean>(false)
   const [detectedSigValid, setDetectedSigValid] = useState<boolean>(false)
   const [endorserId, setEndorserId] = useState<string>('')
   const [howLongAgo, setHowLongAgo] = useState<string>('')
+  const [issuer, setIssuer] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [nonHiddenIdList, setNonHiddenIdList] = useState([])
   const [numHidden, setNumHidden] = useState<number>(0)
@@ -86,14 +89,18 @@ export function VerifyCredentialScreen({ navigation, route }) {
           setHowLongAgo(then.toRelativeCalendar())
         }
 
+        let verifiedResponse: JWTVerified = undefined
         {
           // this checks the JWT signature
 
           try {
-            let verifiedResponse = await didJwt.verifyJWT(vp.proof.jwt, {resolver: DEFAULT_BASIC_RESOLVER, audience: vp.issuer.id})
+
+            verifiedResponse = await didJwt.verifyJWT(vp.proof.jwt, {resolver: DEFAULT_BASIC_RESOLVER, auth: true})
+            //console.log("verifiedResponse",verifiedResponse)
 
             // if we're here, it must have passed validation
             setDetectedSigValid(true)
+
           } catch (e) {
             if (e.toString().indexOf('Signature invalid for JWT') > -1) {
               setDetectedSigInvalid(true)
@@ -102,6 +109,27 @@ export function VerifyCredentialScreen({ navigation, route }) {
               console.log('Got unknown error verifying JWT:', e)
             }
           }
+        }
+
+        if (verifiedResponse) {
+
+          // check that the contents inside and outside the JWT match
+          if (verifiedResponse.payload.vc
+              && verifiedResponse.payload.vc.credentialSubject) {
+            setCredentialSubject(verifiedResponse.payload.vc.credentialSubject)
+            if (vp.credentialSubject) {
+              setCredentialSubjectsMatch(R.equals(vp.credentialSubject, verifiedResponse.payload.vc.credentialSubject))
+            } else {
+              // nothing to compare to, so don't say it doesn't match
+              setCredentialSubjectsMatch(true)
+            }
+          } else {
+            // no signed credentialSubject exists... not good
+          }
+
+          setIssuer(verifiedResponse.issuer)
+          // there's also a signer.id... is it ever different?
+
         }
 
         {
@@ -165,6 +193,24 @@ export function VerifyCredentialScreen({ navigation, route }) {
             : <View style={{ marginTop: 20}}/>
           }
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Validity</Text>
+          <View style={{ flex: 1, flexDirection: 'row' }}>
+            <Text style={{ width: '20%' }}>Claim</Text>
+            <Text style={{ width: '80%' }}>{ JSON.stringify(credentialSubject) }</Text>
+          </View>
+          <View style={{ flex: 1, flexDirection: 'row' }}>
+            <Text style={{ width: '20%' }}>Issuer</Text>
+            <Text style={{ width: '80%' }}>{ issuer }</Text>
+          </View>
+          {
+            credentialSubject
+            ?
+              <View style={{ flex: 1, flexDirection: 'row' }}>
+                <Text style={{ width: '30%' }}>Consistent?</Text>
+                <Text>{ JSON.stringify(credentialSubjectsMatch) }</Text>
+              </View>
+            :
+              <View/>
+          }
           <View style={{ flex: 1, flexDirection: 'row' }}>
             <Text style={{ width: '30%' }}>Valid Signature?</Text>
             <Text>
