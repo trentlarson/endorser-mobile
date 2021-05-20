@@ -67,13 +67,23 @@ export const containsHiddenDid = (obj) => {
 
 // take DID and extract address and return first and last 3 chars
 export const firstAndLast3OfDid = (did) => {
-  if (!isDid(did)) {
-    return did
-  } else if (isHiddenDid(did)) {
-    return "(HIDDEN)"
-  } else {
-    return firstAndLast3(did.split(":")[2].substring(2))
+  if (!did) {
+    return "(BLANK)"
   }
+  if (!isDid(did)) {
+    return "(NOT_A_DID)"
+  }
+  if (isHiddenDid(did)) {
+    return "(HIDDEN)"
+  }
+  const lastChars = did.split(":")[2]
+  if (!lastChars) {
+    return firstAndLast3(did.substring("did:".length))
+  }
+  if (lastChars.startsWith("0x")) { // Ethereum DIDs
+    return firstAndLast3(lastChars.substring(2))
+  }
+  return firstAndLast3(lastChars)
 }
 
 const UNKNOWN_CONTACT = "?"
@@ -93,8 +103,10 @@ function didInfo(did, identifiers, contacts) {
   }
 }
 
-function didInContext(did, identifiers, contacts) {
-  return didInfo(did, identifiers, contacts) + " (" + firstAndLast3OfDid(did) + ")"
+export function didInContext(did, identifiers, contacts) {
+  let shortName = didInfo(did, identifiers, contacts)
+  let visibleDid = shortName === UNKNOWN_CONTACT ? did : firstAndLast3OfDid(did)
+  return shortName + " (" + visibleDid + ")"
 }
 
 /**

@@ -5,10 +5,11 @@ import React, { useState } from 'react'
 import { ActivityIndicator, Button, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import QRCodeScanner from 'react-native-qrcode-scanner'
 import { useFocusEffect } from '@react-navigation/native'
+import { useSelector } from 'react-redux'
 
 import * as utility from '../utility/utility'
-import { appStore } from '../veramo/appSlice'
-import { agent, DEFAULT_BASIC_RESOLVER } from '../veramo/setup'
+import { appSlice, appStore } from '../veramo/appSlice'
+import { agent, dbConnection, DEFAULT_BASIC_RESOLVER } from '../veramo/setup'
 
 export function ScanPresentationScreen({ navigation }) {
 
@@ -66,11 +67,24 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [detectedSigValid, setDetectedSigValid] = useState<boolean>(false)
   const [endorserId, setEndorserId] = useState<string>('')
   const [howLongAgo, setHowLongAgo] = useState<string>('')
+  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [issuer, setIssuer] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [nonHiddenIdList, setNonHiddenIdList] = useState([])
   const [numHidden, setNumHidden] = useState<number>(0)
   const [visibleTo, setVisibleTo] = useState<string[]>([])
+
+  const allContacts = useSelector((state) => state.contacts || [])
+
+  useFocusEffect(
+    React.useCallback(() => {
+
+      agent.didManagerFind().then(ids => setIdentifiers(ids))
+
+      utility.loadContacts(appSlice, appStore, dbConnection)
+
+    }, [])
+  )
 
   useFocusEffect(
     React.useCallback(() => {
@@ -128,7 +142,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           }
 
           setIssuer(verifiedResponse.issuer)
-          // there's also a signer.id... is it ever different?
+          // there's also a signer.id ... is it ever different?
 
         }
 
@@ -195,18 +209,18 @@ export function VerifyCredentialScreen({ navigation, route }) {
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Validity</Text>
           <View style={{ flex: 1, flexDirection: 'row' }}>
             <Text style={{ width: '20%' }}>Claim</Text>
-            <Text style={{ width: '80%' }}>{ JSON.stringify(credentialSubject) }</Text>
+            <Text style={{ width: '80%' }} selectable={true}>{ JSON.stringify(credentialSubject) }</Text>
           </View>
           <View style={{ flex: 1, flexDirection: 'row' }}>
             <Text style={{ width: '20%' }}>Issuer</Text>
-            <Text style={{ width: '80%' }}>{ issuer }</Text>
+            <Text style={{ width: '80%' }} selectable={true}>{ utility.didInContext(issuer, identifiers, allContacts) }</Text>
           </View>
           {
             credentialSubject
             ?
               <View style={{ flex: 1, flexDirection: 'row' }}>
                 <Text style={{ width: '30%' }}>Consistent?</Text>
-                <Text>{ JSON.stringify(credentialSubjectsMatch) }</Text>
+                <Text>{ credentialSubjectsMatch ? 'Yes' : 'No' }</Text>
               </View>
             :
               <View/>
@@ -224,9 +238,10 @@ export function VerifyCredentialScreen({ navigation, route }) {
             <Text>{ howLongAgo }</Text>
           </View>
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
+          <Text>There are { nonHiddenIdList.length } that you can see.</Text>
           <View style={{ padding: 5 }}>
             {
-              nonHiddenIdList.map(did => <Text key={did} style={{ fontSize: 11 }} selectable={true}>{did}</Text>)
+              nonHiddenIdList.map(did => <Text key={did} selectable={true}>{ utility.didInContext(issuer, identifiers, allContacts) }</Text>)
             }
           </View>
           <Text>{ numHidden ? 'There ' + (numHidden === 1 ? 'is' : 'are') + ' ' + numHidden + ' that you cannot see.' : '' }</Text>
