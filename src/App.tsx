@@ -13,11 +13,12 @@ import { Provider } from 'react-redux';
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { appStore } from './veramo/appSlice.ts'
-import { PresentCredentialScreen } from './screens/PresentCredential'
-import { CredentialsScreen } from './screens/SignSendToEndorser'
+import { ConstructCredentialScreen } from './screens/ConstructCredential'
+import { SignCredentialScreen } from './screens/SignSendToEndorser'
 import { ContactImportScreen, ContactsScreen } from './screens/Contacts'
 import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./screens/Settings";
 import { MyCredentialsScreen } from './screens/MyCredentials'
+import { PresentCredentialScreen } from './screens/PresentCredential'
 import { ReportScreen } from './screens/ReportFromEndorser'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
 
@@ -45,7 +46,8 @@ export default function App() {
             <Stack.Screen name="Community Endorser" component={HomeScreen} />
             <Stack.Screen name="Contact Import" component={ContactImportScreen} />
             <Stack.Screen name="Contacts" component={ContactsScreen} />
-            <Stack.Screen name="Claims" component={CredentialsScreen} />
+            <Stack.Screen name="Sign Credential" component={SignCredentialScreen} />
+            <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
             <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
@@ -67,7 +69,7 @@ function HomeScreen({ navigation }) {
     <View>
       <Button
         title="Claim"
-        onPress={() => navigation.navigate('Claims')}
+        onPress={() => navigation.navigate('Create Credential')}
       />
       <Button
         title="Report"
