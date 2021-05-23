@@ -1,9 +1,11 @@
+import crypto from 'crypto'
 import Debug from 'debug'
 import * as didJwt from 'did-jwt'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
+import { CheckBox } from "react-native-elements"
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
@@ -14,14 +16,19 @@ const debug = Debug('endorser-mobile:share-credential')
 
 export function ConstructCredentialScreen({ navigation }) {
 
-  const [confirming, setConfirming] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
+
+  // for confirmations
+  const [confirming, setConfirming] = useState<boolean>(false)
   const [loadedClaimsStarting, setLoadedClaimsStarting] = useState<DateTime>(null)
   const [loadingRecentClaims, setLoadingRecentClaims] = useState<boolean>(false)
   const [recentClaims, setRecentClaims] = useState<Array<any>>([])
   const [recentHiddenCount, setRecentHiddenCount] = useState<number>(0)
   const [selectedClaimsToConfirm, setSelectedClaimsToConfirm] = useState<Array<number>>([])
+
+  // for Grants
+  const [askForGrant, setAskForGrant] = useState<boolean>(false)
 
   let currentOrPreviousSat = DateTime.local()
   let todayIsSaturday = true
@@ -219,6 +226,18 @@ export function ConstructCredentialScreen({ navigation }) {
                     </View>
                   </View>
                 </Modal>
+                {
+                  askForGrant
+                  ? <GrantModal
+                      id={ identifiers[0].did }
+                      proceed={ claim => {
+                        setAskForGrant(false)
+                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                      }}
+                      cancel={ () => setAskForGrant(false) }
+                    />
+                  : <View/>
+                }
                 <View>
                   <Text>What do you want to assert?</Text>
                   <Button
@@ -234,6 +253,11 @@ export function ConstructCredentialScreen({ navigation }) {
                       utility.loadContacts(appSlice, appStore, dbConnection, true)
                     }}
                   />
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Grant'}
+                    onPress={() => setAskForGrant(true)}
+                  />
                 </View>
               </View>
             </View>
@@ -244,6 +268,160 @@ export function ConstructCredentialScreen({ navigation }) {
       </ScrollView>
     </SafeAreaView>
   )
+
+  /**
+    props has:
+    - funderId string for the identifier of the sponsor
+    - proceed function that takes the claim
+    - cancel function
+   **/
+  function GrantModal(props) {
+
+    const [comment, setComment] = useState<string>('')
+    const [durationInHours, setDurationInHours] = useState<string>('1')
+    const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
+    const [fundedId, setFundedId] = useState<string>('')
+    const [termsOfService, setTermsOfService] = useState<string>("Let's just talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc.")
+    const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
+    const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
+
+    function grantClaim(grantId: string, funderId: string, fundedId: string, comments: string, durationInHours: string, expiration: string, termsOfService: string, transfersAllowed: number) {
+      return {
+        "@context": "https://schema.org",
+        "@type": "Grant",
+        // recommend adding non-standard properties as key:value pairs in descriptions until they evolve into standard properties
+        "description": comments,
+        "duration": "PT" + durationInHours + "H",
+        "expires": expiration,
+        "fundedItem": {
+          "@type": "Person",
+          "identifier": fundedId,
+        },
+        "sponsor": {
+          "@type": "Person",
+          "identifier": funderId
+        },
+        "numberOfTransfersAllowed": transfersAllowed,
+        "termsOfService": termsOfService,
+        "identifier": grantId,
+      }
+    }
+
+    function grantClaimFromInputs() {
+      return grantClaim(
+        crypto.randomBytes(16).toString('hex'), // 128 bits seems OK
+        props.id,
+        fundedId,
+        comment,
+        durationInHours,
+        expiration,
+        termsOfService,
+        multipleTransfersAllowed ? Number.MAX_SAFE_INTEGER : transferAllowed ? 1 : 0
+      )
+    }
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={props.cancel}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View>
+              <Text style={styles.modalText}>Grant</Text>
+
+              <View style={{ padding: 5 }}>
+                <Text>Recipient</Text>
+                <TextInput
+                  value={fundedId}
+                  onChangeText={setFundedId}
+                  editable
+                  style={{ borderWidth: 1 }}
+                  autoCapitalize={'none'}
+                  autoCorrect={false}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <Text>Number of Hours</Text>
+                <TextInput
+                  value={durationInHours}
+                  onChangeText={setDurationInHours}
+                  editable
+                  length={ 5 }
+                  style={{ borderWidth: 1 }}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <Text>Expiration</Text>
+                <TextInput
+                  value={expiration}
+                  onChangeText={setExpiration}
+                  editable
+                  style={{ borderWidth: 1 }}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <Text>Comment</Text>
+                <TextInput
+                  value={comment}
+                  onChangeText={setComment}
+                  editable
+                  multiline={true}
+                  style={{ borderWidth: 1 }}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <Text>Terms</Text>
+                <TextInput
+                  value={termsOfService}
+                  onChangeText={setTermsOfService}
+                  editable
+                  multiline={true}
+                  style={{ borderWidth: 1 }}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <CheckBox
+                  title='Transfer Allowed?'
+                  checked={transferAllowed}
+                  onPress={() => {setTransferAllowed(!transferAllowed)}}
+                />
+                <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
+                  <CheckBox
+                    title='Multiple Transfers Allowed?'
+                    checked={multipleTransfersAllowed}
+                    onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
+                    visible={transferAllowed}
+                  />
+                </View>
+              </View>
+
+              <View style={{ padding: 10 }} />
+              <TouchableHighlight
+                style={styles.cancelButton}
+                onPress={props.cancel}
+              >
+                <Text>Cancel</Text>
+              </TouchableHighlight>
+              <TouchableHighlight
+                style={styles.saveButton}
+                onPress={() => props.proceed(grantClaimFromInputs())}
+              >
+                <Text>Set</Text>
+              </TouchableHighlight>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    )
+  }
+
 }
 
 const styles = StyleSheet.create({

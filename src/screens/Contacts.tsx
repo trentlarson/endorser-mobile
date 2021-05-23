@@ -224,7 +224,7 @@ export function ContactsScreen({ navigation, route }) {
           { allContacts.map((contact, index) => (
             <View style={{ borderWidth: 1 }} key={contact.did}>
               <View style={{ padding: 20 }}>
-                <Text style={{ fontSize: 11 }}>
+                <Text style={{ fontSize: 11 }} selectable={ true }>
                   { (contact.name || '(no name)')
                     + '\n' + contact.did
                     + '\n' + (contact.pubKeyBase64 || '(no public key)')}
