@@ -17,7 +17,7 @@ const debug = Debug('endorser-mobile:share-credential')
 export function ConstructCredentialScreen({ navigation }) {
 
   const [askForCreditInfo, setAskForCreditInfo] = useState<boolean>(false)
-  const [askForGrantInfo, setAskForGrantInfo] = useState<boolean>(false)
+  const [askForGiveInfo, setAskForGiveInfo] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
 
@@ -226,12 +226,12 @@ export function ConstructCredentialScreen({ navigation }) {
                   </View>
                 </Modal>
                 {
-                  askForGrantInfo
-                  ? <GrantModal
+                  askForGiveInfo
+                  ? <GiveModal
                       sponsorId={ identifiers[0].did }
-                      cancel={ () => setAskForGrantInfo(false) }
+                      cancel={ () => setAskForGiveInfo(false) }
                       proceed={ claim => {
-                        setAskForGrantInfo(false)
+                        setAskForGiveInfo(false)
                         navigation.navigate('Sign Credential', { credentialSubject: claim })
                       }}
                     />
@@ -252,27 +252,27 @@ export function ConstructCredentialScreen({ navigation }) {
                 <View>
                   <Text>What do you want to assert?</Text>
                   <Button
-                    title={'Attendance at ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' Meeting'}
+                    title={'Attended ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' BVC Meeting'}
                     onPress={setClaimToAttendance}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Confirmation of Other Claims'}
+                    title={'Offer Credit'}
+                    onPress={() => setAskForCreditInfo(true)}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Offer Time'}
+                    onPress={() => setAskForGiveInfo(true)}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Confirm Other Claims'}
                     onPress={() => {
                       setConfirming(true)
                       loadRecentClaims()
                       utility.loadContacts(appSlice, appStore, dbConnection, true)
                     }}
-                  />
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Grant Time'}
-                    onPress={() => setAskForGrantInfo(true)}
-                  />
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Credit'}
-                    onPress={() => setAskForCreditInfo(true)}
                   />
                 </View>
               </View>
@@ -311,11 +311,9 @@ export function ConstructCredentialScreen({ navigation }) {
         // recommend adding non-standard properties as key:value pairs in descriptions until they evolve into standard properties
         "description": description,
         "recipient": {
-          "@type": "Person",
           "identifier": recipientId,
         },
         "provider": {
-          "@type": "Person",
           "identifier": providerId
         },
         "numberOfTransfersAllowed": transfersAllowed,
@@ -346,7 +344,7 @@ export function ConstructCredentialScreen({ navigation }) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View>
-              <Text style={styles.modalText}>Grant</Text>
+              <Text style={styles.modalText}>Give</Text>
 
               <View style={{ padding: 5 }}>
                 <Text>Recipient</Text>
@@ -445,7 +443,7 @@ export function ConstructCredentialScreen({ navigation }) {
     - proceed function that takes the claim
     - cancel function
    **/
-  function GrantModal(props) {
+  function GiveModal(props) {
 
     const [comment, setComment] = useState<string>('')
     const [durationInHours, setDurationInHours] = useState<string>('1')
@@ -458,17 +456,15 @@ export function ConstructCredentialScreen({ navigation }) {
     function grantClaim(grantId: string, funderId: string, fundedId: string, comments: string, durationInHours: string, expiration: string, termsOfService: string, transfersAllowed: number) {
       return {
         "@context": "https://schema.org",
-        "@type": "Grant",
+        "@type": "GiveAction",
         // recommend adding non-standard properties as key:value pairs in descriptions until they evolve into standard properties
         "description": comments,
         "duration": "PT" + durationInHours + "H",
         "expires": expiration,
         "recipient": {
-          "@type": "Person",
           "identifier": fundedId,
         },
-        "sponsor": {
-          "@type": "Person",
+        "agent": {
           "identifier": funderId
         },
         "numberOfTransfersAllowed": transfersAllowed,
@@ -499,7 +495,7 @@ export function ConstructCredentialScreen({ navigation }) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View>
-              <Text style={styles.modalText}>Grant</Text>
+              <Text style={styles.modalText}>Give</Text>
 
               <View style={{ padding: 5 }}>
                 <Text>Recipient</Text>
