@@ -16,6 +16,8 @@ const debug = Debug('endorser-mobile:share-credential')
 
 export function ConstructCredentialScreen({ navigation }) {
 
+  const [askForCreditInfo, setAskForCreditInfo] = useState<boolean>(false)
+  const [askForGrantInfo, setAskForGrantInfo] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
 
@@ -26,9 +28,6 @@ export function ConstructCredentialScreen({ navigation }) {
   const [recentClaims, setRecentClaims] = useState<Array<any>>([])
   const [recentHiddenCount, setRecentHiddenCount] = useState<number>(0)
   const [selectedClaimsToConfirm, setSelectedClaimsToConfirm] = useState<Array<number>>([])
-
-  // for Grants
-  const [askForGrant, setAskForGrant] = useState<boolean>(false)
 
   let currentOrPreviousSat = DateTime.local()
   let todayIsSaturday = true
@@ -227,14 +226,26 @@ export function ConstructCredentialScreen({ navigation }) {
                   </View>
                 </Modal>
                 {
-                  askForGrant
+                  askForGrantInfo
                   ? <GrantModal
-                      id={ identifiers[0].did }
+                      sponsorId={ identifiers[0].did }
+                      cancel={ () => setAskForGrantInfo(false) }
                       proceed={ claim => {
-                        setAskForGrant(false)
+                        setAskForGrantInfo(false)
                         navigation.navigate('Sign Credential', { credentialSubject: claim })
                       }}
-                      cancel={ () => setAskForGrant(false) }
+                    />
+                  : <View/>
+                }
+                {
+                  askForCreditInfo
+                  ? <CreditModal
+                      providerId={ identifiers[0].did }
+                      cancel={ () => setAskForCreditInfo(false) }
+                      proceed={ claim => {
+                        setAskForCreditInfo(false)
+                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                      }}
                     />
                   : <View/>
                 }
@@ -255,8 +266,13 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Grant'}
-                    onPress={() => setAskForGrant(true)}
+                    title={'Grant Time'}
+                    onPress={() => setAskForGrantInfo(true)}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Credit'}
+                    onPress={() => setAskForCreditInfo(true)}
                   />
                 </View>
               </View>
@@ -271,6 +287,160 @@ export function ConstructCredentialScreen({ navigation }) {
 
   /**
     props has:
+    - providerId string for the identifier of the provider
+    - proceed function that takes the claim
+    - cancel function
+   **/
+  function CreditModal(props) {
+
+    const [amountStr, setAmountStr] = useState<string>('0')
+    const [currency, setCurrency] = useState<string>('?')
+    const [description, setDescription] = useState<string>('')
+    const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
+    const [recipientId, setRecipientId] = useState<string>('')
+    const [termsOfService, setTermsOfService] = useState<string>("Confirm receipt of funds.\nI'll confirm payoff upon final payment.")
+    const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
+    const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
+
+    function grantClaim(txnId: string, providerId: string, recipientId: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
+      return {
+        "@context": "https://schema.org",
+        "@type": "LoanOrCredit",
+        "amount": amount,
+        "currency": currency,
+        // recommend adding non-standard properties as key:value pairs in descriptions until they evolve into standard properties
+        "description": description,
+        "recipient": {
+          "@type": "Person",
+          "identifier": recipientId,
+        },
+        "provider": {
+          "@type": "Person",
+          "identifier": providerId
+        },
+        "numberOfTransfersAllowed": transfersAllowed,
+        "termsOfService": termsOfService,
+        "identifier": txnId,
+      }
+    }
+
+    function grantClaimFromInputs() {
+      return grantClaim(
+        crypto.randomBytes(16).toString('hex'), // 128 bits seems OK
+        props.providerId,
+        recipientId,
+        Number.parseFloat(amountStr),
+        currency,
+        description,
+        termsOfService,
+        multipleTransfersAllowed ? Number.MAX_SAFE_INTEGER : transferAllowed ? 1 : 0
+      )
+    }
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={props.cancel}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View>
+              <Text style={styles.modalText}>Grant</Text>
+
+              <View style={{ padding: 5 }}>
+                <Text>Recipient</Text>
+                <TextInput
+                  value={recipientId}
+                  onChangeText={setRecipientId}
+                  editable
+                  style={{ borderWidth: 1 }}
+                  autoCapitalize={'none'}
+                  autoCorrect={false}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <Text>Amount</Text>
+                <TextInput
+                  value={amountStr}
+                  onChangeText={setAmountStr}
+                  editable
+                  length={ 5 }
+                  style={{ borderWidth: 1 }}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <Text>Currency</Text>
+                <TextInput
+                  value={currency}
+                  onChangeText={setCurrency}
+                  editable
+                  style={{ borderWidth: 1 }}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <Text>Description</Text>
+                <TextInput
+                  value={description}
+                  onChangeText={setDescription}
+                  editable
+                  multiline={true}
+                  style={{ borderWidth: 1 }}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <Text>Terms</Text>
+                <TextInput
+                  value={termsOfService}
+                  onChangeText={setTermsOfService}
+                  editable
+                  multiline={true}
+                  style={{ borderWidth: 1 }}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <CheckBox
+                  title='Transfer Allowed?'
+                  checked={transferAllowed}
+                  onPress={() => {setTransferAllowed(!transferAllowed)}}
+                />
+                <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
+                  <CheckBox
+                    title='Multiple Transfers Allowed?'
+                    checked={multipleTransfersAllowed}
+                    onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
+                    visible={transferAllowed}
+                  />
+                </View>
+              </View>
+
+              <View style={{ padding: 10 }} />
+              <TouchableHighlight
+                style={styles.cancelButton}
+                onPress={props.cancel}
+              >
+                <Text>Cancel</Text>
+              </TouchableHighlight>
+              <TouchableHighlight
+                style={styles.saveButton}
+                onPress={() => props.proceed(grantClaimFromInputs())}
+              >
+                <Text>Set</Text>
+              </TouchableHighlight>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    )
+  }
+
+  /**
+    props has:
     - funderId string for the identifier of the sponsor
     - proceed function that takes the claim
     - cancel function
@@ -281,9 +451,9 @@ export function ConstructCredentialScreen({ navigation }) {
     const [durationInHours, setDurationInHours] = useState<string>('1')
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [fundedId, setFundedId] = useState<string>('')
-    const [termsOfService, setTermsOfService] = useState<string>("Let's just talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc.")
-    const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
+    const [termsOfService, setTermsOfService] = useState<string>("Let's talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc. I hope you'll also confirm upon delivery.")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
+    const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
 
     function grantClaim(grantId: string, funderId: string, fundedId: string, comments: string, durationInHours: string, expiration: string, termsOfService: string, transfersAllowed: number) {
       return {
@@ -293,7 +463,7 @@ export function ConstructCredentialScreen({ navigation }) {
         "description": comments,
         "duration": "PT" + durationInHours + "H",
         "expires": expiration,
-        "fundedItem": {
+        "recipient": {
           "@type": "Person",
           "identifier": fundedId,
         },
@@ -310,7 +480,7 @@ export function ConstructCredentialScreen({ navigation }) {
     function grantClaimFromInputs() {
       return grantClaim(
         crypto.randomBytes(16).toString('hex'), // 128 bits seems OK
-        props.id,
+        props.sponsorId,
         fundedId,
         comment,
         durationInHours,
