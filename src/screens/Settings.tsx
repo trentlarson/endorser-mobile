@@ -20,6 +20,9 @@ import { agent, dbConnection, DEFAULT_DID_PROVIDER_NAME } from "../veramo/setup"
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
 const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 
+const TEST_API_URL = 'https://test.endorser.ch:8000'
+const TEST_VIEW_URL = 'https://test.endorser.ch:8080'
+
 const newIdentifier = (address: string, publicHex: string, privateHex: string): Omit<IIdentifier, 'provider'> => {
   return {
     did: DEFAULT_DID_PROVIDER_NAME + ':' + address,
@@ -169,10 +172,12 @@ export function SettingsScreen({navigation}) {
 
   // from https://reactnative.dev/docs/direct-manipulation#setnativeprops-to-clear-textinput-value
   const inputApiRef = useRef()
-  const setApiTextToTestServer = useCallback(() => {
-    const URL = 'https://test.endorser.ch:8000'
-    inputApiRef.current.setNativeProps({ text: URL })
-    appStore.dispatch(appSlice.actions.setApiServer(URL))
+  const inputViewRef = useRef()
+  const setToTestServers = useCallback(() => {
+    inputApiRef.current.setNativeProps({ text: TEST_API_URL })
+    inputViewRef.current.setNativeProps({ text: TEST_VIEW_URL })
+    appStore.dispatch(appSlice.actions.setApiServer(TEST_API_URL))
+    appStore.dispatch(appSlice.actions.setViewServer(TEST_VIEW_URL))
   })
 
   const deleteLastIdentifier = async () => {
@@ -375,13 +380,14 @@ export function SettingsScreen({navigation}) {
                   onChangeText={(text) => {
                     appStore.dispatch(appSlice.actions.setViewServer(text))
                   }}
+                  ref={inputViewRef}
                   style={{borderWidth: 1}}
                 >
                 </TextInput>
 
                 <Button
-                  title='Set API Server to public test server'
-                  onPress={setApiTextToTestServer}
+                  title='Use public test servers'
+                  onPress={setToTestServers}
                 />
 
                 <Text>Log</Text>
