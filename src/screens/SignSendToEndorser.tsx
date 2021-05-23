@@ -148,12 +148,6 @@ export function SignCredentialScreen({ navigation, route }) {
           { identifiers[0] ? (
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Sign</Text>
-              <Text style={{ fontSize: 11 }}>{identifiers[0].did}</Text>
-              { !hasMnemonic ? (
-                <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
-              ) : (
-                 <Text/>
-              )}
               <View style={{ padding: 10 }}>
                 {
                   fetched ? (
@@ -196,8 +190,13 @@ export function SignCredentialScreen({ navigation, route }) {
                         title={'Sign & Store'}
                         onPress={signAndSend}
                       />
-                      <View style={{ padding: 5 }} />
-                      <Text>Claim Details</Text>
+                      <Text style={{ marginTop: 5, marginBottom: 5 }}>Claim Details</Text>
+                      <Text style={{ fontSize: 11 }}>{identifiers[0].did}</Text>
+                      { !hasMnemonic ? (
+                        <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
+                      ) : (
+                         <Text/>
+                      )}
                       <TextInput
                         multiline={true}
                         style={{ borderWidth: 1, height: 300 }}

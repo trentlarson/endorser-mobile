@@ -248,17 +248,17 @@ export function ContactsScreen({ navigation, route }) {
                         </View>
                       :
                         <View>
-                          <Text style={{ textAlign: 'center' }}>{
-                            `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity.`
-                          }</Text>
+                          <Text style={{ textAlign: 'center' }}>
+                            { `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity.` }
+                          </Text>
                           {
                             contact.seesMe
                             ? <Button
-                              title="(Hide Me)"
+                              title="Hide Me"
                               onPress={() => {disallowToSeeMe(contact)}}
                             />
                             : <Button
-                              title="(Unhide Me)"
+                              title="Make Me Visible"
                               onPress={() => {allowToSeeMe(contact)}}
                             />
                           }
