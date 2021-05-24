@@ -298,7 +298,7 @@ export function ConstructCredentialScreen({ navigation }) {
     const [description, setDescription] = useState<string>('')
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [recipientId, setRecipientId] = useState<string>('')
-    const [termsOfService, setTermsOfService] = useState<string>("Confirm receipt of funds.\nI'll confirm payoff upon final payment.")
+    const [termsOfService, setTermsOfService] = useState<string>("Acknowledge receipt of contract and funds (eg. with TakeAction).\nRecipient logs final payment (eg. with GiveAction) and provider agrees (eg. with AgreeAction).")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
 
@@ -403,7 +403,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
               <View style={{ padding: 5 }}>
                 <CheckBox
-                  title='Transfer Allowed?'
+                  title='Transfer Allowed'
                   checked={transferAllowed}
                   onPress={() => {setTransferAllowed(!transferAllowed)}}
                 />
@@ -449,7 +449,7 @@ export function ConstructCredentialScreen({ navigation }) {
     const [durationInHours, setDurationInHours] = useState<string>('1')
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [fundedId, setFundedId] = useState<string>('')
-    const [termsOfService, setTermsOfService] = useState<string>("Let's talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc. I hope you'll also confirm upon delivery.")
+    const [termsOfService, setTermsOfService] = useState<string>("Let's talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc.\nRecipient records delivery with TakeAction.")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
 
@@ -554,7 +554,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
               <View style={{ padding: 5 }}>
                 <CheckBox
-                  title='Transfer Allowed?'
+                  title='Transfer Allowed'
                   checked={transferAllowed}
                   onPress={() => {setTransferAllowed(!transferAllowed)}}
                 />
