@@ -1,3 +1,4 @@
+import * as R from 'ramda'
 import React, { useState } from 'react'
 import { ActivityIndicator, Button, Dimensions, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
@@ -35,7 +36,9 @@ export function MyCredentialsScreen({ navigation }) {
     })
   }
 
-  const isUser = (did) => did === identifiers[0].did
+  const isUser = did => did === identifiers[0].did
+
+  const removeSchemaContext = obj => obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
 
   useFocusEffect(
     React.useCallback(() => {
@@ -79,12 +82,9 @@ export function MyCredentialsScreen({ navigation }) {
                   <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
                 }
                 renderItem={data =>
-                  <Pressable onPress={ () =>
-                    isUser(data.item.issuer)
-                    ? navigation.navigate('Present Credential', { fullClaim: data.item })
-                    : null
-                  }>
-                    <Text style={{ color: (isUser(data.item.issuer) ? "blue" : "black") }}>{
+                  <View>
+
+                    <Text selectable={true}>{
                       utility.claimDescription(
                         data.item,
                         identifiers,
@@ -92,7 +92,57 @@ export function MyCredentialsScreen({ navigation }) {
                         isUser(data.item.issuer) ? '' : ' (issued by a someone else)'
                       )
                     }</Text>
-                  </Pressable>
+
+                    <View style={{ flexDirection: 'row' }}>
+                      {
+                        isUser(data.item.issuer)
+                        ?
+                          <Pressable
+                            style={{ padding: 10 }}
+                            onPress={ () =>
+                              isUser(data.item.issuer)
+                              ? navigation.navigate('Present Credential', { fullClaim: data.item })
+                              : null
+                            }
+                          >
+                            <Text style={{ color: "blue" }}>Present it</Text>
+                          </Pressable>
+                        : <View/>
+                      }
+
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () =>
+                          navigation.navigate('Sign Credential', {
+                            credentialSubject: {
+                              "@context": "https://schema.org",
+                              "@type": "AgreeAction",
+                              object: removeSchemaContext(data.item.claim),
+                            }
+                          })
+                        }
+                      >
+                        <Text style={{ color: "blue" }}>Agree</Text>
+                      </Pressable>
+
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () =>
+                          navigation.navigate('Sign Credential', {
+                            credentialSubject: {
+                              "@context": "https://schema.org",
+                              "@type": "TakeAction",
+                              object: removeSchemaContext(data.item.claim),
+                            }
+                          })
+                        }
+                      >
+                        <Text style={{ color: "blue" }}>Take</Text>
+                      </Pressable>
+
+                    </View>
+
+                  </View>
                 }
               />
             </View>
