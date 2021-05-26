@@ -1,4 +1,5 @@
 import * as R from 'ramda'
+import { Duration } from 'luxon'
 import React, { useState } from 'react'
 import { ActivityIndicator, Button, Dimensions, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
@@ -13,6 +14,8 @@ export function MyCredentialsScreen({ navigation }) {
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
+  const [totalCurrencies, setTotalCurrencies] = useState<Record<string,number>>({})
+  const [totalDuration, setTotalDuration] = useState<string>('')
 
   const searchEndorser = async () => {
     setLoading(true)
@@ -31,8 +34,28 @@ export function MyCredentialsScreen({ navigation }) {
         throw Error('There was an error from the server.')
       }
       return response.json()
-    }).then(result => {
-      setSearchResults(result)
+    }).then(results => {
+      setSearchResults(results)
+
+      // add up any amount or time values
+      let currencyTotals = {}
+      let durationTotal = Duration.fromMillis(0)
+      for (result of results) {
+        if (result.claim) {
+          if (result.claim.amount) {
+            const currency = result.claim.currency || "UNKNOWN"
+            currencyTotals[currency] = result.claim.amount + (currencyTotals[currency] || 0)
+          }
+          if (result.claim.duration) {
+            const thisDuration = Duration.fromISO(result.claim.duration)
+            if (!thisDuration.invalid) {
+              durationTotal = durationTotal.plus(thisDuration)
+            }
+          }
+        }
+      }
+      setTotalCurrencies(currencyTotals)
+      setTotalDuration(durationTotal.toMillis() === 0 ? '' : durationTotal.as('hours') + ' hours')
     })
   }
 
@@ -75,11 +98,29 @@ export function MyCredentialsScreen({ navigation }) {
                 data={searchResults}
                 keyExtractor={item => item.id.toString()}
                 ItemSeparatorComponent={() => <View style={styles.line} />}
-                ListEmptyComponent={
-                  <Text>None</Text>
-                }
+                ListEmptyComponent={<Text>None</Text>}
                 ListHeaderComponent={
-                  <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
+                  <View>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
+                    {
+                      (R.equals(totalCurrencies, {}) && !totalDuration)
+                      ? <View/>
+                      :
+                        <View>
+                          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly' }}>
+                            <Text>Totals</Text>
+                            <Text>{totalDuration || ''}</Text>
+                            {
+                              R.map(
+                                arr => <Text key={arr[0]}>{'' + arr[1] + ' ' + arr[0]}</Text>,
+                                R.toPairs(totalCurrencies)
+                              )
+                            }
+                          </View>
+                        </View>
+                    }
+                    <View style={styles.line} />
+                  </View>
                 }
                 renderItem={data =>
                   <View>
@@ -142,8 +183,10 @@ export function MyCredentialsScreen({ navigation }) {
 
                     </View>
 
+                    <View style={styles.line} />
                   </View>
                 }
+                ListFooterComponent={<View style={styles.line} />}
               />
             </View>
         }
