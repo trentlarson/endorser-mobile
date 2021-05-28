@@ -151,35 +151,48 @@ export function MyCredentialsScreen({ navigation }) {
                         : <View/>
                       }
 
-                      <Pressable
-                        style={{ padding: 10 }}
-                        onPress={ () =>
-                          navigation.navigate('Sign Credential', {
-                            credentialSubject: {
-                              "@context": "https://schema.org",
-                              "@type": "AgreeAction",
-                              object: removeSchemaContext(data.item.claim),
+                      {
+                        !isUser(data.item.issuer)
+                        ?
+                          <Pressable
+                            style={{ padding: 10 }}
+                            onPress={ () =>
+                              navigation.navigate('Sign Credential', {
+                                credentialSubject: {
+                                  "@context": "https://schema.org",
+                                  "@type": "AgreeAction",
+                                  object: removeSchemaContext(data.item.claim),
+                                }
+                              })
                             }
-                          })
-                        }
-                      >
-                        <Text style={{ color: "blue" }}>Agree</Text>
-                      </Pressable>
+                          >
+                            <Text style={{ color: "blue" }}>Agree</Text>
+                          </Pressable>
+                        :
+                          <View/>
+                      }
 
-                      <Pressable
-                        style={{ padding: 10 }}
-                        onPress={ () =>
-                          navigation.navigate('Sign Credential', {
-                            credentialSubject: {
-                              "@context": "https://schema.org",
-                              "@type": "TakeAction",
-                              object: removeSchemaContext(data.item.claim),
+                      {
+                        data.item.claim['@type'] === 'LoanOrCredit'
+                        || data.item.claim['@type'] === 'GiveAction'
+                        ?
+                          <Pressable
+                            style={{ padding: 10 }}
+                            onPress={ () =>
+                              navigation.navigate('Sign Credential', {
+                                credentialSubject: {
+                                  "@context": "https://schema.org",
+                                  "@type": "TakeAction",
+                                  object: removeSchemaContext(data.item.claim),
+                                }
+                              })
                             }
-                          })
-                        }
-                      >
-                        <Text style={{ color: "blue" }}>Take</Text>
-                      </Pressable>
+                          >
+                            <Text style={{ color: "blue" }}>Take</Text>
+                          </Pressable>
+                        :
+                          <View/>
+                      }
 
                     </View>
 
