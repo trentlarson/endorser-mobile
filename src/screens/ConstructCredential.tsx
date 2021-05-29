@@ -4,7 +4,7 @@ import * as didJwt from 'did-jwt'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
+import { Alert, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
@@ -21,14 +21,6 @@ export function ConstructCredentialScreen({ navigation }) {
   const [askForPledgeInfo, setAskForPledgeInfo] = useState<string>('')
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
-
-  // for confirmations
-  const [confirming, setConfirming] = useState<boolean>(false)
-  const [loadedClaimsStarting, setLoadedClaimsStarting] = useState<DateTime>(null)
-  const [loadingRecentClaims, setLoadingRecentClaims] = useState<boolean>(false)
-  const [recentClaims, setRecentClaims] = useState<Array<any>>([])
-  const [recentHiddenCount, setRecentHiddenCount] = useState<number>(0)
-  const [selectedClaimsToConfirm, setSelectedClaimsToConfirm] = useState<Array<number>>([])
 
   let currentOrPreviousSat = DateTime.local()
   let todayIsSaturday = true
@@ -63,83 +55,6 @@ export function ConstructCredentialScreen({ navigation }) {
     navigation.navigate('Sign Credential', { credentialSubject: claimObj })
   }
 
-  function unsetConfirmationsModal() {
-    setConfirming(false)
-    setLoadedClaimsStarting(null)
-    setRecentClaims([])
-    setRecentHiddenCount(0)
-    setSelectedClaimsToConfirm([])
-  }
-
-  function setConfirmations() {
-    const values = Object.values(selectedClaimsToConfirm)
-    if (!anyTrue(values)) {
-      Alert.alert("Select a Claim", "In order to confirm, you must select at least one claim.")
-    } else {
-      const claims = values.map(R.prop('claim'))
-      const onlyGoodClaims = R.reject(R.isNil, claims)
-      if (onlyGoodClaims.length > 0) {
-        const fullClaim = {
-          "@context": "http://schema.org",
-          "@type": "AgreeAction",
-          "object": onlyGoodClaims
-        }
-        navigation.navigate('Sign Credential', { credentialSubject: fullClaim })
-      }
-      unsetConfirmationsModal()
-    }
-  }
-
-  function anyTrue(values) {
-    return R.any(R.identity, values)
-  }
-
-  async function loadRecentClaims() {
-    setLoadingRecentClaims(true)
-
-    let loadMoreEnding, loadMoreStarting
-    if (!loadedClaimsStarting) {
-      loadMoreEnding = DateTime.local()
-      loadMoreStarting = DateTime.local().startOf("day")
-    } else {
-      loadMoreEnding = loadedClaimsStarting
-      loadMoreStarting = loadedClaimsStarting.minus(Duration.fromISO("P1M")) // - 1 month
-    }
-    let loadMoreEndingStr = loadMoreEnding.toISO()
-    let loadMoreStartingStr = loadMoreStarting.toISO()
-
-    const endorserApiServer = appStore.getState().apiServer
-    const token = await utility.accessToken(identifiers[0])
-    fetch(endorserApiServer + '/api/claim/?issuedAt_greaterThanOrEqualTo=' + loadMoreStartingStr + "&issuedAt_lessThan=" + loadMoreEndingStr + "&excludeConfirmations=true", {
-      headers: {
-        "Content-Type": "application/json",
-        "Uport-Push-Token": token,
-      }})
-      .then(response => response.json())
-      .then(async (data) => {
-        const dataWithoutHidden = R.reject(utility.containsHiddenDid, data)
-        setRecentClaims(R.concat(recentClaims, dataWithoutHidden))
-        setRecentHiddenCount(count => count + data.length - dataWithoutHidden.length)
-        setLoadedClaimsStarting(loadMoreStarting)
-      })
-      .finally(() => setLoadingRecentClaims(false))
-  }
-
-  function toggleSelectedClaim(claim) {
-    const claimIdStr = claim.id.toString()
-    const recordVal =
-      selectedClaimsToConfirm[claimIdStr]
-      ? undefined
-      : claim
-    setSelectedClaimsToConfirm(record => R.set(R.lensProp(claimIdStr), recordVal, record))
-  }
-
-  function monthDayLoaded() {
-    return loadedClaimsStarting
-      ? loadedClaimsStarting.toISO().substring(5, 10).replace('-', '/')
-      : 'Now'
-  }
-
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
@@ -168,65 +83,6 @@ export function ConstructCredentialScreen({ navigation }) {
                  <Text/>
               )}
               <View style={{ padding: 10 }}>
-                <Modal
-                  animationType="slide"
-                  transparent={true}
-                  visible={confirming}
-                  onRequestClose={unsetConfirmationsModal}
-                >
-                  <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                      <View syle={{ textAlign: 'left' }}>
-                        <FlatList
-                          ListHeaderComponent={
-                            <Text style={styles.modalText}>Confirmations</Text>
-                          }
-                          ListEmptyComponent={
-                            <Text>No visible claims found after { monthDayLoaded().toLowerCase() }.</Text>
-                          }
-                          data={recentClaims}
-                          ItemSeparatorComponent={() => <View style={styles.line} />}
-                          keyExtractor={item => item.id.toString()}
-                          renderItem={data =>
-                            <TouchableOpacity
-                              style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
-                              onPress={() => { toggleSelectedClaim(data.item) }}>
-                              <Text>{utility.claimDescription(data.item, identifiers, appStore.getState().contacts || [])}</Text>
-                            </TouchableOpacity>
-                          }
-                          ListFooterComponent={
-                            <View style={{ textAlign: 'center' }} >
-                              <Text style={{ padding:5 }}>{ recentHiddenCount > 0
-                                ? '(' + recentHiddenCount + ' are hidden)'
-                                : ''
-                              }</Text>
-                              { loadingRecentClaims
-                                ? <ActivityIndicator size="large" color="#00ff00" />
-                                : <Button
-                                    title={'Load Previous to ' + monthDayLoaded()}
-                                    onPress={loadRecentClaims}
-                                  />
-                              }
-                              <TouchableHighlight
-                                style={styles.cancelButton}
-                                onPress={unsetConfirmationsModal}
-                              >
-                                <Text>Cancel</Text>
-                              </TouchableHighlight>
-                              <View style={{ padding: 5 }} />
-                              <TouchableHighlight
-                                style={styles.saveButton}
-                                onPress={setConfirmations}
-                              >
-                                <Text>Set</Text>
-                              </TouchableHighlight>
-                            </View>
-                          }
-                        />
-                      </View>
-                    </View>
-                  </View>
-                </Modal>
                 {
                   askForGiveInfo
                   ? <GiveModal
@@ -297,14 +153,6 @@ export function ConstructCredentialScreen({ navigation }) {
                     onPress={() => setAskForPledgeInfo("We are as gods. I dedicate myself to reach my full potential. I will never ask another person to live for my sake.")}
                   />
                   <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Confirm Other Claims'}
-                    onPress={() => {
-                      setConfirming(true)
-                      loadRecentClaims()
-                      utility.loadContacts(appSlice, appStore, dbConnection, true)
-                    }}
-                  />
                 </View>
               </View>
             </View>
@@ -708,14 +556,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5
   },
-  itemSelected: {
-    backgroundColor: "#88FFFF",
-  },
-  line: {
-    height: 0.8,
-    width: "100%",
-    backgroundColor: "rgba(0,0,0,0.9)"
-  },
   cancelButton: {
     alignItems: 'center',
     backgroundColor: "#F194FF",
@@ -729,11 +569,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     elevation: 2,
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center"
   },
   modalText: {
     marginBottom: 15,

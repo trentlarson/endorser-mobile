@@ -13,6 +13,7 @@ import { Provider } from 'react-redux';
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { appStore } from './veramo/appSlice.ts'
+import { ConfirmOthersScreen } from './screens/ConfirmOthers.tsx'
 import { ConstructCredentialScreen } from './screens/ConstructCredential'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
 import { ContactImportScreen, ContactsScreen } from './screens/Contacts'
@@ -44,6 +45,7 @@ export default function App() {
         <NavigationContainer>
           <Stack.Navigator>
             <Stack.Screen name="Community Endorser" component={HomeScreen} />
+            <Stack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
             <Stack.Screen name="Contact Import" component={ContactImportScreen} />
             <Stack.Screen name="Contacts" component={ContactsScreen} />
             <Stack.Screen name="Sign Credential" component={SignCredentialScreen} />
@@ -70,6 +72,10 @@ function HomeScreen({ navigation }) {
       <Button
         title="Claim"
         onPress={() => navigation.navigate('Create Credential')}
+      />
+      <Button
+        title={'Confirm Other Claims'}
+        onPress={() => navigation.navigate('Confirm Others')}
       />
       <Button
         title="Report"
