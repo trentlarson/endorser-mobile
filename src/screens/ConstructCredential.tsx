@@ -18,6 +18,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
   const [askForCreditInfo, setAskForCreditInfo] = useState<boolean>(false)
   const [askForGiveInfo, setAskForGiveInfo] = useState<boolean>(false)
+  const [askForPledgeInfo, setAskForPledgeInfo] = useState<string>('')
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
 
@@ -212,6 +213,7 @@ export function ConstructCredentialScreen({ navigation }) {
                               >
                                 <Text>Cancel</Text>
                               </TouchableHighlight>
+                              <View style={{ padding: 5 }} />
                               <TouchableHighlight
                                 style={styles.saveButton}
                                 onPress={setConfirmations}
@@ -249,8 +251,22 @@ export function ConstructCredentialScreen({ navigation }) {
                     />
                   : <View/>
                 }
+                {
+                  askForPledgeInfo
+                  ? <PledgeModal
+                      agent={ identifiers[0].did }
+                      pledge={ askForPledgeInfo }
+                      cancel={ () => setAskForPledgeInfo('') }
+                      proceed={ claim => {
+                        setAskForPledgeInfo('')
+                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                      }}
+                    />
+                  : <View/>
+                }
                 <View>
                   <Text>What do you want to assert?</Text>
+                  <View style={{ padding: 5 }} />
                   <Button
                     title={'Attended ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' BVC Meeting'}
                     onPress={setClaimToAttendance}
@@ -264,6 +280,21 @@ export function ConstructCredentialScreen({ navigation }) {
                   <Button
                     title={'Offer Time'}
                     onPress={() => setAskForGiveInfo(true)}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Pledge Only Victim Enforcement'}
+                    onPress={() => setAskForPledgeInfo("I commit to enforce punishment only when there is an identifiable victim.")}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Pledge Honesty'}
+                    onPress={() => setAskForPledgeInfo("I commit to tell only the truth to all the citizens I server.")}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Pledge Liberty'}
+                    onPress={() => setAskForPledgeInfo("We are as gods. I dedicate myself to reach my full potential. I will never ask another person to live for my sake.")}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
@@ -424,6 +455,7 @@ export function ConstructCredentialScreen({ navigation }) {
               >
                 <Text>Cancel</Text>
               </TouchableHighlight>
+              <View style={{ padding: 5 }} />
               <TouchableHighlight
                 style={styles.saveButton}
                 onPress={() => props.proceed(grantClaimFromInputs())}
@@ -495,7 +527,7 @@ export function ConstructCredentialScreen({ navigation }) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View>
-              <Text style={styles.modalText}>Give</Text>
+              <Text style={styles.modalText}>Grant</Text>
 
               <View style={{ padding: 5 }}>
                 <Text>Recipient</Text>
@@ -575,12 +607,76 @@ export function ConstructCredentialScreen({ navigation }) {
               >
                 <Text>Cancel</Text>
               </TouchableHighlight>
+              <View style={{ padding: 5 }} />
               <TouchableHighlight
                 style={styles.saveButton}
                 onPress={() => props.proceed(grantClaimFromInputs())}
               >
                 <Text>Set</Text>
               </TouchableHighlight>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    )
+  }
+
+  /**
+    props has:
+    - agent string for the identifier of the provider
+    - pledge string for the promise being made
+    - proceed function that takes the claim
+    - cancel function
+   **/
+  function PledgeModal(props) {
+
+    const [pledge, setPledge] = useState<string>(props.pledge)
+
+    function constructPledge() {
+      return {
+        "@context": "http://schema.org",
+        "@type": "AcceptAction",
+        "agent": props.agent,
+        "object": pledge,
+      }
+    }
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={props.cancel}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View>
+              <Text style={styles.modalText}>Accept</Text>
+
+              <View style={{ padding: 5 }}>
+                <TextInput
+                  value={pledge}
+                  onChangeText={setPledge}
+                  editable
+                  style={{ borderWidth: 1 }}
+                  multiline={true}
+                />
+              </View>
+
+              <View style={{ padding: 10 }} />
+              <TouchableHighlight
+                style={styles.cancelButton}
+                onPress={props.cancel}
+              >
+                <Text>Cancel</Text>
+              </TouchableHighlight>
+              <View style={{ padding: 5 }} />
+              <TouchableHighlight
+                style={styles.saveButton}
+                onPress={() => props.proceed(constructPledge())}
+              >
+                <Text>Set</Text>
+              </TouchableHighlight>
+
             </View>
           </View>
         </View>
