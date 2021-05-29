@@ -74,7 +74,7 @@ function HomeScreen({ navigation }) {
         onPress={() => navigation.navigate('Create Credential')}
       />
       <Button
-        title={'Confirm Other Claims'}
+        title={'Confirm'}
         onPress={() => navigation.navigate('Confirm Others')}
       />
       <Button

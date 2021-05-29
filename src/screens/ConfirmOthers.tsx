@@ -56,9 +56,20 @@ export function ConfirmOthersScreen({ navigation }) {
     setSelectedClaimsToConfirm(record => R.set(R.lensProp(claimIdStr), recordVal, record))
   }
 
+  /**
+    return a string representation of the loaded date
+   **/
   function monthDayLoaded() {
+    let startPos = 0
+    if (loadedClaimsStarting) {
+      // I'd love to use diff and minus functions but I get an error "need to specify a reason the Duration is invalid"
+      const yearAfterLoaded = loadedClaimsStarting.plus({ years: 1 })
+      if (yearAfterLoaded.toMillis() > DateTime.now().toMillis()) {
+        startPos = 5 // don't show the year
+      }
+    }
     return loadedClaimsStarting
-      ? loadedClaimsStarting.toISO().substring(5, 10).replace('-', '/')
+      ? loadedClaimsStarting.toISO().substring(startPos, 10)
       : 'Now'
   }
 
