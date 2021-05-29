@@ -89,7 +89,7 @@ To Release:
 
 - ... and after that upload:
   - Make sure to commit those changes to git.
-  - Bump the version.
+  - Bump the version in: package.json
 
 - ... and if it's a final release:
-  - Bump the version (eg to "snapshot") in: package.json, android/app/build.gradle, ios/EndorserMobile/Info.plist
+  - Bump the version (eg to "-rc") in: package.json, android/app/build.gradle, ios/EndorserMobile/Info.plist

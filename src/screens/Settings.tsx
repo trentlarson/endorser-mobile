@@ -293,7 +293,7 @@ export function SettingsScreen({navigation}) {
               </View>
             }
           </View>
-          <View style={{ marginTop: 20 }}>
+          <View>
             {
               R.isEmpty(identifiers)
               ?
@@ -315,22 +315,24 @@ export function SettingsScreen({navigation}) {
               :
                 <View style={{ marginBottom: 60 }}>
 
-                  <Text>Identifier</Text>
-
                   { !hasMnemonic ? (
                     <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
                   ) : (
                      <Text/>
                   )}
 
-                  { Object.keys(qrJwts).map(id =>
-                    <View key={id} style={{ marginTop: 10 }}>
-                      <Text style={{ fontSize: 11, marginTop: 20, marginBottom: 20 }} selectable={true}>{id}</Text>
-                      <Text style={{ marginBottom: 20 }}>Your Info</Text>
-                      <QRCode value={qrJwts[id]} size={300}/>
+                  { identifiers.map(ident =>
+                    <View key={ident.did} style={{ marginTop: 20 }}>
+                      <Text>Identifier</Text>
+                      <Text style={{ fontSize: 11, marginBottom: 20 }} selectable={true}>{ident.did}</Text>
+                      <Text>Public Key (base64)</Text>
+                      <Text style={{ marginBottom: 20 }}>{ Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64') }</Text>
+                      <Text>Public Key (hex)</Text>
+                      <Text style={{ marginBottom: 20 }}>{ ident.keys[0].publicKeyHex }</Text>
+                      <QRCode value={qrJwts[ident.did]} size={300}/>
                     </View>
                   )}
-                  <View style={{marginTop: 20}}>
+                  <View style={{ marginTop: 20, marginBottom: 20 }}>
                     <Button
                     title="Export Identifier"
                     onPress={() => navigation.navigate('Export Identifier')}
