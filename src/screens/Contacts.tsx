@@ -4,6 +4,7 @@ import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
+import { CheckBox } from 'react-native-elements'
 import { useFocusEffect } from '@react-navigation/native'
 import QRCodeScanner from 'react-native-qrcode-scanner'
 import { useSelector } from 'react-redux'
@@ -288,7 +289,14 @@ export function ContactImportScreen({ navigation }) {
   const CURRENT_JWT_PREFIX = appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION
 
   const [contactInfo, setContactInfo] = useState<Contact>()
-  const [saved, setSaved] = useState<boolean>(false)
+  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
+  const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
+
+  // these are tracking progress when saving data
+  const [saving, setSaving] = useState<boolean>(false)
+  const [storingVisibility, setStoringVisibility] = useState<boolean>(false)
+  const [doneSavingStoring, setDoneSavingStoring] = useState<boolean>(false)
+  const [visibilityError, setVisibilityError] = useState<string>('')
 
   const onSuccessfulQrEvent = async (e) => {
     onSuccessfulQrText(e.data)
@@ -310,22 +318,68 @@ export function ContactImportScreen({ navigation }) {
     setContactInfo(payload)
   }
 
+  const clearModalAndRedirect = () => {
+    setContactInfo(null)
+    navigation.navigate('Contacts')
+  }
+
+
+  const allowToSeeMe = async (contact) => {
+    const endorserApiServer = appStore.getState().apiServer
+    const token = await utility.accessToken(identifiers[0])
+    await fetch(endorserApiServer + '/api/report/canSeeMe', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        "Uport-Push-Token": token,
+      },
+      body: JSON.stringify({ did: contact.did })
+    }).then(response => {
+      if (response.status !== 200) {
+        throw ('There was an error from the server trying to set you as visible. ' + new Date().getMilliseconds())
+      }
+    })
+  }
+
   const onAccept = () => {
     const saveAndRedirect = async() => {
-
+      setSaving(true)
       const conn = await dbConnection
       const contact = new Contact()
       contact.did = contactInfo.iss
       contact.name = contactInfo.own && contactInfo.own.name
       contact.pubKeyBase64 = contactInfo.own && contactInfo.own.publicEncKey
       const newContact = await conn.manager.save(contact)
-      setSaved(true)
+      setSaving(false)
       appStore.dispatch(appSlice.actions.setContacts(null)) // force reload
 
-      setTimeout(() => { navigation.navigate('Contacts')}, 500)
+      if (wantsToBeVisible) {
+        setStoringVisibility(true)
+        await allowToSeeMe(contact, identifiers[0])
+        .then(() => {
+          setTimeout(clearModalAndRedirect, 500)
+        })
+        .catch(err => {
+          setVisibilityError(contact.name + ' was saved.  However, there was a problem with setting visibility.  Mark yourselv visible or not on the Contacts page.')
+        })
+        .finally(() => {
+          setStoringVisibility(false)
+          setDoneSavingStoring(true)
+        })
+      } else {
+        setDoneSavingStoring(true)
+        setTimeout(clearModalAndRedirect, 500)
+      }
     }
+
     saveAndRedirect()
   }
+
+  useFocusEffect(
+    React.useCallback(() => {
+      agent.didManagerFind().then(ids => setIdentifiers(ids))
+    }, [])
+  )
 
   return (
     <SafeAreaView>
@@ -343,27 +397,60 @@ export function ContactImportScreen({ navigation }) {
           >
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
-                { saved ? (
-                  <Text style={styles.modalText}>Success!</Text>
+                { saving ? (
+                  <ActivityIndicator color="#00ff00" />
                 ) : (
                   <View>
-                    <Text style={styles.modalText}>Save this contact?</Text>
+                    { storingVisibility ? (
+                      <View>
+                        <Text style={styles.modalText}>Storing visibility...</Text>
+                        <ActivityIndicator color="#00ff00" />
+                      </View>
+                    ) : (
 
-                    <TouchableHighlight
-                      style={styles.cancelButton}
-                      onPress={() => {
-                        setContactInfo(null)
-                      }}
-                    >
-                      <Text>Cancel</Text>
-                    </TouchableHighlight>
-                    <View style={{ padding: 5 }}/>
-                    <TouchableHighlight
-                      style={styles.saveButton}
-                      onPress={onAccept}
-                    >
-                      <Text>Save</Text>
-                    </TouchableHighlight>
+                      doneSavingStoring ? (
+                        visibilityError ? (
+                          <View>
+                            <Text style={styles.modalText}>{ visibilityError }</Text>
+                            <TouchableHighlight
+                              style={styles.cancelButton}
+                              onPress={ clearModalAndRedirect }
+                            >
+                              <Text>OK</Text>
+                            </TouchableHighlight>
+                          </View>
+                        ) : (
+                          <Text style={styles.modalText}>Saved.</Text>
+                        )
+                      ) : (
+
+                        <View>
+                          <Text style={styles.modalText}>Save this contact?</Text>
+
+                          <CheckBox
+                            title={ 'Make my claims visible to ' + contactInfo?.own?.name }
+                            checked={wantsToBeVisible}
+                            onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
+                          />
+
+                          <TouchableHighlight
+                            style={styles.cancelButton}
+                            onPress={() => {
+                              setContactInfo(null)
+                            }}
+                          >
+                            <Text>Cancel</Text>
+                          </TouchableHighlight>
+                          <View style={{ padding: 5 }}/>
+                          <TouchableHighlight
+                            style={styles.saveButton}
+                            onPress={onAccept}
+                          >
+                            <Text>Save</Text>
+                          </TouchableHighlight>
+                        </View>
+                      )
+                    )}
                   </View>
                 )}
               </View>
