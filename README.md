@@ -82,9 +82,9 @@ To Release:
     - Submit it for review, and after they approve the review then you can test in TestFlight or release.
   - Screenshot on different simulator: `yarn run ios --simulator="iPhone 8"`
     6.5" (eg. iPhone 11)
-    take at 361x780 then scale to 1284x2778
+    take at 361x780 then scale to 1284x2778 (exactly)
     5.5" (eg. iPhone 8)
-    ... 361x642 or 400x712 ... 1242x2208
+    ... 361x642 or 400x712 ... 1242x2208 (exactly)
   - Add screenshots to version control.
 
 - ... and after that upload:

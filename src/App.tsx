@@ -78,7 +78,7 @@ function HomeScreen({ navigation }) {
         onPress={() => navigation.navigate('Confirm Others')}
       />
       <Button
-        title="Report"
+        title="Search"
         onPress={() => navigation.navigate('Reports from Endorser.ch server')}
       />
       <View style={{ marginTop: 100 }}/>
