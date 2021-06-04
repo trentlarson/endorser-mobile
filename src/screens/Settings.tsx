@@ -14,7 +14,7 @@ import { IIdentifier } from "@veramo/core"
 import * as pkg from '../../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
-import { appSlice, appStore } from "../veramo/appSlice"
+import { DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER, appSlice, appStore } from "../veramo/appSlice"
 import { agent, dbConnection, DEFAULT_DID_PROVIDER_NAME } from "../veramo/setup"
 
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
@@ -179,6 +179,12 @@ export function SettingsScreen({navigation}) {
     appStore.dispatch(appSlice.actions.setApiServer(TEST_API_URL))
     appStore.dispatch(appSlice.actions.setViewServer(TEST_VIEW_URL))
   })
+  const setToProdServers = useCallback(() => {
+    inputApiRef.current.setNativeProps({ text: DEFAULT_ENDORSER_API_SERVER })
+    inputViewRef.current.setNativeProps({ text: DEFAULT_ENDORSER_VIEW_SERVER })
+    appStore.dispatch(appSlice.actions.setApiServer(DEFAULT_ENDORSER_API_SERVER))
+    appStore.dispatch(appSlice.actions.setViewServer(DEFAULT_ENDORSER_VIEW_SERVER))
+  })
 
   const deleteLastIdentifier = async () => {
     if (identifiers.length > 0) {
@@ -266,6 +272,11 @@ export function SettingsScreen({navigation}) {
       appStore.dispatch(appSlice.actions.setTestMode(setting))
       if (setting) {
         Alert.alert('Beware! In test mode you have the ability to corrupt your data.')
+      } else {
+        // now going into real mode, but if the servers were switched then warn
+        if (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER) {
+          Alert.alert('Beware! Your servers are not set to the default production servers.')
+        }
       }
     }
     setNewTestMode(isInTestMode)
@@ -390,6 +401,10 @@ export function SettingsScreen({navigation}) {
                 <Button
                   title='Use public test servers'
                   onPress={setToTestServers}
+                />
+                <Button
+                  title='Use public prod servers'
+                  onPress={setToProdServers}
                 />
 
                 <Text>Log</Text>

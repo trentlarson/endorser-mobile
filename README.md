@@ -58,6 +58,7 @@ To Do First Release:
 
 To Release:
 
+- Test everything.
 - In package.json, update version
 - In src/veramo/appSlice.ts: servers are endorser.ch
 - android
