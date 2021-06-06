@@ -139,8 +139,8 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Pledge Only Victim Enforcement'}
-                    onPress={() => setAskForPledgeInfo("I commit to enforce punishment only when there is an identifiable victim.")}
+                    title={'Thick Red Line Officer Pledge'}
+                    onPress={() => setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate.\nI pledge only to act to protect lives, liberty, and property.  I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
