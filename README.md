@@ -43,6 +43,9 @@ Clean:
   - Import via the mnemonic, eg. #3 from endorser-ch test/util.js
   - Submit claims & confirmations.
   - Run report searches for the individual, eg. for 'carp'
+- On an actual device (remember the table-name fiasco!)
+  - Android - must use Play Store to release to internal testing (because fiasco wasn't caught when connected)
+  - iOS - TestFlight is recommended (though potentially OK to use Xcode, since it would have caught the fiasco)
 
 
 
@@ -51,7 +54,7 @@ Clean:
 To Do First Release:
 
 - Android
-  - In the android folder, put pc-api-7249509642322112640-286-534d849dfda0.json
+  - In the android folder, put pc-api-....json
   - In the android/app folder, put google-comm-endo-upload-key.keystore
 - Figure out Apple signing.  (Sorry, I don't remember that part.)
 
@@ -64,7 +67,7 @@ To Release:
 - android
   - In node_modules/@veramo/data-store, all Entity() calls need the name inside.
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number)
-    - Always increment the versionCode.  It is possible to reuse the versionName.
+    - Always increment the versionCode (and ensure you don't already have a larger release in ios).  It is possible to reuse the versionName.
   - `cd android; bundle exec fastlane beta; cd ..`
   - To create a new release & upload:
     - Do one of these in Google Play Console:
@@ -74,7 +77,7 @@ To Release:
     - After uploading, "Save", "Review Release", then "Rollout to internal testing" or "Rollout to Production".
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json
-  - (Note that CFBundleVersion is done by fastlane beta.)
+  - Make the CFBundleVersion one less than the versionCode above. (Note that it is automatically incremented by fastlane beta.)
   - `cd ios; bundle exec fastlane beta; cd ..`
   - To create a new release
     - Have a test build?  IDK... maybe don't click 'Expire'
