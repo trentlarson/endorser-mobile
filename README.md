@@ -64,8 +64,9 @@ To Release:
 - Test everything.
 - In package.json, update version
 - In src/veramo/appSlice.ts: servers are endorser.ch
+- In node_modules/@veramo/data-store, all Entity() calls need the name inside.
+- (I recommend starting with ios since it takes longer to get approved.)
 - android
-  - In node_modules/@veramo/data-store, all Entity() calls need the name inside.
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number)
     - Always increment the versionCode (and ensure you don't already have a larger release in ios).  It is possible to reuse the versionName.
   - `cd android; bundle exec fastlane beta; cd ..`
