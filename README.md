@@ -82,8 +82,8 @@ To Release:
   - `cd ios; bundle exec fastlane beta; cd ..`
   - To create a new release
     - Have a test build?  IDK... maybe don't click 'Expire'
-    - In App Connect -> App Store next to iOS App, click the "+"
-    - Under App description next to "Build" and to the right, click the red icon to remove that version, then add another version.
+    - For a new one: in App Connect -> App Store next to iOS App, click the "+"
+    - For an existing one: under "Build" and all the way to the right of the number (which you have to mouse-over to see), click the red icon to remove that version, then add another version.  Also change the "Version" in the field below the icons.
     - Submit it for review, and after they approve the review then you can test in TestFlight or release.
   - Screenshot on different simulator: `yarn run ios --simulator="iPhone 8"`
     6.5" (eg. iPhone 11)

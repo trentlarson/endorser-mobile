@@ -145,7 +145,7 @@ export function ConstructCredentialScreen({ navigation }) {
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Pledge Honesty'}
-                    onPress={() => setAskForPledgeInfo("I commit to tell only the truth to all the citizens I server.")}
+                    onPress={() => setAskForPledgeInfo("I commit to tell only the truth to all the citizens I serve.")}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
