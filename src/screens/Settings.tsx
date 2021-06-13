@@ -459,18 +459,18 @@ export function ExportIdentityScreen({navigation}) {
               </View>
             ) : (
               <View>
-                <Text>BEWARE: Anyone who gets hold of this mnemonic will be able to impersonate you and
+                <Text>BEWARE: Anyone who gets hold of this mnemonic phrase will be able to impersonate you and
                   take over any digital holdings based on it. So only reveal it when you are in a
                   private place out of sight of cameras and other eyes, and only record it in
                   something private -- don't take a screenshot or send it to any online
                   service.</Text>
-                <Button title={'Click to show identifier mnemonic'} onPress={setShow}/>
+                <Button title={'Click to show identifier mnemonic phrase'} onPress={setShow}/>
               </View>
             )}
           </View>
         ) : (
           <View>
-            <Text>There is no mnemonic to export.</Text>
+            <Text>There is no mnemonic phrase to export.</Text>
           </View>
         )}
       </View>
@@ -509,7 +509,7 @@ export function ImportIdentityScreen({navigation}) {
     <SafeAreaView>
       <ScrollView>
         <View style={{padding: 20}}>
-          <Text style={{fontSize: 30, fontWeight: 'bold'}}>Mnemonic</Text>
+          <Text style={{fontSize: 30, fontWeight: 'bold'}}>Mnemonic Phrase</Text>
           <View style={{marginBottom: 50, marginTop: 20}}>
             {idChanged ? (
               <Text style={{fontSize: 30}}>Success!</Text>
@@ -520,7 +520,7 @@ export function ImportIdentityScreen({navigation}) {
                 </View>
               ) : (
                 <View>
-                  <Text>Enter mnemonic:</Text>
+                  <Text>Enter mnemonic phrase:</Text>
                   <TextInput
                     autoCapitalize={'none'}
                     multiline={true}
@@ -534,7 +534,7 @@ export function ImportIdentityScreen({navigation}) {
                     onPress={() => setMakeLowercase(!makeLowercase)}
                   />
                   <Button
-                    title={'Click to import from mnemonic'}
+                    title={'Click to import from mnemonic phrase'}
                     onPress={importIdentifier}
                   />
                 </View>
