@@ -92,6 +92,9 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 // Import and existing ID
 const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) => {
 
+  // just to get rid of variability that might cause an error
+  mnemonic = mnemonic.trim().toLowerCase()
+
   /**
   // an approach I pieced together
   // requires: yarn add elliptic
@@ -337,9 +340,9 @@ export function SettingsScreen({navigation}) {
                       <Text>Identifier</Text>
                       <Text style={{ fontSize: 11, marginBottom: 20 }} selectable={true}>{ident.did}</Text>
                       <Text>Public Key (base64)</Text>
-                      <Text style={{ marginBottom: 20 }}>{ Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64') }</Text>
+                      <Text style={{ marginBottom: 20 }} selectable={true}>{ Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64') }</Text>
                       <Text>Public Key (hex)</Text>
-                      <Text style={{ marginBottom: 20 }}>{ ident.keys[0].publicKeyHex }</Text>
+                      <Text style={{ marginBottom: 20 }} selectable={true}>{ ident.keys[0].publicKeyHex }</Text>
                       <QRCode value={qrJwts[ident.did]} size={300}/>
                     </View>
                   )}
@@ -354,7 +357,9 @@ export function SettingsScreen({navigation}) {
 
             { isInTestMode
               ? <View style={{ marginTop: 200 }}>
-                  <Button title="Create ID" onPress={() => { setCreatingId(true) }} />
+                  <Button title="Create ID" onPress={()=>{setCreatingId(true)}} />
+                  <View style={{ padding: 5 }} />
+                  <Button title="Import ID" onPress={()=>navigation.navigate('Import Identifier')} />
                   <View style={{ padding: 5 }} />
                   <Button title="Delete Last ID" onPress={deleteLastIdentifier} />
                 </View>
@@ -479,31 +484,37 @@ export function ExportIdentityScreen({navigation}) {
 }
 
 export function ImportIdentityScreen({navigation}) {
+  const [idChanged, setIdChanged] = useState<boolean>(false)
+  const [idImporting, setIdImporting] = useState<boolean>(false)
   const [identifier, setIdentifier] = useState<Omit<IIdentifier, 'provider'>>()
   const [makeLowercase, setMakeLowercase] = useState<boolean>(false)
   const [mnemonic, setMnemonic] = useState<String>('')
-  const [idChanged, setIdChanged] = useState<boolean>(false)
 
-  // Check for existing identifers on load and set them to state
   useEffect(() => {
-    const getIdentifiers = async () => {
-      const ids = await agent.didManagerFind()
-      setIdentifier(ids[0])
+    const coordImportId = async () => {
+      appStore.dispatch(appSlice.actions.addLog("Importing identifier..."))
+      importAndStoreIdentifier(mnemonic, makeLowercase)
+      .then(newIdentifier => {
+        appStore.dispatch(appSlice.actions.addLog("... totally finished importing identifier."))
+        setIdentifier(newIdentifier)
+        setIdChanged(true)
+
+        // one reason redirect automatically is to force reload of ID (which doen't show if they go "back")
+        setTimeout(() => {
+          navigation.popToTop()
+        }, 500)
+      })
+      .catch(err => {
+        appStore.dispatch(appSlice.actions.addLog("... got error importing: " + err))
+      })
+      .finally(() => {
+        setIdImporting(false)
+      })
     }
-    getIdentifiers()
-  }, [])
-
-  const importIdentifier = async () => {
-    appStore.dispatch(appSlice.actions.addLog("Importing identifier..."))
-    importAndStoreIdentifier(mnemonic, makeLowercase).then(newIdentifier => {
-      appStore.dispatch(appSlice.actions.addLog("... totally finished importing identifier."))
-      setIdentifier(newIdentifier)
-      setIdChanged(true)
-
-      // one reason redirect automatically is to force reload of ID (which doen't show if they go "back")
-      setTimeout(() => navigation.popToTop(), 500)
-    })
-  }
+    if (idImporting) {
+      coordImportId()
+    }
+  }, [idImporting])
 
   return (
     <SafeAreaView>
@@ -511,35 +522,35 @@ export function ImportIdentityScreen({navigation}) {
         <View style={{padding: 20}}>
           <Text style={{fontSize: 30, fontWeight: 'bold'}}>Mnemonic Phrase</Text>
           <View style={{marginBottom: 50, marginTop: 20}}>
-            {idChanged ? (
-              <Text style={{fontSize: 30}}>Success!</Text>
+          {
+            idImporting ? (
+              <ActivityIndicator size="large" color="#00ff00" />
             ) : (
-              identifier ? (
-                <View>
-                  <Text>You have an identifier, and you can only have one.</Text>
-                </View>
+              idChanged ? (
+                <Text style={{fontSize: 30}}>Success!</Text>
               ) : (
-                <View>
-                  <Text>Enter mnemonic phrase:</Text>
-                  <TextInput
-                    autoCapitalize={'none'}
-                    multiline={true}
-                    style={{borderWidth: 1, height: 100}}
-                    onChangeText={setMnemonic}
-                  >
-                  </TextInput>
-                  <CheckBox
-                    title='Convert to Lowercase'
-                    checked={makeLowercase}
-                    onPress={() => setMakeLowercase(!makeLowercase)}
-                  />
-                  <Button
-                    title={'Click to import from mnemonic phrase'}
-                    onPress={importIdentifier}
-                  />
-                </View>
+                  <View>
+                    <Text>Enter mnemonic phrase:</Text>
+                    <TextInput
+                      autoCapitalize={'none'}
+                      multiline={true}
+                      style={{borderWidth: 1, height: 100}}
+                      onChangeText={setMnemonic}
+                    >
+                    </TextInput>
+                    <CheckBox
+                      title='Convert Address to Lowercase'
+                      checked={makeLowercase}
+                      onPress={() => setMakeLowercase(!makeLowercase)}
+                    />
+                    <Button
+                      title={'Click to import from mnemonic phrase'}
+                      onPress={()=>setIdImporting(true)}
+                    />
+                  </View>
               )
-            )}
+            )
+          }
           </View>
         </View>
       </ScrollView>
