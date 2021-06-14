@@ -274,6 +274,7 @@ export function SettingsScreen({navigation}) {
     const setNewTestMode = async (setting) => {
       appStore.dispatch(appSlice.actions.setTestMode(setting))
       if (setting) {
+        setToTestServers()
         Alert.alert('Beware! In test mode you have the ability to corrupt your data.')
       } else {
         // now going into real mode, but if the servers were switched then warn
