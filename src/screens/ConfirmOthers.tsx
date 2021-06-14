@@ -141,6 +141,7 @@ export function ConfirmOthersScreen({ navigation }) {
                     onPress={() => loadRecentClaims(identifiers)}
                   />
               }
+              <View style={{ marginTop: 10 }}/>
               <Button
                 title="Set Confirmations"
                 onPress={ setConfirmations }

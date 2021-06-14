@@ -308,7 +308,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(grantClaimFromInputs())}
               >
-                <Text>Set</Text>
+                <Text>Set...</Text>
               </TouchableHighlight>
             </View>
           </View>
@@ -460,7 +460,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(grantClaimFromInputs())}
               >
-                <Text>Set</Text>
+                <Text>Set...</Text>
               </TouchableHighlight>
             </View>
           </View>
@@ -522,7 +522,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(constructPledge())}
               >
-                <Text>Set</Text>
+                <Text>Set...</Text>
               </TouchableHighlight>
 
             </View>
