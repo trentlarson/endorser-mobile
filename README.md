@@ -64,11 +64,11 @@ To Release:
 - Test everything.
 - In package.json, update version
 - In src/veramo/appSlice.ts: servers are endorser.ch
-- In node_modules/@veramo/data-store, all Entity() calls need the name inside.
+- In node_modules/@veramo/data-store/build/entities/*.js, all Entity() calls need the name inside.
 - (I recommend starting with ios since it takes longer to get approved.)
 - android
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number)
-    - Always increment the versionCode (and ensure you don't already have a larger release in ios).  It is possible to reuse the versionName.
+    - Always increment the versionCode (and ensure you don't already have a larger release in ios just for consistency's sake).  It is possible to reuse the versionName.
   - `cd android; bundle exec fastlane beta; cd ..`
   - To create a new release & upload:
     - Do one of these in Google Play Console:
@@ -84,7 +84,7 @@ To Release:
     - Have a test build?  IDK... maybe don't click 'Expire'
     - For a new one: in App Connect -> App Store next to iOS App, click the "+"
     - For an existing one: under "Build" and all the way to the right of the number (which you have to mouse-over to see), click the red icon to remove that version, then add another version.  Also change the "Version" in the field below the icons.
-    - Submit it for review, and after they approve the review then you can test in TestFlight or release.
+    - Submit it for review (by filling in the "What's New" and "Notes"), and after they approve the review then you can test in TestFlight or release.
   - Screenshot on different simulator: `yarn run ios --simulator="iPhone 8"`
     6.5" (eg. iPhone 11)
     take at 361x780 then scale to 1284x2778 (exactly)
