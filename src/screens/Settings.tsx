@@ -15,7 +15,8 @@ import * as pkg from '../../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
 import { DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER, appSlice, appStore } from "../veramo/appSlice"
-import { agent, dbConnection, DEFAULT_DID_PROVIDER_NAME } from "../veramo/setup"
+import { agent, dbConnection, DEFAULT_ETHR_DID_PROVIDER_NAME } from "../veramo/setup"
+import { peerAddressFromPublicKey } from "../veramo/peerDidProvider"
 
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
 const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
@@ -23,9 +24,9 @@ const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 const TEST_API_URL = 'https://test.endorser.ch:8000'
 const TEST_VIEW_URL = 'https://test.endorser.ch:8080'
 
-const newIdentifier = (address: string, publicHex: string, privateHex: string): Omit<IIdentifier, 'provider'> => {
+const newIdentifier = (provider: string, address: string, publicHex: string, privateHex: string): Omit<IIdentifier> => {
   return {
-    did: DEFAULT_DID_PROVIDER_NAME + ':' + address,
+    did: provider + ':' + address,
     keys: [{
       kid: publicHex,
       kms: 'local',
@@ -33,9 +34,17 @@ const newIdentifier = (address: string, publicHex: string, privateHex: string): 
       publicKeyHex: publicHex,
       privateKeyHex: privateHex
     }],
-    provider: DEFAULT_DID_PROVIDER_NAME,
+    provider: provider,
     services: []
   }
+}
+
+const newEthrIdentifier = (address: string, publicHex: string, privateHex: string): Omit<IIdentifier> => {
+  return newIdentifier(DEFAULT_ETHR_DID_PROVIDER_NAME, address, publicHex, privateHex)
+}
+
+const newPeerIdentifier = (address: string, publicHex: string, privateHex: string): Omit<IIdentifier> => {
+  return newIdentifier('did:peer', address, publicHex, privateHex)
 }
 
 // uPort's QR code format
@@ -90,7 +99,7 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 }
 
 // Import and existing ID
-const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) => {
+const importAndStoreIdentifier = async (mnemonic: string, makeEthereum: boolean, toLowercase: boolean) => {
 
   // just to get rid of variability that might cause an error
   mnemonic = mnemonic.trim().toLowerCase()
@@ -134,13 +143,21 @@ const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) 
   const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
   const privateHex = rootNode.privateKey.substring(2)
   const publicHex = rootNode.privateKey.substring(2)
-  let address = rootNode.address
-  if (toLowercase) {
-    address = address.toLowerCase()
-  }
   appStore.dispatch(appSlice.actions.addLog("... derived keys and address..."))
 
-  const newId = newIdentifier(address, publicHex, privateHex)
+  let newId
+  if (makeEthereum) {
+    address = rootNode.address
+    if (toLowercase) {
+      // this is for old users because the original uPort converted addresses to lower-case
+      address = address.toLowerCase()
+    }
+    newId = newEthrIdentifier(address, publicHex, privateHex)
+  } else {
+    address = peerAddressFromPublicKey(publicHex)
+    newId = newPeerIdentifier(address, publicHex, privateHex)
+  }
+
   appStore.dispatch(appSlice.actions.addLog("... created new ID..."))
 
   // awaiting because otherwise the UI may not see that a mnemonic was created
@@ -488,13 +505,14 @@ export function ImportIdentityScreen({navigation}) {
   const [idChanged, setIdChanged] = useState<boolean>(false)
   const [idImporting, setIdImporting] = useState<boolean>(false)
   const [identifier, setIdentifier] = useState<Omit<IIdentifier, 'provider'>>()
+  const [makeEthereum, setMakeEthereum] = useState<boolean>(false)
   const [makeLowercase, setMakeLowercase] = useState<boolean>(false)
   const [mnemonic, setMnemonic] = useState<String>('')
 
   useEffect(() => {
     const coordImportId = async () => {
       appStore.dispatch(appSlice.actions.addLog("Importing identifier..."))
-      importAndStoreIdentifier(mnemonic, makeLowercase)
+      importAndStoreIdentifier(mnemonic, makeEthereum, makeLowercase)
       .then(newIdentifier => {
         appStore.dispatch(appSlice.actions.addLog("... totally finished importing identifier."))
         setIdentifier(newIdentifier)
@@ -540,10 +558,21 @@ export function ImportIdentityScreen({navigation}) {
                     >
                     </TextInput>
                     <CheckBox
-                      title='Convert Address to Lowercase'
-                      checked={makeLowercase}
-                      onPress={() => setMakeLowercase(!makeLowercase)}
+                      title='Create Ethereum Address'
+                      checked={makeEthereum}
+                      onPress={() => setMakeEthereum(!makeEthereum)}
                     />
+                    {
+                      makeEthereum ? (
+                        <CheckBox
+                          title='Convert Address to Lowercase'
+                          checked={makeLowercase}
+                          onPress={() => setMakeLowercase(!makeLowercase)}
+                        />
+                      ) : (
+                        <View/>
+                      )
+                    }
                     <Button
                       title={'Click to import from mnemonic phrase'}
                       onPress={()=>setIdImporting(true)}

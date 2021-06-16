@@ -6,7 +6,7 @@ import { createAgent, IDIDManager, IResolver, IDataStore, IKeyManager } from '@v
 // Core identity manager plugin
 import { DIDManager } from '@veramo/did-manager'
 
-// Ethr did identity provider
+// Ethr DID identity provider
 import { EthrDIDProvider } from '@veramo/did-provider-ethr'
 
 // Core key manager plugin
@@ -35,6 +35,7 @@ import * as R from 'ramda'
 
 import { Contact } from '../entity/contact'
 import { Settings } from '../entity/settings'
+import { PeerDidProvider } from './peerDidProvider'
 
 import { Initial1616938713828 } from '../migration/1616938713828-initial'
 import { SettingsContacts1616967972293 } from '../migration/1616967972293-settings-contacts'
@@ -57,19 +58,18 @@ export const dbConnection = createConnection({
   type: 'react-native',
 })
 
-function didProviderName(netName) {
+function ethrDidProviderName(netName) {
   return 'did:ethr' + (netName === 'mainnet' ? '' : ':' + netName)
 }
 
-const NETWORK_NAMES = ['mainnet', 'rinkeby']
-
-const DEFAULT_DID_PROVIDER_NETWORK_NAME = 'mainnet'
-
-export const DEFAULT_DID_PROVIDER_NAME = didProviderName(DEFAULT_DID_PROVIDER_NETWORK_NAME)
+const ETHR_NETWORK_NAMES = ['mainnet', 'rinkeby']
+const DEFAULT_ETHR_DID_PROVIDER_NETWORK_NAME = 'mainnet'
+export const DEFAULT_ETHR_DID_PROVIDER_NAME = ethrDidProviderName(DEFAULT_ETHR_DID_PROVIDER_NETWORK_NAME)
 
 const providers = {}
-NETWORK_NAMES.forEach((networkName) => {
-  providers[didProviderName(networkName)] = new EthrDIDProvider({
+providers['did:peer'] = new PeerDidProvider({ defaultKms: 'local', network: 'did:peer' })
+ETHR_NETWORK_NAMES.forEach((networkName) => {
+  providers[ethrDidProviderName(networkName)] = new EthrDIDProvider({
     defaultKms: 'local',
     network: networkName,
     rpcUrl: 'https://' + networkName + '.infura.io/v3/' + INFURA_PROJECT_ID,
@@ -80,11 +80,11 @@ NETWORK_NAMES.forEach((networkName) => {
 
 const didManager = new DIDManager({
   store: new DIDStore(dbConnection),
-  defaultProvider: DEFAULT_DID_PROVIDER_NAME,
+  defaultProvider: DEFAULT_ETHR_DID_PROVIDER_NAME,
   providers: providers,
 })
 
-const basicDidResolvers = NETWORK_NAMES.map((networkName) =>
+const ethrDidResolvers = ETHR_NETWORK_NAMES.map((networkName) =>
   [
     networkName,
     new Resolver({
@@ -96,13 +96,12 @@ const basicDidResolvers = NETWORK_NAMES.map((networkName) =>
   ]
 )
 
-const basicResolverMap = R.fromPairs(basicDidResolvers)
+const ethrResolverMap = R.fromPairs(ethrDidResolvers)
+export const DEFAULT_BASIC_RESOLVER = ethrResolverMap[DEFAULT_ETHR_DID_PROVIDER_NETWORK_NAME]
 
-export const DEFAULT_BASIC_RESOLVER = basicResolverMap[DEFAULT_DID_PROVIDER_NETWORK_NAME]
-
-const agentDidResolvers = NETWORK_NAMES.map((networkName) => {
+const agentDidResolvers = ETHR_NETWORK_NAMES.map((networkName) => {
   return new DIDResolverPlugin({
-    resolver: basicResolverMap[networkName],
+    resolver: ethrResolverMap[networkName],
   })
 })
 
