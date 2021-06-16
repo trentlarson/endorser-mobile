@@ -16,13 +16,15 @@ import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
 import { DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER, appSlice, appStore } from "../veramo/appSlice"
 import { agent, dbConnection, DEFAULT_ETHR_DID_PROVIDER_NAME } from "../veramo/setup"
-import { peerAddressFromPublicKey } from "../veramo/peerDidProvider"
+import { peerAddressFromPublicKey, PEER_DID_PREFIX } from "../veramo/peerDidProvider"
 
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
 const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 
 const TEST_API_URL = 'https://test.endorser.ch:8000'
 const TEST_VIEW_URL = 'https://test.endorser.ch:8080'
+//const TEST_API_URL = 'http://192.168.1.5:3000'
+//const TEST_VIEW_URL = 'http://192.168.1.5:3001'
 
 const newIdentifier = (provider: string, address: string, publicHex: string, privateHex: string): Omit<IIdentifier> => {
   return {
@@ -44,7 +46,7 @@ const newEthrIdentifier = (address: string, publicHex: string, privateHex: strin
 }
 
 const newPeerIdentifier = (address: string, publicHex: string, privateHex: string): Omit<IIdentifier> => {
-  return newIdentifier('did:peer', address, publicHex, privateHex)
+  return newIdentifier(PEER_DID_PREFIX, address, publicHex, privateHex)
 }
 
 // uPort's QR code format
@@ -147,14 +149,14 @@ const importAndStoreIdentifier = async (mnemonic: string, makeEthereum: boolean,
 
   let newId
   if (makeEthereum) {
-    address = rootNode.address
+    let address = rootNode.address
     if (toLowercase) {
       // this is for old users because the original uPort converted addresses to lower-case
       address = address.toLowerCase()
     }
     newId = newEthrIdentifier(address, publicHex, privateHex)
   } else {
-    address = peerAddressFromPublicKey(publicHex)
+    let address = peerAddressFromPublicKey(publicHex)
     newId = newPeerIdentifier(address, publicHex, privateHex)
   }
 

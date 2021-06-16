@@ -3,6 +3,8 @@ import nodeCrypto from 'crypto';
 import { IIdentifier, IKey, IService, IAgentContext, IKeyManager } from '@veramo/core'
 import { AbstractIdentifierProvider } from '@veramo/did-manager'
 
+export const PEER_DID_PREFIX = 'did:peer'
+
 type IContext = IAgentContext<IKeyManager>
 
 /**
@@ -25,21 +27,20 @@ export const peerAddressFromPublicKey = (publicKeyHex: string): string => {
 
 /**
  * {@link @veramo/did-manager#DIDManager} identifier provider for `did:peer` identifiers
+ *
+ * Copied from ethr-did-provider
  * Note that the following are unimplemented and throw errors: addKey, addService, removeKey, removeService
  *
  * @public
  */
 export class PeerDidProvider extends AbstractIdentifierProvider {
   private defaultKms: string
-  private network: string
 
   constructor(options: {
     defaultKms: string
-    network: string
   }) {
     super()
     this.defaultKms = options.defaultKms
-    this.network = options.network
   }
 
   async createIdentifier(
@@ -49,7 +50,7 @@ export class PeerDidProvider extends AbstractIdentifierProvider {
     const key = await context.agent.keyManagerCreate({ kms: kms || this.defaultKms, type: 'Secp256k1' })
     const address = peerAddressFromPublicKey(key.publicKeyHex)
     const identifier: Omit<IIdentifier, 'provider'> = {
-      did: 'did:peer:' + address,
+      did: PEER_DID_PREFIX + ':' + address,
       controllerKeyId: key.kid,
       keys: [key],
       services: [],

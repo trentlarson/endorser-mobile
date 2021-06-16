@@ -35,7 +35,7 @@ import * as R from 'ramda'
 
 import { Contact } from '../entity/contact'
 import { Settings } from '../entity/settings'
-import { PeerDidProvider } from './peerDidProvider'
+import { PeerDidProvider, PEER_DID_PREFIX } from './peerDidProvider'
 
 import { Initial1616938713828 } from '../migration/1616938713828-initial'
 import { SettingsContacts1616967972293 } from '../migration/1616967972293-settings-contacts'
@@ -67,7 +67,7 @@ const DEFAULT_ETHR_DID_PROVIDER_NETWORK_NAME = 'mainnet'
 export const DEFAULT_ETHR_DID_PROVIDER_NAME = ethrDidProviderName(DEFAULT_ETHR_DID_PROVIDER_NETWORK_NAME)
 
 const providers = {}
-providers['did:peer'] = new PeerDidProvider({ defaultKms: 'local', network: 'did:peer' })
+providers[PEER_DID_PREFIX] = new PeerDidProvider({ defaultKms: 'local' })
 ETHR_NETWORK_NAMES.forEach((networkName) => {
   providers[ethrDidProviderName(networkName)] = new EthrDIDProvider({
     defaultKms: 'local',
