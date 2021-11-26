@@ -17,6 +17,11 @@ interface Payload<T> {
   payload: T;
 }
 
+interface LogMsg {
+  log: boolean;
+  msg: string;
+}
+
 export const appSlice = createSlice({
   name: 'app',
   initialState: {
@@ -33,8 +38,10 @@ export const appSlice = createSlice({
     testMode: false,
   },
   reducers: {
-    addLog: (state, contents: Payload<string>) => {
-      state.logMessage += "\n" + contents.payload
+    addLog: (state, contents: Payload<LogMsg>) => {
+      if (contents.payload.log) {
+        state.logMessage += "\n" + contents.payload.msg
+      }
     },
     setContacts: (state, contents: Payload<Array<Contact>>) => {
       state.contacts = contents.payload

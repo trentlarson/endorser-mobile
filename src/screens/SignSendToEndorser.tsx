@@ -31,10 +31,10 @@ export function SignCredentialScreen({ navigation, route }) {
    */
   async function sendToEndorserSite(jwt: string): Promise<string> {
     setFetching(true)
-    appStore.dispatch(appSlice.actions.addLog("Starting the send to Endorser server..."))
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the send to Endorser server..."}))
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
-    appStore.dispatch(appSlice.actions.addLog("... sending to server..."))
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... sending to server..."}))
     return fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
@@ -44,17 +44,17 @@ export function SignCredentialScreen({ navigation, route }) {
       body: JSON.stringify({ jwtEncoded: jwt }),
     })
     .then(async resp => {
-      appStore.dispatch(appSlice.actions.addLog("... got server response..."))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got server response..."}))
       setFetching(false)
       setFetched(true)
       debug('Got endorser.ch status', resp.status)
-      appStore.dispatch(appSlice.actions.addLog("... got server status " + resp.status + "..."))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got server status " + resp.status + "..."}))
       if (resp.ok) {
-        appStore.dispatch(appSlice.actions.addLog("... finished the send to Endorser server."))
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the send to Endorser server."}))
         return resp.json()
       } else {
         const text = await resp.text()
-        appStore.dispatch(appSlice.actions.addLog("... finished with error text: " + text))
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished with error text: " + text}))
         throw Error('Got failure response code of ' + resp.status + ' with body text of ' + text)
       }
     })
@@ -90,19 +90,19 @@ export function SignCredentialScreen({ navigation, route }) {
       const vcJwt: JWT = await createVerifiableCredentialJwt(vcPayload, issuer)
       **/
 
-      appStore.dispatch(appSlice.actions.addLog("Starting the signing & sending..."))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the signing & sending..."}))
       const signer = didJwt.SimpleSigner(identifiers[0].keys[0].privateKeyHex)
       const did: string = identifiers[0].did
       const vcClaim = JSON.parse(claimStr)
-      appStore.dispatch(appSlice.actions.addLog("... created signer and now signing..."))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
       const vcJwt: string = await didJwt.createJWT(utility.vcPayload(did, vcClaim),{ issuer: did, signer })
       setJwt(vcJwt)
-      appStore.dispatch(appSlice.actions.addLog("... created signed JWT and now sending..."))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT and now sending..."}))
       let result = await sendToEndorserSite(vcJwt)
-      appStore.dispatch(appSlice.actions.addLog("... finished the signing & sending with result: " + JSON.stringify(result)))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the signing & sending with result: " + JSON.stringify(result)}))
       return result
     } catch (e) {
-      appStore.dispatch(appSlice.actions.addLog("Got error in SignSendToEndorser.signAndSend: " + e))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
       // I have seen cases where each of these give different, helpful info.
       console.log('Error storing identifier, 1:', e)

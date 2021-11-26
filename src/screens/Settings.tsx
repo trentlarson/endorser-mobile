@@ -57,21 +57,21 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
     /**
       First save the mnemonic, because: we've seen cases where the identifier import fails, and if they don't have the mnemonic then they can't restore their identifier, but maybe if the mnemonic is saved then they can export and import it through the UI.
      **/
-    appStore.dispatch(appSlice.actions.addLog("... about to create Settings entity..."))
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... about to create Settings entity..."}))
 
     const settings = new Settings()
     settings.id = MASTER_COLUMN_VALUE
     settings.mnemonic = mnemonic
-    appStore.dispatch(appSlice.actions.addLog("... created Settings entity..."))
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created Settings entity..."}))
 
     const conn = await dbConnection
-    appStore.dispatch(appSlice.actions.addLog("... got DB connection..."))
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got DB connection..."}))
 
     let newContact = await conn.manager.save(settings)
-    appStore.dispatch(appSlice.actions.addLog("... mnemonic saved..."))
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... mnemonic saved..."}))
 
     const savedId = await agent.didManagerImport(newId)
-    appStore.dispatch(appSlice.actions.addLog("... identifier imported by DID Manager..."))
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... identifier imported by DID Manager..."}))
 
     return savedId
   } catch (e) {
@@ -79,7 +79,7 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
     // For some reason, we don't see any error pop-up when we get here (at least in prod, both iOS and Android).
 
     // In release mode, a thrown error didn't give any helpful info.
-    appStore.dispatch(appSlice.actions.addLog("Got error in Settings.storeIdentifier: " + e))
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Got error in Settings.storeIdentifier: " + e}))
 
     // I have seen cases where each of these give different, helpful info.
     console.log('Error storing identifier, 1:', e)
@@ -138,14 +138,14 @@ const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) 
   if (toLowercase) {
     address = address.toLowerCase()
   }
-  appStore.dispatch(appSlice.actions.addLog("... derived keys and address..."))
+  appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... derived keys and address..."}))
 
   const newId = newIdentifier(address, publicHex, privateHex)
-  appStore.dispatch(appSlice.actions.addLog("... created new ID..."))
+  appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created new ID..."}))
 
   // awaiting because otherwise the UI may not see that a mnemonic was created
   const savedId = await storeIdentifier(newId, mnemonic)
-  appStore.dispatch(appSlice.actions.addLog("... stored new ID..."))
+  appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... stored new ID..."}))
   return savedId
 }
 
@@ -157,7 +157,7 @@ const createAndStoreIdentifier = async () => {
 
   const entropy = crypto.randomBytes(32)
   const mnemonic = bip39.entropyToMnemonic(entropy)
-  appStore.dispatch(appSlice.actions.addLog("... generated mnemonic..."))
+  appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... generated mnemonic..."}))
 
   return importAndStoreIdentifier(mnemonic)
 }
@@ -166,6 +166,7 @@ export function SettingsScreen({navigation}) {
 
   const [createStatus, setCreateStatus] = useState<string>('')
   const [creatingId, setCreatingId] = useState<boolean>(false)
+  const [finishedCheckingIds, setFinishedCheckingIds] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Omit<IIdentifier, 'provider'>[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [inputName, setInputName] = useState<string>('')
@@ -253,17 +254,18 @@ export function SettingsScreen({navigation}) {
         const sharePayload = uportJwtPayload(ident.did, settings?.name, ident.keys[0].publicKeyHex)
         setQrJwtForPayload(ident, sharePayload)
       })
+      setFinishedCheckingIds(true)
     }
     getIdentifiers()
   }, []) // Why does this loop infinitely with any variable, even with classToPlain(identifiers) that doesn't change?
 
   useEffect(() => {
     const createIdentifier = async () => {
-      appStore.dispatch(appSlice.actions.addLog("Creating new identifier..."))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Creating new identifier..."}))
       createAndStoreIdentifier()
       .then(setNewId)
       .then(() => setCreatingId(false))
-      .then(() => appStore.dispatch(appSlice.actions.addLog("... totally finished creating identifier.")))
+      .then(() => appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... totally finished creating identifier."})))
     }
     if (creatingId) {
       createIdentifier()
@@ -312,21 +314,25 @@ export function SettingsScreen({navigation}) {
             {
               R.isEmpty(identifiers)
               ?
-                <View>
-                  <Text>There are no identifiers.</Text>
-                  { creatingId
-                    ? <View>
-                      <Text>{createStatus}</Text>
-                      <ActivityIndicator size="large" color="#00ff00" />
-                    </View>
-                    : <View>
-                      <Button title="Create Identifier" onPress={() => { setCreatingId(true) }} />
-                      <View style={{ padding: 5 }} />
-                      <Button title="Import Identifier" onPress={() => navigation.navigate('Import Identifier')}
-                      />
-                    </View>
-                  }
-                </View>
+                finishedCheckingIds
+                ?
+                  <View>
+                    <Text>There are no identifiers.</Text>
+                    { creatingId
+                      ? <View>
+                        <Text>{createStatus}</Text>
+                        <ActivityIndicator size="large" color="#00ff00" />
+                      </View>
+                      : <View>
+                        <Button title="Create Identifier" onPress={() => { setCreatingId(true) }} />
+                        <View style={{ padding: 5 }} />
+                        <Button title="Import Identifier" onPress={() => navigation.navigate('Import Identifier')}
+                        />
+                      </View>
+                    }
+                  </View>
+                :
+                  <View><Text>Checking for identifiers...</Text></View>
               :
                 <View style={{ marginBottom: 60 }}>
 
@@ -493,10 +499,10 @@ export function ImportIdentityScreen({navigation}) {
 
   useEffect(() => {
     const coordImportId = async () => {
-      appStore.dispatch(appSlice.actions.addLog("Importing identifier..."))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Importing identifier..."}))
       importAndStoreIdentifier(mnemonic, makeLowercase)
       .then(newIdentifier => {
-        appStore.dispatch(appSlice.actions.addLog("... totally finished importing identifier."))
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... totally finished importing identifier."}))
         setIdentifier(newIdentifier)
         setIdChanged(true)
 
@@ -506,7 +512,7 @@ export function ImportIdentityScreen({navigation}) {
         }, 500)
       })
       .catch(err => {
-        appStore.dispatch(appSlice.actions.addLog("... got error importing: " + err))
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got error importing: " + err}))
       })
       .finally(() => {
         setIdImporting(false)
