@@ -168,11 +168,18 @@ export function SettingsScreen({navigation}) {
   const [creatingId, setCreatingId] = useState<boolean>(false)
   const [finishedCheckingIds, setFinishedCheckingIds] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Omit<IIdentifier, 'provider'>[]>([])
+  const [isInAdvancedMode, setIsInAdvancedMode] = useState<boolean>(appStore.getState().advancedMode)
+  const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [inputName, setInputName] = useState<string>('')
-  const [storedName, setStoredName] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
-  const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
+  const [storedName, setStoredName] = useState<string>('')
+
+  const toggleAdvancedMode = () => {
+    const newValue = !isInAdvancedMode
+    setIsInAdvancedMode(newValue)
+    appStore.dispatch(appSlice.actions.setAdvancedMode(newValue))
+  }
 
   // from https://reactnative.dev/docs/direct-manipulation#setnativeprops-to-clear-textinput-value
   const inputApiRef = useRef()
@@ -273,11 +280,13 @@ export function SettingsScreen({navigation}) {
   }, [creatingId])
 
   useEffect(() => {
+    // This is the wrong approach because setting this flag multiple times will
+    // cause multiple warning messages.
     const setNewTestMode = async (setting) => {
       appStore.dispatch(appSlice.actions.setTestMode(setting))
       if (setting) {
         setToTestServers()
-        Alert.alert('Beware! In test mode you have the ability to corrupt your data.')
+        Alert.alert('Beware! In test mode you have the ability to corrupt your data. Close and Restart the app if you are unsure.')
       } else {
         // now going into real mode, but if the servers were switched then warn
         if (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER) {
@@ -363,7 +372,7 @@ export function SettingsScreen({navigation}) {
             }
 
             { isInTestMode
-              ? <View style={{ marginTop: 200 }}>
+              ? <View style={{ marginTop: 20 }}>
                   <Button title="Create ID" onPress={()=>{setCreatingId(true)}} />
                   <View style={{ padding: 5 }} />
                   <Button title="Import ID" onPress={()=>navigation.navigate('Import Identifier')} />
@@ -381,50 +390,64 @@ export function SettingsScreen({navigation}) {
             </View>
 
             <CheckBox
-              title='Test Mode'
-              checked={isInTestMode}
-              onPress={() => {setIsInTestMode(!isInTestMode)}}
+              title='Advanced Mode'
+              checked={isInAdvancedMode}
+              onPress={toggleAdvancedMode}
             />
 
             {
-            isInTestMode
-            ?
-              <View style={{ padding: 10 }}>
-                <Text>Endorser API Server</Text>
-                <TextInput
-                  defaultValue={ appStore.getState().apiServer }
-                  onChangeText={(text) => {
-                    appStore.dispatch(appSlice.actions.setApiServer(text))
-                  }}
-                  ref={inputApiRef}
-                  style={{borderWidth: 1}}
+            isInAdvancedMode
+            ? (
+              <View>
+                <CheckBox
+                  title='Test Mode'
+                  checked={isInTestMode}
+                  onPress={() => {setIsInTestMode(!isInTestMode)}}
                 />
-                <Text>Endorser View Server</Text>
-                <TextInput
-                  defaultValue={ appStore.getState().viewServer }
-                  onChangeText={(text) => {
-                    appStore.dispatch(appSlice.actions.setViewServer(text))
-                  }}
-                  ref={inputViewRef}
-                  style={{borderWidth: 1}}
-                >
-                </TextInput>
+                {
+                isInTestMode
+                ? (
+                  <View style={{ padding: 10 }}>
+                    <Text>Endorser API Server</Text>
+                    <TextInput
+                      defaultValue={ appStore.getState().apiServer }
+                      onChangeText={(text) => {
+                        appStore.dispatch(appSlice.actions.setApiServer(text))
+                      }}
+                      ref={inputApiRef}
+                      style={{borderWidth: 1}}
+                    />
+                    <Text>Endorser View Server</Text>
+                    <TextInput
+                      defaultValue={ appStore.getState().viewServer }
+                      onChangeText={(text) => {
+                        appStore.dispatch(appSlice.actions.setViewServer(text))
+                      }}
+                      ref={inputViewRef}
+                      style={{borderWidth: 1}}
+                    >
+                    </TextInput>
 
-                <Button
-                  title='Use public test servers'
-                  onPress={setToTestServers}
-                />
-                <Button
-                  title='Use public prod servers'
-                  onPress={setToProdServers}
-                />
+                    <Button
+                      title='Use public test servers'
+                      onPress={setToTestServers}
+                    />
+                    <Button
+                      title='Use public prod servers'
+                      onPress={setToProdServers}
+                    />
+
+                  </View>
+                ) : (
+                  <View/>
+                )}
 
                 <Text>Log</Text>
                 <Text selectable={true}>{ appStore.getState().logMessage }</Text>
               </View>
-            :
+            ) : (
               <View/>
-            }
+            )}
           </View>
         </View>
       </ScrollView>

@@ -35,6 +35,7 @@ export const appSlice = createSlice({
 
     logMessage: '',
 
+    advancedMode: false,
     testMode: false,
   },
   reducers: {
@@ -43,6 +44,12 @@ export const appSlice = createSlice({
         state.logMessage += "\n" + contents.payload.msg
       }
     },
+    setAdvancedMode: (state, contents: Payload<boolean>) => {
+      state.advancedMode = contents.payload
+    },
+    setApiServer: (state, contents: Payload<string>) => {
+      state.apiServer = contents.payload
+    },
     setContacts: (state, contents: Payload<Array<Contact>>) => {
       state.contacts = contents.payload
     },
@@ -50,14 +57,11 @@ export const appSlice = createSlice({
       const index = R.findIndex(c => c.did === contents.payload.did, state.contacts)
       state.contacts[index] = contents.payload
     },
-    setApiServer: (state, contents: Payload<string>) => {
-      state.apiServer = contents.payload
+    setTestMode: (state, contents: Payload<boolean>) => {
+      state.testMode = contents.payload
     },
     setViewServer: (state, contents: Payload<string>) => {
       state.viewServer = contents.payload
-    },
-    setTestMode: (state, contents: Payload<boolean>) => {
-      state.testMode = contents.payload
     },
   }
 })
