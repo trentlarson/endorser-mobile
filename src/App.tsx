@@ -50,7 +50,7 @@ export default function App() {
             <Stack.Screen name="Contacts" component={ContactsScreen} />
             <Stack.Screen name="Sign Credential" component={SignCredentialScreen} />
             <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
-            <Stack.Screen name="Export Identifier" component={ExportIdentityScreen} />
+            <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
             <Stack.Screen name="My Credentials" component={MyCredentialsScreen} />

@@ -23,18 +23,19 @@ const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 const TEST_API_URL = 'https://test.endorser.ch:8000'
 const TEST_VIEW_URL = 'https://test.endorser.ch:8080'
 
-const newIdentifier = (address: string, publicHex: string, privateHex: string): Omit<IIdentifier, 'provider'> => {
+const newIdentifier = (address: string, publicHex: string, privateHex: string, derivationPath: string): Omit<IIdentifier, 'provider'> => {
   return {
     did: DEFAULT_DID_PROVIDER_NAME + ':' + address,
     keys: [{
       kid: publicHex,
       kms: 'local',
-      type: 'Secp256k1',
+      meta: {derivationPath: derivationPath},
+      privateKeyHex: privateHex,
       publicKeyHex: publicHex,
-      privateKeyHex: privateHex
+      type: 'Secp256k1',
     }],
     provider: DEFAULT_DID_PROVIDER_NAME,
-    services: []
+    services: [],
   }
 }
 
@@ -79,7 +80,7 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
     // For some reason, we don't see any error pop-up when we get here (at least in prod, both iOS and Android).
 
     // In release mode, a thrown error didn't give any helpful info.
-    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Got error in Settings.storeIdentifier: " + e}))
+    appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in Settings.storeIdentifier: " + e}))
 
     // I have seen cases where each of these give different, helpful info.
     console.log('Error storing identifier, 1:', e)
@@ -140,7 +141,7 @@ const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) 
   }
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... derived keys and address..."}))
 
-  const newId = newIdentifier(address, publicHex, privateHex)
+  const newId = newIdentifier(address, publicHex, privateHex, UPORT_ROOT_DERIVATION_PATH)
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created new ID..."}))
 
   // awaiting because otherwise the UI may not see that a mnemonic was created
@@ -160,6 +161,12 @@ const createAndStoreIdentifier = async () => {
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... generated mnemonic..."}))
 
   return importAndStoreIdentifier(mnemonic)
+}
+
+const logDatabaseTable = (tableName) => async () => {
+  const conn = await dbConnection
+  const data = await conn.manager.query('SELECT * FROM ' + tableName)
+  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Contents of table \"" + tableName + "\":\n" + JSON.stringify(data)}))
 }
 
 export function SettingsScreen({navigation}) {
@@ -268,11 +275,14 @@ export function SettingsScreen({navigation}) {
 
   useEffect(() => {
     const createIdentifier = async () => {
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Creating new identifier..."}))
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Creating new identifier..."}))
       createAndStoreIdentifier()
       .then(setNewId)
       .then(() => setCreatingId(false))
-      .then(() => appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... totally finished creating identifier."})))
+      .then(() => appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... totally finished creating identifier."})))
+      .catch(err => {
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got error creating identifier: " + err}))
+      })
     }
     if (creatingId) {
       createIdentifier()
@@ -364,8 +374,8 @@ export function SettingsScreen({navigation}) {
                   )}
                   <View style={{ marginTop: 20, marginBottom: 20 }}>
                     <Button
-                    title="Export Identifier"
-                    onPress={() => navigation.navigate('Export Identifier')}
+                    title="Export Seed Phrase"
+                    onPress={() => navigation.navigate('Export Seed Phrase')}
                     />
                   </View>
                 </View>
@@ -441,6 +451,19 @@ export function SettingsScreen({navigation}) {
                 ) : (
                   <View/>
                 )}
+
+                <Button
+                  title='Log Identifier Table'
+                  onPress={logDatabaseTable('identifier')}
+                />
+                <Button
+                  title='Log Key Table'
+                  onPress={logDatabaseTable('key')}
+                />
+                <Button
+                  title='Log Settings Table'
+                  onPress={logDatabaseTable('settings')}
+                />
 
                 <Text>Log</Text>
                 <Text selectable={true}>{ appStore.getState().logMessage }</Text>
@@ -522,10 +545,10 @@ export function ImportIdentityScreen({navigation}) {
 
   useEffect(() => {
     const coordImportId = async () => {
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Importing identifier..."}))
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Importing identifier..."}))
       importAndStoreIdentifier(mnemonic, makeLowercase)
       .then(newIdentifier => {
-        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... totally finished importing identifier."}))
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... totally finished importing identifier."}))
         setIdentifier(newIdentifier)
         setIdChanged(true)
 
@@ -535,7 +558,7 @@ export function ImportIdentityScreen({navigation}) {
         }, 500)
       })
       .catch(err => {
-        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got error importing: " + err}))
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got error importing identifier: " + err}))
       })
       .finally(() => {
         setIdImporting(false)

@@ -102,7 +102,7 @@ export function SignCredentialScreen({ navigation, route }) {
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the signing & sending with result: " + JSON.stringify(result)}))
       return result
     } catch (e) {
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
       // I have seen cases where each of these give different, helpful info.
       console.log('Error storing identifier, 1:', e)
