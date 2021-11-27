@@ -363,12 +363,27 @@ export function SettingsScreen({navigation}) {
 
                   { identifiers.map(ident =>
                     <View key={ident.did} style={{ marginTop: 20 }}>
+
                       <Text>Identifier</Text>
-                      <Text style={{ fontSize: 11, marginBottom: 20 }} selectable={true}>{ident.did}</Text>
+                      <Text style={{ fontSize: 11, marginBottom: 20 }} selectable={true}>
+                        { ident.did }
+                      </Text>
+
                       <Text>Public Key (base64)</Text>
-                      <Text style={{ marginBottom: 20 }} selectable={true}>{ Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64') }</Text>
+                      <Text style={{ marginBottom: 20 }} selectable={true}>
+                        { Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64') }
+                      </Text>
+
                       <Text>Public Key (hex)</Text>
-                      <Text style={{ marginBottom: 20 }} selectable={true}>{ ident.keys[0].publicKeyHex }</Text>
+                      <Text style={{ marginBottom: 20 }} selectable={true}>
+                        { ident.keys[0].publicKeyHex }
+                      </Text>
+
+                      <Text>Derivation Path</Text>
+                      <Text style={{ marginBottom: 20 }} selectable={true}>
+                        { ident.keys[0].meta && ident.keys[0].meta.derivationPath ? ident.keys[0].meta.derivationPath : 'Unknown. Maybe: ' + UPORT_ROOT_DERIVATION_PATH }
+                      </Text>
+
                       <QRCode value={qrJwts[ident.did]} size={300}/>
                     </View>
                   )}
