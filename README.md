@@ -28,6 +28,11 @@ Clean:
 `./node_modules/.bin/react-native-clean-project`
 
 
+### Create a New DB Migration
+
+`npx typeorm migration:create -n YourMigrationName`
+
+
 
 
 ## Test

@@ -13,17 +13,31 @@ export class Settings extends BaseEntity {
 
   /**
     Currently this has a single entry so it's a constant string, eg "MASTER"
-  **/
+   **/
   @PrimaryColumn('text')
   //@ts-ignore
   id: string
 
   /**
-    Support one mnemonic.  If you've got multiple DIDs then derive them from the master key.
-  **/
+    If there's an ivBase64 then this is an base-64-encoded, encrypted string; otherwise, it's plain text.
+   **/
   @Column('text', { nullable: true })
   //@ts-ignore
   mnemonic: string
+
+  /**
+    base-64-encoded
+   **/
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  ivBase64: string
+
+  /**
+    random text
+   **/
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  salt: string
 
   @Column('text', { nullable: true })
   //@ts-ignore

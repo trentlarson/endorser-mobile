@@ -83,11 +83,11 @@ function HomeScreen({ navigation }) {
       />
       <View style={{ marginTop: 100 }}/>
       <Button
-        title="See Contacts"
+        title="Manage Contacts"
         onPress={() => navigation.navigate('Contacts')}
       />
       <Button
-        title="Set Settings"
+        title="Manage Settings"
         onPress={() => navigation.navigate('Settings')}
       />
       <Button

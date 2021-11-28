@@ -29,7 +29,8 @@ const newIdentifier = (address: string, publicHex: string, privateHex: string, d
     keys: [{
       kid: publicHex,
       kms: 'local',
-      meta: {derivationPath: derivationPath},
+      // meta is declared as text in SQL but as an object in the entity
+      meta: { derivationPath: derivationPath },
       privateKeyHex: privateHex,
       publicKeyHex: publicHex,
       type: 'Secp256k1',
@@ -52,7 +53,7 @@ function uportJwtPayload(did, name, publicKeyHex) {
   }
 }
 
-const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: string) => {
+const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: string, mnemonicPassword: string) => {
 
   try {
     /**
@@ -60,9 +61,16 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
      **/
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... about to create Settings entity..."}))
 
+    // This is specified to be a particular length.
+    const ivBase64 = crypto.randomBytes(16).toString('base64')
+    // There's technically no reason to keep a salt, too, but I'll keep that boilerplate code.
+    const salt = crypto.randomBytes(6).toString('base64');
+
     const settings = new Settings()
     settings.id = MASTER_COLUMN_VALUE
-    settings.mnemonic = mnemonic
+    settings.mnemonic = utility.encryptAndBase64(mnemonic, mnemonicPassword, salt, ivBase64);
+    settings.ivBase64 = ivBase64
+    settings.salt = salt
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created Settings entity..."}))
 
     const conn = await dbConnection
@@ -91,7 +99,7 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 }
 
 // Import and existing ID
-const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) => {
+const importAndStoreIdentifier = async (mnemonic: string, mnemonicPassword: string, toLowercase: boolean) => {
 
   // just to get rid of variability that might cause an error
   mnemonic = mnemonic.trim().toLowerCase()
@@ -145,13 +153,13 @@ const importAndStoreIdentifier = async (mnemonic: string, toLowercase: boolean) 
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created new ID..."}))
 
   // awaiting because otherwise the UI may not see that a mnemonic was created
-  const savedId = await storeIdentifier(newId, mnemonic)
+  const savedId = await storeIdentifier(newId, mnemonic, mnemonicPassword)
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... stored new ID..."}))
   return savedId
 }
 
 // Create a totally new ID
-const createAndStoreIdentifier = async () => {
+const createAndStoreIdentifier = async (mnemonicPassword) => {
 
   // This doesn't give us the entropy/seed.
   //const id = await agent.didManagerCreate()
@@ -160,7 +168,7 @@ const createAndStoreIdentifier = async () => {
   const mnemonic = bip39.entropyToMnemonic(entropy)
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... generated mnemonic..."}))
 
-  return importAndStoreIdentifier(mnemonic)
+  return importAndStoreIdentifier(mnemonic, mnemonicPassword, false)
 }
 
 const logDatabaseTable = (tableName) => async () => {
@@ -174,11 +182,12 @@ export function SettingsScreen({navigation}) {
   const [createStatus, setCreateStatus] = useState<string>('')
   const [creatingId, setCreatingId] = useState<boolean>(false)
   const [finishedCheckingIds, setFinishedCheckingIds] = useState<boolean>(false)
+  const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Omit<IIdentifier, 'provider'>[]>([])
   const [isInAdvancedMode, setIsInAdvancedMode] = useState<boolean>(appStore.getState().advancedMode)
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
-  const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [inputName, setInputName] = useState<string>('')
+  const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [storedName, setStoredName] = useState<string>('')
 
@@ -276,7 +285,7 @@ export function SettingsScreen({navigation}) {
   useEffect(() => {
     const createIdentifier = async () => {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Creating new identifier..."}))
-      createAndStoreIdentifier()
+      createAndStoreIdentifier(mnemonicPassword)
       .then(setNewId)
       .then(() => setCreatingId(false))
       .then(() => appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... totally finished creating identifier."})))
@@ -344,6 +353,13 @@ export function SettingsScreen({navigation}) {
                       </View>
                       : <View>
                         <Button title="Create Identifier" onPress={() => { setCreatingId(true) }} />
+                        <Text>... and guard seed phrase with password:</Text>
+                        <TextInput
+                          autoCapitalize={'none'}
+                          defaultValue={ mnemonicPassword }
+                          onChangeText={ setMnemonicPassword }
+                          style={{borderWidth: 1}}
+                        />
                         <View style={{ padding: 5 }} />
                         <Button title="Import Identifier" onPress={() => navigation.navigate('Import Identifier')}
                         />
@@ -381,7 +397,7 @@ export function SettingsScreen({navigation}) {
 
                       <Text>Derivation Path</Text>
                       <Text style={{ marginBottom: 20 }} selectable={true}>
-                        { ident.keys[0].meta && ident.keys[0].meta.derivationPath ? ident.keys[0].meta.derivationPath : 'Unknown. Maybe: ' + UPORT_ROOT_DERIVATION_PATH }
+                        { ident.keys[0].meta && ident.keys[0].meta.derivationPath ? ident.keys[0].meta.derivationPath : 'Unknown. Probably: ' + UPORT_ROOT_DERIVATION_PATH }
                       </Text>
 
                       <QRCode value={qrJwts[ident.did]} size={300}/>
@@ -399,6 +415,13 @@ export function SettingsScreen({navigation}) {
             { isInTestMode
               ? <View style={{ marginTop: 20 }}>
                   <Button title="Create ID" onPress={()=>{setCreatingId(true)}} />
+                  <Text>... and guard seed phrase with password:</Text>
+                  <TextInput
+                    autoCapitalize={'none'}
+                    defaultValue={ mnemonicPassword }
+                    onChangeText={ setMnemonicPassword }
+                    style={{borderWidth: 1}}
+                  />
                   <View style={{ padding: 5 }} />
                   <Button title="Import ID" onPress={()=>navigation.navigate('Import Identifier')} />
                   <View style={{ padding: 5 }} />
@@ -494,7 +517,10 @@ export function SettingsScreen({navigation}) {
 }
 
 export function ExportIdentityScreen({navigation}) {
+  const [error, setError] = useState<String>('')
   const [mnemonic, setMnemonic] = useState<String>('')
+  const [mnemonicRaw, setMnemonicRaw] = useState<String>('')
+  const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [show, setShow] = useState<String>(false)
 
   const copyToClipboard = () => {
@@ -503,19 +529,36 @@ export function ExportIdentityScreen({navigation}) {
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
-    const getMnemonic = async () => {
+    const getMnemonicRaw = async () => {
       const conn = await dbConnection
       const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-      const mnemonic = settings.mnemonic
-      setMnemonic(mnemonic)
+      setMnemonicRaw(settings.mnemonic)
     }
-    getMnemonic()
+    getMnemonicRaw()
   }, [])
+
+  const decryptAndShow = async () => {
+    const conn = await dbConnection
+    const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+    try {
+      if (settings.ivBase64 != null) {
+        const mnemonic = utility.decryptFromBase64(settings.mnemonic, mnemonicPassword, settings.salt, settings.ivBase64);
+        setMnemonic(mnemonic)
+      } else {
+        // because we still have some people who have unencrypted seeds in their DB
+        setMnemonic(mnemonicRaw)
+      }
+    } catch (err) {
+      setError('Decryption failed. Check your password.')
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Unable to retrieve mnemonic because: " + err}))
+    }
+    setShow(true)
+  }
 
   return (
     <View style={{padding: 20}}>
       <View style={{marginBottom: 50, marginTop: 20}}>
-        {mnemonic ? (
+        {mnemonicRaw ? (
           <View>
             {show ? (
               <View>
@@ -537,7 +580,16 @@ export function ExportIdentityScreen({navigation}) {
                   private place out of sight of cameras and other eyes, and only record it in
                   something private -- don't take a screenshot or send it to any online
                   service.</Text>
-                <Button title={'Click to show identifier mnemonic phrase'} onPress={setShow}/>
+                <Button title={'Click to show identifier mnemonic phrase'} onPress={decryptAndShow}/>
+                <Text>... and unlock seed phrase with password:</Text>
+                <TextInput
+                  autoCapitalize={'none'}
+                  defaultValue={ mnemonicPassword }
+                  onChangeText={ setMnemonicPassword }
+                  secureTextEntry={true}
+                  style={{borderWidth: 1}}
+                />
+
               </View>
             )}
           </View>
@@ -546,6 +598,9 @@ export function ExportIdentityScreen({navigation}) {
             <Text>There is no mnemonic phrase to export.</Text>
           </View>
         )}
+        <Text style={{ padding: 10, color: 'red' }}>
+          {error}
+        </Text>
       </View>
     </View>
   )
@@ -557,11 +612,12 @@ export function ImportIdentityScreen({navigation}) {
   const [identifier, setIdentifier] = useState<Omit<IIdentifier, 'provider'>>()
   const [makeLowercase, setMakeLowercase] = useState<boolean>(false)
   const [mnemonic, setMnemonic] = useState<String>('')
+  const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
 
   useEffect(() => {
     const coordImportId = async () => {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Importing identifier..."}))
-      importAndStoreIdentifier(mnemonic, makeLowercase)
+      importAndStoreIdentifier(mnemonic, mnemonicPassword, makeLowercase)
       .then(newIdentifier => {
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... totally finished importing identifier."}))
         setIdentifier(newIdentifier)
@@ -606,11 +662,19 @@ export function ImportIdentityScreen({navigation}) {
                       onChangeText={setMnemonic}
                     >
                     </TextInput>
+                    <Text>... and guard seed phrase with password:</Text>
+                    <TextInput
+                      autoCapitalize={'none'}
+                      defaultValue={ mnemonicPassword }
+                      onChangeText={ setMnemonicPassword }
+                      style={{borderWidth: 1}}
+                    />
                     <CheckBox
                       title='Convert Address to Lowercase'
                       checked={makeLowercase}
                       onPress={() => setMakeLowercase(!makeLowercase)}
                     />
+                    <Text>Note that this will also create an identifier with the default uPort derivation path.</Text>
                     <Button
                       title={'Click to import from mnemonic phrase'}
                       onPress={()=>setIdImporting(true)}

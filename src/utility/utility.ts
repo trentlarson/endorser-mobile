@@ -1,4 +1,5 @@
 import { classToPlain } from 'class-transformer'
+import crypto from 'crypto';
 import * as didJwt from 'did-jwt'
 import * as R from 'ramda'
 
@@ -162,6 +163,61 @@ export const loadContacts = async (appSlice, appStore, dbConnection, useCached) 
     const foundContacts = await conn.manager.find(Contact, {order: {name:'ASC'}})
     await appStore.dispatch(appSlice.actions.setContacts(classToPlain(foundContacts)))
   }
+}
+
+function sha1(input: Buffer): Buffer {
+  return crypto.createHash('sha1').update(input).digest();
+}
+
+function passwordDeriveBytes(
+  password: string,
+  salt: string,
+  iterations: number,
+  len: number
+): Buffer {
+  let key = Buffer.from(password + salt);
+  for (let i = 0; i < iterations; i += 1) {
+    key = sha1(key);
+  }
+  if (key.length < len) {
+    const hx = passwordDeriveBytes(password, salt, iterations - 1, 20);
+    for (let counter = 1; key.length < len; counter += 1) {
+      key = Buffer.concat([
+        key,
+        sha1(Buffer.concat([Buffer.from(counter.toString()), hx])),
+      ]);
+    }
+  }
+  return Buffer.alloc(len, key);
+}
+
+export function encryptAndBase64(
+  plainText: string,
+  password: string,
+  salt: string,
+  ivBase64: string
+): string {
+  const ivBuf = Buffer.from(ivBase64, 'base64');
+  const key = passwordDeriveBytes(password, salt, 100, 32);
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, Buffer.from(ivBuf));
+  const part1 = cipher.update(plainText, 'utf8');
+  const part2 = cipher.final();
+  const encrypted = Buffer.concat([part1, part2]).toString('base64');
+  return encrypted;
+}
+
+export function decryptFromBase64(
+  encryptedBase64: string,
+  password: string,
+  salt: string,
+  ivBase64: string
+): string {
+  const ivBuf = Buffer.from(ivBase64, 'base64');
+  const key = passwordDeriveBytes(password, salt, 100, 32);
+  const decipher = crypto.createDecipheriv('aes-256-cbc', key, Buffer.from(ivBuf));
+  let decrypted = decipher.update(encryptedBase64, 'base64', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
 }
 
 export const vcPayload = (did: string, claim: any): JwtCredentialPayload => {
