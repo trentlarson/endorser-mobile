@@ -1,5 +1,6 @@
 import * as R from 'ramda'
 import { configureStore, createSlice } from '@reduxjs/toolkit'
+import { IIdentifier } from "@veramo/core"
 
 import { Contact } from '../entity/contact'
 import * as utility from '../utility/utility'
@@ -28,6 +29,10 @@ export const appSlice = createSlice({
 
     // This is nullable because it is cached state from the DB...
     // it'll be null if we haven't even loaded from the DB yet.
+    identifiers: null as Array<IIdentifier> | null,
+
+    // This is nullable because it is cached state from the DB...
+    // it'll be null if we haven't even loaded from the DB yet.
     contacts: null as Array<Contact> | null,
 
     apiServer: DEFAULT_ENDORSER_API_SERVER,
@@ -39,6 +44,9 @@ export const appSlice = createSlice({
     testMode: false,
   },
   reducers: {
+    addIdentifier: (state, contents: Payload<IIdentifier>) => {
+      state.identifiers = state.identifiers.concat([contents.payload])
+    },
     addLog: (state, contents: Payload<LogMsg>) => {
       if (contents.payload.log) {
         state.logMessage += "\n" + contents.payload.msg
@@ -56,6 +64,9 @@ export const appSlice = createSlice({
     setContact: (state, contents: Payload<Contact>) => {
       const index = R.findIndex(c => c.did === contents.payload.did, state.contacts)
       state.contacts[index] = contents.payload
+    },
+    setIdentifiers: (state, contents: Payload<Array<IIdentifier>>) => {
+      state.identifiers = contents.payload
     },
     setTestMode: (state, contents: Payload<boolean>) => {
       state.testMode = contents.payload

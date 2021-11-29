@@ -192,9 +192,13 @@ export function SettingsScreen({navigation}) {
   const [storedName, setStoredName] = useState<string>('')
 
   const toggleAdvancedMode = () => {
-    const newValue = !isInAdvancedMode
-    setIsInAdvancedMode(newValue)
-    appStore.dispatch(appSlice.actions.setAdvancedMode(newValue))
+    if (isInTestMode) {
+      Alert.alert('You must uncheck Test Mode to exit Advanced Mode.')
+    } else {
+      const newValue = !isInAdvancedMode
+      setIsInAdvancedMode(newValue)
+      appStore.dispatch(appSlice.actions.setAdvancedMode(newValue))
+    }
   }
 
   // from https://reactnative.dev/docs/direct-manipulation#setnativeprops-to-clear-textinput-value
@@ -219,16 +223,20 @@ export function SettingsScreen({navigation}) {
       await agent.didManagerDelete(oldIdent)
       if (identifiers.length === 1) {
         const conn = await dbConnection
-        await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {mnemonic: null})
+        await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {mnemonic: null, ivBase64: null, salt: null})
       }
       const ids = await agent.didManagerFind()
+      appStore.dispatch(appSlice.actions.setIdentifiers(ids.map(classToPlain)))
       setIdentifiers(ids)
       setQrJwts(jwts => R.omit([oldIdent.did], jwts))
     }
   }
 
   const setNewId = async (ident) => {
-    setIdentifiers((s) => s.concat([classToPlain(ident)]))
+    const pojoIdent = classToPlain(ident)
+    appStore.dispatch(appSlice.actions.addIdentifier(pojoIdent))
+    setIdentifiers((s) => s.concat([pojoIdent]))
+
     const conn = await dbConnection
     let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
     if (settings?.mnemonic) {
@@ -261,6 +269,7 @@ export function SettingsScreen({navigation}) {
     const getIdentifiers = async () => {
       const ids = await agent.didManagerFind()
       const pojoIds = ids.map(classToPlain)
+      appStore.dispatch(appSlice.actions.setIdentifiers(pojoIds))
       setIdentifiers(pojoIds)
 
       const conn = await dbConnection
@@ -345,7 +354,7 @@ export function SettingsScreen({navigation}) {
                 finishedCheckingIds
                 ?
                   <View>
-                    <Text>There are no identifiers.</Text>
+                    <Text style={{ marginTop: 10 }}>There are no identifiers.</Text>
                     { creatingId
                       ? <View>
                         <Text>{createStatus}</Text>
@@ -359,9 +368,6 @@ export function SettingsScreen({navigation}) {
                           defaultValue={ mnemonicPassword }
                           onChangeText={ setMnemonicPassword }
                           style={{borderWidth: 1}}
-                        />
-                        <View style={{ padding: 5 }} />
-                        <Button title="Import Identifier" onPress={() => navigation.navigate('Import Identifier')}
                         />
                       </View>
                     }
@@ -431,7 +437,7 @@ export function SettingsScreen({navigation}) {
             }
           </View>
           <View>
-            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Other</Text>
+            <Text style={{ fontSize: 30, fontWeight: 'bold', marginTop: 20 }}>Other</Text>
 
             <View style={{ marginBottom: 20 }}>
               <Text selectable={true}>Version { pkg.version } ({ VersionNumber.buildVersion })</Text>

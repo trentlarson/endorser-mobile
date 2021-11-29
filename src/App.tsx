@@ -2,17 +2,18 @@
 
 import 'react-native-gesture-handler'
 import 'reflect-metadata'
-import React from 'react'
+
+import { classToPlain } from 'class-transformer'
+import React, { useEffect, useState } from 'react'
 import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
-import { appStore } from './veramo/appSlice.ts'
 import { ConfirmOthersScreen } from './screens/ConfirmOthers.tsx'
 import { ConstructCredentialScreen } from './screens/ConstructCredential'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
@@ -22,6 +23,8 @@ import { MyCredentialsScreen } from './screens/MyCredentials'
 import { PresentCredentialScreen } from './screens/PresentCredential'
 import { ReportScreen } from './screens/ReportFromEndorser'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
+import { appSlice, appStore } from './veramo/appSlice'
+import { agent } from './veramo/setup'
 
 
 
@@ -67,34 +70,77 @@ export default function App() {
 }
 
 function HomeScreen({ navigation }) {
+  const [loading, setLoading] = useState<boolean>(true)
+  const allIdentifiers = useSelector((state) => state.identifiers)
+
+  // Check for existing identifers on load and set them to state
+  useEffect(() => {
+    const getIdentifiers = async () => {
+      const _ids = await agent.didManagerFind()
+      appStore.dispatch(appSlice.actions.setIdentifiers(_ids.map(classToPlain)))
+      setLoading(false)
+    }
+    getIdentifiers()
+  }, [])
+
   return (
-    <View>
-      <Button
-        title="Claim"
-        onPress={() => navigation.navigate('Create Credential')}
-      />
-      <Button
-        title={'Confirm'}
-        onPress={() => navigation.navigate('Confirm Others')}
-      />
-      <Button
-        title="Search"
-        onPress={() => navigation.navigate('Reports from Endorser.ch server')}
-      />
-      <View style={{ marginTop: 100 }}/>
-      <Button
-        title="Manage Contacts"
-        onPress={() => navigation.navigate('Contacts')}
-      />
-      <Button
-        title="Manage Settings"
-        onPress={() => navigation.navigate('Settings')}
-      />
-      <Button
-        title="Get Help"
-        onPress={() => navigation.navigate('Help')}
-      />
-    </View>
+    loading
+    ? (
+      <View style={{ marginLeft: '45%', marginTop: '50%' }}>
+        <Text>Loading...</Text>
+      </View>
+    ) : (
+      allIdentifiers != null && allIdentifiers.length > 0
+      ? (
+        <View>
+          <Button
+            title="Claim"
+            onPress={() => navigation.navigate('Create Credential')}
+          />
+          <Button
+            title={'Confirm'}
+            onPress={() => navigation.navigate('Confirm Others')}
+          />
+          <Button
+            title="Search"
+            onPress={() => navigation.navigate('Reports from Endorser.ch server')}
+          />
+          <Button
+            title="Scan Presentation"
+            onPress={() => navigation.navigate('Scan Presentation')}
+          />
+          <View style={{ marginTop: 100 }}/>
+          <Button
+            title="Manage Contacts"
+            onPress={() => navigation.navigate('Contacts')}
+          />
+          <Button
+            title="Manage Profile & Settings"
+            onPress={() => navigation.navigate('Settings')}
+          />
+          <Button
+            title="Get Help"
+            onPress={() => navigation.navigate('Help')}
+          />
+        </View>
+      ) : (
+        <View>
+          <Button
+            title="Create New Identifier"
+            onPress={() => navigation.navigate('Settings')}
+          />
+          <Button
+            title="Import Identifier"
+            onPress={() => navigation.navigate('Import Identifier')}
+          />
+          <View style={{ marginTop: 100 }}/>
+          <Button
+            title="Scan Presentation"
+            onPress={() => navigation.navigate('Scan Presentation')}
+          />
+        </View>
+      )
+    )
   )
 }
 
