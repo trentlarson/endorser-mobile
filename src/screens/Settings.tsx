@@ -68,7 +68,7 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 
     const settings = new Settings()
     settings.id = MASTER_COLUMN_VALUE
-    settings.mnemonic = utility.encryptAndBase64(mnemonic, mnemonicPassword, salt, ivBase64);
+    settings.mnemEncrBase64 = utility.encryptAndBase64(mnemonic, mnemonicPassword, salt, ivBase64);
     settings.ivBase64 = ivBase64
     settings.salt = salt
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created Settings entity..."}))
@@ -223,7 +223,7 @@ export function SettingsScreen({navigation}) {
       await agent.didManagerDelete(oldIdent)
       if (identifiers.length === 1) {
         const conn = await dbConnection
-        await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {mnemonic: null, ivBase64: null, salt: null})
+        await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {mnemEncrBase64: null, ivBase64: null, salt: null})
       }
       const ids = await agent.didManagerFind()
       appStore.dispatch(appSlice.actions.setIdentifiers(ids.map(classToPlain)))
@@ -239,7 +239,7 @@ export function SettingsScreen({navigation}) {
 
     const conn = await dbConnection
     let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-    if (settings?.mnemonic) {
+    if (settings?.mnemEncrBase64 || settings?.mnemonic) {
       setHasMnemonic(true)
     }
 
@@ -274,7 +274,7 @@ export function SettingsScreen({navigation}) {
 
       const conn = await dbConnection
       let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-      if (settings?.mnemonic) {
+      if (settings?.mnemEncrBase64 || settings?.mnemonic) {
         setHasMnemonic(true)
       }
       if (settings?.name) {
@@ -524,8 +524,8 @@ export function SettingsScreen({navigation}) {
 
 export function ExportIdentityScreen({navigation}) {
   const [error, setError] = useState<String>('')
+  const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [mnemonic, setMnemonic] = useState<String>('')
-  const [mnemonicRaw, setMnemonicRaw] = useState<String>('')
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [show, setShow] = useState<String>(false)
 
@@ -535,36 +535,39 @@ export function ExportIdentityScreen({navigation}) {
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
-    const getMnemonicRaw = async () => {
+    const getMnemonicFromDB = async () => {
       const conn = await dbConnection
       const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-      setMnemonicRaw(settings.mnemonic)
+      setHasMnemonic(settings.mnemEncrBase64 != null || settings.mnemonic != null)
     }
-    getMnemonicRaw()
+    getMnemonicFromDB()
   }, [])
 
   const decryptAndShow = async () => {
     const conn = await dbConnection
     const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-    try {
-      if (settings.ivBase64 != null) {
-        const mnemonic = utility.decryptFromBase64(settings.mnemonic, mnemonicPassword, settings.salt, settings.ivBase64);
+    if (settings.mnemEncrBase64 != null) {
+      try {
+        const mnemonic = utility.decryptFromBase64(settings.mnemEncrBase64, mnemonicPassword, settings.salt, settings.ivBase64);
         setMnemonic(mnemonic)
-      } else {
-        // because we still have some people who have unencrypted seeds in their DB
-        setMnemonic(mnemonicRaw)
+        setShow(true)
+      } catch (err) {
+        setError('Decryption failed. Check your password.')
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Unable to retrieve mnemonic because: " + err}))
       }
-    } catch (err) {
-      setError('Decryption failed. Check your password.')
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Unable to retrieve mnemonic because: " + err}))
+    } else if (settings.mnemonic != null) {
+      // because we still have some people who have unencrypted seeds in their DB
+      setMnemonic(settings.mnemonic)
+      setShow(true)
+    } else {
+      setError('No mnemonic found.')
     }
-    setShow(true)
   }
 
   return (
     <View style={{padding: 20}}>
       <View style={{marginBottom: 50, marginTop: 20}}>
-        {mnemonicRaw ? (
+        {hasMnemonic ? (
           <View>
             {show ? (
               <View>

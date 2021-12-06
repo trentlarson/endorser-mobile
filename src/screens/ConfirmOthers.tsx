@@ -11,6 +11,7 @@ export function ConfirmOthersScreen({ navigation }) {
 
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loadedClaimsStarting, setLoadedClaimsStarting] = useState<DateTime>(null)
+  const [loadError, setLoadError] = useState<string>('')
   const [loadingRecentClaims, setLoadingRecentClaims] = useState<boolean>(false)
   const [recentClaims, setRecentClaims] = useState<Array<any>>([])
   const [recentHiddenCount, setRecentHiddenCount] = useState<number>(0)
@@ -43,6 +44,10 @@ export function ConfirmOthersScreen({ navigation }) {
         setRecentClaims(R.concat(recentClaims, dataWithoutHidden))
         setRecentHiddenCount(count => count + data.length - dataWithoutHidden.length)
         setLoadedClaimsStarting(loadMoreStarting)
+      })
+      .catch((err) => {
+        setLoadError('There was a problem retrieving claims to confirm.')
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error loading claims to confirm: " + err}))
       })
       .finally(() => setLoadingRecentClaims(false))
   }
@@ -113,7 +118,10 @@ export function ConfirmOthersScreen({ navigation }) {
       <View syle={{ textAlign: 'left' }}>
         <FlatList
           ListHeaderComponent={
-            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Confirm</Text>
+            <View>
+              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Confirm</Text>
+              <Text style={{ color: 'red' }}>{loadError}</Text>
+            </View>
           }
           ListEmptyComponent={
             <Text style={{ padding: 10 }}>No visible claims found after { monthDayLoaded().toLowerCase() }.</Text>
