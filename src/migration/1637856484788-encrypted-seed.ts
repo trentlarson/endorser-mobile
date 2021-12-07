@@ -3,6 +3,11 @@ import {MigrationInterface, QueryRunner} from "typeorm";
 export class EncryptedSeed1637856484788 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<any> {
+    const UPORT_ROOT_DERIVATION_PATH = "{\"derivationPath\":\"m/7696500\\'/0\\'/0\\'/0\\'\"}"
+    const migrateSql0 = "UPDATE key SET meta = '" + UPORT_ROOT_DERIVATION_PATH + "'"
+    const result0 = await queryRunner.query(migrateSql0)
+    console.log('Up Migration for derivationPath', result0)
+
     const migrateSql1 = 'ALTER TABLE "settings" ADD COLUMN "mnemEncrBase64" TEXT'
     const result1 = await queryRunner.query(migrateSql1)
     console.log('Up Migration for mnemonic', result1)
