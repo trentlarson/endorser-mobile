@@ -19,32 +19,11 @@ export class Settings extends BaseEntity {
   id: string
 
   /**
-    Plan text from early version; should be empty now.
+    Seed phrase
    **/
   @Column('text', { nullable: true })
   //@ts-ignore
   mnemonic: string
-
-  /**
-    Encrypted & Base-64-encoded string
-   **/
-  @Column('text', { nullable: true })
-  //@ts-ignore
-  mnemEncrBase64: string
-
-  /**
-    base-64-encoded
-   **/
-  @Column('text', { nullable: true })
-  //@ts-ignore
-  ivBase64: string
-
-  /**
-    random text
-   **/
-  @Column('text', { nullable: true })
-  //@ts-ignore
-  salt: string
 
   @Column('text', { nullable: true })
   //@ts-ignore
