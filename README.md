@@ -68,8 +68,8 @@ To Release:
 
 - Test everything.
 - In package.json, update version
+- Tag
 - In src/veramo/appSlice.ts: servers are endorser.ch
-- In node_modules/@veramo/data-store/build/entities/*.js, all Entity() calls need the name inside.
 - (I recommend starting with ios since it takes longer to get approved.)
 - android
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number)
