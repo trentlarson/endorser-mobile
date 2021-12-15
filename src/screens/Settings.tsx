@@ -577,7 +577,8 @@ export function ImportIdentityScreen({navigation}) {
 
         // one reason redirect automatically is to force reload of ID (which doen't show if they go "back")
         setTimeout(() => {
-          navigation.popToTop()
+          // if we goBack or popToTop then the home screen doesn't see the new ID
+          navigation.reset({ index: 0, routes: [{ name: "Community Endorser" }] })
         }, 500)
       })
       .catch(err => {
