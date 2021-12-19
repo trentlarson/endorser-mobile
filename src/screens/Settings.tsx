@@ -182,6 +182,7 @@ export function SettingsScreen({navigation}) {
 
   const [createStatus, setCreateStatus] = useState<string>('')
   const [creatingId, setCreatingId] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
   const [finishedCheckingIds, setFinishedCheckingIds] = useState<boolean>(false)
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Omit<IIdentifier, 'provider'>[]>([])
@@ -297,10 +298,14 @@ export function SettingsScreen({navigation}) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Creating new identifier..."}))
       createAndStoreIdentifier(mnemonicPassword)
       .then(setNewId)
-      .then(() => setCreatingId(false))
-      .then(() => appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... totally finished creating identifier."})))
+      .then(() => {
+        setCreatingId(false)
+        setError("")
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... totally finished creating identifier."}))
+      })
       .catch(err => {
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got error creating identifier: " + err}))
+        setError("There was an error. " + err)
       })
     }
     if (creatingId) {
@@ -349,6 +354,7 @@ export function SettingsScreen({navigation}) {
             }
           </View>
           <View>
+            <Text style={{ padding: 10, color: 'red', textAlign: 'center' }}>{ error }</Text>
             {
               R.isEmpty(identifiers)
               ?
