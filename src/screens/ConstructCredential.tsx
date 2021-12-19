@@ -63,7 +63,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
       const conn = await dbConnection
       let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-      if (settings?.mnemonic) {
+      if (settings?.mnemEncrBase64 || settings?.mnemonic) {
         setHasMnemonic(true)
       }
     }
