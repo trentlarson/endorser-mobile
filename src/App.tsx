@@ -176,6 +176,17 @@ function HelpScreen() {
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I backup/export/import my identifier?</Text>
           <Text style={{ padding: 5 }}>On the Settings screen, scroll down and click 'Export Identifier', then show the "mnemonic phrase". Be careful to do this in a safe place! If you want to keep it secure then don't save it anywhere unencrypted... and if you don't already have a secure, encrypted location then it's not a bad idea to store it offline, meaning written down and locked away from everyone else.</Text>
+          <Text style={{ padding: 5 }}>One more thing: your identifier has a specific "derivation path" listed in your settings, so copy that as well. (This is the default derivation path for this app, but if you use another app then you may have to give it to that app.)</Text>
+        </View>
+
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>Why do I see warnings about a missing backup?</Text>
+          <Text style={{ padding: 5 }}>Some error has messed with your underlying seed phrase backup. Without a backup, this identifier is gone forever if you lose this device, and with it you lose the ability to verify yourself and your claims and your credentials. If you see that message and you haven't done a backup already, we beg of you: wipe your data now (after exporting your contacts) and create a new one that you can safely use to build reputation.</Text>
+        </View>
+
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>How do I change my mnemonic seed phrase password?</Text>
+          <Text style={{ padding: 5 }}>First, export your phrase. Then go into Test Mode (under Settings and Advanced Mode) and import that phrase with the new password.</Text>
         </View>
 
         <View style={{ padding: 20 }}>
@@ -184,13 +195,9 @@ function HelpScreen() {
         </View>
 
         <View style={{ padding: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>Why do I see warnings about a missing backup?</Text>
-          <Text style={{ padding: 5 }}>Without a backup, this identifier is gone forever if you lose this device, and with it you lose the ability to verify yourself and your claims and your credentials. If you see that message, we beg of you: wipe your data now (after exporting your contacts) and create a new one that you can safely use to build reputation.</Text>
-        </View>
-
-        <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I generate a different identifier?</Text>
-          <Text style={{ padding: 5 }}>Here are the directions.  But, first, note that this will erase the identifier and contacts, so we recommend you backup those first by following the instructions above.</Text>
+          <Text style={{ padding: 5 }}>One way is to go to Test Mode (under Settings under Advanced Mode) where you can deleted our current identifier and generate a new one.</Text>
+          <Text style={{ padding: 5 }}>Here's another way, but note that this will erase the identifier and contacts, so we recommend you backup those first by following the instructions above.</Text>
           <Text style={{ padding: 5 }}>- On Android, you can go to the Storage in App Info and clear it. Remember to export your data first!</Text>
           <Text style={{ padding: 5 }}>- On iOS, the easiest way is to uninstall and reinstall the app. Remember to export your data first!</Text>
           <Text style={{ padding: 5 }}>(I know you expect better functionality and it's on the radar.)</Text>
