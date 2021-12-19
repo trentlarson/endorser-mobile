@@ -68,6 +68,7 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 
     const settings = new Settings()
     settings.id = MASTER_COLUMN_VALUE
+    settings.mnemonic = null // ensure previous, unencrypted mnemonic is erased
     settings.mnemEncrBase64 = utility.encryptAndBase64(mnemonic, mnemonicPassword, salt, ivBase64);
     settings.ivBase64 = ivBase64
     settings.salt = salt
@@ -429,7 +430,7 @@ export function SettingsScreen({navigation}) {
                     style={{borderWidth: 1}}
                   />
                   <View style={{ padding: 5 }} />
-                  <Button title="Import ID" onPress={()=>navigation.navigate('Import Identifier')} />
+                  <Button title="Import ID" onPress={()=>navigation.navigate('Import Seed Phrase')} />
                   <View style={{ padding: 5 }} />
                   <Button title="Delete Last ID" onPress={deleteLastIdentifier} />
                 </View>
@@ -525,6 +526,7 @@ export function SettingsScreen({navigation}) {
 export function ExportIdentityScreen({navigation}) {
   const [error, setError] = useState<String>('')
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
+  const [isInTestMode] = useState<boolean>(appStore.getState().testMode)
   const [mnemonic, setMnemonic] = useState<String>('')
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [show, setShow] = useState<String>(false)
@@ -570,7 +572,13 @@ export function ExportIdentityScreen({navigation}) {
     <View style={{padding: 20}}>
       <View style={{marginBottom: 50, marginTop: 20}}>
         {hasMnemonic ? (
+
           <View>
+            <Text>BEWARE: Anyone who gets hold of this mnemonic phrase will be able to impersonate you and
+              take over any digital holdings based on it. So only reveal it when you are in a
+              private place out of sight of cameras and other eyes, and only record it in
+              something private -- don't take a screenshot or send it to any online
+              service.</Text>
             {show ? (
               <View>
                 <TextInput
@@ -579,18 +587,17 @@ export function ExportIdentityScreen({navigation}) {
                 >
                   {mnemonic}
                 </TextInput>
-                <Button
-                  title="Copy to Clipboard"
-                  onPress={copyToClipboard}
-                />
+                {isInTestMode ? (
+                  <Button
+                    title="Copy to Clipboard"
+                    onPress={copyToClipboard}
+                  />
+                ) : (
+                  <View />
+                )}
               </View>
             ) : (
               <View>
-                <Text>BEWARE: Anyone who gets hold of this mnemonic phrase will be able to impersonate you and
-                  take over any digital holdings based on it. So only reveal it when you are in a
-                  private place out of sight of cameras and other eyes, and only record it in
-                  something private -- don't take a screenshot or send it to any online
-                  service.</Text>
                 <Button title={'Click to show identifier mnemonic phrase'} onPress={decryptAndShow}/>
                 <Text>... and unlock seed phrase with password:</Text>
                 <TextInput
@@ -609,7 +616,7 @@ export function ExportIdentityScreen({navigation}) {
             <Text>There is no mnemonic phrase to export.</Text>
           </View>
         )}
-        <Text style={{ padding: 10, color: 'red' }}>
+        <Text style={{ padding: 10, color: 'red', textAlign: 'center' }}>
           {error}
         </Text>
       </View>
@@ -618,12 +625,26 @@ export function ExportIdentityScreen({navigation}) {
 }
 
 export function ImportIdentityScreen({navigation}) {
+  const [error, setError] = useState<string>('')
   const [idChanged, setIdChanged] = useState<boolean>(false)
   const [idImporting, setIdImporting] = useState<boolean>(false)
   const [identifier, setIdentifier] = useState<Omit<IIdentifier, 'provider'>>()
   const [makeLowercase, setMakeLowercase] = useState<boolean>(false)
   const [mnemonic, setMnemonic] = useState<String>('')
+  const [mnemonicIsOld, setMnemonicIsOld] = useState<boolean>(false)
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
+
+  useEffect(() => {
+    const loadOldMnemonic = async () => {
+      const conn = await dbConnection
+      const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+      if (settings.mnemonic != null) {
+        setMnemonic(settings.mnemonic)
+        setMnemonicIsOld(true)
+      }
+    }
+    loadOldMnemonic()
+  })
 
   useEffect(() => {
     const coordImportId = async () => {
@@ -642,6 +663,7 @@ export function ImportIdentityScreen({navigation}) {
       })
       .catch(err => {
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got error importing identifier: " + err}))
+        setError("There was an error. " + err)
       })
       .finally(() => {
         setIdImporting(false)
@@ -651,6 +673,11 @@ export function ImportIdentityScreen({navigation}) {
       coordImportId()
     }
   }, [idImporting])
+
+  const setNewMnemonic = (mnemonic: string) => {
+    setMnemonic(mnemonic)
+    setMnemonicIsOld(false)
+  }
 
   return (
     <SafeAreaView>
@@ -666,12 +693,18 @@ export function ImportIdentityScreen({navigation}) {
                 <Text style={{fontSize: 30}}>Success!</Text>
               ) : (
                   <View>
-                    <Text>Enter mnemonic phrase:</Text>
+                    {mnemonicIsOld ? (
+                      <Text style={{ color: 'red' }}>Seed phrase is not protected, so click below to protect it.</Text>
+                    ) : (
+                      <View />
+                    )}
+                    <Text>Enter mnemonic seed phrase:</Text>
                     <TextInput
                       autoCapitalize={'none'}
                       multiline={true}
                       style={{borderWidth: 1, height: 100}}
-                      onChangeText={setMnemonic}
+                      defaultValue={ mnemonic }
+                      onChangeText={ setNewMnemonic }
                     >
                     </TextInput>
                     <Text>... and guard seed phrase with password:</Text>
@@ -691,6 +724,11 @@ export function ImportIdentityScreen({navigation}) {
                       title={'Click to import from mnemonic phrase'}
                       onPress={()=>setIdImporting(true)}
                     />
+                    {error ? (
+                      <Text style={{ color: 'red', textAlign: 'center' }}>{ error }</Text>
+                    ) : (
+                      <View />
+                    )}
                   </View>
               )
             )

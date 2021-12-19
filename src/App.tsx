@@ -24,7 +24,7 @@ import { PresentCredentialScreen } from './screens/PresentCredential'
 import { ReportScreen } from './screens/ReportFromEndorser'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
 import { appSlice, appStore } from './veramo/appSlice'
-import { agent } from './veramo/setup'
+import { agent, dbConnection } from './veramo/setup'
 
 
 
@@ -55,7 +55,7 @@ export default function App() {
             <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
             <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
-            <Stack.Screen name="Import Identifier" component={ImportIdentityScreen} />
+            <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
             <Stack.Screen name="My Credentials" component={MyCredentialsScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
             <Stack.Screen name="Reports from Endorser.ch server" component={ReportScreen} />
@@ -71,6 +71,8 @@ export default function App() {
 
 function HomeScreen({ navigation }) {
   const [loading, setLoading] = useState<boolean>(true)
+  const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
+
   const allIdentifiers = useSelector((state) => state.identifiers)
 
   // Check for existing identifers on load and set them to state
@@ -79,6 +81,12 @@ function HomeScreen({ navigation }) {
       const _ids = await agent.didManagerFind()
       appStore.dispatch(appSlice.actions.setIdentifiers(_ids.map(classToPlain)))
       setLoading(false)
+
+      const conn = await dbConnection
+      const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+      if (settings.mnemonic != null) {
+        setOldMnemonic(true)
+      }
     }
     getIdentifiers()
   }, [])
@@ -122,6 +130,17 @@ function HomeScreen({ navigation }) {
             title="Get Help"
             onPress={() => navigation.navigate('Help')}
           />
+          {oldMnemonic ? (
+            <View style={{ marginTop: 50 }}>
+              <Text style={{ color: 'red', textAlign: 'center' }}>Your data is not secure.</Text>
+              <Button
+                title="Click to secure your mnemonic seed phrase."
+                onPress={() => navigation.navigate('Import Seed Phrase')}
+              />
+            </View>
+          ) : (
+            <View/>
+          )}
         </View>
       ) : (
         <View>
@@ -130,8 +149,8 @@ function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Settings')}
           />
           <Button
-            title="Import Identifier"
-            onPress={() => navigation.navigate('Import Identifier')}
+            title="Import Seed Phrase"
+            onPress={() => navigation.navigate('Import Seed Phrase')}
           />
           <View style={{ marginTop: 100 }}/>
           <Button
