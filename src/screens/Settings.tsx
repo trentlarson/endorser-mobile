@@ -574,7 +574,7 @@ export function ExportIdentityScreen({navigation}) {
         {hasMnemonic ? (
 
           <View>
-            <Text>BEWARE: Anyone who gets hold of this mnemonic phrase will be able to impersonate you and
+            <Text>BEWARE: Anyone who gets hold of this mnemonic seed phrase will be able to impersonate you and
               take over any digital holdings based on it. So only reveal it when you are in a
               private place out of sight of cameras and other eyes, and only record it in
               something private -- don't take a screenshot or send it to any online
@@ -598,7 +598,7 @@ export function ExportIdentityScreen({navigation}) {
               </View>
             ) : (
               <View>
-                <Button title={'Click to show identifier mnemonic phrase'} onPress={decryptAndShow}/>
+                <Button title={'Click to show mnemonic seed phrase'} onPress={decryptAndShow}/>
                 <Text>... and unlock seed phrase with password:</Text>
                 <TextInput
                   autoCapitalize={'none'}
@@ -613,7 +613,7 @@ export function ExportIdentityScreen({navigation}) {
           </View>
         ) : (
           <View>
-            <Text>There is no mnemonic phrase to export.</Text>
+            <Text>There is no mnemonic seed phrase to export.</Text>
           </View>
         )}
         <Text style={{ padding: 10, color: 'red', textAlign: 'center' }}>
@@ -683,7 +683,7 @@ export function ImportIdentityScreen({navigation}) {
     <SafeAreaView>
       <ScrollView>
         <View style={{padding: 20}}>
-          <Text style={{fontSize: 30, fontWeight: 'bold'}}>Mnemonic Phrase</Text>
+          <Text style={{fontSize: 30, fontWeight: 'bold'}}>Mnemonic Seed Phrase</Text>
           <View style={{marginBottom: 50, marginTop: 20}}>
           {
             idImporting ? (
@@ -721,7 +721,7 @@ export function ImportIdentityScreen({navigation}) {
                     />
                     <Text>Note that this will also create an identifier with the default uPort derivation path.</Text>
                     <Button
-                      title={'Click to import from mnemonic phrase'}
+                      title={'Click to import from mnemonic seed phrase'}
                       onPress={()=>setIdImporting(true)}
                     />
                     {error ? (
