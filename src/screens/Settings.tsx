@@ -420,7 +420,7 @@ export function SettingsScreen({navigation}) {
 
             { isInTestMode
               ? <View style={{ marginTop: 20 }}>
-                  <Button title="Create ID" onPress={()=>{setCreatingId(true)}} />
+                  <Button title="Create Identifier" onPress={()=>{setCreatingId(true)}} />
                   <Text>... and guard seed phrase with password:</Text>
                   <TextInput
                     autoCapitalize={'none'}
@@ -544,6 +544,8 @@ export function ExportIdentityScreen({navigation}) {
   }, [])
 
   const decryptAndShow = async () => {
+    setError('')
+
     const conn = await dbConnection
     const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
     if (settings.mnemEncrBase64 != null) {
