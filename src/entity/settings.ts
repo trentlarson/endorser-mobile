@@ -19,7 +19,7 @@ export class Settings extends BaseEntity {
   id: string
 
   /**
-    Plan text from early version; should be empty now.
+    Plain text from early version; should be empty now.
    **/
   @Column('text', { nullable: true })
   //@ts-ignore
@@ -49,4 +49,12 @@ export class Settings extends BaseEntity {
   @Column('text', { nullable: true })
   //@ts-ignore
   name: string
+
+  /**
+    Name of configuration to use on home screen
+   **/
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  homeScreen: string
+
 }

@@ -236,3 +236,20 @@ export const createJwt = async (identifier: IIdentifier, payload: any): string =
   const did: string = identifier.did
   return didJwt.createJWT(payload,{ issuer: did, signer })
 }
+
+export const bvcClaim = (did: string, startTime: string) => {
+  return {
+    '@context': 'http://schema.org',
+    '@type': 'JoinAction',
+    agent: {
+      did: did,
+    },
+    event: {
+      organizer: {
+        name: 'Bountiful Voluntaryist Community',
+      },
+      name: 'Saturday Morning Meeting',
+      startTime: startTime,
+    }
+  }
+}

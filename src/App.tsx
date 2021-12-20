@@ -25,7 +25,7 @@ import { ReportScreen } from './screens/ReportFromEndorser'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
 import { appSlice, appStore } from './veramo/appSlice'
 import { agent, dbConnection } from './veramo/setup'
-
+import { BVCButton } from './utility/utility.tsx'
 
 
 
@@ -74,92 +74,118 @@ function HomeScreen({ navigation }) {
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
 
   const allIdentifiers = useSelector((state) => state.identifiers)
+  const settings = useSelector((state) => state.settings)
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
       const _ids = await agent.didManagerFind()
       appStore.dispatch(appSlice.actions.setIdentifiers(_ids.map(classToPlain)))
-      setLoading(false)
 
       const conn = await dbConnection
       const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+      appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
+
       if (settings.mnemonic != null) {
         setOldMnemonic(true)
       }
+
+      setLoading(false)
     }
     getIdentifiers()
   }, [])
 
   return (
-    loading
-    ? (
-      <View style={{ marginLeft: '45%', marginTop: '50%' }}>
-        <Text>Loading...</Text>
-      </View>
-    ) : (
-      allIdentifiers != null && allIdentifiers.length > 0
+    <View>
+      {loading
       ? (
-        <View>
-          <Button
-            title="Claim"
-            onPress={() => navigation.navigate('Create Credential')}
-          />
-          <Button
-            title={'Confirm'}
-            onPress={() => navigation.navigate('Confirm Others')}
-          />
-          <Button
-            title="Search"
-            onPress={() => navigation.navigate('Reports from Endorser.ch server')}
-          />
-          <Button
-            title="Scan Presentation"
-            onPress={() => navigation.navigate('Scan Presentation')}
-          />
-          <View style={{ marginTop: 100 }}/>
-          <Button
-            title="Manage Contacts"
-            onPress={() => navigation.navigate('Contacts')}
-          />
-          <Button
-            title="Manage Profile & Settings"
-            onPress={() => navigation.navigate('Settings')}
-          />
-          <Button
-            title="Get Help"
-            onPress={() => navigation.navigate('Help')}
-          />
-          {oldMnemonic ? (
-            <View style={{ marginTop: 50 }}>
-              <Text style={{ color: 'red', textAlign: 'center' }}>Your data is not secure.</Text>
-              <Button
-                title="Click to secure your mnemonic seed phrase."
-                onPress={() => navigation.navigate('Import Seed Phrase')}
-              />
-            </View>
-          ) : (
-            <View/>
-          )}
+        <View style={{ marginLeft: '45%', marginTop: '50%' }}>
+          <Text>Loading...</Text>
         </View>
-      ) : (
-        <View>
-          <Button
-            title="Create New Identifier"
-            onPress={() => navigation.navigate('Settings')}
-          />
-          <Button
-            title="Import Seed Phrase"
-            onPress={() => navigation.navigate('Import Seed Phrase')}
-          />
-          <View style={{ marginTop: 100 }}/>
-          <Button
-            title="Scan Presentation"
-            onPress={() => navigation.navigate('Scan Presentation')}
-          />
-        </View>
+      ) : ( // not loading
+        allIdentifiers != null && allIdentifiers.length > 0
+        ? (
+          <View>
+            {settings.homeScreen === 'BVC'
+            ? (
+              <View>
+                <View style={{ marginBottom: 100 }}/>
+                <Text style={{ textAlign: 'center' }}>Bountiful Voluntaryist Community Saturday Meeting</Text>
+                <BVCButton
+                  description='Meeting'
+                  identifier={ allIdentifiers[0] }
+                  navigation={ navigation }
+                />
+                <Button
+                  title={'Confirm'}
+                  onPress={() => navigation.navigate('Confirm Others')}
+                />
+                <View style={{ marginBottom: 100 }}/>
+              </View>
+            ) : ( // it's not the BVC home screen
+              <View />
+            )}
+            <Button
+              title="Claim"
+              onPress={() => navigation.navigate('Create Credential')}
+            />
+            <Button
+              title={'Confirm'}
+              onPress={() => navigation.navigate('Confirm Others')}
+            />
+            <Button
+              title="Search"
+              onPress={() => navigation.navigate('Reports from Endorser.ch server')}
+            />
+            <Button
+              title="Scan Presentation"
+              onPress={() => navigation.navigate('Scan Presentation')}
+            />
+            <View style={{ marginTop: 100 }}/>
+            <Button
+              title="Manage Contacts"
+              onPress={() => navigation.navigate('Contacts')}
+            />
+            <Button
+              title="Manage Profile & Settings"
+              onPress={() => navigation.navigate('Settings')}
+            />
+            {oldMnemonic ? (
+              <View style={{ marginTop: 50 }}>
+                <Text style={{ color: 'red', textAlign: 'center' }}>Your data is not secure.</Text>
+                <Button
+                  title="Click to secure your mnemonic seed phrase."
+                  onPress={() => navigation.navigate('Import Seed Phrase')}
+                />
+              </View>
+            ) : (
+              <View/>
+            )}
+          </View>
+        ) : ( // there are no identifiers
+          <View>
+            <Button
+              title="Create New Identifier"
+              onPress={() => navigation.navigate('Settings')}
+            />
+            <Button
+              title="Import Seed Phrase"
+              onPress={() => navigation.navigate('Import Seed Phrase')}
+            />
+            <View style={{ marginTop: 100 }}/>
+            <Button
+              title="Scan Presentation"
+              onPress={() => navigation.navigate('Scan Presentation')}
+            />
+          </View>
+        )
       )
-    )
+      }
+      <Button
+        title="Get Help"
+        onPress={() => navigation.navigate('Help')}
+      />
+    </View>
   )
 }
 

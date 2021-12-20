@@ -185,6 +185,7 @@ export function SettingsScreen({navigation}) {
   const [error, setError] = useState<string>('')
   const [finishedCheckingIds, setFinishedCheckingIds] = useState<boolean>(false)
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
+  const [homeIsBVC, setHomeIsBVC] = useState<boolean>(false)
   const [identifiers, setIdentifiers] = useState<Omit<IIdentifier, 'provider'>[]>([])
   const [isInAdvancedMode, setIsInAdvancedMode] = useState<boolean>(appStore.getState().advancedMode)
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
@@ -192,6 +193,20 @@ export function SettingsScreen({navigation}) {
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [storedName, setStoredName] = useState<string>('')
+
+  const toggleStateForHomeIsBVC = async () => {
+    if (homeIsBVC) {
+      appStore.dispatch(appSlice.actions.setHomeScreen(null))
+      const conn = await dbConnection
+      await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { homeScreen: null })
+      setHomeIsBVC(false)
+    } else {
+      appStore.dispatch(appSlice.actions.setHomeScreen('BVC'))
+      const conn = await dbConnection
+      await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { homeScreen: 'BVC' })
+      setHomeIsBVC(true)
+    }
+  }
 
   const toggleAdvancedMode = () => {
     if (isInTestMode) {
@@ -331,6 +346,9 @@ export function SettingsScreen({navigation}) {
     setNewTestMode(isInTestMode)
   }, [isInTestMode])
 
+  useEffect(() => {
+    setHomeIsBVC(appStore.getState().settings.homeScreen)
+  })
 
   return (
     <SafeAreaView>
@@ -446,8 +464,17 @@ export function SettingsScreen({navigation}) {
           <View>
             <Text style={{ fontSize: 30, fontWeight: 'bold', marginTop: 20 }}>Other</Text>
 
-            <View style={{ marginBottom: 20 }}>
+            <View>
               <Text selectable={true}>Version { pkg.version } ({ VersionNumber.buildVersion })</Text>
+            </View>
+
+            <View style={{ marginTop: 20, padding: 10 }}>
+              <Text>Home Screen</Text>
+              <CheckBox
+                title='Bountiful Voluntaryist Community'
+                checked={homeIsBVC === 'BVC'}
+                onPress={toggleStateForHomeIsBVC}
+              />
             </View>
 
             <CheckBox

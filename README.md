@@ -30,7 +30,10 @@ Clean:
 
 ### Create a New DB Migration
 
+`cd src/migration`
 `npx typeorm migration:create -n YourMigrationName`
+
+... and edit src/veramo/setup.js to import that file and add to `migrations`.
 
 
 

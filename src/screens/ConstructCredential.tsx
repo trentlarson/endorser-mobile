@@ -9,6 +9,7 @@ import { CheckBox } from "react-native-elements"
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
+import { BVCButton } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
 import { agent, dbConnection } from '../veramo/setup'
 
@@ -32,28 +33,6 @@ export function ConstructCredentialScreen({ navigation }) {
   const eventStartDateObj = currentOrPreviousSat.set({weekday:6}).set({hour:9}).startOf("hour")
   // Hack, but the full ISO pushes the length to 340 which crashes verifyJWT!  Crazy!
   const TODAY_OR_PREV_START_DATE = eventStartDateObj.toISO({suppressMilliseconds:true})
-
-  function bvcClaim(did: string, startTime: string) {
-    return {
-      '@context': 'http://schema.org',
-      '@type': 'JoinAction',
-      agent: {
-        did: did,
-      },
-      event: {
-        organizer: {
-          name: 'Bountiful Voluntaryist Community',
-        },
-        name: 'Saturday Morning Meeting',
-        startTime: startTime,
-      }
-    }
-  }
-
-  function setClaimToAttendance() {
-    const claimObj = bvcClaim(identifiers[0] ? identifiers[0].did : 'UNKNOWN', TODAY_OR_PREV_START_DATE)
-    navigation.navigate('Sign Credential', { credentialSubject: claimObj })
-  }
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
@@ -123,9 +102,10 @@ export function ConstructCredentialScreen({ navigation }) {
                 <View>
                   <Text>What do you want to assert?</Text>
                   <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Attended ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' BVC Meeting'}
-                    onPress={setClaimToAttendance}
+                  <BVCButton
+                    description='BVC Meeting'
+                    identifier={ identifiers[0] }
+                    navigation={ navigation }
                   />
                   <View style={{ padding: 5 }} />
                   <Button

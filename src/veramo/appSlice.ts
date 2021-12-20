@@ -3,6 +3,7 @@ import { configureStore, createSlice } from '@reduxjs/toolkit'
 import { IIdentifier } from "@veramo/core"
 
 import { Contact } from '../entity/contact'
+import { Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 
 export const DEFAULT_ENDORSER_API_SERVER = 'https://endorser.ch:3000'
@@ -26,6 +27,10 @@ interface LogMsg {
 export const appSlice = createSlice({
   name: 'app',
   initialState: {
+
+    // This is nullable because it is cached state from the DB...
+    // it'll be null if we haven't even loaded from the DB yet.
+    settings: null as Settings,
 
     // This is nullable because it is cached state from the DB...
     // it'll be null if we haven't even loaded from the DB yet.
@@ -65,8 +70,14 @@ export const appSlice = createSlice({
       const index = R.findIndex(c => c.did === contents.payload.did, state.contacts)
       state.contacts[index] = contents.payload
     },
+    setHomeScreen: (state, contents: Payload<string>) => {
+      state.settings.homeScreen = contents.payload
+    },
     setIdentifiers: (state, contents: Payload<Array<IIdentifier>>) => {
       state.identifiers = contents.payload
+    },
+    setSettings: (state, contents: Payload<Settings>) => {
+      state.settings = contents.payload
     },
     setTestMode: (state, contents: Payload<boolean>) => {
       state.testMode = contents.payload

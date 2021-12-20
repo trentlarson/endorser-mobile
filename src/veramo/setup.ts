@@ -36,9 +36,10 @@ import * as R from 'ramda'
 import { Contact } from '../entity/contact'
 import { Settings } from '../entity/settings'
 
-import { Initial1616938713828 } from '../migration/1616938713828-initial'
+import { Initial1616938713828 }          from '../migration/1616938713828-initial'
 import { SettingsContacts1616967972293 } from '../migration/1616967972293-settings-contacts'
-import { EncryptedSeed1637856484788 } from '../migration/1637856484788-encrypted-seed.ts'
+import { EncryptedSeed1637856484788 }    from '../migration/1637856484788-encrypted-seed'
+import { HomeScreenConfig1639947962124 } from '../migration/1639947962124-HomeScreenConfig'
 
 // You will need to get a project ID from infura https://www.infura.io
 const INFURA_PROJECT_ID = '0f439b3b9237480ea8eb9da7b1f3965a'
@@ -53,7 +54,7 @@ export const dbConnection = createConnection({
   entities: ALL_ENTITIES,
   location: 'default',
   logging: ['error', 'info', 'warn'],
-  migrations: [ Initial1616938713828, SettingsContacts1616967972293, EncryptedSeed1637856484788 ],
+  migrations: [ Initial1616938713828, SettingsContacts1616967972293, EncryptedSeed1637856484788, HomeScreenConfig1639947962124 ],
   migrationsRun: true,
   type: 'react-native',
 })
