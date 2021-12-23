@@ -15,7 +15,7 @@ export const BVCButton = ({ identifier, navigation, description }) => {
 
   return (
     <Button
-      title={'Attended ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' ' + description}
+      title={'I Attended ' + (todayIsSaturday ? 'Today\'s' : 'Last') + ' ' + description}
       onPress={() => {
         let currentOrPreviousSat = DateTime.local()
         if (currentOrPreviousSat.weekday < 6) {
