@@ -122,37 +122,37 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'I Offer Credit'}
+                    title={'Offer Credit'}
                     onPress={() => setAskForCreditInfo(true)}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'I Offer Time'}
+                    title={'Offer Time'}
                     onPress={() => setAskForGiveInfo(true)}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'I Have Seen Something Great'}
+                    title={'Witness To Something Great'}
                     onPress={() => setAskForWitnessInfo("They")}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'I Pledge To Thick Red Line'}
+                    title={'Pledge To Thick Red Line'}
                     onPress={() => setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate.\nI pledge only to act to protect lives, liberty, and property.  I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'I Pledge Officer Honesty'}
+                    title={'Pledge Officer Honesty'}
                     onPress={() => setAskForPledgeInfo("I commit to tell only the truth when identifying as a government representative.")}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'I Pledge Liberty'}
+                    title={'Pledge Liberty'}
                     onPress={() => setAskForPledgeInfo("We are as gods. I dedicate myself to reach my full potential. I will never ask another person to live for my sake.")}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'I Pledge A Life Of Gifts'}
+                    title={'Pledge A Life Of Gifts'}
                     onPress={() => setAskForPledgeInfo("I am building the world I want by giving for our future, freely.")}
                   />
                 </View>
