@@ -25,7 +25,23 @@ Run android:
 
 Clean:
 
-`./node_modules/.bin/react-native-clean-project`
+`yarn run clean`
+
+... but note that answering "Y" to install pods sometimes doesn't actually install pods (?!) and you may have to `pod install` that by hand.
+
+Troubleshooting:
+
+- A "CompileC" error can happen after removing a dependency. You may have to manually remove node_modules and pods (both `ios/Pods` and `~/Library/Caches/CocoaPods`) and reinstall them.
+
+```
+watchman watch-del-all
+rm -rf node_modules
+yarn install
+yarn start --reset-cache # which you'll have to kill because it doesn't stop
+rm -rf /tmp/metro-*
+rm -rf ~/Library/Caches/CocoaPods ios/Pods
+cd ios; pod install; cd ..
+```
 
 
 ### Create a New DB Migration

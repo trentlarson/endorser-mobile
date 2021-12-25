@@ -34,6 +34,7 @@
     "ethr-did-resolver": "^3.0.3",
     "events": "^3.2.0",
     "luxon": "^1.26.0",
+    "papaparse": "^5.3.1",
     "process": "^0.11.10",
     "ramda": "^0.27.1",
     "react": "16.13.1",

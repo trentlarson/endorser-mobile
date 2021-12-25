@@ -1,5 +1,6 @@
 import { classToPlain } from 'class-transformer'
 import * as didJwt from 'did-jwt'
+import * as Papa from 'papaparse'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
@@ -34,18 +35,8 @@ export function ContactsScreen({ navigation, route }) {
     appStore.dispatch(appSlice.actions.setContact(classToPlain(contact)))
   }
 
-  const allContactText = () => (
-    allContacts.map((contact) => (
-      `
-      ${contact.name}
-      ${contact.did}
-      ${contact.pubKeyBase64}
-      `
-    )).join('\n\n')
-  )
-
   const copyToClipboard = () => {
-    Clipboard.setString(allContactText())
+    Clipboard.setString(Papa.unparse(allContacts))
   }
 
   const createContact = async () => {
