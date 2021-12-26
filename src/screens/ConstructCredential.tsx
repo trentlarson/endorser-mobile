@@ -20,6 +20,7 @@ export function ConstructCredentialScreen({ navigation }) {
   const [askForCreditInfo, setAskForCreditInfo] = useState<boolean>(false)
   const [askForGiveInfo, setAskForGiveInfo] = useState<boolean>(false)
   const [askForPledgeInfo, setAskForPledgeInfo] = useState<string>('')
+  const [askForWitnessInfo, setAskForWitnessInfo] = useState<string>('')
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
 
@@ -99,6 +100,18 @@ export function ConstructCredentialScreen({ navigation }) {
                     />
                   : <View/>
                 }
+                {
+                  askForWitnessInfo
+                  ? <WitnessModal
+                      text={ askForWitnessInfo }
+                      cancel={ () => setAskForWitnessInfo('') }
+                      proceed={ claim => {
+                        setAskForWitnessInfo('')
+                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                      }}
+                    />
+                  : <View/>
+                }
                 <View>
                   <Text>What do you want to assert?</Text>
                   <View style={{ padding: 5 }} />
@@ -119,7 +132,12 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Pledge to Thick Red Line'}
+                    title={'Witness To Something Great'}
+                    onPress={() => setAskForWitnessInfo("They")}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Pledge To Thick Red Line'}
                     onPress={() => setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate.\nI pledge only to act to protect lives, liberty, and property.  I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")}
                   />
                   <View style={{ padding: 5 }} />
@@ -133,6 +151,10 @@ export function ConstructCredentialScreen({ navigation }) {
                     onPress={() => setAskForPledgeInfo("We are as gods. I dedicate myself to reach my full potential. I will never ask another person to live for my sake.")}
                   />
                   <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Pledge A Life Of Gifts'}
+                    onPress={() => setAskForPledgeInfo("I am building the world I want by giving for our future, freely.")}
+                  />
                 </View>
               </View>
             </View>
@@ -203,7 +225,7 @@ export function ConstructCredentialScreen({ navigation }) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View>
-              <Text style={styles.modalText}>Give</Text>
+              <Text style={styles.modalText}>Grant or Loan Money</Text>
 
               <View style={{ padding: 5 }}>
                 <Text>Recipient</Text>
@@ -355,7 +377,7 @@ export function ConstructCredentialScreen({ navigation }) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View>
-              <Text style={styles.modalText}>Grant</Text>
+              <Text style={styles.modalText}>Give Time</Text>
 
               <View style={{ padding: 5 }}>
                 <Text>Recipient</Text>
@@ -501,6 +523,85 @@ export function ConstructCredentialScreen({ navigation }) {
               <TouchableHighlight
                 style={styles.saveButton}
                 onPress={() => props.proceed(constructPledge())}
+              >
+                <Text>Set...</Text>
+              </TouchableHighlight>
+
+            </View>
+          </View>
+        </View>
+      </Modal>
+    )
+  }
+
+  /**
+    props has:
+    - text - string with the text of what was seen
+    - proceed - function that takes the claim
+    - cancel - function to cancel action
+   **/
+  function WitnessModal(props) {
+
+    const [text, setText] = useState<string>(props.text)
+    const [identifier, setIdentifier] = useState<string>('')
+
+    function constructWitness() {
+      return {
+
+        // We might prefer this but the URLs don't resolve.
+        // https://lov.linkeddata.es/dataset/lov/terms?q=appreciate
+
+        "@context": "http://schema.org",
+        "@type": "WatchAction",
+        "about": identifier,
+        "text": text,
+      }
+    }
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={props.cancel}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View>
+              <Text style={styles.modalText}>Witness</Text>
+
+              <View style={{ padding: 5 }}>
+                <Text>Identifier</Text>
+                <TextInput
+                  value={identifier}
+                  onChangeText={setIdentifier}
+                  editable
+                  style={{ borderWidth: 1 }}
+                  autoCapitalize={'none'}
+                  autoCorrect={false}
+                />
+              </View>
+
+              <View style={{ padding: 5 }}>
+                <TextInput
+                  value={text}
+                  onChangeText={setText}
+                  editable
+                  style={{ borderWidth: 1 }}
+                  multiline={true}
+                />
+              </View>
+
+              <View style={{ padding: 10 }} />
+              <TouchableHighlight
+                style={styles.cancelButton}
+                onPress={props.cancel}
+              >
+                <Text>Cancel</Text>
+              </TouchableHighlight>
+              <View style={{ padding: 5 }} />
+              <TouchableHighlight
+                style={styles.saveButton}
+                onPress={() => props.proceed(constructWitness())}
               >
                 <Text>Set...</Text>
               </TouchableHighlight>
