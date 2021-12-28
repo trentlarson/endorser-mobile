@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { ActivityIndicator, Button, Dimensions, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 
+import { styles } from './style'
 import * as utility from '../utility/utility'
 import { appStore } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
@@ -207,11 +208,3 @@ export function MyCredentialsScreen({ navigation }) {
     </SafeAreaView>
   )
 }
-
-const styles = StyleSheet.create({
-  line: {
-    height: 0.8,
-    width: "100%",
-    backgroundColor: "rgba(0,0,0,0.9)"
-  },
-})
