@@ -2,8 +2,9 @@ import { classToPlain } from 'class-transformer'
 import * as Papa from 'papaparse'
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Alert, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
+import { CheckBox } from 'react-native-elements'
 import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
@@ -17,23 +18,47 @@ export function ContactsScreen({ navigation, route }) {
   const [contactDid, setContactDid] = useState<string>()
   const [contactName, setContactName] = useState<string>()
   const [contactPubKeyBase64, setContactPubKeyBase64] = useState<string>()
+  const [contactsCsv, setContactsCsv] = useState<string>('')
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
+  const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
+  const [wantsCsv, setWantsCsv] = useState<boolean>(false)
+
+  // these are tracking progress when saving data
+  const [csvErrors, setCsvErrors] = useState<Array<string>>([])
+  const [csvMessages, setCsvMessages] = useState<Array<string>>([])
+  const [doneSavingStoring, setDoneSavingStoring] = useState<boolean>()
+  const [saving, setSaving] = useState<boolean>(false)
+  const [storingVisibility, setStoringVisibility] = useState<boolean>(false)
+  const [visibilityError, setVisibilityError] = useState<boolean>(false)
 
   const allContacts = useSelector((state) => state.contacts || [])
 
-  const setContactInState = async (contact) => {
-    const newContactEntity = new Contact()
-    // fill in with contact info
-    Object.assign(newContactEntity, contact)
-    const conn = await dbConnection
-    await conn.manager.save(newContactEntity)
+  let contactFields = [];
+  const sampleContact = new Contact()
+  for (let field in sampleContact) {
+    if (sampleContact.hasOwnProperty(field)) {
+      contactFields = R.concat(contactFields, [field])
+    }
+  }
 
-    appStore.dispatch(appSlice.actions.setContact(classToPlain(contact)))
+  const clearModalAndRedirect = () => {
+    setWantsCsv(false)
   }
 
   const copyToClipboard = () => {
     Clipboard.setString(Papa.unparse(allContacts))
+  }
+
+  const saveContact = async (contact: Contact) => {
+    const conn = await dbConnection
+    // Weird that I have to specify Contact type since all uses are Entities, but if I don't then it complains in CSV import.
+    return conn.manager.save(Contact, contact)
+  }
+
+  const saveContacts = async (contacts: Array<Contact>) => {
+    const conn = await dbConnection
+    return conn.manager.save(Contact, contacts)
   }
 
   const createContact = async () => {
@@ -41,18 +66,82 @@ export function ContactsScreen({ navigation, route }) {
     contact.did = contactDid
     contact.name = contactName
     contact.pubKeyBase64 = contactPubKeyBase64
-    //the seesMe value is unknown
-
-    const conn = await dbConnection
-    let newContact = await conn.manager.save(contact)
-    utility.loadContacts(appSlice, appStore, dbConnection)
+    await saveContact(contact)
+    return utility.loadContacts(appSlice, appStore, dbConnection)
   }
 
-  const checkVisibility = async (contact) => {
+  const createContactsFromCsv = async () => {
+    setSaving(true)
+
+    let contacts = []
+    let messages = []
+    let showingTrimmedMessage = false
+    const parsed = Papa.parse(contactsCsv, {dynamicTyping: true, skipEmptyLines: true})
+    for (let contactArray of parsed.data) {
+      // each contactArray has the fields detected for one row of input
+      if (contactArray.length === 0) {
+        // quietly skip blank rows
+      } else if (contactArray.length === 1 && (contactArray[0] == null || contactArray[0] === '')) {
+        // quietly skip empty rows
+      } else if (contactArray.length > 1 && contactArray[1] === '') {
+        messages = R.concat(messages, ['Skipped empty DID in the row for "' + contactArray[0] + '".'])
+      } else if (contactArray[0] === contactFields[0] && messages.length === 0) {
+        messages = R.concat(messages, ['Skipped first row with "' + contactFields[0] + '" field of "' + contactFields[0] + '". If you really want to include that, make a header row.'])
+      } else {
+        const contact = new Contact()
+        for (let col = 0; col < contactFields.length; col++) {
+          if (col < contactArray.length) {
+            let value = contactArray[col]
+            if (typeof value === 'string') {
+              value = value.trim()
+              if (!showingTrimmedMessage && value !== contactArray[col]) {
+                messages = R.concat(messages, ['Trimmed whitespace around "' + contactArray[col] + '" in the row for "' + contact.name + '". (Will do this for every value but will not warn about any other instances.)'])
+                showingTrimmedMessage = true
+              }
+            }
+            contact[contactFields[col]] = value
+          }
+        }
+        contacts = R.concat(contacts, [contact])
+        if (contactArray.length < contactFields.length) {
+          messages = R.concat(messages, ['There are fewer than ' + contactFields.length + ' fields in the row for "' + contact.name + '". (Will attempt to save anyway.)'])
+        }
+        if (contactArray.length > contactFields) {
+          messages = R.concat(messages, ['There are more than ' + contactFields.length + ' fields in the row for "' + contact.name + '". (Will attempt to save anyway.)'])
+        }
+      }
+    }
+    if (contacts.length === 0) {
+      messages = R.concat(messages, ['There were no valid contacts to import.'])
+    }
+
+    return saveContacts(contacts)
+    .then((savedContacts) => {
+      setSaving(false)
+      setCsvErrors(messages)
+      setCsvMessages(['Saved ' + savedContacts.length + ' contacts.'])
+      setWantsCsv(false)
+    })
+    .then(() => {
+      if (wantsToBeVisible) {
+        // trigger each of the contacts to save visibility
+        return Promise.all(contacts.map((contact) => allowToSeeMe(contact)))
+      }
+    })
+    .then(() => {
+      return utility.loadContacts(appSlice, appStore, dbConnection)
+    })
+
+  }
+
+  /**
+    similar to allowToSeeMe & disallowToSeeMe
+   */
+  const checkVisibility = async (contact: Contact) => {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
-    fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + contact.did, {
+    return fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + contact.did, {
       headers: {
         "Content-Type": "application/json",
         "Uport-Push-Token": token,
@@ -65,17 +154,23 @@ export function ContactsScreen({ navigation, route }) {
     }).then(result => {
       setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
 
-      const newContact = R.clone(contact)
-      newContact.seesMe = result
-      setContactInState(newContact)
+      // contact.seesMe = ... silently fails
+      const newContact = R.set(R.lensProp('seesMe'), result, contact)
+      return saveContact(newContact)
+    })
+    .then(() => {
+      return utility.loadContacts(appSlice, appStore, dbConnection)
     })
   }
 
-  const allowToSeeMe = async (contact) => {
+  /**
+    similar to disallowToSeeMe & checkVisibility
+   */
+  const allowToSeeMe = async (contact: Contact) => {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
-    fetch(endorserApiServer + '/api/report/canSeeMe', {
+    return fetch(endorserApiServer + '/api/report/canSeeMe', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -85,20 +180,26 @@ export function ContactsScreen({ navigation, route }) {
     }).then(response => {
       setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
       if (response.status !== 200) {
-        throw Error('There was an error from the server trying to set you as visible.')
+        throw Error('There was an error from the server trying to set you as visible to ' + contact.name)
       } else {
-        const newContact = R.clone(contact)
-        newContact.seesMe = true
-        setContactInState(newContact)
+        // contact.seesMe = ... silently fails
+        const newContact = R.set(R.lensProp('seesMe'), true, contact)
+        return saveContact(newContact)
       }
+    })
+    .then(() => {
+      return utility.loadContacts(appSlice, appStore, dbConnection)
     })
   }
 
-  const disallowToSeeMe = async (contact) => {
+  /**
+    similar to allowToSeeMe & checkVisibility
+   */
+  const disallowToSeeMe = async (contact: Contact) => {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
-    fetch(endorserApiServer + '/api/report/cannotSeeMe', {
+    return fetch(endorserApiServer + '/api/report/cannotSeeMe', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -108,12 +209,15 @@ export function ContactsScreen({ navigation, route }) {
     }).then(response => {
       setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
       if (response.status !== 200) {
-        throw Error('There was an error from the server trying to hide you.')
+        throw Error('There was an error from the server trying to hide you from ' + contact.name)
       } else {
-        const newContact = R.clone(contact)
-        newContact.seesMe = false
-        setContactInState(newContact)
+        // contact.seesMe = ... silently fails
+        const newContact = R.set(R.lensProp('seesMe'), false, contact)
+        return saveContact(newContact)
       }
+    })
+    .then(() => {
+      return utility.loadContacts(appSlice, appStore, dbConnection)
     })
   }
 
@@ -145,16 +249,94 @@ export function ContactsScreen({ navigation, route }) {
   return (
     <SafeAreaView>
       <ScrollView>
-        <View style={{ padding: 20 }}>
+        <View style={{ padding: 10 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Contacts</Text>
-          <View style={{ padding: 20 }}>
-            <Button
-              title="Scan to Import"
-              onPress={() => navigation.navigate('Contact Import')}
-            />
-          </View>
-          <View style={{ alignItems: "center" }}>
-            <Text>or enter by hand:</Text>
+          <Button
+            title="Scan to Import"
+            onPress={() => navigation.navigate('Contact Import')}
+          />
+
+          <Button
+            title="Import Bulk (CSV)"
+            onPress={setWantsCsv}
+          />
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!wantsCsv}
+            onRequestClose={() => {
+              Alert.alert("Modal has been closed.");
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                { saving ? (
+                  <ActivityIndicator color="#00ff00" />
+                ) : (
+                  <View>
+
+                    <Text
+                      style={styles.modalText}>Enter in CSV format (columns in order)
+                      <Text
+                        style={{ color: 'blue' }}
+                        onPress={() => Alert.alert("Columns are:\n " + contactFields.join(', ') + "\n\nPaste content (because manual newlines don't work as expected).")}>(?)
+                      </Text>
+                    </Text>
+
+                    <TextInput
+                      multiline={true}
+                      style={{ borderWidth: 1, height: 100 }}
+                      onChangeText={setContactsCsv}
+                      autoCapitalize={'none'}
+                      autoCorrect={false}
+                    >
+                      { contactsCsv }
+                    </TextInput>
+
+                    <CheckBox
+                      title={ 'After saving, make my claims visible to all.' }
+                      checked={wantsToBeVisible}
+                      onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
+                    />
+
+                    <TouchableHighlight
+                      style={styles.cancelButton}
+                      onPress={() => {
+                        setWantsCsv(false)
+                      }}
+                    >
+                      <Text>Cancel</Text>
+                    </TouchableHighlight>
+                    <View style={{ padding: 5 }}/>
+                    <TouchableHighlight
+                      style={styles.saveButton}
+                      onPress={createContactsFromCsv}
+                    >
+                      <Text>Save</Text>
+                    </TouchableHighlight>
+                  </View>
+                )}
+              </View>
+            </View>
+          </Modal>
+          {csvMessages.length > 0 ? (
+            <View style={{ marginBottom: 20 }}>
+              <Text>{ csvMessages.join("\n") }</Text>
+            </View>
+          ) : (
+            <View />
+          )}
+          {csvErrors.length > 0 ? (
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ color: 'red' }}>Got these messages while parsing the input:</Text>
+              <Text>{ "- " + csvErrors.join("\n- ") }</Text>
+            </View>
+          ) : (
+            <View />
+          )}
+
+          <View style={{ alignItems: "center", marginTop: 10 }}>
+            <Text>... or enter by hand:</Text>
           </View>
           <View>
             <Text>Name (optional)</Text>
@@ -278,5 +460,46 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5
+  },
+  cancelButton: {
+    backgroundColor: "#F194FF",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  saveButton: {
+    backgroundColor: "#00FF00",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
+  },
+  line: {
+    height: 0.8,
+    width: "100%",
+    backgroundColor: "rgba(0,0,0,0.9)"
   },
 })

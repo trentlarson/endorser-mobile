@@ -160,8 +160,10 @@ export const accessToken = async (identifier) => {
 export const loadContacts = async (appSlice, appStore, dbConnection, useCached) => {
   if (!appStore.getState().contacts || !useCached) {
     const conn = await dbConnection
-    const foundContacts = await conn.manager.find(Contact, {order: {name:'ASC'}})
-    await appStore.dispatch(appSlice.actions.setContacts(classToPlain(foundContacts)))
+    return conn.manager.find(Contact, {order: {name:'ASC'}})
+    .then((foundContacts) => {
+      return appStore.dispatch(appSlice.actions.setContacts(classToPlain(foundContacts)))
+    })
   }
 }
 

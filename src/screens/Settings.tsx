@@ -531,6 +531,10 @@ export function SettingsScreen({navigation}) {
                 )}
 
                 <Button
+                  title='Log Contact Table'
+                  onPress={logDatabaseTable('contact')}
+                />
+                <Button
                   title='Log Identifier Table'
                   onPress={logDatabaseTable('identifier')}
                 />

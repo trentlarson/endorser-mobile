@@ -76,9 +76,9 @@ export function ContactImportScreen({ navigation }) {
       contact.name = contactInfo.own && contactInfo.own.name
       contact.pubKeyBase64 = contactInfo.own && contactInfo.own.publicEncKey
       const newContact = await conn.manager.save(contact)
-      setSaving(false)
-      appStore.dispatch(appSlice.actions.setContacts(null)) // force reload
+      utility.loadContacts(appSlice, appStore, dbConnection)
 
+      setSaving(false)
       if (wantsToBeVisible) {
         setStoringVisibility(true)
         await allowToSeeMe(contact, identifiers[0])
@@ -86,7 +86,7 @@ export function ContactImportScreen({ navigation }) {
           setTimeout(clearModalAndRedirect, 500)
         })
         .catch(err => {
-          setVisibilityError(contact.name + ' was saved.  However, there was a problem with setting visibility.  Mark yourselv visible or not on the Contacts page.')
+          setVisibilityError('"' + contact.name + '" was saved.  However, there was a problem with setting visibility.  Mark yourself visible or invisible on the Contacts page.')
         })
         .finally(() => {
           setStoringVisibility(false)
