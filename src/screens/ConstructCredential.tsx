@@ -6,7 +6,9 @@ import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { Alert, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
+import { useSelector } from 'react-redux'
 
+import { ContactSelectModal } from './ContactSelect'
 import { styles } from './style'
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
@@ -134,7 +136,7 @@ export function ConstructCredentialScreen({ navigation }) {
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Witness To Something Great'}
-                    onPress={() => setAskForWitnessInfo("They")}
+                    onPress={() => setAskForWitnessInfo("They ")}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
@@ -143,7 +145,7 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Pledge Officer Honesty'}
+                    title={'Pledge Honesty As An Officer'}
                     onPress={() => setAskForPledgeInfo("I commit to tell only the truth when identifying as a government representative.")}
                   />
                   <View style={{ padding: 5 }} />
@@ -154,7 +156,7 @@ export function ConstructCredentialScreen({ navigation }) {
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Pledge A Life Of Gifts'}
-                    onPress={() => setAskForPledgeInfo("I am building the world I want by giving for our future, freely.")}
+                    onPress={() => setAskForPledgeInfo("I help to create a world based on giving, in ways that fulfill me.")}
                   />
                 </View>
               </View>
@@ -301,17 +303,17 @@ export function ConstructCredentialScreen({ navigation }) {
 
               <View style={{ padding: 10 }} />
               <TouchableHighlight
-                style={styles.cancelButton}
-                onPress={props.cancel}
-              >
-                <Text>Cancel</Text>
-              </TouchableHighlight>
-              <View style={{ padding: 5 }} />
-              <TouchableHighlight
                 style={styles.saveButton}
                 onPress={() => props.proceed(grantClaimFromInputs())}
               >
                 <Text>Set...</Text>
+              </TouchableHighlight>
+              <View style={{ padding: 5 }} />
+              <TouchableHighlight
+                style={styles.cancelButton}
+                onPress={props.cancel}
+              >
+                <Text>Cancel</Text>
               </TouchableHighlight>
             </View>
           </View>
@@ -453,17 +455,17 @@ export function ConstructCredentialScreen({ navigation }) {
 
               <View style={{ padding: 10 }} />
               <TouchableHighlight
-                style={styles.cancelButton}
-                onPress={props.cancel}
-              >
-                <Text>Cancel</Text>
-              </TouchableHighlight>
-              <View style={{ padding: 5 }} />
-              <TouchableHighlight
                 style={styles.saveButton}
                 onPress={() => props.proceed(grantClaimFromInputs())}
               >
                 <Text>Set...</Text>
+              </TouchableHighlight>
+              <View style={{ padding: 5 }} />
+              <TouchableHighlight
+                style={styles.cancelButton}
+                onPress={props.cancel}
+              >
+                <Text>Cancel</Text>
               </TouchableHighlight>
             </View>
           </View>
@@ -515,17 +517,17 @@ export function ConstructCredentialScreen({ navigation }) {
 
               <View style={{ padding: 10 }} />
               <TouchableHighlight
-                style={styles.cancelButton}
-                onPress={props.cancel}
-              >
-                <Text>Cancel</Text>
-              </TouchableHighlight>
-              <View style={{ padding: 5 }} />
-              <TouchableHighlight
                 style={styles.saveButton}
                 onPress={() => props.proceed(constructPledge())}
               >
                 <Text>Set...</Text>
+              </TouchableHighlight>
+              <View style={{ padding: 5 }} />
+              <TouchableHighlight
+                style={styles.cancelButton}
+                onPress={props.cancel}
+              >
+                <Text>Cancel</Text>
               </TouchableHighlight>
 
             </View>
@@ -543,8 +545,11 @@ export function ConstructCredentialScreen({ navigation }) {
    **/
   function WitnessModal(props) {
 
-    const [text, setText] = useState<string>(props.text)
     const [identifier, setIdentifier] = useState<string>('')
+    const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
+    const [text, setText] = useState<string>(props.text)
+
+    const allContacts = useSelector((state) => state.contacts || [])
 
     function constructWitness() {
       return {
@@ -567,6 +572,15 @@ export function ConstructCredentialScreen({ navigation }) {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+            {
+              selectFromContacts
+              ? <ContactSelectModal
+                  cancel={ () => { setSelectFromContacts(false) } }
+                  proceed={ (did) => { setIdentifier(did); setSelectFromContacts(false) }}
+                />
+              : <View/>
+            }
+
             <View>
               <Text style={styles.modalText}>Witness</Text>
 
@@ -576,13 +590,24 @@ export function ConstructCredentialScreen({ navigation }) {
                   value={identifier}
                   onChangeText={setIdentifier}
                   editable
-                  style={{ borderWidth: 1 }}
+                  style={{ borderWidth: 1, width: 300 }}
                   autoCapitalize={'none'}
                   autoCorrect={false}
                 />
+                {
+                  allContacts.length > 0
+                  ? <TouchableHighlight
+                      style={styles.moreButton}
+                      onPress={() => setSelectFromContacts(true)}
+                    >
+                      <Text>Pick</Text>
+                    </TouchableHighlight>
+                  : <View />
+                }
               </View>
 
-              <View style={{ padding: 5 }}>
+              <View style={{ marginTop: 20 }}>
+                <Text>What I Saw</Text>
                 <TextInput
                   value={text}
                   onChangeText={setText}
@@ -594,17 +619,17 @@ export function ConstructCredentialScreen({ navigation }) {
 
               <View style={{ padding: 10 }} />
               <TouchableHighlight
-                style={styles.cancelButton}
-                onPress={props.cancel}
-              >
-                <Text>Cancel</Text>
-              </TouchableHighlight>
-              <View style={{ padding: 5 }} />
-              <TouchableHighlight
                 style={styles.saveButton}
                 onPress={() => props.proceed(constructWitness())}
               >
                 <Text>Set...</Text>
+              </TouchableHighlight>
+              <View style={{ padding: 5 }} />
+              <TouchableHighlight
+                style={styles.cancelButton}
+                onPress={props.cancel}
+              >
+                <Text>Cancel</Text>
               </TouchableHighlight>
 
             </View>

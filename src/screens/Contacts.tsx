@@ -2,7 +2,7 @@ import { classToPlain } from 'class-transformer'
 import * as Papa from 'papaparse'
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { ActivityIndicator, Alert, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
+import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
 import { CheckBox } from 'react-native-elements'
 import { useFocusEffect } from '@react-navigation/native'
@@ -301,19 +301,19 @@ export function ContactsScreen({ navigation, route }) {
                     />
 
                     <TouchableHighlight
+                      style={styles.saveButton}
+                      onPress={createContactsFromCsv}
+                    >
+                      <Text>Save</Text>
+                    </TouchableHighlight>
+                    <View style={{ padding: 5 }}/>
+                    <TouchableHighlight
                       style={styles.cancelButton}
                       onPress={() => {
                         setWantsCsv(false)
                       }}
                     >
                       <Text>Cancel</Text>
-                    </TouchableHighlight>
-                    <View style={{ padding: 5 }}/>
-                    <TouchableHighlight
-                      style={styles.saveButton}
-                      onPress={createContactsFromCsv}
-                    >
-                      <Text>Save</Text>
                     </TouchableHighlight>
                   </View>
                 )}

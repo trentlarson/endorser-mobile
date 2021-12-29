@@ -29,6 +29,13 @@ export const styles = StyleSheet.create({
     padding: 10,
     elevation: 2
   },
+  moreButton: {
+    alignItems: 'center',
+    backgroundColor: "#aaaaFF",
+    borderRadius: 10,
+    padding: 5,
+    elevation: 2
+  },
   saveButton: {
     alignItems: 'center',
     backgroundColor: "#00FF00",

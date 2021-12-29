@@ -26,6 +26,7 @@ import { ReportScreen } from './screens/ReportFromEndorser'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
 import { appSlice, appStore } from './veramo/appSlice'
 import { agent, dbConnection } from './veramo/setup'
+import * as utility from './utility/utility.ts'
 import { BVCButton } from './utility/utility.tsx'
 
 
@@ -87,18 +88,21 @@ function HomeScreen({ navigation }) {
       const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
       appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
 
+      setLoading(false)
+
+      utility.loadContacts(appSlice, appStore, dbConnection)
+
       if (settings.mnemonic != null) {
         setOldMnemonic(true)
       }
-
-      setLoading(false)
     }
     getIdentifiers()
   }, [])
 
   return (
     <View>
-      {loading
+      {
+      loading
       ? (
         <View style={{ marginLeft: '45%', marginTop: '50%' }}>
           <Text>Loading...</Text>
@@ -107,7 +111,7 @@ function HomeScreen({ navigation }) {
         allIdentifiers != null && allIdentifiers.length > 0
         ? (
           <View>
-            {settings.homeScreen === 'BVC'
+            {settings != null && settings.homeScreen === 'BVC'
             ? (
               <View>
                 <View style={{ marginBottom: 100 }}/>
