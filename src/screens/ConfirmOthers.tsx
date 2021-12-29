@@ -9,7 +9,6 @@ import { agent, dbConnection } from '../veramo/setup'
 
 export function ConfirmOthersScreen({ navigation }) {
 
-  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loadedClaimsStarting, setLoadedClaimsStarting] = useState<DateTime>(null)
   const [loadError, setLoadError] = useState<string>('')
   const [loadingRecentClaims, setLoadingRecentClaims] = useState<boolean>(false)
@@ -18,38 +17,42 @@ export function ConfirmOthersScreen({ navigation }) {
   const [selectedClaimsToConfirm, setSelectedClaimsToConfirm] = useState<Array<number>>([])
 
   async function loadRecentClaims(ids) {
-    setLoadingRecentClaims(true)
-
-    let loadMoreEnding, loadMoreStarting
-    if (!loadedClaimsStarting) {
-      loadMoreEnding = DateTime.local()
-      loadMoreStarting = DateTime.local().startOf("day")
+    if (ids == null && ids[0] == null) {
+      Alert.alert("You have no identifiers. Go to the Settings page and create one.")
     } else {
-      loadMoreEnding = loadedClaimsStarting
-      loadMoreStarting = loadedClaimsStarting.minus(Duration.fromISO("P1M")) // - 1 month
-    }
-    let loadMoreEndingStr = loadMoreEnding.toISO()
-    let loadMoreStartingStr = loadMoreStarting.toISO()
+      setLoadingRecentClaims(true)
 
-    const endorserApiServer = appStore.getState().apiServer
-    const token = await utility.accessToken(ids[0])
-    fetch(endorserApiServer + '/api/claim/?issuedAt_greaterThanOrEqualTo=' + loadMoreStartingStr + "&issuedAt_lessThan=" + loadMoreEndingStr + "&excludeConfirmations=true", {
-      headers: {
-        "Content-Type": "application/json",
-        "Uport-Push-Token": token,
-      }})
-      .then(response => response.json())
-      .then(async (data) => {
-        const dataWithoutHidden = R.reject(utility.containsHiddenDid, data)
-        setRecentClaims(R.concat(recentClaims, dataWithoutHidden))
-        setRecentHiddenCount(count => count + data.length - dataWithoutHidden.length)
-        setLoadedClaimsStarting(loadMoreStarting)
-      })
-      .catch((err) => {
-        setLoadError('There was a problem retrieving claims to confirm.')
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error loading claims to confirm: " + err}))
-      })
-      .finally(() => setLoadingRecentClaims(false))
+      let loadMoreEnding, loadMoreStarting
+      if (!loadedClaimsStarting) {
+        loadMoreEnding = DateTime.local()
+        loadMoreStarting = DateTime.local().startOf("day")
+      } else {
+        loadMoreEnding = loadedClaimsStarting
+        loadMoreStarting = loadedClaimsStarting.minus(Duration.fromISO("P1M")) // - 1 month
+      }
+      let loadMoreEndingStr = loadMoreEnding.toISO()
+      let loadMoreStartingStr = loadMoreStarting.toISO()
+
+      const endorserApiServer = appStore.getState().apiServer
+      const token = await utility.accessToken(ids[0])
+      return fetch(endorserApiServer + '/api/claim/?issuedAt_greaterThanOrEqualTo=' + loadMoreStartingStr + "&issuedAt_lessThan=" + loadMoreEndingStr + "&excludeConfirmations=true", {
+        headers: {
+          "Content-Type": "application/json",
+          "Uport-Push-Token": token,
+        }})
+        .then(response => response.json())
+        .then(async (data) => {
+          const dataWithoutHidden = R.reject(utility.containsHiddenDid, data)
+          setRecentClaims(R.concat(recentClaims, dataWithoutHidden))
+          setRecentHiddenCount(count => count + data.length - dataWithoutHidden.length)
+          setLoadedClaimsStarting(loadMoreStarting)
+        })
+        .catch((err) => {
+          setLoadError('There was a problem retrieving claims to confirm.')
+          appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error loading claims to confirm: " + err}))
+        })
+        .finally(() => setLoadingRecentClaims(false))
+    }
   }
 
   function toggleSelectedClaim(claim) {
@@ -100,15 +103,12 @@ export function ConfirmOthersScreen({ navigation }) {
     }
   }
 
-  // Check for existing identifers on load and set them to state
+  // load recent claims based on identifiers
   useEffect(() => {
     const getIdentifiers = async () => {
-      const ids = await agent.didManagerFind()
-      setIdentifiers(ids)
+      loadRecentClaims(appStore.getState().identifiers)
 
-      loadRecentClaims(ids)
-
-      utility.loadContacts(appSlice, appStore, dbConnection, true)
+      agent.didManagerFind() // without this it shows some errors at app start (even though the app all works)
     }
     getIdentifiers()
   }, [])
@@ -133,7 +133,7 @@ export function ConfirmOthersScreen({ navigation }) {
             <TouchableOpacity
               style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
               onPress={() => { toggleSelectedClaim(data.item) }}>
-              <Text>{utility.claimDescription(data.item, identifiers, appStore.getState().contacts || [])}</Text>
+              <Text>{utility.claimDescription(data.item, appStore.getState().identifiers, appStore.getState().contacts || [])}</Text>
             </TouchableOpacity>
           }
           ListFooterComponent={
@@ -146,7 +146,7 @@ export function ConfirmOthersScreen({ navigation }) {
                 ? <ActivityIndicator size="large" color="#00ff00" />
                 : <Button
                     title={'Load Previous to ' + monthDayLoaded()}
-                    onPress={() => loadRecentClaims(identifiers)}
+                    onPress={() => loadRecentClaims(appStore.getState().identifiers)}
                   />
               }
               <View style={{ marginTop: 10 }}/>

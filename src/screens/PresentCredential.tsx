@@ -18,9 +18,6 @@ export function PresentCredentialScreen({ navigation, route }) {
     React.useCallback(() => {
       async function createPresentation() {
 
-        let identifiers
-        await agent.didManagerFind().then(async ids => identifiers = ids)
-
         // based on https://github.com/uport-project/veramo/blob/next/packages/credential-w3c/src/__tests__/action-handler.test.ts#L86
         const vc = await agent.createVerifiableCredential({
           credential: {
@@ -32,6 +29,7 @@ export function PresentCredentialScreen({ navigation, route }) {
 
         let vp
         /** These are currently too long, so you'll have to split into multiple QR codes.
+        let identifiers = appStore.getState().identifiers
         if (identifiers.length > 0 && identifiers[0].did !== fullClaim.issuer) {
           // Verifiable types found here: https://github.com/uport-project/veramo/blob/next/packages/core/src/types/IMessage.ts
           // These will be automatically filled in: @context, type, issuanceDate

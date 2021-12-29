@@ -35,12 +35,12 @@ Troubleshooting:
 
 ```
 watchman watch-del-all
-rm -rf node_modules
-yarn install
-yarn start --reset-cache # which you'll have to kill because it doesn't stop
 rm -rf /tmp/metro-*
 rm -rf ~/Library/Caches/CocoaPods ios/Pods
 cd ios; pod install; cd ..
+rm -rf node_modules
+yarn install
+yarn start --reset-cache # which you'll have to kill because it doesn't stop
 ```
 
 

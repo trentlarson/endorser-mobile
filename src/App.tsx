@@ -60,7 +60,7 @@ export default function App() {
             <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
             <Stack.Screen name="My Credentials" component={MyCredentialsScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
-            <Stack.Screen name="Reports from Endorser.ch server" component={ReportScreen} />
+            <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
             <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
@@ -140,7 +140,7 @@ function HomeScreen({ navigation }) {
             />
             <Button
               title="Search"
-              onPress={() => navigation.navigate('Reports from Endorser.ch server')}
+              onPress={() => navigation.navigate('Reports from Endorser server')}
             />
             <Button
               title="Scan Presentation"

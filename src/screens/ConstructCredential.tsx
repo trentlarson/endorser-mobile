@@ -24,8 +24,10 @@ export function ConstructCredentialScreen({ navigation }) {
   const [askForGiveInfo, setAskForGiveInfo] = useState<boolean>(false)
   const [askForPledgeInfo, setAskForPledgeInfo] = useState<string>('')
   const [askForWitnessInfo, setAskForWitnessInfo] = useState<string>('')
-  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
+
+  const identifiers = useSelector((state) => state.identifiers)
+  const settings = useSelector((state) => state.settings)
 
   let currentOrPreviousSat = DateTime.local()
   let todayIsSaturday = true
@@ -40,17 +42,12 @@ export function ConstructCredentialScreen({ navigation }) {
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
-    const getIdentifiers = async () => {
-      const _ids = await agent.didManagerFind()
-      setIdentifiers(_ids)
-
-      const conn = await dbConnection
-      let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+    const getSettings = async () => {
       if (settings?.mnemEncrBase64 || settings?.mnemonic) {
         setHasMnemonic(true)
       }
     }
-    getIdentifiers()
+    getSettings()
   }, [])
 
   return (

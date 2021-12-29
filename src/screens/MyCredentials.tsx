@@ -3,6 +3,7 @@ import { Duration } from 'luxon'
 import React, { useState } from 'react'
 import { ActivityIndicator, Button, Dimensions, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
+import { useSelector } from 'react-redux'
 
 import { styles } from './style'
 import * as utility from '../utility/utility'
@@ -11,12 +12,13 @@ import { agent } from '../veramo/setup'
 
 export function MyCredentialsScreen({ navigation }) {
 
-  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
   const [totalCurrencies, setTotalCurrencies] = useState<Record<string,number>>({})
   const [totalDuration, setTotalDuration] = useState<string>('')
+
+  const identifiers = useSelector((state) => state.identifiers || [])
 
   const searchEndorser = async () => {
     setLoading(true)
@@ -63,12 +65,6 @@ export function MyCredentialsScreen({ navigation }) {
   const isUser = did => did === identifiers[0].did
 
   const removeSchemaContext = obj => obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
-
-  useFocusEffect(
-    React.useCallback(() => {
-      agent.didManagerFind().then(ids => setIdentifiers(ids))
-    }, [])
-  )
 
   // Hack because without this it doesn't scroll to the bottom: https://stackoverflow.com/a/67244863/845494
   const screenHeight = Dimensions.get('window').height - 200

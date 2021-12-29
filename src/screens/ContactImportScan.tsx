@@ -4,6 +4,7 @@ import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, Styl
 import { CheckBox } from 'react-native-elements'
 import QRCodeScanner from 'react-native-qrcode-scanner'
 import { useFocusEffect } from '@react-navigation/native'
+import { useSelector } from 'react-redux'
 
 import { styles } from './style'
 import { Contact } from '../entity/contact'
@@ -16,7 +17,7 @@ export function ContactImportScreen({ navigation }) {
   const CURRENT_JWT_PREFIX = appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION
 
   const [contactInfo, setContactInfo] = useState<Contact>()
-  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
+
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
 
   // these are tracking progress when saving data
@@ -24,6 +25,8 @@ export function ContactImportScreen({ navigation }) {
   const [storingVisibility, setStoringVisibility] = useState<boolean>(false)
   const [doneSavingStoring, setDoneSavingStoring] = useState<boolean>(false)
   const [visibilityError, setVisibilityError] = useState<string>('')
+
+  const identifiers = useSelector((state) => state.identifiers || [])
 
   const onSuccessfulQrEvent = async (e) => {
     onSuccessfulQrText(e.data)
@@ -101,12 +104,6 @@ export function ContactImportScreen({ navigation }) {
 
     saveAndRedirect()
   }
-
-  useFocusEffect(
-    React.useCallback(() => {
-      agent.didManagerFind().then(ids => setIdentifiers(ids))
-    }, [])
-  )
 
   return (
     <SafeAreaView>

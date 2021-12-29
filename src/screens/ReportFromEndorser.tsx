@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { ActivityIndicator, Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
+import { useSelector } from 'react-redux'
 
 import * as utility from '../utility/utility'
 import { appStore } from '../veramo/appSlice'
@@ -9,10 +10,11 @@ import { MyCredentialsScreen } from './MyCredentials'
 
 export function ReportScreen({ navigation }) {
 
-  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
+
+  const identifiers = useSelector((state) => state.identifiers || [])
 
   const searchEndorser = async () => {
     setLoading(true)
@@ -33,12 +35,6 @@ export function ReportScreen({ navigation }) {
       setSearchResults(result)
     })
   }
-
-  useFocusEffect(
-    React.useCallback(() => {
-      agent.didManagerFind().then(ids => setIdentifiers(ids))
-    }, [])
-  )
 
   return (
     <SafeAreaView>

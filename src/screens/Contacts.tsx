@@ -20,7 +20,7 @@ export function ContactsScreen({ navigation, route }) {
   const [contactName, setContactName] = useState<string>()
   const [contactPubKeyBase64, setContactPubKeyBase64] = useState<string>()
   const [contactsCsv, setContactsCsv] = useState<string>('')
-  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
+  const [id0, setId0] = useState<Identifier>()
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
   const [wantsCsv, setWantsCsv] = useState<boolean>(false)
@@ -141,7 +141,7 @@ export function ContactsScreen({ navigation, route }) {
   const checkVisibility = async (contact: Contact) => {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
     const endorserApiServer = appStore.getState().apiServer
-    const token = await utility.accessToken(identifiers[0])
+    const token = await utility.accessToken(id0)
     return fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + contact.did, {
       headers: {
         "Content-Type": "application/json",
@@ -170,7 +170,7 @@ export function ContactsScreen({ navigation, route }) {
   const allowToSeeMe = async (contact: Contact) => {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
     const endorserApiServer = appStore.getState().apiServer
-    const token = await utility.accessToken(identifiers[0])
+    const token = await utility.accessToken(id0)
     return fetch(endorserApiServer + '/api/report/canSeeMe', {
       method: 'POST',
       headers: {
@@ -199,7 +199,7 @@ export function ContactsScreen({ navigation, route }) {
   const disallowToSeeMe = async (contact: Contact) => {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
     const endorserApiServer = appStore.getState().apiServer
-    const token = await utility.accessToken(identifiers[0])
+    const token = await utility.accessToken(id0)
     return fetch(endorserApiServer + '/api/report/cannotSeeMe', {
       method: 'POST',
       headers: {
@@ -240,7 +240,7 @@ export function ContactsScreen({ navigation, route }) {
   useFocusEffect(
     React.useCallback(() => {
 
-      agent.didManagerFind().then(ids => setIdentifiers(ids))
+      setId0(appStore.getState().identifiers && appStore.getState().identifiers[0])
 
       utility.loadContacts(appSlice, appStore, dbConnection)
 
@@ -280,7 +280,8 @@ export function ContactsScreen({ navigation, route }) {
                       style={styles.modalText}>Enter in CSV format (columns in order)
                       <Text
                         style={{ color: 'blue' }}
-                        onPress={() => Alert.alert("Columns are:\n " + contactFields.join(', ') + "\n\nPaste content (because manual newlines don't work as expected).")}>(?)
+                        onPress={() => Alert.alert("Columns are:\n " + contactFields.join(', ') + "\n\nPaste content (because manual newlines don't work as expected).")}>
+                        (?)
                       </Text>
                     </Text>
 
@@ -421,7 +422,7 @@ export function ContactsScreen({ navigation, route }) {
                       :
                         <View>
                           <Text style={{ textAlign: 'center' }}>
-                            { `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity.` }
+                            { `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity on the Endorser server.` }
                           </Text>
                           {
                             contact.seesMe

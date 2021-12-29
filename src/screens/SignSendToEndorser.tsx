@@ -16,10 +16,10 @@ export function SignCredentialScreen({ navigation, route }) {
 
   const [claimStr, setClaimStr] = useState<string>(JSON.stringify(credentialSubject))
   const [endorserId, setEndorserId] = useState<string>(null)
-  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [fetched, setFetched] = useState<boolean>(false)
   const [fetching, setFetching] = useState<boolean>(false)
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
+  const [id0, setId0] = useState<Identifier>()
   const [jwt, setJwt] = useState<JWT>()
 
   const endorserViewLink = (endorserId) => {
@@ -33,7 +33,7 @@ export function SignCredentialScreen({ navigation, route }) {
     setFetching(true)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the send to Endorser server..."}))
     const endorserApiServer = appStore.getState().apiServer
-    const token = await utility.accessToken(identifiers[0])
+    const token = await utility.accessToken(id0)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... sending to server..."}))
     return fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
@@ -91,8 +91,8 @@ export function SignCredentialScreen({ navigation, route }) {
       **/
 
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the signing & sending..."}))
-      const signer = didJwt.SimpleSigner(identifiers[0].keys[0].privateKeyHex)
-      const did: string = identifiers[0].did
+      const signer = didJwt.SimpleSigner(id0.keys[0].privateKeyHex)
+      const did: string = id0.did
       const vcClaim = JSON.parse(claimStr)
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
       const vcJwt: string = await didJwt.createJWT(utility.vcPayload(did, vcClaim),{ issuer: did, signer })
@@ -128,24 +128,22 @@ export function SignCredentialScreen({ navigation, route }) {
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
-    const getIdentifiers = async () => {
-      const _ids = await agent.didManagerFind()
-      setIdentifiers(_ids)
+    const getIdentifier = async () => {
+      setId0(appStore.getState().identifiers && appStore.getState().identifiers[0])
 
-      const conn = await dbConnection
-      let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+      let settings = appStore.getState().settings
       if (settings?.mnemEncrBase64 || settings?.mnemonic) {
         setHasMnemonic(true)
       }
     }
-    getIdentifiers()
+    getIdentifier()
   }, [])
 
   return (
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          { identifiers[0] ? (
+          { id0 ? (
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Sign</Text>
               <View style={{ padding: 10 }}>
@@ -153,23 +151,23 @@ export function SignCredentialScreen({ navigation, route }) {
                   fetched ? (
                     endorserId ? (
                       <Button
-                        title="Success!  Click here to see your claim on Endorser.ch"
+                        title="Success!  Click here to see your claim on the Endorser server."
                         onPress={() => {
                           Linking.openURL(endorserViewLink(endorserId)).catch(err =>
                             setError(
-                              'Sorry, something went wrong trying to go to endorser.ch',
+                              'Sorry, something went wrong trying to go to the Endorser server.',
                             ),
                           )
                           setFetched(false)
                         }}
                       />
                     ) : ( /* fetched && !endorserId */
-                      <Text>Got response from Endorser.ch but something went wrong.  You might check your data.  If it's good it may be an error at Endorser.ch</Text>
+                      <Text>Got response from the Endorser server but something went wrong.  You might check your data.  If it's good, there may be an error at Endorser.</Text>
                     )
                   ) : ( /* !fetched */
                     fetching ? (
                       <View>
-                        <Text>Saving to Endorser.ch server...</Text>
+                        <Text>Saving to the Endorser server...</Text>
                         <ActivityIndicator size="large" color="#00ff00" />
                       </View>
                     ) : ( /* !fetched && !fetching */
@@ -191,7 +189,7 @@ export function SignCredentialScreen({ navigation, route }) {
                         onPress={signAndSend}
                       />
                       <Text style={{ marginTop: 5, marginBottom: 5 }}>Claim Details</Text>
-                      <Text style={{ fontSize: 11 }}>{identifiers[0].did}</Text>
+                      <Text style={{ fontSize: 11 }}>{id0.did}</Text>
                       { !hasMnemonic ? (
                         <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
                       ) : (

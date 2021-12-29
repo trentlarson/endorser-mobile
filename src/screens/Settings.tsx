@@ -284,8 +284,7 @@ export function SettingsScreen({navigation}) {
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
-      const ids = await agent.didManagerFind()
-      const pojoIds = ids.map(classToPlain)
+      const pojoIds = appStore.getState().identifiers
       appStore.dispatch(appSlice.actions.setIdentifiers(pojoIds))
       setIdentifiers(pojoIds)
 
