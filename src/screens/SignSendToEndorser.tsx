@@ -14,6 +14,7 @@ export function SignCredentialScreen({ navigation, route }) {
 
   const { credentialSubject } = route.params
 
+  const [claimJsonError, setClaimJsonError] = useState<string>(null)
   const [claimStr, setClaimStr] = useState<string>(JSON.stringify(credentialSubject))
   const [endorserId, setEndorserId] = useState<string>(null)
   const [fetched, setFetched] = useState<boolean>(false)
@@ -112,14 +113,12 @@ export function SignCredentialScreen({ navigation, route }) {
     }
   }
 
-  function formatClaimJson() {
-    if (claimStr) {
+  function formatClaimJson(claimString) {
+    if (claimString) {
       try {
-        return JSON.stringify(JSON.parse(claimStr), null, 2)
-      } catch (e) {
-        console.log('Got an error parsing JSON in claim input.', e)
-        setTimeout(() => { throw e }, 100) // show error, though they can minimize it
-        return claimStr
+        return JSON.stringify(JSON.parse(claimString), null, 2)
+      } catch (err) {
+        return claimString
       }
     } else {
       return ''
@@ -138,6 +137,19 @@ export function SignCredentialScreen({ navigation, route }) {
     }
     getIdentifier()
   }, [])
+
+  useEffect(() => {
+    if (claimStr == null || claimStr.trim() == '') {
+      setClaimJsonError('The claim is empty.')
+    } else {
+      try {
+        JSON.stringify(JSON.parse(claimStr), null, 2)
+        setClaimJsonError('')
+      } catch (err) {
+        setClaimJsonError('The claim is not formatted correctly. ' + err)
+      }
+    }
+  }, [claimStr])
 
   return (
     <SafeAreaView>
@@ -180,33 +192,36 @@ export function SignCredentialScreen({ navigation, route }) {
                     )
                   )
                 }
-                {
-                  claimStr ? (
-                    <View>
-                      <View style={{ padding: 5 }} />
+
+                <View>
+                  <View style={{ padding: 5 }} />
+                  {
+                    (claimJsonError && claimJsonError.length > 0)
+                    ?
+                      <Text style={{ textAlign: 'center' }}>Sign & Store{'\n'}(... after fixing the formatting error.)</Text>
+                    :
                       <Button
                         title={'Sign & Store'}
                         onPress={signAndSend}
                       />
-                      <Text style={{ marginTop: 5, marginBottom: 5 }}>Claim Details</Text>
-                      <Text style={{ fontSize: 11 }}>{id0.did}</Text>
-                      { !hasMnemonic ? (
-                        <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
-                      ) : (
-                         <Text/>
-                      )}
-                      <TextInput
-                        multiline={true}
-                        style={{ borderWidth: 1, height: 300 }}
-                        onChangeText={setClaimStr}
-                      >
-                        { formatClaimJson() }
-                      </TextInput>
-                    </View>
+                  }
+                  <Text style={{ marginTop: 5, marginBottom: 5 }}>Claim Details</Text>
+                  <Text style={{ fontSize: 11 }}>{id0.did}</Text>
+                  { !hasMnemonic ? (
+                    <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
                   ) : (
-                    <View/>
-                  )
-                }
+                     <Text/>
+                  )}
+                  <TextInput
+                    multiline={true}
+                    style={{ borderWidth: 1, height: 300 }}
+                    onChangeText={setClaimStr}
+                  >
+                    { formatClaimJson(claimStr) }
+                  </TextInput>
+                  <Text style={{ color: 'red' }}>{ claimJsonError }</Text>
+                </View>
+
                 {
                   jwt ? (
                     <View>
