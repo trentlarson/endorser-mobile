@@ -356,7 +356,6 @@ export function ContactsScreen({ navigation, route }) {
               editable
               style={{ borderWidth: 1 }}
               autoCapitalize={'none'}
-              autoCorrect={false}
             />
             <Text>Public Key (base64-encoded, optional)</Text>
             <TextInput
@@ -365,7 +364,6 @@ export function ContactsScreen({ navigation, route }) {
               editable
               style={{ borderWidth: 1 }}
               autoCapitalize={'none'}
-              autoCorrect={false}
             />
           </View>
           <View style={{ alignItems: "center" }}>
