@@ -405,39 +405,43 @@ export function ContactsScreen({ navigation, route }) {
                   ? <ActivityIndicator color="#00ff00" />
                   : <View style={styles.centeredView}>
                     {
-                      R.isNil(contact.seesMe)
+                      (id0 && contact.did === id0.did)
                       ?
-                        <View>
-                          <Button style={{ textAlign: 'center' }}
-                            title={`Can ${contact.name || 'They'} See My Activity?`}
-                            onPress={() => {checkVisibility(contact)}}
-                          />
-                          <Button
-                            title="Make Me Visible"
-                            onPress={() => {allowToSeeMe(contact)}}
-                          />
-                        </View>
+                        <View><Text>You can always see your own activity on the Endorser server.</Text></View>
                       :
-                        <View>
-                          <Text style={{ textAlign: 'center' }}>
-                            { `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity on the Endorser server.` }
-                          </Text>
-                          {
-                            contact.seesMe
-                            ? <Button
-                              title="Hide Me"
-                              onPress={() => {disallowToSeeMe(contact)}}
+                        R.isNil(contact.seesMe)
+                        ?
+                          <View>
+                            <Button style={{ textAlign: 'center' }}
+                              title={`Can ${contact.name || 'They'} See My Activity?`}
+                              onPress={() => {checkVisibility(contact)}}
                             />
-                            : <Button
+                            <Button
                               title="Make Me Visible"
                               onPress={() => {allowToSeeMe(contact)}}
                             />
-                          }
-                          <Button
-                            title={`(Double-Check Visibility)`}
-                            onPress={() => {checkVisibility(contact)}}
-                          />
-                        </View>
+                          </View>
+                        :
+                          <View>
+                            <Text style={{ textAlign: 'center' }}>
+                              { `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity on the Endorser server.` }
+                            </Text>
+                            {
+                              contact.seesMe
+                              ? <Button
+                                title="Hide Me"
+                                onPress={() => {disallowToSeeMe(contact)}}
+                              />
+                              : <Button
+                                title="Make Me Visible"
+                                onPress={() => {allowToSeeMe(contact)}}
+                              />
+                            }
+                            <Button
+                              title={`(Double-Check Visibility)`}
+                              onPress={() => {checkVisibility(contact)}}
+                            />
+                          </View>
                     }
                     { appStore.getState().testMode
                       ? <View><Button title={'Delete'} onPress={() => deleteContact(contact.did)}/></View>
