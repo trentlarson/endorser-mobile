@@ -125,6 +125,13 @@ export function SignCredentialScreen({ navigation, route }) {
     }
   }
 
+  function changeCurlyQuotes() {
+    setClaimStr(claimStr.replace(/”/g, "\"").replace(/“/g, "\""))
+  }
+  function hasCurlyQuotes() {
+    return claimStr && (claimStr.match(/”/) || claimStr.match(/“/))
+  }
+
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifier = async () => {
@@ -216,10 +223,21 @@ export function SignCredentialScreen({ navigation, route }) {
                     multiline={true}
                     style={{ borderWidth: 1, height: 300 }}
                     onChangeText={setClaimStr}
+                    autoCorrect={false}
                   >
                     { formatClaimJson(claimStr) }
                   </TextInput>
                   <Text style={{ color: 'red' }}>{ claimJsonError }</Text>
+                  {
+                    hasCurlyQuotes()
+                    ?
+                      <Button
+                        title={'Change Curly Quotes To Regular Quotes'}
+                        onPress={changeCurlyQuotes}
+                      />
+                    :
+                      <View/>
+                  }
                 </View>
 
                 {

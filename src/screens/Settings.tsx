@@ -391,6 +391,7 @@ export function SettingsScreen({navigation}) {
                           defaultValue={ mnemonicPassword }
                           onChangeText={ setMnemonicPassword }
                           style={{borderWidth: 1}}
+                          textContentType={'newPassword'}
                         />
                       </View>
                     }
@@ -450,6 +451,7 @@ export function SettingsScreen({navigation}) {
                     defaultValue={ mnemonicPassword }
                     onChangeText={ setMnemonicPassword }
                     style={{borderWidth: 1}}
+                    textContentType={'newPassword'}
                   />
                   <View style={{ padding: 5 }} />
                   <Button title="Import ID" onPress={()=>navigation.navigate('Import Seed Phrase')} />
@@ -641,6 +643,7 @@ export function ExportIdentityScreen({navigation}) {
                   onChangeText={ setMnemonicPassword }
                   secureTextEntry={true}
                   style={{borderWidth: 1}}
+                  textContentType={'password'}
                 />
 
               </View>
@@ -748,6 +751,7 @@ export function ImportIdentityScreen({navigation}) {
                       defaultValue={ mnemonicPassword }
                       onChangeText={ setMnemonicPassword }
                       style={{borderWidth: 1}}
+                      textContentType={'newPassword'}
                     />
                     <CheckBox
                       title='Convert Address to Lowercase'
