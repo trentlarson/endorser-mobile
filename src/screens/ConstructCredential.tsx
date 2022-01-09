@@ -303,7 +303,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(grantClaimFromInputs())}
               >
-                <Text>Finalize...</Text>
+                <Text>Finish...</Text>
               </TouchableHighlight>
               <View style={{ padding: 5 }} />
               <TouchableHighlight
@@ -455,7 +455,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(grantClaimFromInputs())}
               >
-                <Text>Finalize...</Text>
+                <Text>Finish...</Text>
               </TouchableHighlight>
               <View style={{ padding: 5 }} />
               <TouchableHighlight
@@ -517,7 +517,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(constructPledge())}
               >
-                <Text>Finalize...</Text>
+                <Text>Finish...</Text>
               </TouchableHighlight>
               <View style={{ padding: 5 }} />
               <TouchableHighlight
@@ -619,7 +619,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(constructWitness())}
               >
-                <Text>Finalize...</Text>
+                <Text>Finish...</Text>
               </TouchableHighlight>
               <View style={{ padding: 5 }} />
               <TouchableHighlight

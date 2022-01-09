@@ -131,11 +131,11 @@ function HomeScreen({ navigation }) {
               <View />
             )}
             <Button
-              title="Claim - Certify - Offer"
+              title="Claim - Ask - Offer"
               onPress={() => navigation.navigate('Create Credential')}
             />
             <Button
-              title={'Confirm - Agree'}
+              title={'Agree - Certify - Confirm'}
               onPress={() => navigation.navigate('Confirm Others')}
             />
             <Button

@@ -212,7 +212,7 @@ export function SignCredentialScreen({ navigation, route }) {
                         onPress={signAndSend}
                       />
                   }
-                  <Text style={{ marginTop: 5, marginBottom: 5 }}>Claim Details</Text>
+                  <Text style={{ marginTop: 75, marginBottom: 5 }}>Claim Details for Your Review:</Text>
                   <Text style={{ fontSize: 11 }}>{id0.did}</Text>
                   { !hasMnemonic ? (
                     <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>

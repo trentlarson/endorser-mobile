@@ -156,7 +156,7 @@ export function ConfirmOthersScreen({ navigation }) {
               }
               <View style={{ marginTop: 10 }}/>
               <Button
-                title="Finalize..."
+                title="Finish..."
                 onPress={ setConfirmations }
               />
             </View>
