@@ -303,7 +303,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(grantClaimFromInputs())}
               >
-                <Text>Set...</Text>
+                <Text>Finalize...</Text>
               </TouchableHighlight>
               <View style={{ padding: 5 }} />
               <TouchableHighlight
@@ -357,7 +357,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
     function grantClaimFromInputs() {
       return grantClaim(
-        crypto.randomBytes(16).toString('hex'), // 128 bits seems OK
+        crypto.randomBytes(16).toString('hex'), // 128 bits seems OK; might consider ULIDs
         props.sponsorId,
         fundedId,
         comment,
@@ -455,7 +455,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(grantClaimFromInputs())}
               >
-                <Text>Set...</Text>
+                <Text>Finalize...</Text>
               </TouchableHighlight>
               <View style={{ padding: 5 }} />
               <TouchableHighlight
@@ -517,7 +517,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(constructPledge())}
               >
-                <Text>Set...</Text>
+                <Text>Finalize...</Text>
               </TouchableHighlight>
               <View style={{ padding: 5 }} />
               <TouchableHighlight
@@ -619,7 +619,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 style={styles.saveButton}
                 onPress={() => props.proceed(constructWitness())}
               >
-                <Text>Set...</Text>
+                <Text>Finalize...</Text>
               </TouchableHighlight>
               <View style={{ padding: 5 }} />
               <TouchableHighlight
