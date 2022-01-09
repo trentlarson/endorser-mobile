@@ -2,6 +2,7 @@ import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Button, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { CheckBox } from "react-native-elements"
 
 import * as utility from '../utility/utility'
 import { appSlice, appStore } from '../veramo/appSlice'
@@ -132,8 +133,12 @@ export function ConfirmOthersScreen({ navigation }) {
           renderItem={data =>
             <TouchableOpacity
               style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
-              onPress={() => { toggleSelectedClaim(data.item) }}>
-              <Text>{utility.claimDescription(data.item, appStore.getState().identifiers, appStore.getState().contacts || [])}</Text>
+            >
+              <CheckBox
+                title={ utility.claimDescription(data.item, appStore.getState().identifiers, appStore.getState().contacts || []) }
+                checked={!!selectedClaimsToConfirm[data.item.id.toString()]}
+                onPress={() => { toggleSelectedClaim(data.item) }}
+              />
             </TouchableOpacity>
           }
           ListFooterComponent={
@@ -151,7 +156,7 @@ export function ConfirmOthersScreen({ navigation }) {
               }
               <View style={{ marginTop: 10 }}/>
               <Button
-                title="Set Confirmations"
+                title="Finalize..."
                 onPress={ setConfirmations }
               />
             </View>
