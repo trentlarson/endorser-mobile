@@ -3,7 +3,7 @@ import * as crypto from 'crypto'
 import { HDNode } from '@ethersproject/hdnode'
 import * as R from 'ramda'
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Alert, Button, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
+import { ActivityIndicator, Alert, Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
 import { CheckBox } from "react-native-elements"
 import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
@@ -281,6 +281,10 @@ export function SettingsScreen({navigation}) {
     setQrJwts(jwts => R.set(R.lensProp(identifier.did), qrJwt, jwts))
   }
 
+  const copyToClipboard = (value) => {
+    Clipboard.setString(value)
+  }
+
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
@@ -431,6 +435,14 @@ export function SettingsScreen({navigation}) {
                       </Text>
 
                       <QRCode value={qrJwts[ident.did]} size={300}/>
+
+                      <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => Linking.openURL(qrJwts[ident.did])}>
+                        View Online
+                      </Text>
+                      <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => copyToClipboard(qrJwts[ident.did])}>
+                        Copy to Clipboard
+                      </Text>
+
                     </View>
                   )}
                   <View style={{ marginTop: 20, marginBottom: 20 }}>

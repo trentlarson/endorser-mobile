@@ -122,7 +122,7 @@ function HomeScreen({ navigation }) {
                   navigation={ navigation }
                 />
                 <Button
-                  title={'Confirm'}
+                  title={'Confirm Others'}
                   onPress={() => navigation.navigate('Confirm Others')}
                 />
                 <View style={{ marginBottom: 100 }}/>
@@ -131,11 +131,11 @@ function HomeScreen({ navigation }) {
               <View />
             )}
             <Button
-              title="Claim"
+              title="Claim - Certify - Offer"
               onPress={() => navigation.navigate('Create Credential')}
             />
             <Button
-              title={'Confirm'}
+              title={'Confirm - Agree'}
               onPress={() => navigation.navigate('Confirm Others')}
             />
             <Button
@@ -143,7 +143,7 @@ function HomeScreen({ navigation }) {
               onPress={() => navigation.navigate('Reports from Endorser server')}
             />
             <Button
-              title="Scan Presentation"
+              title="Scan Signatures"
               onPress={() => navigation.navigate('Scan Presentation')}
             />
             <View style={{ marginTop: 100 }}/>
