@@ -33,19 +33,7 @@ export function ContactImportScreen({ navigation }) {
   }
 
   const onSuccessfulQrText = async (jwtText) => {
-    const endorserContextLoc = jwtText.indexOf(utility.ENDORSER_JWT_URL_LOCATION)
-    if (endorserContextLoc > -1) {
-      jwtText = jwtText.substring(endorserContextLoc + utility.ENDORSER_JWT_URL_LOCATION.length)
-    }
-    if (jwtText.startsWith(utility.UPORT_JWT_PREFIX)) {
-      jwtText = jwtText.substring(prefix.length)
-    }
-
-    // JWT format: { header, payload, signature, data }
-    const jwt = didJwt.decodeJWT(jwtText)
-
-    const payload = jwt.payload
-    setContactInfo(payload)
+    return setContactInfo(utility.getContactPayloadFromJwtUrl(jwtText))
   }
 
   const clearModalAndRedirect = () => {

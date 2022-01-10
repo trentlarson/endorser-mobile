@@ -20,6 +20,7 @@ export function ContactsScreen({ navigation, route }) {
   const [contactName, setContactName] = useState<string>()
   const [contactPubKeyBase64, setContactPubKeyBase64] = useState<string>()
   const [contactsCsv, setContactsCsv] = useState<string>('')
+  const [contactUrl, setContactUrl] = useState<string>('')
   const [id0, setId0] = useState<Identifier>()
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
@@ -63,12 +64,25 @@ export function ContactsScreen({ navigation, route }) {
   }
 
   const createContact = async () => {
-    const contact = new Contact()
-    contact.did = contactDid
-    contact.name = contactName
-    contact.pubKeyBase64 = contactPubKeyBase64
-    await saveContact(contact)
-    return utility.loadContacts(appSlice, appStore, dbConnection)
+  console.log('contactDid',contactDid)
+    if (contactUrl != null && contactUrl != '') {
+      const conInfo = utility.getContactPayloadFromJwtUrl(contactUrl)
+      const contact = new Contact()
+      contact.did = conInfo.iss
+      contact.name = conInfo.own.name
+      contact.pubKeyBase64 = conInfo.own.publicEncKey
+      await saveContact(contact)
+      return utility.loadContacts(appSlice, appStore, dbConnection)
+    } else if (contactDid != null && contactDid != '') {
+      const contact = new Contact()
+      contact.did = contactDid
+      contact.name = contactName
+      contact.pubKeyBase64 = contactPubKeyBase64
+      await saveContact(contact)
+      return utility.loadContacts(appSlice, appStore, dbConnection)
+    } else {
+      Alert.alert("There must be a URL or a DID to create a contact.");
+    }
   }
 
   const createContactsFromCsv = async () => {
@@ -338,7 +352,27 @@ export function ContactsScreen({ navigation, route }) {
           )}
 
           <View style={{ alignItems: "center", marginTop: 10 }}>
-            <Text>... or enter by hand:</Text>
+            <Text>... or enter URL by hand:</Text>
+          </View>
+          <View>
+            <TextInput
+              value={contactUrl}
+              onChangeText={setContactUrl}
+              editable
+              style={{ borderWidth: 1 }}
+              autoCapitalize={'none'}
+            />
+            <View style={{ alignItems: "center" }}>
+              <Button
+                style={{ alignItems: "center" }}
+                title='Create'
+                onPress={createContact}
+              />
+            </View>
+          </View>
+
+          <View style={{ alignItems: "center", marginTop: 10 }}>
+            <Text>... or enter details by hand:</Text>
           </View>
           <View>
             <Text>Name (optional)</Text>
