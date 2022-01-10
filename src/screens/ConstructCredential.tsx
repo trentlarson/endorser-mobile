@@ -22,6 +22,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
   const [askForCreditInfo, setAskForCreditInfo] = useState<boolean>(false)
   const [askForGiveInfo, setAskForGiveInfo] = useState<boolean>(false)
+  const [askForPersonInfo, setAskForPersonInfo] = useState<boolean>(false)
   const [askForPledgeInfo, setAskForPledgeInfo] = useState<string>('')
   const [askForWitnessInfo, setAskForWitnessInfo] = useState<string>('')
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
@@ -88,6 +89,18 @@ export function ConstructCredentialScreen({ navigation }) {
                   : <View/>
                 }
                 {
+                  askForPersonInfo
+                  ? <PersonModal
+                      identifier={ identifiers[0].did }
+                      cancel={ () => setAskForPersonInfo(false) }
+                      proceed={ claim => {
+                        setAskForPersonInfo(false)
+                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                      }}
+                    />
+                  : <View/>
+                }
+                {
                   askForPledgeInfo
                   ? <PledgeModal
                       agent={ identifiers[0].did }
@@ -119,6 +132,11 @@ export function ConstructCredentialScreen({ navigation }) {
                     description='BVC Meeting'
                     identifier={ identifiers[0] }
                     navigation={ navigation }
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Advertize Skills or Services'}
+                    onPress={() => setAskForPersonInfo(true)}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
@@ -464,6 +482,69 @@ export function ConstructCredentialScreen({ navigation }) {
               >
                 <Text>Cancel</Text>
               </TouchableHighlight>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    )
+  }
+
+  /**
+    props has:
+    - identifier string for the identifier of the provider
+    - proceed function that takes the claim
+    - cancel function... cancels
+   **/
+  function PersonModal(props) {
+
+    const [text, setText] = useState<string>('')
+
+    function constructPerson() {
+      return {
+        "@context": "http://schema.org",
+        "@type": "Person",
+        "identifier": props.identifier,
+        "knowsAbout": text,
+      }
+    }
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={props.cancel}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View>
+              <Text style={styles.modalText}>I Know About...</Text>
+
+              <View>
+                <TextInput
+                  value={text}
+                  onChangeText={setText}
+                  editable
+                  style={{ borderWidth: 1 }}
+                  multiline={true}
+                  autoCapitalize={'none'}
+                />
+              </View>
+
+              <View style={{ padding: 10 }} />
+              <TouchableHighlight
+                style={styles.saveButton}
+                onPress={() => props.proceed(constructPerson())}
+              >
+                <Text>Finish...</Text>
+              </TouchableHighlight>
+              <View style={{ padding: 5 }} />
+              <TouchableHighlight
+                style={styles.cancelButton}
+                onPress={props.cancel}
+              >
+                <Text>Cancel</Text>
+              </TouchableHighlight>
+
             </View>
           </View>
         </View>
