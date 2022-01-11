@@ -3,7 +3,7 @@ import * as crypto from 'crypto'
 import { HDNode } from '@ethersproject/hdnode'
 import * as R from 'ramda'
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Alert, Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
+import { ActivityIndicator, Alert, Button, Linking, Modal, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
 import { CheckBox } from "react-native-elements"
 import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
@@ -16,6 +16,7 @@ import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
 import { DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER, appSlice, appStore } from "../veramo/appSlice"
 import { agent, dbConnection, DEFAULT_DID_PROVIDER_NAME } from "../veramo/setup"
+import { styles } from './style'
 
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
 const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
@@ -192,6 +193,7 @@ export function SettingsScreen({navigation}) {
   const [inputName, setInputName] = useState<string>('')
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
+  const [quickMessage, setQuickMessage] = useState<string>(null)
   const [storedName, setStoredName] = useState<string>('')
 
   const toggleStateForHomeIsBVC = async () => {
@@ -283,6 +285,8 @@ export function SettingsScreen({navigation}) {
 
   const copyToClipboard = (value) => {
     Clipboard.setString(value)
+    setQuickMessage('Copied')
+    setTimeout(() => { setQuickMessage(null) }, 1000)
   }
 
   // Check for existing identifers on load and set them to state
@@ -337,7 +341,7 @@ export function SettingsScreen({navigation}) {
     const setNewTestMode = async (setting) => {
       appStore.dispatch(appSlice.actions.setTestMode(setting))
       if (setting) {
-        Alert.alert('Beware! In test mode you have the ability to corrupt your data. Close and Restart the app if you are unsure.')
+        Alert.alert('Beware! In test mode you have the ability to corrupt your data. If you are unsure, exit test mode or close and restart the app.')
       } else {
         // now going into real mode, but if the servers were switched then warn
         if (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER) {
@@ -439,9 +443,21 @@ export function SettingsScreen({navigation}) {
                       <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => Linking.openURL(qrJwts[ident.did])}>
                         View Online
                       </Text>
+
                       <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => copyToClipboard(qrJwts[ident.did])}>
                         Copy to Clipboard
                       </Text>
+                      <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={!!quickMessage}
+                      >
+                        <View style={styles.centeredView}>
+                          <View style={styles.modalView}>
+                            <Text>{ quickMessage }</Text>
+                          </View>
+                        </View>
+                      </Modal>
 
                     </View>
                   )}

@@ -23,6 +23,7 @@ export function ContactsScreen({ navigation, route }) {
   const [contactUrl, setContactUrl] = useState<string>('')
   const [id0, setId0] = useState<Identifier>()
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
+  const [quickMessage, setQuickMessage] = useState<string>(null)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
   const [wantsCsv, setWantsCsv] = useState<boolean>(false)
 
@@ -64,7 +65,6 @@ export function ContactsScreen({ navigation, route }) {
   }
 
   const createContact = async () => {
-  console.log('contactDid',contactDid)
     if (contactUrl != null && contactUrl != '') {
       const conInfo = utility.getContactPayloadFromJwtUrl(contactUrl)
       const contact = new Contact()
@@ -72,6 +72,8 @@ export function ContactsScreen({ navigation, route }) {
       contact.name = conInfo.own.name
       contact.pubKeyBase64 = conInfo.own.publicEncKey
       await saveContact(contact)
+      setQuickMessage('Created')
+      setTimeout(() => { setQuickMessage(null) }, 1000)
       return utility.loadContacts(appSlice, appStore, dbConnection)
     } else if (contactDid != null && contactDid != '') {
       const contact = new Contact()
@@ -79,6 +81,8 @@ export function ContactsScreen({ navigation, route }) {
       contact.name = contactName
       contact.pubKeyBase64 = contactPubKeyBase64
       await saveContact(contact)
+      setQuickMessage('Created')
+      setTimeout(() => { setQuickMessage(null) }, 1000)
       return utility.loadContacts(appSlice, appStore, dbConnection)
     } else {
       Alert.alert("There must be a URL or a DID to create a contact.");
@@ -279,9 +283,6 @@ export function ContactsScreen({ navigation, route }) {
             animationType="slide"
             transparent={true}
             visible={!!wantsCsv}
-            onRequestClose={() => {
-              Alert.alert("Modal has been closed.");
-            }}
           >
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
@@ -370,6 +371,17 @@ export function ContactsScreen({ navigation, route }) {
               />
             </View>
           </View>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!quickMessage}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text>{ quickMessage }</Text>
+              </View>
+            </View>
+          </Modal>
 
           <View style={{ alignItems: "center", marginTop: 10 }}>
             <Text>... or enter details by hand:</Text>
