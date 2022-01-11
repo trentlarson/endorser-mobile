@@ -349,9 +349,12 @@ export function ConstructCredentialScreen({ navigation }) {
     const [durationInHours, setDurationInHours] = useState<string>('1')
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [fundedId, setFundedId] = useState<string>('')
+    const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
     const [termsOfService, setTermsOfService] = useState<string>("Let's talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc.\nRecipient records delivery with TakeAction.")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
+
+    const allContacts = useSelector((state) => state.contacts || [])
 
     function grantClaim(grantId: string, funderId: string, fundedId: string, comments: string, durationInHours: string, expiration: string, termsOfService: string, transfersAllowed: number) {
       return {
@@ -394,6 +397,16 @@ export function ConstructCredentialScreen({ navigation }) {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+
+            {
+              selectFromContacts
+              ? <ContactSelectModal
+                  cancel={ () => { setSelectFromContacts(false) } }
+                  proceed={ (did) => { setFundedId(did); setSelectFromContacts(false) }}
+                />
+              : <View/>
+            }
+
             <View>
               <Text style={styles.modalText}>Give Time</Text>
 
@@ -407,6 +420,16 @@ export function ConstructCredentialScreen({ navigation }) {
                   autoCapitalize={'none'}
                   autoCorrect={false}
                 />
+                {
+                  allContacts.length > 0
+                  ? <TouchableHighlight
+                      style={styles.moreButton}
+                      onPress={() => setSelectFromContacts(true)}
+                    >
+                      <Text>Pick</Text>
+                    </TouchableHighlight>
+                  : <View />
+                }
               </View>
 
               <View style={{ padding: 5 }}>
