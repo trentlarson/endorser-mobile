@@ -78,7 +78,7 @@ export function ContactImportScreen({ navigation }) {
           setTimeout(clearModalAndRedirect, 500)
         })
         .catch(err => {
-          setVisibilityError('"' + contact.name + '" was saved.  However, there was a problem with setting visibility.  Mark yourself visible or invisible on the Contacts page.')
+          setVisibilityError('"' + contact.name + '" was saved. However, there was a problem with setting visibility. Mark yourself visible or invisible on the Contacts page.')
         })
         .finally(() => {
           setStoringVisibility(false)
@@ -132,7 +132,7 @@ export function ContactImportScreen({ navigation }) {
                             </TouchableHighlight>
                           </View>
                         ) : (
-                          <Text style={styles.modalText}>Saved.</Text>
+                          <Text style={styles.modalText}>Saved</Text>
                         )
                       ) : (
 
