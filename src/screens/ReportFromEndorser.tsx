@@ -48,6 +48,12 @@ export function ReportScreen({ navigation }) {
             editable
             style={{ borderWidth: 1 }}
           />
+          <Text>
+            Examples:&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('programming') }}>programming</Text>,&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('Training') }}>Training</Text>,&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('JoinAction') }}>JoinAction</Text>
+          </Text>
           {
             loading
             ?
