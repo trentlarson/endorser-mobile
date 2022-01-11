@@ -135,7 +135,7 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Advertize Skills or Services'}
+                    title={'Advertise or Seek Skills or Services'}
                     onPress={() => setAskForPersonInfo(true)}
                   />
                   <View style={{ padding: 5 }} />
@@ -497,15 +497,26 @@ export function ConstructCredentialScreen({ navigation }) {
    **/
   function PersonModal(props) {
 
-    const [text, setText] = useState<string>('')
+    const [knowsText, setKnowsText] = useState<string>('')
+    const [located, setLocated] = useState<string>('')
+    const [seeksText, setSeeksText] = useState<string>('')
 
     function constructPerson() {
-      return {
+      let result = {
         "@context": "http://schema.org",
         "@type": "Person",
         "identifier": props.identifier,
-        "knowsAbout": text,
       }
+      if (located) {
+        result = R.mergeRight(result, { homeLocation: located })
+      }
+      if (knowsText) {
+        result = R.mergeRight(result, { knowsAbout: knowsText })
+      }
+      if (seeksText) {
+        result = R.mergeRight(result, { seeks: seeksText })
+      }
+      return result
     }
 
     return (
@@ -517,12 +528,38 @@ export function ConstructCredentialScreen({ navigation }) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View>
-              <Text style={styles.modalText}>I Know About...</Text>
 
               <View>
+                <Text style={styles.modalText}>I Know About...</Text>
                 <TextInput
-                  value={text}
-                  onChangeText={setText}
+                  value={knowsText}
+                  onChangeText={setKnowsText}
+                  editable
+                  style={{ borderWidth: 1 }}
+                  multiline={true}
+                  autoCapitalize={'none'}
+                />
+              </View>
+
+              <View style={{ padding: 20 }} />
+              <View>
+                <Text style={styles.modalText}>I Am Looking For...</Text>
+                <TextInput
+                  value={seeksText}
+                  onChangeText={setSeeksText}
+                  editable
+                  style={{ borderWidth: 1 }}
+                  multiline={true}
+                  autoCapitalize={'none'}
+                />
+              </View>
+
+              <View style={{ padding: 20 }} />
+              <View>
+                <Text style={styles.modalText}>I Am Located...</Text>
+                <TextInput
+                  value={located}
+                  onChangeText={setLocated}
                   editable
                   style={{ borderWidth: 1 }}
                   multiline={true}
