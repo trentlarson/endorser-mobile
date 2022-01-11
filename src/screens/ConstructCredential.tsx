@@ -197,9 +197,12 @@ export function ConstructCredentialScreen({ navigation }) {
     const [description, setDescription] = useState<string>('')
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [recipientId, setRecipientId] = useState<string>('')
+    const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
     const [termsOfService, setTermsOfService] = useState<string>("Acknowledge receipt of contract and funds (eg. with TakeAction).\nRecipient logs final payment (eg. with GiveAction) and provider agrees (eg. with AgreeAction).")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
+
+    const allContacts = useSelector((state) => state.contacts || [])
 
     function grantClaim(txnId: string, providerId: string, recipientId: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
       return {
@@ -242,6 +245,16 @@ export function ConstructCredentialScreen({ navigation }) {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+
+            {
+              selectFromContacts
+              ? <ContactSelectModal
+                  cancel={ () => { setSelectFromContacts(false) } }
+                  proceed={ (did) => { setRecipientId(did); setSelectFromContacts(false) }}
+                />
+              : <View/>
+            }
+
             <View>
               <Text style={styles.modalText}>Grant or Loan Money</Text>
 
@@ -255,6 +268,16 @@ export function ConstructCredentialScreen({ navigation }) {
                   autoCapitalize={'none'}
                   autoCorrect={false}
                 />
+                {
+                  allContacts.length > 0
+                  ? <TouchableHighlight
+                      style={styles.moreButton}
+                      onPress={() => setSelectFromContacts(true)}
+                    >
+                      <Text>Pick</Text>
+                    </TouchableHighlight>
+                  : <View />
+                }
               </View>
 
               <View style={{ padding: 5 }}>
