@@ -223,6 +223,12 @@ export function SettingsScreen({navigation}) {
   // from https://reactnative.dev/docs/direct-manipulation#setnativeprops-to-clear-textinput-value
   const inputApiRef = useRef()
   const inputViewRef = useRef()
+  const setToLocalServers = useCallback(() => {
+    inputApiRef.current.setNativeProps({ text: 'http://127.0.0.1:3000' })
+    inputViewRef.current.setNativeProps({ text: 'http://127.0.0.1:3001' })
+    appStore.dispatch(appSlice.actions.setApiServer('http://127.0.0.1:3000'))
+    appStore.dispatch(appSlice.actions.setViewServer('http://127.0.0.1:3001'))
+  })
   const setToTestServers = useCallback(() => {
     inputApiRef.current.setNativeProps({ text: TEST_API_URL })
     inputViewRef.current.setNativeProps({ text: TEST_VIEW_URL })
@@ -545,12 +551,16 @@ export function SettingsScreen({navigation}) {
                     </TextInput>
 
                     <Button
+                      title='Use public prod servers'
+                      onPress={setToProdServers}
+                    />
+                    <Button
                       title='Use public test servers'
                       onPress={setToTestServers}
                     />
                     <Button
-                      title='Use public prod servers'
-                      onPress={setToProdServers}
+                      title='Use local test servers'
+                      onPress={setToLocalServers}
                     />
 
                   </View>
