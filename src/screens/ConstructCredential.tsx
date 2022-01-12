@@ -554,7 +554,7 @@ export function ConstructCredentialScreen({ navigation }) {
         "identifier": props.identifier,
       }
       if (located) {
-        result = R.mergeRight(result, { homeLocation: located })
+        result = R.mergeRight(result, { homeLocation: { address: located } })
       }
       if (knowsText) {
         result = R.mergeRight(result, { knowsAbout: knowsText })
