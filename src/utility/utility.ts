@@ -61,9 +61,12 @@ function testRecursivelyOnString(func, input) {
   }
 }
 
-// This is currently a rather expensive implementation.
 export const containsHiddenDid = (obj) => {
   return testRecursivelyOnString(str => str === HIDDEN_DID, obj)
+}
+
+export const containsNonHiddenDid = (obj) => {
+  return testRecursivelyOnString(str => isDid(str) && !isHiddenDid(str), obj)
 }
 
 // take DID and extract address and return first and last 3 chars

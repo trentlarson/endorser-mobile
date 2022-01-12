@@ -1,6 +1,7 @@
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, View } from 'react-native'
+import { ActivityIndicator, Button, FlatList, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, View } from 'react-native'
+import { CheckBox } from 'react-native-elements'
 import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
@@ -16,6 +17,7 @@ export function ReportScreen({ navigation }) {
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
+  const [showClaimsWithoutDids, setShowClaimsWithoutDids] = useState(false)
 
   const identifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
@@ -67,6 +69,17 @@ export function ReportScreen({ navigation }) {
                   <Text>- </Text>{ objectToYamlReact(item) }
                 </View>
               )
+              /** This complained about being inside a ScrollView, and about nesting.
+              <FlatList
+                data={ obj }
+                keyExtractor={(item, index) => "" + index}
+                renderItem={(item, index) =>
+                  <View style={{ marginLeft: 5 }}>
+                    <Text>- </Text>{ objectToYamlReact(item) }
+                  </View>
+                }
+              />
+              **/
             }
           </View>
         )
@@ -98,6 +111,15 @@ export function ReportScreen({ navigation }) {
         </Text>
       )
     }
+  }
+
+  const filteredResultOutput = (results) => {
+    // assuming results is an array
+    const filteredResults =
+      showClaimsWithoutDids
+      ? results
+      : R.filter(utility.containsNonHiddenDid, results)
+    return objectToYamlReact(filteredResults)
   }
 
   const searchEndorser = async () => {
@@ -149,15 +171,20 @@ export function ReportScreen({ navigation }) {
                     title="Search"
                     onPress={searchEndorser}
                   />
-                  <Text>
-                    {
-                      searchResults == null
-                      ? ''
-                      : searchResults.length == 0
-                        ? 'No results'
-                        : objectToYamlReact(searchResults)
-                    }
-                  </Text>
+
+                  <CheckBox
+                    title='Show claims without actionable IDs.'
+                    checked={showClaimsWithoutDids}
+                    onPress={() => setShowClaimsWithoutDids(!showClaimsWithoutDids)}
+                  />
+
+                  {
+                    searchResults == null
+                    ? <Text/>
+                    : searchResults.length == 0
+                      ? <Text>No results.</Text>
+                      : filteredResultOutput(searchResults)
+                  }
 
                   <Modal
                     animationType="slide"
