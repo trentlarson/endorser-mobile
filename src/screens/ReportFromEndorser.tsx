@@ -12,11 +12,13 @@ import { MyCredentialsScreen } from './MyCredentials'
 
 export function ReportScreen({ navigation }) {
 
+  const [didsForModal, setDidsForModal] = useState<Array<string>>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
 
   const identifiers = useSelector((state) => state.identifiers || [])
+  const allContacts = useSelector((state) => state.contacts || [])
 
   /** This works, but I like the 'React' version better.
   const objectToYamlString = (obj, indentLevel) => {
@@ -53,7 +55,7 @@ export function ReportScreen({ navigation }) {
   }
   **/
 
-  const objectToYamlReact = (obj) => {
+  const objectToYamlReact = (obj, visibleToDids) => {
     if (obj instanceof Object) {
       if (Array.isArray(obj)) {
         // array: loop through elements
@@ -77,7 +79,7 @@ export function ReportScreen({ navigation }) {
                 const newline = obj[key] instanceof Object ? "\n" : ""
                 return (
                   <Text key={ index } style={{ marginLeft: 20 }}>
-                    { key } : { newline }{ objectToYamlReact(obj[key]) }
+                    { key } : { newline }{ objectToYamlReact(obj[key], obj[key + 'VisibleToDids']) }
                   </Text>
                 )}
               )
@@ -86,7 +88,15 @@ export function ReportScreen({ navigation }) {
         )
       }
     } else {
-      return <Text>{ JSON.stringify(obj) }</Text>
+      let style = (visibleToDids == null) ? {} : { color: 'blue' }
+      return (
+        <Text
+          style={ style }
+          onPress={ () => setDidsForModal(visibleToDids) }
+        >
+          { JSON.stringify(obj) }
+        </Text>
+      )
     }
   }
 
@@ -148,6 +158,44 @@ export function ReportScreen({ navigation }) {
                         : objectToYamlReact(searchResults)
                     }
                   </Text>
+
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={!!didsForModal}
+                  >
+                    <View style={styles.centeredView}>
+                      <View style={styles.modalView}>
+                        <Text>This person can be seen by the following people:</Text>
+                        {
+                          didsForModal != null
+                          ? didsForModal.map((did) => {
+                              const contact = R.find(con => con.did === did, allContacts)
+                              return (
+                                <Text key={ did } style={{ padding: 10 }}>
+                                  { did }
+                                  {
+                                    contact != null
+                                    ? <Text>... who is in your contacts: { contact.name }</Text>
+                                    : <Text>... who allows you to see them, but they're not in your contacts.</Text>
+                                  }
+                                </Text>
+                              )
+                            })
+                          : <View/>
+                        }
+                        <TouchableHighlight
+                          style={styles.cancelButton}
+                          onPress={() => {
+                            setDidsForModal(null)
+                          }}
+                        >
+                          <Text>Cancel</Text>
+                        </TouchableHighlight>
+                      </View>
+                    </View>
+                  </Modal>
+
                 </View>
             }
           </View>
