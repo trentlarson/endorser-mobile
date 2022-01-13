@@ -138,7 +138,7 @@ export function SignCredentialScreen({ navigation, route }) {
       setId0(appStore.getState().identifiers && appStore.getState().identifiers[0])
 
       let settings = appStore.getState().settings
-      if (settings?.mnemEncrBase64 || settings?.mnemonic) {
+      if (settings && (settings.mnemEncrBase64 || settings.mnemonic)) {
         setHasMnemonic(true)
       }
     }

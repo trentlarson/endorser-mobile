@@ -140,7 +140,7 @@ export function ContactImportScreen({ navigation }) {
                           <Text style={styles.modalText}>Save this contact?</Text>
 
                           <CheckBox
-                            title={ 'Make my claims visible to ' + contactInfo?.own?.name }
+                            title={ 'Make my claims visible to ' + (contactInfo && contactInfo.own && contactInfo.own.name) }
                             checked={wantsToBeVisible}
                             onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                           />

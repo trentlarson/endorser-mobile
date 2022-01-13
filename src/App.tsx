@@ -92,7 +92,7 @@ function HomeScreen({ navigation }) {
 
       utility.loadContacts(appSlice, appStore, dbConnection)
 
-      if (settings.mnemonic != null) {
+      if (settings != null && settings.mnemonic != null) {
         setOldMnemonic(true)
       }
     }

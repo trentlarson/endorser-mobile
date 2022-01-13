@@ -44,7 +44,7 @@ export function ConstructCredentialScreen({ navigation }) {
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getSettings = async () => {
-      if (settings?.mnemEncrBase64 || settings?.mnemonic) {
+      if (settings && (settings.mnemEncrBase64 || settings.mnemonic)) {
         setHasMnemonic(true)
       }
     }

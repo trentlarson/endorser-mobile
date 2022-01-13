@@ -264,7 +264,7 @@ export function SettingsScreen({navigation}) {
 
     const conn = await dbConnection
     let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-    if (settings?.mnemEncrBase64 || settings?.mnemonic) {
+    if (settings && (settings.mnemEncrBase64 || settings.mnemonic)) {
       setHasMnemonic(true)
     }
 
@@ -304,16 +304,16 @@ export function SettingsScreen({navigation}) {
 
       const conn = await dbConnection
       let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-      if (settings?.mnemEncrBase64 || settings?.mnemonic) {
+      if (settings && (settings.mnemEncrBase64 || settings.mnemonic)) {
         setHasMnemonic(true)
       }
-      if (settings?.name) {
-        setStoredName(settings?.name)
-        setInputName(settings?.name)
+      if (settings && settings.name) {
+        setStoredName(settings.name)
+        setInputName(settings.name)
       }
 
       pojoIds.forEach(ident => {
-        const sharePayload = uportJwtPayload(ident.did, settings?.name, ident.keys[0].publicKeyHex)
+        const sharePayload = uportJwtPayload(ident.did, settings && settings.name, ident.keys[0].publicKeyHex)
         setQrJwtForPayload(ident, sharePayload)
       })
       setFinishedCheckingIds(true)
@@ -359,8 +359,8 @@ export function SettingsScreen({navigation}) {
   }, [isInTestMode])
 
   useEffect(() => {
-    setHomeIsBVC(appStore.getState().settings.homeScreen)
-  })
+    setHomeIsBVC(appStore.getState().settings && appStore.getState().settings.homeScreen === 'BVC')
+  }, [])
 
   return (
     <SafeAreaView>
@@ -714,7 +714,7 @@ export function ImportIdentityScreen({navigation}) {
     const loadOldMnemonic = async () => {
       const conn = await dbConnection
       const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-      if (settings.mnemonic != null) {
+      if (settings && settings.mnemonic != null) {
         setMnemonic(settings.mnemonic)
         setMnemonicIsOld(true)
       }
