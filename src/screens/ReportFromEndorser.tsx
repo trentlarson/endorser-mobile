@@ -1,6 +1,6 @@
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, FlatList, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, View } from 'react-native'
+import { ActivityIndicator, Button, FlatList, Linking, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import { CheckBox } from 'react-native-elements'
 import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
@@ -13,6 +13,7 @@ import { MyCredentialsScreen } from './MyCredentials'
 
 export function ReportScreen({ navigation }) {
 
+  const [claimIdForModal, setClaimIdForModal] = useState<string>()
   const [didsForModal, setDidsForModal] = useState<Array<string>>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
@@ -57,7 +58,7 @@ export function ReportScreen({ navigation }) {
   }
   **/
 
-  const objectToYamlReact = (obj, visibleToDids) => {
+  const objectToYamlReact = (obj, claimId, visibleToDids) => {
     if (obj instanceof Object) {
       if (Array.isArray(obj)) {
         // array: loop through elements
@@ -66,7 +67,7 @@ export function ReportScreen({ navigation }) {
             {
               obj.map((item, index) =>
                 <View key={ index } style={{ marginLeft: 5 }}>
-                  <Text>- </Text>{ objectToYamlReact(item) }
+                  <Text>- </Text>{ objectToYamlReact(item, claimId || item.id) }
                 </View>
               )
               /** This complained about being inside a ScrollView, and about nesting.
@@ -75,7 +76,7 @@ export function ReportScreen({ navigation }) {
                 keyExtractor={(item, index) => "" + index}
                 renderItem={(item, index) =>
                   <View style={{ marginLeft: 5 }}>
-                    <Text>- </Text>{ objectToYamlReact(item) }
+                    <Text>- </Text>{ objectToYamlReact(item, claimId || item.id) }
                   </View>
                 }
               />
@@ -92,7 +93,7 @@ export function ReportScreen({ navigation }) {
                 const newline = obj[key] instanceof Object ? "\n" : ""
                 return (
                   <Text key={ index } style={{ marginLeft: 20 }}>
-                    { key } : { newline }{ objectToYamlReact(obj[key], obj[key + 'VisibleToDids']) }
+                    { key } : { newline }{ objectToYamlReact(obj[key], claimId, obj[key + 'VisibleToDids']) }
                   </Text>
                 )}
               )
@@ -105,7 +106,10 @@ export function ReportScreen({ navigation }) {
       return (
         <Text
           style={ style }
-          onPress={ () => setDidsForModal(visibleToDids) }
+          onPress={ () => {
+            setClaimIdForModal(claimId)
+            setDidsForModal(visibleToDids)
+          }}
         >
           { JSON.stringify(obj) }
         </Text>
@@ -172,18 +176,20 @@ export function ReportScreen({ navigation }) {
                     onPress={searchEndorser}
                   />
 
-                  <CheckBox
-                    title='Show claims without actionable IDs.'
-                    checked={showClaimsWithoutDids}
-                    onPress={() => setShowClaimsWithoutDids(!showClaimsWithoutDids)}
-                  />
-
                   {
                     searchResults == null
                     ? <Text/>
                     : searchResults.length == 0
                       ? <Text>No results.</Text>
-                      : filteredResultOutput(searchResults)
+                      : <View>
+                          <CheckBox
+                            title='Show claims without visible IDs.'
+                            checked={showClaimsWithoutDids}
+                            onPress={() => setShowClaimsWithoutDids(!showClaimsWithoutDids)}
+                          />
+                          
+                          { filteredResultOutput(searchResults) }
+                        </View>
                   }
 
                   <Modal
@@ -193,19 +199,18 @@ export function ReportScreen({ navigation }) {
                   >
                     <View style={styles.centeredView}>
                       <View style={styles.modalView}>
-                        <Text>This person can be seen by the following people:</Text>
+                        <Text>
+                          This person can be seen by the people in your network, below.
+                          Ask one of them to give you more information about <Text style={{ color: 'blue' }} onPress={() => Linking.openURL(appStore.getState().viewServer + '/reportClaim?claimId=' + claimIdForModal)}>this claim</Text>.
+                        </Text>
+
                         {
                           didsForModal != null
                           ? didsForModal.map((did) => {
                               const contact = R.find(con => con.did === did, allContacts)
                               return (
                                 <Text key={ did } style={{ padding: 10 }}>
-                                  { did }
-                                  {
-                                    contact != null
-                                    ? <Text>... who is in your contacts: { contact.name }</Text>
-                                    : <Text>... who allows you to see them, but they're not in your contacts.</Text>
-                                  }
+                                  { utility.didInContext(did, identifiers, allContacts) }
                                 </Text>
                               )
                             })
@@ -217,7 +222,7 @@ export function ReportScreen({ navigation }) {
                             setDidsForModal(null)
                           }}
                         >
-                          <Text>Cancel</Text>
+                          <Text>Close</Text>
                         </TouchableHighlight>
                       </View>
                     </View>
