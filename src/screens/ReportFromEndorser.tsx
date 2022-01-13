@@ -13,8 +13,9 @@ import { MyCredentialsScreen } from './MyCredentials'
 
 export function ReportScreen({ navigation }) {
 
-  const [claimIdForModal, setClaimIdForModal] = useState<string>()
-  const [didsForModal, setDidsForModal] = useState<Array<string>>(null)
+  const [claimIdForLinkedModal, setClaimIdForLinkedModal] = useState<string>()
+  const [didsForLinkedModal, setDidsForLinkedModal] = useState<Array<string>>(null)
+  const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
@@ -102,14 +103,18 @@ export function ReportScreen({ navigation }) {
         )
       }
     } else {
-      let style = (visibleToDids == null) ? {} : { color: 'blue' }
+      const isVisibleDid = (typeof obj == 'string' && utility.isDid(obj) && !utility.isHiddenDid(obj))
+      const style = (visibleToDids != null || isVisibleDid) ? { color: 'blue' } : {}
+      const onPress =
+        (visibleToDids != null)
+        ? () => { setClaimIdForLinkedModal(claimId); setDidsForLinkedModal(visibleToDids) }
+        : isVisibleDid
+          ? () => { setDidForVisibleModal(obj) }
+          : () => {}
       return (
         <Text
           style={ style }
-          onPress={ () => {
-            setClaimIdForModal(claimId)
-            setDidsForModal(visibleToDids)
-          }}
+          onPress={ onPress }
         >
           { JSON.stringify(obj) }
         </Text>
@@ -195,18 +200,40 @@ export function ReportScreen({ navigation }) {
                   <Modal
                     animationType="slide"
                     transparent={true}
-                    visible={!!didsForModal}
+                    visible={!!didForVisibleModal}
+                  >
+                    <View style={styles.centeredView}>
+                      <View style={styles.modalView}>
+                        <Text>
+                          { utility.didInContext(didForVisibleModal, identifiers, allContacts) }
+                        </Text>
+                        <TouchableHighlight
+                          style={styles.cancelButton}
+                          onPress={() => {
+                            setDidForVisibleModal(null)
+                          }}
+                        >
+                          <Text>Close</Text>
+                        </TouchableHighlight>
+                      </View>
+                    </View>
+                  </Modal>
+
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={!!didsForLinkedModal}
                   >
                     <View style={styles.centeredView}>
                       <View style={styles.modalView}>
                         <Text>
                           This person can be seen by the people in your network, below.
-                          Ask one of them to give you more information about <Text style={{ color: 'blue' }} onPress={() => Linking.openURL(appStore.getState().viewServer + '/reportClaim?claimId=' + claimIdForModal)}>this claim</Text>.
+                          Ask one of them to give you more information about <Text style={{ color: 'blue' }} onPress={() => Linking.openURL(appStore.getState().viewServer + '/reportClaim?claimId=' + claimIdForLinkedModal)}>this claim</Text>.
                         </Text>
 
                         {
-                          didsForModal != null
-                          ? didsForModal.map((did) => {
+                          didsForLinkedModal != null
+                          ? didsForLinkedModal.map((did) => {
                               const contact = R.find(con => con.did === did, allContacts)
                               return (
                                 <Text key={ did } style={{ padding: 10 }}>
@@ -219,7 +246,7 @@ export function ReportScreen({ navigation }) {
                         <TouchableHighlight
                           style={styles.cancelButton}
                           onPress={() => {
-                            setDidsForModal(null)
+                            setDidsForLinkedModal(null)
                           }}
                         >
                           <Text>Close</Text>
