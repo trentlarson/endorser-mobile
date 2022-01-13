@@ -201,7 +201,7 @@ function HelpScreen() {
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>What is even the purpose of this thing?</Text>
           <Text style={{ padding: 5 }}>This uses the power of cryptography to build confidence: when you make claims and then your friends and family confirm those claims, you gain much more utility, control, and security in your online life.</Text>
-          <Text style={{ padding: 5 }}>For an example, look at <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/reportBestAttendance')}>this report of meeting attendance</Text>.  Attendees can see their own info and their contacts' info but you cannot see it... until someone brings you into their confidence. So... make some claims, confirm others' claims, and build a network of trust -- with trustworthy communications, all verifiable cryptographically.</Text>
+          <Text style={{ padding: 5 }}>For an example, look at <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/reportBestAttendance')}>this report of meeting attendance</Text>.  Attendees can see their own info and their contacts' info but you cannot see it... until someone brings you into their confidence. So make some claims, confirm others' claims, and build a network of trust -- with trustworthy communications, all verifiable cryptographically.</Text>
         </View>
 
         <View style={{ padding: 20 }}>
@@ -217,17 +217,17 @@ function HelpScreen() {
 
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I change my mnemonic seed phrase password?</Text>
-          <Text style={{ padding: 5 }}>First, export your phrase. Then go into Test Mode (under Settings and Advanced Mode) and import that phrase with the new password.</Text>
+          <Text style={{ padding: 5 }}>First, export your phrase. Then go into Test Mode (under Settings and Advanced Mode) and click "Import ID" to import that phrase with the new password.</Text>
         </View>
 
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I backup/export/import my contacts?</Text>
-          <Text style={{ padding: 5 }}>On the Contacts screen, copy the names and DIDs to your clipboard (with the 'copy' button at the bottom) and send them to yourself (eg. by email).  You can then enter them by hand if you want to import them (and yes, we realize that it's tedious to paste them in one-by-one and yes, we intend to improve this).</Text>
+          <Text style={{ padding: 5 }}>On the Contacts screen, click on "Copy All to Clipboard (CSV)" and send them to yourself (eg. by email).  You can then import them with the "Import Bulk (CSV)" on the same screen.</Text>
         </View>
 
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I generate a different identifier?</Text>
-          <Text style={{ padding: 5 }}>One way is to go to Test Mode (under Settings under Advanced Mode) where you can deleted our current identifier and generate a new one.</Text>
+          <Text style={{ padding: 5 }}>One way is to go to Test Mode (under Settings under Advanced Mode), and then you can delete your current identifier and generate a new one.</Text>
           <Text style={{ padding: 5 }}>Here's another way, but note that this will erase the identifier and contacts, so we recommend you backup those first by following the instructions above.</Text>
           <Text style={{ padding: 5 }}>- On Android, you can go to the Storage in App Info and clear it. Remember to export your data first!</Text>
           <Text style={{ padding: 5 }}>- On iOS, the easiest way is to uninstall and reinstall the app. Remember to export your data first!</Text>
