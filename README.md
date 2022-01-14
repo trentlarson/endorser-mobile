@@ -88,7 +88,7 @@ To Release:
 - Test everything.
 - In package.json, update version
 - Tag
-- In src/veramo/appSlice.ts: servers are endorser.ch
+- In src/veramo/appSlice.ts: check that servers are endorser.ch
 - (I recommend starting with ios since it takes longer to get approved.)
 - android
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number)
@@ -103,20 +103,24 @@ To Release:
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json
   - Make the CFBundleVersion one less than the versionCode above. (Note that it is automatically incremented by fastlane beta.)
-  - `cd ios; bundle exec fastlane beta; cd ..`
+  - This might require that you first create the new release version in the appstoreconnect.apple.com
+    - `cd ios; bundle exec fastlane beta; cd ..`
+    - This takes about 30 minutes. The upload takes about 10 at the end; there's no prompt after requesting the 6-digit code.
+    - After entering the 6-digit code (in about 18 minutes), it should say "Login Successful". It failed when I was on a VPN... maybe because I hadn't created the version in the App Store yet.
   - To create a new release
     - Have a test build?  IDK... maybe don't click 'Expire'
     - For a new one: in App Connect -> App Store next to iOS App, click the "+"
     - For an existing one: under "Build" and all the way to the right of the number (which you have to mouse-over to see), click the red icon to remove that version, then add another version.  Also change the "Version" in the field below the icons.
     - Submit it for review (by filling in the "What's New" and "Notes"), and after they approve the review then you can test in TestFlight or release.
-  - Screenshot on different simulator: `yarn run ios --simulator="iPhone 8"`
+  - Screenshot on different simulator: `yarn run ios --simulator='iPhone 5.5"` (also 'iPhone 8')
     6.5" (eg. iPhone 11)
     take at 361x780 then scale to 1284x2778 (exactly)
     5.5" (eg. iPhone 8)
     ... 361x642 or 400x712 ... 1242x2208 (exactly)
-  - Add screenshots to version control.
+  - Add screenshots to version control in endorser-mobile-assets
 
 - ... and after that upload:
+  - update CHANGELOG commit hash.
   - Make sure to commit those changes to git.
   - Bump the version in: package.json
 

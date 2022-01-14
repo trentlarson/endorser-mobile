@@ -12,6 +12,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [6.0.16]
+
+### Added
+- Encrypt mnemonic seed phrase
+- Show derivation path
+- Bulk CSV contact export and import
+- Links in search results, to show DID contact info & linked "visible" intermediate DID info
+- YAML format for search results
+- Drop-down contact selection for DID inputs on claims
+- Custom home screen for one organization
+
+
+
+
+## [6.0.15]
+
+### Added
+- Add verifiable presentations
+- Add pledges, including time and money
+
+
+
+
 ## [6.0.7]
 
 ### Added
