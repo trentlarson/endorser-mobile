@@ -170,7 +170,7 @@ export function SignCredentialScreen({ navigation, route }) {
                   fetched ? (
                     endorserId ? (
                       <Button
-                        title="Success!  Click here to see your claim on the Endorser server."
+                        title="Success!  Click here to see your claim on the Endorser server -- but note that you won't see all the info if you're not logged in."
                         onPress={() => {
                           Linking.openURL(endorserViewLink(endorserId)).catch(err =>
                             setError(

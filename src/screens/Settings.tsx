@@ -9,6 +9,7 @@ import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
 import Clipboard from "@react-native-community/clipboard"
 import VersionNumber from 'react-native-version-number'
+import { useSelector } from 'react-redux'
 import { IIdentifier } from "@veramo/core"
 
 import * as pkg from '../../package.json'
@@ -78,8 +79,12 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
     const conn = await dbConnection
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got DB connection..."}))
 
-    let newContact = await conn.manager.save(settings)
+    await conn.manager.save(settings) // will skip undefined fields
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... mnemonic saved..."}))
+
+    let newSettings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+    appStore.dispatch(appSlice.actions.setSettings(classToPlain(newSettings)))
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... settings cached..."}))
 
     const savedId = await agent.didManagerImport(newId)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... identifier imported by DID Manager..."}))
@@ -186,8 +191,6 @@ export function SettingsScreen({navigation}) {
   const [error, setError] = useState<string>('')
   const [finishedCheckingIds, setFinishedCheckingIds] = useState<boolean>(false)
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
-  const [homeIsBVC, setHomeIsBVC] = useState<boolean>(false)
-  const [identifiers, setIdentifiers] = useState<Omit<IIdentifier, 'provider'>[]>([])
   const [isInAdvancedMode, setIsInAdvancedMode] = useState<boolean>(appStore.getState().advancedMode)
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
   const [inputName, setInputName] = useState<string>('')
@@ -196,22 +199,19 @@ export function SettingsScreen({navigation}) {
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [storedName, setStoredName] = useState<string>('')
 
+  const identifiersSelector = useSelector((state) => state.identifiers || [])
+  const homeScreenSelector = useSelector((state) => (state.settings || {}).homeScreen)
+  const logMessageSelector = useSelector((state) => state.logMessage)
+
   const toggleStateForHomeIsBVC = async () => {
-    if (homeIsBVC) {
-      appStore.dispatch(appSlice.actions.setHomeScreen(null))
-      const conn = await dbConnection
-      await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { homeScreen: null })
-      setHomeIsBVC(false)
-    } else {
-      appStore.dispatch(appSlice.actions.setHomeScreen('BVC'))
-      const conn = await dbConnection
-      await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { homeScreen: 'BVC' })
-      setHomeIsBVC(true)
-    }
+    const newValue = homeScreenSelector == null ? 'BVC' : null
+    const conn = await dbConnection
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { homeScreen: newValue })
+    appStore.dispatch(appSlice.actions.setHomeScreen(newValue))
   }
 
   const toggleAdvancedMode = () => {
-    if (isInTestMode) {
+    if (isInTestMode && isInAdvancedMode) {
       Alert.alert('You must uncheck Test Mode to exit Advanced Mode.')
     } else {
       const newValue = !isInAdvancedMode
@@ -243,16 +243,16 @@ export function SettingsScreen({navigation}) {
   })
 
   const deleteLastIdentifier = async () => {
-    if (identifiers.length > 0) {
-      const oldIdent = identifiers[identifiers.length - 1]
+    if (identifiersSelector.length > 0) {
+      const oldIdent = identifiersSelector[identifiersSelector.length - 1]
       await agent.didManagerDelete(oldIdent)
-      if (identifiers.length === 1) {
+      if (identifiersSelector.length === 1) {
         const conn = await dbConnection
         await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {mnemEncrBase64: null, ivBase64: null, salt: null})
       }
+
       const ids = await agent.didManagerFind()
       appStore.dispatch(appSlice.actions.setIdentifiers(ids.map(classToPlain)))
-      setIdentifiers(ids)
       setQrJwts(jwts => R.omit([oldIdent.did], jwts))
     }
   }
@@ -260,7 +260,6 @@ export function SettingsScreen({navigation}) {
   const setNewId = async (ident) => {
     const pojoIdent = classToPlain(ident)
     appStore.dispatch(appSlice.actions.addIdentifier(pojoIdent))
-    setIdentifiers((s) => s.concat([pojoIdent]))
 
     const conn = await dbConnection
     let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
@@ -275,7 +274,7 @@ export function SettingsScreen({navigation}) {
   const storeNewName = async () => {
     const conn = await dbConnection
     await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {name: inputName})
-    identifiers.forEach(ident => {
+    identifiersSelector.forEach(ident => {
       const sharePayload = uportJwtPayload(ident, inputName, ident.keys[0].publicKeyHex)
       setQrJwtForPayload(ident, sharePayload)
     })
@@ -299,8 +298,6 @@ export function SettingsScreen({navigation}) {
   useEffect(() => {
     const getIdentifiers = async () => {
       const pojoIds = appStore.getState().identifiers
-      appStore.dispatch(appSlice.actions.setIdentifiers(pojoIds))
-      setIdentifiers(pojoIds)
 
       const conn = await dbConnection
       let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
@@ -358,10 +355,6 @@ export function SettingsScreen({navigation}) {
     setNewTestMode(isInTestMode)
   }, [isInTestMode])
 
-  useEffect(() => {
-    setHomeIsBVC(appStore.getState().settings && appStore.getState().settings.homeScreen === 'BVC')
-  }, [])
-
   return (
     <SafeAreaView>
       <ScrollView>
@@ -386,7 +379,7 @@ export function SettingsScreen({navigation}) {
           <View>
             <Text style={{ padding: 10, color: 'red', textAlign: 'center' }}>{ error }</Text>
             {
-              R.isEmpty(identifiers)
+              R.isEmpty(identifiersSelector)
               ?
                 finishedCheckingIds
                 ?
@@ -421,7 +414,7 @@ export function SettingsScreen({navigation}) {
                      <Text/>
                   )}
 
-                  { identifiers.map(ident =>
+                  { identifiersSelector.map(ident =>
                     <View key={ident.did} style={{ marginTop: 20 }}>
 
                       <Text>Identifier</Text>
@@ -506,7 +499,7 @@ export function SettingsScreen({navigation}) {
               <Text>Home Screen</Text>
               <CheckBox
                 title='Bountiful Voluntaryist Community'
-                checked={homeIsBVC === 'BVC'}
+                checked={homeScreenSelector === 'BVC'}
                 onPress={toggleStateForHomeIsBVC}
               />
             </View>
@@ -586,7 +579,7 @@ export function SettingsScreen({navigation}) {
                 />
 
                 <Text>Log</Text>
-                <Text selectable={true}>{ appStore.getState().logMessage }</Text>
+                <Text selectable={true}>{ logMessageSelector }</Text>
               </View>
             ) : (
               <View/>

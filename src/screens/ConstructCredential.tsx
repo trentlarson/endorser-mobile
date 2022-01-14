@@ -55,7 +55,7 @@ export function ConstructCredentialScreen({ navigation }) {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          { identifiers[0] ? (
+          { identifiers && identifiers[0] ? (
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Create</Text>
               { !hasMnemonic ? (
