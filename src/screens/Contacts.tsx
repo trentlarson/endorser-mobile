@@ -21,6 +21,8 @@ export function ContactsScreen({ navigation, route }) {
   const [contactPubKeyBase64, setContactPubKeyBase64] = useState<string>()
   const [contactsCsv, setContactsCsv] = useState<string>('')
   const [contactUrl, setContactUrl] = useState<string>('')
+  const [editContactIndex, setEditContactIndex] = useState<number>(null)
+  const [editContactName, setEditContactName] = useState<string>(null)
   const [id0, setId0] = useState<Identifier>()
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
@@ -62,6 +64,17 @@ export function ContactsScreen({ navigation, route }) {
   const saveContacts = async (contacts: Array<Contact>) => {
     const conn = await dbConnection
     return conn.manager.save(Contact, contacts)
+  }
+
+  const saveContactName = async (contactIndex, contactName) => {
+    setEditContactIndex(null)
+    setEditContactName(null)
+
+    const contact = allContacts[contactIndex]
+    const newContact = R.set(R.lensProp('name'), contactName, contact)
+    const result = saveContact(newContact)
+    appStore.dispatch(appSlice.actions.setContact(newContact))
+    return result
   }
 
   const createContact = async () => {
@@ -336,6 +349,40 @@ export function ContactsScreen({ navigation, route }) {
               </View>
             </View>
           </Modal>
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={editContactIndex != null}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text>Edit Name</Text>
+                <TextInput
+                  value={editContactName}
+                  onChangeText={setEditContactName}
+                  editable
+                  style={{ borderWidth: 1 }}
+                  autoCapitalize={'none'}
+                />
+
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => saveContactName(editContactIndex, editContactName) }
+                >
+                  <Text>Save</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }}/>
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={() => { setEditContactIndex(null) }}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </Modal>
+
           {csvMessages.length > 0 ? (
             <View style={{ marginBottom: 20 }}>
               <Text>{ csvMessages.join("\n") }</Text>
@@ -371,6 +418,7 @@ export function ContactsScreen({ navigation, route }) {
               />
             </View>
           </View>
+
           <Modal
             animationType="slide"
             transparent={true}
@@ -442,9 +490,20 @@ export function ContactsScreen({ navigation, route }) {
             <View style={{ borderWidth: 1 }} key={contact.did}>
               <View style={{ padding: 20 }}>
                 <Text style={{ fontSize: 11 }} selectable={ true }>
-                  { (contact.name || '(no name)')
-                    + '\n' + contact.did
-                    + '\n' + (contact.pubKeyBase64 || '(no public key)')}
+                  { contact.name || '(no name)' }
+                  &nbsp;
+                  <Text
+                    style={{ color: 'blue' }}
+                    onPress={() => { setEditContactIndex(index); setEditContactName(allContacts[index].name) }}
+                  >
+                    (edit)
+                  </Text>
+                </Text>
+                <Text style={{ fontSize: 11 }} selectable={ true }>
+                  { contact.did }
+                </Text>
+                <Text style={{ fontSize: 11 }} selectable={ true }>
+                  { (contact.pubKeyBase64 || '(no public key)')}
                 </Text>
                 {
                   loadingAction[contact.did]
