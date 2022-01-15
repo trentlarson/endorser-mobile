@@ -227,6 +227,11 @@ function HelpScreen() {
         </View>
 
         <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>How do I delete a contact?</Text>
+          <Text style={{ padding: 5 }}>Go to Test Mode (under Settings under Advanced Mode), and then you can delete any contact. But beware: there is currently no prompt for safety, so be careful... and after deleting, go back and exit Test Mode right away.</Text>
+        </View>
+
+        <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>How do I generate a different identifier?</Text>
           <Text style={{ padding: 5 }}>One way is to go to Test Mode (under Settings under Advanced Mode), and then you can delete your current identifier and generate a new one.</Text>
           <Text style={{ padding: 5 }}>Here's another way, but note that this will erase the identifier and contacts, so we recommend you backup those first by following the instructions above.</Text>
