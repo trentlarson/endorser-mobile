@@ -134,11 +134,18 @@ export function ConfirmOthersScreen({ navigation }) {
             <TouchableOpacity
               style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
             >
+              {/* Why does any CheckBox in here give this error when you start the app: "Please provide SecretBox to the KeyStore"?
               <CheckBox
-                title={ utility.claimDescription(data.item, appStore.getState().identifiers, appStore.getState().contacts || []) }
+                title={ utility.claimDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || []) }
                 checked={!!selectedClaimsToConfirm[data.item.id.toString()]}
                 onPress={() => { toggleSelectedClaim(data.item) }}
               />
+              */}
+              <Text onPress={() => { toggleSelectedClaim(data.item) }}>
+                <Text>{utility.claimDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || [])}</Text>
+                { "\n" }
+                <Text style={{ color: "blue" }}>{ selectedClaimsToConfirm[data.item.id.toString()] ? "(on)" : "(off)" }</Text>
+              </Text>
             </TouchableOpacity>
           }
           ListFooterComponent={
