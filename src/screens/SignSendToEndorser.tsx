@@ -164,8 +164,8 @@ export function SignCredentialScreen({ navigation, route }) {
         <View style={{ padding: 20 }}>
           { id0 ? (
             <View>
-              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Sign</Text>
-              <View style={{ padding: 10 }}>
+              <Text style={{ fontSize: 30, fontWeight: 'bold', marginBottom: 10 }}>Sign</Text>
+              <View>
                 {
                   fetched ? (
                     endorserId ? (
@@ -192,7 +192,10 @@ export function SignCredentialScreen({ navigation, route }) {
                     ) : ( /* !fetched && !fetching */
 
                       claimStr ? (
-                        <View/>
+                        <View>
+                          <Text>Below is the information for your final review.</Text>
+                          <Text style={{ color: 'red' }}>This is not yet submitted; click 'Sign & Store' to send.</Text>
+                        </View>
                       ) : ( /* !fetched && !fetching && !claimStr */
                         <Text>No claim found.  Go back and try again.</Text>
                       )
