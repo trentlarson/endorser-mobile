@@ -6,8 +6,10 @@ import { Contact } from '../entity/contact'
 import { Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 
-export const DEFAULT_ENDORSER_API_SERVER = 'https://endorser.ch:3000'
-export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
+//export const DEFAULT_ENDORSER_API_SERVER = 'https://endorser.ch:3000'
+//export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
+export const DEFAULT_ENDORSER_API_SERVER = 'https://test.endorser.ch:8000'
+export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://test.endorser.ch8080'
 
 // for contents set in reducers
 interface Payload<T> {

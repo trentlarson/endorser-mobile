@@ -18,10 +18,42 @@ import { agent, dbConnection } from '../veramo/setup'
 
 const debug = Debug('endorser-mobile:share-credential')
 
+function donateClaim(grantId: string, funderId: string, fundedId: string, price: number, priceCurrency: string, comments: string, expiration: string, termsOfService: string, transfersAllowed: number) {
+  return {
+    "@context": "https://schema.org",
+
+    // An alternative is a Grant (even MonetaryGrant)
+    "@type": "DonateAction",
+
+    "description": comments,
+    "agent": {
+      "identifier": funderId,
+    },
+    "recipient": {
+      "identifier": fundedId,
+    },
+    "identifier": grantId,
+
+    "price": price,
+
+    // eg. ISO 4217 or UN/CEFACT Common Codes; see https://schema.org/price
+    "priceCurrency": priceCurrency,
+
+    //-- The rest are not in the schema.org spec for DonateAction.
+
+    "expires": expiration,
+    "termsOfService": termsOfService,
+
+    //-- The rest are new, not in the schema.org spec anywhere.
+
+    "numberOfTransfersAllowed": transfersAllowed,
+  }
+}
+
 export function ConstructCredentialScreen({ navigation }) {
 
   const [askForCreditInfo, setAskForCreditInfo] = useState<boolean>(false)
-  const [askForGiveInfo, setAskForGiveInfo] = useState<boolean>(false)
+  const [askForDonationInfo, setAskForDonationInfo] = useState<string>(null)
   const [askForPersonInfo, setAskForPersonInfo] = useState<boolean>(false)
   const [askForPledgeInfo, setAskForPledgeInfo] = useState<string>('')
   const [askForWitnessInfo, setAskForWitnessInfo] = useState<string>('')
@@ -65,12 +97,13 @@ export function ConstructCredentialScreen({ navigation }) {
               )}
               <View style={{ padding: 10 }}>
                 {
-                  askForGiveInfo
-                  ? <GiveModal
+                  askForDonationInfo != null
+                  ? <DonationModal
                       sponsorId={ identifiers[0].did }
-                      cancel={ () => setAskForGiveInfo(false) }
+                      cancel={ () => setAskForDonationInfo(null) }
+                      kind={ askForDonationInfo }
                       proceed={ claim => {
-                        setAskForGiveInfo(false)
+                        setAskForDonationInfo(null)
                         navigation.navigate('Sign Credential', { credentialSubject: claim })
                       }}
                     />
@@ -140,13 +173,12 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Offer Credit'}
-                    onPress={() => setAskForCreditInfo(true)}
+                    title={'Donate Time'}
+                    onPress={() => setAskForDonationInfo('time')}
                   />
-                  <View style={{ padding: 5 }} />
                   <Button
-                    title={'Offer Time'}
-                    onPress={() => setAskForGiveInfo(true)}
+                    title={'Donate Money'}
+                    onPress={() => setAskForDonationInfo('money')}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
@@ -204,7 +236,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
     const allContacts = useSelector((state) => state.contacts || [])
 
-    function grantClaim(txnId: string, providerId: string, recipientId: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
+    function loanOrCreditClaim(txnId: string, providerId: string, recipientId: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
       return {
         "@context": "https://schema.org",
         "@type": "LoanOrCredit",
@@ -224,8 +256,8 @@ export function ConstructCredentialScreen({ navigation }) {
       }
     }
 
-    function grantClaimFromInputs() {
-      return grantClaim(
+    function loanOrCreditClaimFromInputs() {
+      return loanOrCreditClaim(
         crypto.randomBytes(16).toString('hex'), // 128 bits seems OK
         props.providerId,
         recipientId,
@@ -342,7 +374,7 @@ export function ConstructCredentialScreen({ navigation }) {
               <View style={{ padding: 10 }} />
               <TouchableHighlight
                 style={styles.saveButton}
-                onPress={() => props.proceed(grantClaimFromInputs())}
+                onPress={() => props.proceed(loanOrCreditClaimFromInputs())}
               >
                 <Text>Finish...</Text>
               </TouchableHighlight>
@@ -363,49 +395,32 @@ export function ConstructCredentialScreen({ navigation }) {
   /**
     props has:
     - funderId string for the identifier of the sponsor
+    - kind string is "money" or "time"
     - proceed function that takes the claim
     - cancel function
    **/
-  function GiveModal(props) {
+  function DonationModal(props) {
 
     const [comment, setComment] = useState<string>('')
-    const [durationInHours, setDurationInHours] = useState<string>('1')
+    const [amount, setAmount] = useState<string>('1')
+    const [currency, setCurrency] = useState<string>(props.kind === 'time' ? 'HUR' : '')
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [fundedId, setFundedId] = useState<string>('')
     const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
-    const [termsOfService, setTermsOfService] = useState<string>("Let's talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc.\nRecipient records delivery with TakeAction.")
+    const [termsOfService, setTermsOfService] = useState<string>("We talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc. Recipient will record delivery with TakeAction.")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
 
     const allContacts = useSelector((state) => state.contacts || [])
 
-    function grantClaim(grantId: string, funderId: string, fundedId: string, comments: string, durationInHours: string, expiration: string, termsOfService: string, transfersAllowed: number) {
-      return {
-        "@context": "https://schema.org",
-        "@type": "GiveAction",
-        // recommend adding non-standard properties as key:value pairs in descriptions until they evolve into standard properties
-        "description": comments,
-        "duration": "PT" + durationInHours + "H",
-        "expires": expiration,
-        "recipient": {
-          "identifier": fundedId,
-        },
-        "agent": {
-          "identifier": funderId
-        },
-        "numberOfTransfersAllowed": transfersAllowed,
-        "termsOfService": termsOfService,
-        "identifier": grantId,
-      }
-    }
-
-    function grantClaimFromInputs() {
-      return grantClaim(
+    function donateClaimFromInputs() {
+      return donateClaim(
         crypto.randomBytes(16).toString('hex'), // 128 bits seems OK; might consider ULIDs
         props.sponsorId,
         fundedId,
+        amount,
+        currency,
         comment,
-        durationInHours,
         expiration,
         termsOfService,
         multipleTransfersAllowed ? Number.MAX_SAFE_INTEGER : transferAllowed ? 1 : 0
@@ -456,15 +471,32 @@ export function ConstructCredentialScreen({ navigation }) {
               </View>
 
               <View style={{ padding: 5 }}>
-                <Text>Number of Hours</Text>
+                <Text>{ props.kind === 'money' ? 'Amount of Currency' : 'Number of Hours' }</Text>
                 <TextInput
-                  value={durationInHours}
-                  onChangeText={setDurationInHours}
+                  value={amount}
+                  onChangeText={setAmount}
                   editable
                   length={ 5 }
                   style={{ borderWidth: 1 }}
                 />
               </View>
+
+              {
+                props.kind === 'money' ? (
+                  <View style={{ padding: 5 }}>
+                    <Text>Kind of Currency (eg. USD, BTC)</Text>
+                    <TextInput
+                      value={currency}
+                      onChangeText={setCurrency}
+                      editable
+                      length={ 5 }
+                      style={{ borderWidth: 1 }}
+                    />
+                  </View>
+                ) : (
+                  <View/>
+                )
+              }
 
               <View style={{ padding: 5 }}>
                 <Text>Expiration</Text>
@@ -506,7 +538,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 />
                 <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
                   <CheckBox
-                    title='Multiple Transfers Allowed?'
+                    title='Multiple Transfers Allowed'
                     checked={multipleTransfersAllowed}
                     onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
                     visible={transferAllowed}
@@ -517,7 +549,7 @@ export function ConstructCredentialScreen({ navigation }) {
               <View style={{ padding: 10 }} />
               <TouchableHighlight
                 style={styles.saveButton}
-                onPress={() => props.proceed(grantClaimFromInputs())}
+                onPress={() => props.proceed(donateClaimFromInputs())}
               >
                 <Text>Finish...</Text>
               </TouchableHighlight>
