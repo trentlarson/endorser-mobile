@@ -182,6 +182,11 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
+                    title={'Generate Credit'}
+                    onPress={() => setAskForCreditInfo(true)}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
                     title={'Witness To Something Great'}
                     onPress={() => setAskForWitnessInfo("They ")}
                   />
@@ -224,8 +229,8 @@ export function ConstructCredentialScreen({ navigation }) {
    **/
   function CreditModal(props) {
 
-    const [amountStr, setAmountStr] = useState<string>('0')
-    const [currency, setCurrency] = useState<string>('?')
+    const [amountStr, setAmountStr] = useState<string>('')
+    const [currency, setCurrency] = useState<string>('')
     const [description, setDescription] = useState<string>('')
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [recipientId, setRecipientId] = useState<string>('')
@@ -261,7 +266,7 @@ export function ConstructCredentialScreen({ navigation }) {
         crypto.randomBytes(16).toString('hex'), // 128 bits seems OK
         props.providerId,
         recipientId,
-        Number.parseFloat(amountStr),
+        Number(amountStr),
         currency,
         description,
         termsOfService,
@@ -324,7 +329,7 @@ export function ConstructCredentialScreen({ navigation }) {
               </View>
 
               <View style={{ padding: 5 }}>
-                <Text>Currency</Text>
+                <Text>Kind of Currency (eg. USD, BTC)</Text>
                 <TextInput
                   value={currency}
                   onChangeText={setCurrency}
@@ -402,7 +407,7 @@ export function ConstructCredentialScreen({ navigation }) {
   function DonationModal(props) {
 
     const [comment, setComment] = useState<string>('')
-    const [amount, setAmount] = useState<string>('1')
+    const [amountStr, setAmountStr] = useState<string>('1')
     const [currency, setCurrency] = useState<string>(props.kind === 'time' ? 'HUR' : '')
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [fundedId, setFundedId] = useState<string>('')
@@ -418,7 +423,7 @@ export function ConstructCredentialScreen({ navigation }) {
         crypto.randomBytes(16).toString('hex'), // 128 bits seems OK; might consider ULIDs
         props.sponsorId,
         fundedId,
-        amount,
+        Number(amountStr),
         currency,
         comment,
         expiration,
@@ -473,8 +478,8 @@ export function ConstructCredentialScreen({ navigation }) {
               <View style={{ padding: 5 }}>
                 <Text>{ props.kind === 'money' ? 'Amount of Currency' : 'Number of Hours' }</Text>
                 <TextInput
-                  value={amount}
-                  onChangeText={setAmount}
+                  value={amountStr}
+                  onChangeText={setAmountStr}
                   editable
                   length={ 5 }
                   style={{ borderWidth: 1 }}
