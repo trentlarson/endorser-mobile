@@ -161,24 +161,15 @@ export function ConstructCredentialScreen({ navigation }) {
                 <View>
                   <Text>What do you want to assert?</Text>
                   <View style={{ padding: 5 }} />
-                  <BVCButton
-                    description='BVC Meeting'
-                    identifier={ identifiers[0] }
-                    navigation={ navigation }
-                  />
-                  <View style={{ padding: 5 }} />
                   <Button
                     title={'Advertise or Seek Skills or Services'}
                     onPress={() => setAskForPersonInfo(true)}
                   />
                   <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Donate Time'}
-                    onPress={() => setAskForDonationInfo('time')}
-                  />
-                  <Button
-                    title={'Donate Money'}
-                    onPress={() => setAskForDonationInfo('money')}
+                  <BVCButton
+                    description='BVC Meeting'
+                    identifier={ identifiers[0] }
+                    navigation={ navigation }
                   />
                   <View style={{ padding: 5 }} />
                   <Button
@@ -187,8 +178,12 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Witness To Something Great'}
-                    onPress={() => setAskForWitnessInfo("They ")}
+                    title={'Offer Time Donation'}
+                    onPress={() => setAskForDonationInfo('time')}
+                  />
+                  <Button
+                    title={'Offer Money Donation'}
+                    onPress={() => setAskForDonationInfo('money')}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
@@ -209,6 +204,11 @@ export function ConstructCredentialScreen({ navigation }) {
                   <Button
                     title={'Pledge A Life Of Gifts'}
                     onPress={() => setAskForPledgeInfo("I help to create a world based on giving, in ways that fulfill me.")}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Witness To Something Remarkable'}
+                    onPress={() => setAskForWitnessInfo("They ")}
                   />
                 </View>
               </View>
@@ -235,7 +235,7 @@ export function ConstructCredentialScreen({ navigation }) {
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [recipientId, setRecipientId] = useState<string>('')
     const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
-    const [termsOfService, setTermsOfService] = useState<string>("Acknowledge receipt of contract and funds (eg. with TakeAction).\nRecipient logs final payment (eg. with GiveAction) and provider agrees (eg. with AgreeAction).")
+    const [termsOfService, setTermsOfService] = useState<string>("Recipient will acknowledge receipt of contract and funds (eg. with TakeAction). Recipient logs final payment (eg. with GiveAction) and provider agrees (eg. with AgreeAction).")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
 
@@ -451,7 +451,7 @@ export function ConstructCredentialScreen({ navigation }) {
             }
 
             <View>
-              <Text style={styles.modalText}>Give Time</Text>
+              <Text style={styles.modalText}>Offer Donation</Text>
 
               <View style={{ padding: 5 }}>
                 <Text>Recipient</Text>
