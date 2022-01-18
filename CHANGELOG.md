@@ -12,12 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.0.16]
+## [6.0.17]
 
 ### Added
 - Encrypt mnemonic seed phrase
 - Show derivation path
 - Bulk CSV contact export and import
+- Edit a contact name.
 - Links in search results, to show DID contact info & linked "visible" intermediate DID info
 - YAML format for search results
 - Drop-down contact selection for DID inputs on claims
