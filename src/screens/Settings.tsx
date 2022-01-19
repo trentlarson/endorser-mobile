@@ -763,7 +763,7 @@ export function ImportIdentityScreen({navigation}) {
               ) : (
                   <View>
                     {mnemonicIsOld ? (
-                      <Text style={{ color: 'red' }}>Seed phrase is not protected, so click below to protect it.</Text>
+                      <Text style={{ color: 'red' }}>Seed phrase is not protected, so click "to import" below to protect it.</Text>
                     ) : (
                       <View />
                     )}
