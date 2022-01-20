@@ -78,7 +78,7 @@ To Release:
     - After uploading, "Save", "Review Release", then "Rollout to internal testing" or "Rollout to Production".
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json
-  - Make the CFBundleVersion one less than the versionCode above. (Note that it is automatically incremented by fastlane beta.)
+  - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION one less than the versionCode wanted (eg. in android). (Note that it EndorserMobile/Info.plist CFBundleVersion is automatically incremented by fastlane beta.)
   - `cd ios; bundle exec fastlane beta; cd ..`
   - To create a new release
     - Have a test build?  IDK... maybe don't click 'Expire'
