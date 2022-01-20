@@ -79,8 +79,7 @@ yarn start --reset-cache # which you'll have to kill because it doesn't stop
 To Do First Release:
 
 - Android
-  - In the android folder, put pc-api-....json
-  - In the android/app folder, put google-comm-endo-upload-key.keystore
+  - In the android/app folder, put pc-api-....json and google-comm-endo-upload-key.keystore
 - Figure out Apple signing.  (Sorry, I don't remember that part.)
 
 
@@ -92,9 +91,14 @@ To Release:
 - In src/veramo/appSlice.ts: check that servers are endorser.ch
 - (I recommend starting with ios since it takes longer to get approved.)
 - android
-  - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number)
+  - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number to match ios)
     - Always increment the versionCode (and ensure you don't already have a larger release in ios just for consistency's sake).  It is possible to reuse the versionName.
   - `cd android; bundle exec fastlane beta; cd ..`
+    - It will prompt for credentials.
+    - For error: "Keystore file 'endorser-mobile/android/fastlane/../app/google...keystore' not found for signing config 'externalOverride'."
+      - Put the google...keystore file in place.
+    - For error: "Google Api Error: forbidden: The caller does not have permission"
+      - Check that the pc-api...json file is in place. Also go to Console -> Setup -> API access and find that Service Account key, then Grant Access.
   - To create a new release & upload:
     - Do one of these in Google Play Console:
       - In Internal testing, "Edit release", or
@@ -103,7 +107,7 @@ To Release:
     - After uploading, "Save", "Review Release", then "Rollout to internal testing" or "Rollout to Production".
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json
-  - Make the CFBundleVersion one less than the versionCode in the android/app/build.gradle. (Note that it is automatically incremented by fastlane beta.)
+  - Make the CFBundleVersion one less than the versionCode in the android/app/build.gradle. (Note that it is automatically incremented by fastlane beta.) (Remember this when building; it changes.)
   - Create a release in App Store Connect
     - Have a test build?  IDK... maybe don't click 'Expire'
     - For a new one: in App Connect -> App Store next to iOS App, click the "+"
