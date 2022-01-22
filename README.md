@@ -50,8 +50,8 @@ yarn start --reset-cache # which you'll have to kill because it doesn't stop
 `cd src/migration`
 `npx typeorm migration:create -n YourMigrationName`
 
-... and edit src/veramo/setup.js to import that file and add to `migrations`.
-
+... and edit it to include a field: 'public name = "ClassName...789"'
+... and edit src/veramo/setup.js and add import for that file and add to `migrations` (and add to ALL_ENTITIES if there's a new table)
 
 
 

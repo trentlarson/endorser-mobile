@@ -163,7 +163,7 @@ function HomeScreen({ navigation }) {
               onPress={() => navigation.navigate('Reports from Endorser server')}
             />
             <Button
-              title="Scan Signatures"
+              title="Scan Presentation"
               onPress={() => navigation.navigate('Scan Presentation')}
             />
             <View style={{ marginTop: 100 }}/>
@@ -206,6 +206,7 @@ function HomeScreen({ navigation }) {
         )
       )
       }
+      <View style={{ marginBottom: 100 }} />
       <Button
         title="Get Help"
         onPress={() => navigation.navigate('Help')}

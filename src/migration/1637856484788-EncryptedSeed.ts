@@ -2,6 +2,9 @@ import {MigrationInterface, QueryRunner} from "typeorm";
 
 export class EncryptedSeed1637856484788 implements MigrationInterface {
 
+  // The default is to use the class name but somehow Android loses the name in the apk.
+  public name = "EncryptedSeed1637856484788"
+
   public async up(queryRunner: QueryRunner): Promise<any> {
     const UPORT_ROOT_DERIVATION_PATH = '{"derivationPath":"m/7696500\'\'/0\'\'/0\'\'/0\'\'"}'
     const migrateSql0 = "UPDATE key SET meta = '" + UPORT_ROOT_DERIVATION_PATH + "'"
