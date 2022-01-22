@@ -83,26 +83,38 @@ function HomeScreen({ navigation }) {
     const getIdentifiers = async () => {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "About to load DIDs..."}))
 
-      const _ids = await agent.didManagerFind()
-      appStore.dispatch(appSlice.actions.setIdentifiers(_ids.map(classToPlain)))
+      agent.didManagerFind()
+      .then((_ids) => {
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... found DIDs, about to store..."}))
+        appStore.dispatch(appSlice.actions.setIdentifiers(_ids.map(classToPlain)))
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... stored DIDs, about to load settings ..."}))
 
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded DIDs, about to load settings..."}))
+        return dbConnection
+      })
+      .then((conn) => {
+        return conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+      })
+      .then((settings) => {
+        appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
 
-      const conn = await dbConnection
-      const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+        setLoading(false)
 
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded settings, about to load contacts..."}))
-      appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
+        if (settings != null && settings.mnemonic != null) {
+          setOldMnemonic(true)
+        }
 
-      setLoading(false)
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded settings, about to load contacts..."}))
 
-      utility.loadContacts(appSlice, appStore, dbConnection)
+        return utility.loadContacts(appSlice, appStore, dbConnection)
+      })
+      .then(() => {
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
 
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
+      })
+      .catch((err) => {
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
+      })
 
-      if (settings != null && settings.mnemonic != null) {
-        setOldMnemonic(true)
-      }
     }
     getIdentifiers()
   }, [])
