@@ -763,7 +763,7 @@ export function ImportIdentityScreen({navigation}) {
               ) : (
                   <View>
                     {mnemonicIsOld ? (
-                      <Text style={{ color: 'red' }}>Seed phrase is not protected, so click "to import" below to protect it.</Text>
+                      <Text style={{ color: 'red' }}>Seed phrase is not protected, so "click to import" below to protect it.</Text>
                     ) : (
                       <View />
                     )}
@@ -785,7 +785,7 @@ export function ImportIdentityScreen({navigation}) {
                       textContentType={'newPassword'}
                     />
                     <CheckBox
-                      title='Convert Address to Lowercase'
+                      title='Convert Address to Lowercase -- Check this if you used the original uPort app.'
                       checked={makeLowercase}
                       onPress={() => setMakeLowercase(!makeLowercase)}
                     />

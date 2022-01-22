@@ -156,10 +156,10 @@ function HomeScreen({ navigation }) {
               onPress={() => navigation.navigate('Settings')}
             />
             {oldMnemonic ? (
-              <View style={{ marginTop: 50 }}>
-                <Text style={{ color: 'red', textAlign: 'center' }}>Your data is not secure.</Text>
+              <View style={{ marginTop: 20, marginBottom: 20 }}>
+                <Text style={{ color: 'red', textAlign: 'center' }}>Your identity is not encrypted.</Text>
                 <Button
-                  title="Click to secure your mnemonic seed phrase."
+                  title="Encrypt your identity."
                   onPress={() => navigation.navigate('Import Seed Phrase')}
                 />
               </View>
