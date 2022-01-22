@@ -81,16 +81,24 @@ function HomeScreen({ navigation }) {
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "About to load DIDs..."}))
+
       const _ids = await agent.didManagerFind()
       appStore.dispatch(appSlice.actions.setIdentifiers(_ids.map(classToPlain)))
 
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded DIDs, about to load settings..."}))
+
       const conn = await dbConnection
       const settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded settings, about to load contacts..."}))
       appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
 
       setLoading(false)
 
       utility.loadContacts(appSlice, appStore, dbConnection)
+
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
 
       if (settings != null && settings.mnemonic != null) {
         setOldMnemonic(true)
@@ -195,6 +203,9 @@ function HomeScreen({ navigation }) {
 }
 
 function HelpScreen() {
+
+  const logMessageSelector = useSelector((state) => state.logMessage)
+
   return (
     <SafeAreaView>
       <ScrollView>
@@ -289,20 +300,23 @@ function HelpScreen() {
 
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>What info should I provide in feedback?</Text>
-          <Text style={{ padding: 5 }} selectable={true}>Version { pkg.version } ({ VersionNumber.buildVersion })</Text>
+          <Text style={{ padding: 5 }} selectable={true}>
+            Version { pkg.version } ({ VersionNumber.buildVersion })
+            { logMessageSelector }
+          </Text>
         </View>
 
         { Platform.OS === 'android'
           ?
             <View style={{ padding: 20 }}>
-              <Text style={{ fontWeight: 'bold' }}>Do I need to upgrade?</Text>
-              <Text style={{ padding: 5 }}>Double-check in <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://play.google.com/store/apps/details?id=ch.endorser.mobile')}>here in the Play Store</Text>.</Text>
+              <Text style={{ fontWeight: 'bold' }}>Should I upgrade?</Text>
+              <Text style={{ padding: 5 }}>Check <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://play.google.com/store/apps/details?id=ch.endorser.mobile')}>here in the Play Store</Text>.</Text>
             </View>
           : Platform.OS === 'ios'
             ?
               <View style={{ padding: 20 }}>
-               <Text style={{ fontWeight: 'bold' }}>Do I need to upgrade?</Text>
-               <Text style={{ padding: 5 }}>Double-check <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://apps.apple.com/us/app/endorser-mobile/id1556368693')}>here in the App Store</Text>.</Text>
+               <Text style={{ fontWeight: 'bold' }}>Should I to upgrade?</Text>
+               <Text style={{ padding: 5 }}>Check <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://apps.apple.com/us/app/endorser-mobile/id1556368693')}>here in the App Store</Text>.</Text>
               </View>
             :
               <Text/>
