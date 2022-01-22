@@ -120,98 +120,98 @@ function HomeScreen({ navigation }) {
   }, [])
 
   return (
-    <View>
-      {
-      loading
-      ? (
-        <View style={{ marginLeft: '45%', marginTop: '50%' }}>
-          <Text>Loading...</Text>
-        </View>
-      ) : ( // not loading
-        allIdentifiers != null && allIdentifiers.length > 0
+    <SafeAreaView>
+      <ScrollView>
+        {
+        loading
         ? (
-          <View>
-            {settings != null && settings.homeScreen === 'BVC'
-            ? (
-              <View>
-                <View style={{ marginBottom: 100 }}/>
-                <Text style={{ textAlign: 'center' }}>Bountiful Voluntaryist Community Saturday Meeting</Text>
-                <BVCButton
-                  description='Meeting'
-                  identifier={ allIdentifiers[0] }
-                  navigation={ navigation }
-                />
-                <Button
-                  title={'Confirm Others'}
-                  onPress={() => navigation.navigate('Confirm Others')}
-                />
-                <View style={{ marginBottom: 100 }}/>
-              </View>
-            ) : ( // it's not the BVC home screen
-              <View />
-            )}
-            <Button
-              title="Claim / Ask / Offer"
-              onPress={() => navigation.navigate('Create Credential')}
-            />
-            <Button
-              title={'Agree / Certify / Confirm'}
-              onPress={() => navigation.navigate('Confirm Others')}
-            />
-            <Button
-              title="Search"
-              onPress={() => navigation.navigate('Reports from Endorser server')}
-            />
-            <Button
-              title="Scan Presentation"
-              onPress={() => navigation.navigate('Scan Presentation')}
-            />
-            <View style={{ marginTop: 100 }}/>
-            <Button
-              title="Manage Contacts"
-              onPress={() => navigation.navigate('Contacts')}
-            />
-            <Button
-              title="Manage Profile & Settings"
-              onPress={() => navigation.navigate('Settings')}
-            />
-            {oldMnemonic ? (
-              <View style={{ marginTop: 20, marginBottom: 20 }}>
-                <Text style={{ color: 'red', textAlign: 'center' }}>Your identity is not encrypted.</Text>
-                <Button
-                  title="Encrypt your identity."
-                  onPress={() => navigation.navigate('Import Seed Phrase')}
-                />
-              </View>
-            ) : (
-              <View/>
-            )}
+          <View style={{ marginLeft: '45%', marginTop: '50%' }}>
+            <Text>Loading...</Text>
           </View>
-        ) : ( // there are no identifiers
-          <View>
-            <Button
-              title="Create New Identifier"
-              onPress={() => navigation.navigate('Settings')}
-            />
-            <Button
-              title="Import Seed Phrase"
-              onPress={() => navigation.navigate('Import Seed Phrase')}
-            />
-            <View style={{ marginTop: 100 }}/>
-            <Button
-              title="Scan Presentation"
-              onPress={() => navigation.navigate('Scan Presentation')}
-            />
-          </View>
+        ) : ( // not loading
+          allIdentifiers != null && allIdentifiers.length > 0
+          ? (
+            <View>
+              {settings != null && settings.homeScreen === 'BVC'
+              ? (
+                <View>
+                  <Text style={{ textAlign: 'center' }}>Bountiful Voluntaryist Community Saturday Meeting</Text>
+                  <BVCButton
+                    description='Meeting'
+                    identifier={ allIdentifiers[0] }
+                    navigation={ navigation }
+                  />
+                  <Button
+                    title={'Confirm Others'}
+                    onPress={() => navigation.navigate('Confirm Others')}
+                  />
+                  <View style={{ marginBottom: 50 }}/>
+                </View>
+              ) : ( // it's not the BVC home screen
+                <View />
+              )}
+              <Button
+                title="Claim / Ask / Offer"
+                onPress={() => navigation.navigate('Create Credential')}
+              />
+              <Button
+                title={'Agree / Certify / Confirm'}
+                onPress={() => navigation.navigate('Confirm Others')}
+              />
+              <Button
+                title="Search"
+                onPress={() => navigation.navigate('Reports from Endorser server')}
+              />
+              <Button
+                title="Scan Presentation"
+                onPress={() => navigation.navigate('Scan Presentation')}
+              />
+              <View style={{ marginTop: 50 }}/>
+              <Button
+                title="Manage Contacts"
+                onPress={() => navigation.navigate('Contacts')}
+              />
+              <Button
+                title="Manage Profile & Settings"
+                onPress={() => navigation.navigate('Settings')}
+              />
+              {oldMnemonic ? (
+                <View style={{ marginTop: 10, marginBottom: 10 }}>
+                  <Text style={{ color: 'red', textAlign: 'center' }}>Your identity is not encrypted.</Text>
+                  <Button
+                    title="Encrypt your identity."
+                    onPress={() => navigation.navigate('Import Seed Phrase')}
+                  />
+                </View>
+              ) : (
+                <View/>
+              )}
+            </View>
+          ) : ( // there are no identifiers
+            <View>
+              <Button
+                title="Create New Identifier"
+                onPress={() => navigation.navigate('Settings')}
+              />
+              <Button
+                title="Import Seed Phrase"
+                onPress={() => navigation.navigate('Import Seed Phrase')}
+              />
+              <View style={{ marginTop: 50 }}/>
+              <Button
+                title="Scan Presentation"
+                onPress={() => navigation.navigate('Scan Presentation')}
+              />
+            </View>
+          )
         )
-      )
-      }
-      <View style={{ marginBottom: 100 }} />
-      <Button
-        title="Get Help"
-        onPress={() => navigation.navigate('Help')}
-      />
-    </View>
+        }
+        <Button
+          title="Get Help"
+          onPress={() => navigation.navigate('Help')}
+        />
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
