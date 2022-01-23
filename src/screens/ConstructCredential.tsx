@@ -181,6 +181,7 @@ export function ConstructCredentialScreen({ navigation }) {
                     title={'Offer Time Donation'}
                     onPress={() => setAskForDonationInfo('time')}
                   />
+                  <View style={{ padding: 5 }} />
                   <Button
                     title={'Offer Money Donation'}
                     onPress={() => setAskForDonationInfo('money')}
