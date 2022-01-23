@@ -179,7 +179,7 @@ function HomeScreen({ navigation }) {
                 <View style={{ marginTop: 10, marginBottom: 10 }}>
                   <Text style={{ color: 'red', textAlign: 'center' }}>Your identity is not encrypted.</Text>
                   <Button
-                    title="Encrypt your identity."
+                    title="Encrypt My Identity"
                     onPress={() => navigation.navigate('Import Seed Phrase')}
                   />
                 </View>
