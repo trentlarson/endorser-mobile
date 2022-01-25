@@ -81,13 +81,13 @@ function HomeScreen({ navigation }) {
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "About to load DIDs..."}))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "About to load DIDs..."}))
 
       agent.didManagerFind()
       .then((_ids) => {
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... found DIDs, about to store..."}))
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... found DIDs, about to store..."}))
         appStore.dispatch(appSlice.actions.setIdentifiers(_ids.map(classToPlain)))
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... stored DIDs, about to load settings ..."}))
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... stored DIDs, about to load settings ..."}))
 
         return dbConnection
       })
@@ -103,16 +103,16 @@ function HomeScreen({ navigation }) {
           setOldMnemonic(true)
         }
 
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded settings, about to load contacts..."}))
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... loaded settings, about to load contacts..."}))
 
         return utility.loadContacts(appSlice, appStore, dbConnection)
       })
       .then(() => {
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished loading contacts."}))
 
       })
       .catch((err) => {
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got an error: " + err}))
       })
 
     }

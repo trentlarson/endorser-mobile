@@ -106,7 +106,7 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 }
 
 // Import and existing ID
-const importAndStoreIdentifier = async (mnemonic: string, mnemonicPassword: string, toLowercase: boolean) => {
+const importAndStoreIdentifier = async (mnemonic: string, mnemonicPassword: string, toLowercase: boolean, previousIdentifiers: Array<IIdentifier>) => {
 
   // just to get rid of variability that might cause an error
   mnemonic = mnemonic.trim().toLowerCase()
@@ -151,9 +151,33 @@ const importAndStoreIdentifier = async (mnemonic: string, mnemonicPassword: stri
   const privateHex = rootNode.privateKey.substring(2)
   const publicHex = rootNode.privateKey.substring(2)
   let address = rootNode.address
+
+  const prevIds = previousIdentifiers || [];
+
   if (toLowercase) {
-    address = address.toLowerCase()
+    const foundEqual = R.find(
+      (id) => id.did === address,
+      previousIdentifiers
+    )
+    if (foundEqual) {
+      // They're trying to create a lowercase version of one that exists normal.
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Won't create a lowercase version of the DID since a regular version exists."}))
+    } else {
+      address = address.toLowerCase()
+    }
+  } else {
+    // They're not trying to convert to lowercase.
+    const foundLower = R.find(
+      (id) => id.did === address.toLowerCase(),
+      previousIdentifiers
+    )
+    if (foundLower) {
+      // They're not creating a lowercase version, but a normal one exists.
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Must create a lowercase version of the DID since a lowercase version exists."}))
+      address = address.toLowerCase()
+    }
   }
+
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... derived keys and address..."}))
 
   const newId = newIdentifier(address, publicHex, privateHex, UPORT_ROOT_DERIVATION_PATH)
@@ -175,7 +199,7 @@ const createAndStoreIdentifier = async (mnemonicPassword) => {
   const mnemonic = bip39.entropyToMnemonic(entropy)
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... generated mnemonic..."}))
 
-  return importAndStoreIdentifier(mnemonic, mnemonicPassword, false)
+  return importAndStoreIdentifier(mnemonic, mnemonicPassword, false, [])
 }
 
 const logDatabaseTable = (tableName) => async () => {
@@ -267,25 +291,35 @@ export function SettingsScreen({navigation}) {
       setHasMnemonic(true)
     }
 
-    const sharePayload = uportJwtPayload(ident, inputName, ident.keys[0].publicKeyHex)
-    setQrJwtForPayload(ident, sharePayload)
+    setQrJwtForPayload(ident, inputName)
   }
 
   const storeNewName = async () => {
     const conn = await dbConnection
     await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {name: inputName})
     identifiersSelector.forEach(ident => {
-      const sharePayload = uportJwtPayload(ident, inputName, ident.keys[0].publicKeyHex)
-      setQrJwtForPayload(ident, sharePayload)
+      setQrJwtForPayload(ident, inputName)
     })
     setStoredName(inputName)
   }
 
-  const setQrJwtForPayload = async (identifier, payload) => {
-    const newJwt = await utility.createJwt(identifier, payload)
-    const viewPrefix = appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION
-    const qrJwt = viewPrefix + newJwt
-    setQrJwts(jwts => R.set(R.lensProp(identifier.did), qrJwt, jwts))
+  const setQrJwtForPayload = async (identifier, name) => {
+    // The public key should always exist, but we've seen Veramo weirdness
+    // where an entry in the key table with a lowercase DID will be overwritten
+    // by one with mixed case but the associated entry in the identifier table
+    // will remain (so one identifier will not have an associated key). Ug.
+    if (identifier.keys[0] && identifier.keys[0].publicKeyHex && identifier.keys[0].privateKeyHex) {
+      try {
+        const sharePayload = uportJwtPayload(identifier.did, name, identifier.keys[0].publicKeyHex)
+
+        const newJwt = await utility.createJwt(identifier, sharePayload)
+        const viewPrefix = appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION
+        const qrJwt = viewPrefix + newJwt
+        setQrJwts(jwts => R.set(R.lensProp(identifier.did), qrJwt, jwts))
+      } catch (err) {
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error setting JWT contents for contact: " + err}))
+      }
+    }
   }
 
   const copyToClipboard = (value) => {
@@ -310,8 +344,7 @@ export function SettingsScreen({navigation}) {
       }
 
       pojoIds.forEach(ident => {
-        const sharePayload = uportJwtPayload(ident.did, settings && settings.name, ident.keys[0].publicKeyHex)
-        setQrJwtForPayload(ident, sharePayload)
+        setQrJwtForPayload(ident, settings && settings.name)
       })
       setFinishedCheckingIds(true)
     }
@@ -408,13 +441,17 @@ export function SettingsScreen({navigation}) {
               :
                 <View style={{ marginBottom: 60 }}>
 
-                  { !hasMnemonic ? (
+                  {
+                  !hasMnemonic ? (
                     <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
                   ) : (
                      <Text/>
-                  )}
+                  )
+                  }
 
-                  { identifiersSelector.map(ident =>
+                  {
+                  identifiersSelector.map(ident =>
+
                     <View key={ident.did} style={{ marginTop: 20 }}>
 
                       <Text>Identifier</Text>
@@ -422,44 +459,66 @@ export function SettingsScreen({navigation}) {
                         { ident.did }
                       </Text>
 
-                      <Text>Public Key (base64)</Text>
-                      <Text style={{ marginBottom: 20 }} selectable={true}>
-                        { Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64') }
-                      </Text>
+                      {
+                      ident.keys[0] == null ? (
+                        <Text style={{ color: 'red' }}>That identifier has no keys, and therefore it cannot be used for signing or verification.</Text>
+                      ) : (
+                      ident.keys[0].publicKeyHex == null ? (
+                        <Text style={{ color: 'red' }}>That identifier has no public key, and therefore it cannot be verified.</Text>
+                      ) : (
 
-                      <Text>Public Key (hex)</Text>
-                      <Text style={{ marginBottom: 20 }} selectable={true}>
-                        { ident.keys[0].publicKeyHex }
-                      </Text>
+                      ident.keys[0].privateKeyHex == null ? (
+                        <Text style={{ color: 'red' }}>That identifier has no private key, and therefore it cannot be used for signing.</Text>
+                      ) : (
 
-                      <Text>Derivation Path</Text>
-                      <Text style={{ marginBottom: 20 }} selectable={true}>
-                        { ident.keys[0].meta && ident.keys[0].meta.derivationPath ? ident.keys[0].meta.derivationPath : 'Unknown. Probably: ' + UPORT_ROOT_DERIVATION_PATH }
-                      </Text>
+                        <View>
+                          <Text>Public Key (base64)</Text>
+                          <Text style={{ marginBottom: 20 }} selectable={true}>
+                            { Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64') }
+                          </Text>
 
-                      <QRCode value={qrJwts[ident.did]} size={300}/>
+                          <Text>Public Key (hex)</Text>
+                          <Text style={{ marginBottom: 20 }} selectable={true}>
+                            { ident.keys[0].publicKeyHex }
+                          </Text>
 
-                      <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => Linking.openURL(qrJwts[ident.did])}>
-                        View Online
-                      </Text>
+                          <Text>Derivation Path</Text>
+                          <Text style={{ marginBottom: 20 }} selectable={true}>
+                            { ident.keys[0].meta && ident.keys[0].meta.derivationPath ? ident.keys[0].meta.derivationPath : 'Unknown. Probably: ' + UPORT_ROOT_DERIVATION_PATH }
+                          </Text>
 
-                      <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => copyToClipboard(qrJwts[ident.did])}>
-                        Copy to Clipboard
-                      </Text>
-                      <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={!!quickMessage}
-                      >
-                        <View style={styles.centeredView}>
-                          <View style={styles.modalView}>
-                            <Text>{ quickMessage }</Text>
-                          </View>
+                          <QRCode value={qrJwts[ident.did]} size={300}/>
+
+                          <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => Linking.openURL(qrJwts[ident.did])}>
+                            View Online
+                          </Text>
+
+                          <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => copyToClipboard(qrJwts[ident.did])}>
+                            Copy to Clipboard
+                          </Text>
                         </View>
-                      </Modal>
+
+                      )
+                      )
+                      )
+                      }
 
                     </View>
-                  )}
+                  )
+                  }
+
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={!!quickMessage}
+                  >
+                    <View style={styles.centeredView}>
+                      <View style={styles.modalView}>
+                        <Text>{ quickMessage }</Text>
+                      </View>
+                    </View>
+                  </Modal>
+
                   <View style={{ marginTop: 20, marginBottom: 20 }}>
                     <Button
                     title="Export Seed Phrase"
@@ -697,11 +756,12 @@ export function ImportIdentityScreen({navigation}) {
   const [error, setError] = useState<string>('')
   const [idChanged, setIdChanged] = useState<boolean>(false)
   const [idImporting, setIdImporting] = useState<boolean>(false)
-  const [identifier, setIdentifier] = useState<Omit<IIdentifier, 'provider'>>()
   const [makeLowercase, setMakeLowercase] = useState<boolean>(false)
   const [mnemonic, setMnemonic] = useState<String>('')
   const [mnemonicIsOld, setMnemonicIsOld] = useState<boolean>(false)
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
+
+  const identifiersSelector = useSelector((state) => state.identifiers || [])
 
   useEffect(() => {
     const loadOldMnemonic = async () => {
@@ -718,10 +778,10 @@ export function ImportIdentityScreen({navigation}) {
   useEffect(() => {
     const coordImportId = async () => {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Importing identifier..."}))
-      importAndStoreIdentifier(mnemonic, mnemonicPassword, makeLowercase)
+
+      importAndStoreIdentifier(mnemonic, mnemonicPassword, makeLowercase, identifiersSelector)
       .then(newIdentifier => {
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... totally finished importing identifier."}))
-        setIdentifier(newIdentifier)
         setIdChanged(true)
 
         // one reason redirect automatically is to force reload of ID (which doen't show if they go "back")
