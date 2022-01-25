@@ -756,10 +756,10 @@ export function ConstructCredentialScreen({ navigation }) {
         // We might prefer this but the URLs don't resolve.
         // https://lov.linkeddata.es/dataset/lov/terms?q=appreciate
 
-        "@context": "http://schema.org",
-        "@type": "WatchAction",
-        "about": identifier,
-        "text": text,
+        "@context": "http://purl.org/vocab/bio/0.1/",
+        "@type": "Event",
+        "agent": identifier,
+        "description": text,
       }
     }
 
@@ -814,6 +814,7 @@ export function ConstructCredentialScreen({ navigation }) {
                   style={{ borderWidth: 1 }}
                   multiline={true}
                 />
+                * Note that this description will be visible to the world, so beware not to include names, addresses, etc.
               </View>
 
               <View style={{ padding: 10 }} />
