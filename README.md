@@ -117,7 +117,7 @@ To Release:
     - After uploading, "Save", "Review Release", then "Rollout to internal testing" or "Rollout to Production".
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json
-  - Make the CFBundleVersion one less than the versionCode in the android/app/build.gradle. (Note that it is automatically incremented by fastlane beta.) (Remember this when building; it changes.)
+  - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION one less than the versionCode wanted (eg. in android). (Note that EndorserMobile/Info.plist CFBundleVersion is automatically incremented by fastlane beta.)
   - Create a release in App Store Connect
     - Have a test build?  IDK... maybe don't click 'Expire'
     - For a new one: in App Connect -> App Store next to iOS App, click the "+"
