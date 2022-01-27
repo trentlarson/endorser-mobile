@@ -281,119 +281,121 @@ export function ConstructCredentialScreen({ navigation }) {
         transparent={true}
         onRequestClose={props.cancel}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
+        <ScrollView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
 
-            {
-              selectFromContacts
-              ? <ContactSelectModal
-                  cancel={ () => { setSelectFromContacts(false) } }
-                  proceed={ (did) => { setRecipientId(did); setSelectFromContacts(false) }}
-                />
-              : <View/>
-            }
+              {
+                selectFromContacts
+                ? <ContactSelectModal
+                    cancel={ () => { setSelectFromContacts(false) } }
+                    proceed={ (did) => { setRecipientId(did); setSelectFromContacts(false) }}
+                  />
+                : <View/>
+              }
 
-            <View>
-              <Text style={styles.modalText}>Grant or Loan Money</Text>
+              <View>
+                <Text style={styles.modalText}>Grant or Loan Money</Text>
 
-              <View style={{ padding: 5 }}>
-                <Text>Recipient</Text>
-                <TextInput
-                  value={recipientId}
-                  onChangeText={setRecipientId}
-                  editable
-                  style={{ borderWidth: 1 }}
-                  autoCapitalize={'none'}
-                  autoCorrect={false}
-                />
-                {
-                  allContacts.length > 0
-                  ? <TouchableHighlight
-                      style={styles.moreButton}
-                      onPress={() => setSelectFromContacts(true)}
-                    >
-                      <Text>Pick</Text>
-                    </TouchableHighlight>
-                  : <View />
-                }
-              </View>
+                <View style={{ padding: 5 }}>
+                  <Text>Recipient</Text>
+                  <TextInput
+                    value={recipientId}
+                    onChangeText={setRecipientId}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
+                  />
+                  {
+                    allContacts.length > 0
+                    ? <TouchableHighlight
+                        style={styles.moreButton}
+                        onPress={() => setSelectFromContacts(true)}
+                      >
+                        <Text>Pick</Text>
+                      </TouchableHighlight>
+                    : <View />
+                  }
+                </View>
 
-              <View style={{ padding: 5 }}>
-                <Text>Amount</Text>
-                <TextInput
-                  value={amountStr}
-                  onChangeText={setAmountStr}
-                  editable
-                  length={ 5 }
-                  style={{ borderWidth: 1 }}
-                />
-              </View>
-
-              <View style={{ padding: 5 }}>
-                <Text>Kind of Currency (eg. USD, BTC)</Text>
-                <TextInput
-                  value={currency}
-                  onChangeText={setCurrency}
-                  editable
-                  style={{ borderWidth: 1 }}
-                />
-              </View>
-
-              <View style={{ padding: 5 }}>
-                <Text>Description</Text>
-                <TextInput
-                  value={description}
-                  onChangeText={setDescription}
-                  editable
-                  multiline={true}
-                  style={{ borderWidth: 1 }}
-                />
-              </View>
-
-              <View style={{ padding: 5 }}>
-                <Text>Terms</Text>
-                <TextInput
-                  value={termsOfService}
-                  onChangeText={setTermsOfService}
-                  editable
-                  multiline={true}
-                  style={{ borderWidth: 1 }}
-                />
-              </View>
-
-              <View style={{ padding: 5 }}>
-                <CheckBox
-                  title='Transfer Allowed'
-                  checked={transferAllowed}
-                  onPress={() => {setTransferAllowed(!transferAllowed)}}
-                />
-                <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
-                  <CheckBox
-                    title='Multiple Transfers Allowed?'
-                    checked={multipleTransfersAllowed}
-                    onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
-                    visible={transferAllowed}
+                <View style={{ padding: 5 }}>
+                  <Text>Amount</Text>
+                  <TextInput
+                    value={amountStr}
+                    onChangeText={setAmountStr}
+                    editable
+                    length={ 5 }
+                    style={{ borderWidth: 1 }}
                   />
                 </View>
-              </View>
 
-              <View style={{ padding: 10 }} />
-              <TouchableHighlight
-                style={styles.saveButton}
-                onPress={() => props.proceed(loanOrCreditClaimFromInputs())}
-              >
-                <Text>Finish...</Text>
-              </TouchableHighlight>
-              <View style={{ padding: 5 }} />
-              <TouchableHighlight
-                style={styles.cancelButton}
-                onPress={props.cancel}
-              >
-                <Text>Cancel</Text>
-              </TouchableHighlight>
+                <View style={{ padding: 5 }}>
+                  <Text>Kind of Currency (eg. USD, BTC)</Text>
+                  <TextInput
+                    value={currency}
+                    onChangeText={setCurrency}
+                    editable
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Description</Text>
+                  <TextInput
+                    value={description}
+                    onChangeText={setDescription}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Terms</Text>
+                  <TextInput
+                    value={termsOfService}
+                    onChangeText={setTermsOfService}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <CheckBox
+                    title='Transfer Allowed'
+                    checked={transferAllowed}
+                    onPress={() => {setTransferAllowed(!transferAllowed)}}
+                  />
+                  <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
+                    <CheckBox
+                      title='Multiple Transfers Allowed?'
+                      checked={multipleTransfersAllowed}
+                      onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
+                      visible={transferAllowed}
+                    />
+                  </View>
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => props.proceed(loanOrCreditClaimFromInputs())}
+                >
+                  <Text>Finish...</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }} />
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={props.cancel}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+              </View>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </Modal>
     )
   }
@@ -439,136 +441,138 @@ export function ConstructCredentialScreen({ navigation }) {
         transparent={true}
         onRequestClose={props.cancel}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-
-            {
-              selectFromContacts
-              ? <ContactSelectModal
-                  cancel={ () => { setSelectFromContacts(false) } }
-                  proceed={ (did) => { setFundedId(did); setSelectFromContacts(false) }}
-                />
-              : <View/>
-            }
-
-            <View>
-              <Text style={styles.modalText}>Offer Donation</Text>
-
-              <View style={{ padding: 5 }}>
-                <Text>Recipient</Text>
-                <TextInput
-                  value={fundedId}
-                  onChangeText={setFundedId}
-                  editable
-                  style={{ borderWidth: 1 }}
-                  autoCapitalize={'none'}
-                  autoCorrect={false}
-                />
-                {
-                  allContacts.length > 0
-                  ? <TouchableHighlight
-                      style={styles.moreButton}
-                      onPress={() => setSelectFromContacts(true)}
-                    >
-                      <Text>Pick</Text>
-                    </TouchableHighlight>
-                  : <View />
-                }
-              </View>
-
-              <View style={{ padding: 5 }}>
-                <Text>{ props.kind === 'money' ? 'Amount of Currency' : 'Number of Hours' }</Text>
-                <TextInput
-                  value={amountStr}
-                  onChangeText={setAmountStr}
-                  editable
-                  length={ 5 }
-                  style={{ borderWidth: 1 }}
-                />
-              </View>
+        <ScrollView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
 
               {
-                props.kind === 'money' ? (
-                  <View style={{ padding: 5 }}>
-                    <Text>Kind of Currency (eg. USD, BTC)</Text>
-                    <TextInput
-                      value={currency}
-                      onChangeText={setCurrency}
-                      editable
-                      length={ 5 }
-                      style={{ borderWidth: 1 }}
-                    />
-                  </View>
-                ) : (
-                  <View/>
-                )
+                selectFromContacts
+                ? <ContactSelectModal
+                    cancel={ () => { setSelectFromContacts(false) } }
+                    proceed={ (did) => { setFundedId(did); setSelectFromContacts(false) }}
+                  />
+                : <View/>
               }
 
-              <View style={{ padding: 5 }}>
-                <Text>Expiration</Text>
-                <TextInput
-                  value={expiration}
-                  onChangeText={setExpiration}
-                  editable
-                  style={{ borderWidth: 1 }}
-                />
-              </View>
+              <View>
+                <Text style={styles.modalText}>Offer Donation</Text>
 
-              <View style={{ padding: 5 }}>
-                <Text>Comment</Text>
-                <TextInput
-                  value={comment}
-                  onChangeText={setComment}
-                  editable
-                  multiline={true}
-                  style={{ borderWidth: 1 }}
-                />
-              </View>
+                <View style={{ padding: 5 }}>
+                  <Text>Recipient</Text>
+                  <TextInput
+                    value={fundedId}
+                    onChangeText={setFundedId}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
+                  />
+                  {
+                    allContacts.length > 0
+                    ? <TouchableHighlight
+                        style={styles.moreButton}
+                        onPress={() => setSelectFromContacts(true)}
+                      >
+                        <Text>Pick</Text>
+                      </TouchableHighlight>
+                    : <View />
+                  }
+                </View>
 
-              <View style={{ padding: 5 }}>
-                <Text>Terms</Text>
-                <TextInput
-                  value={termsOfService}
-                  onChangeText={setTermsOfService}
-                  editable
-                  multiline={true}
-                  style={{ borderWidth: 1 }}
-                />
-              </View>
-
-              <View style={{ padding: 5 }}>
-                <CheckBox
-                  title='Transfer Allowed'
-                  checked={transferAllowed}
-                  onPress={() => {setTransferAllowed(!transferAllowed)}}
-                />
-                <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
-                  <CheckBox
-                    title='Multiple Transfers Allowed'
-                    checked={multipleTransfersAllowed}
-                    onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
-                    visible={transferAllowed}
+                <View style={{ padding: 5 }}>
+                  <Text>{ props.kind === 'money' ? 'Amount of Currency' : 'Number of Hours' }</Text>
+                  <TextInput
+                    value={amountStr}
+                    onChangeText={setAmountStr}
+                    editable
+                    length={ 5 }
+                    style={{ borderWidth: 1 }}
                   />
                 </View>
-              </View>
 
-              <View style={{ padding: 10 }} />
-              <TouchableHighlight
-                style={styles.saveButton}
-                onPress={() => props.proceed(donateClaimFromInputs())}
-              >
-                <Text>Finish...</Text>
-              </TouchableHighlight>
-              <View style={{ padding: 5 }} />
-              <TouchableHighlight
-                style={styles.cancelButton}
-                onPress={props.cancel}
-              >
-                <Text>Cancel</Text>
-              </TouchableHighlight>
+                {
+                  props.kind === 'money' ? (
+                    <View style={{ padding: 5 }}>
+                      <Text>Kind of Currency (eg. USD, BTC)</Text>
+                      <TextInput
+                        value={currency}
+                        onChangeText={setCurrency}
+                        editable
+                        length={ 5 }
+                        style={{ borderWidth: 1 }}
+                      />
+                    </View>
+                  ) : (
+                    <View/>
+                  )
+                }
+
+                <View style={{ padding: 5 }}>
+                  <Text>Expiration</Text>
+                  <TextInput
+                    value={expiration}
+                    onChangeText={setExpiration}
+                    editable
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Comment</Text>
+                  <TextInput
+                    value={comment}
+                    onChangeText={setComment}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Terms</Text>
+                  <TextInput
+                    value={termsOfService}
+                    onChangeText={setTermsOfService}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <CheckBox
+                    title='Transfer Allowed'
+                    checked={transferAllowed}
+                    onPress={() => {setTransferAllowed(!transferAllowed)}}
+                  />
+                  <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
+                    <CheckBox
+                      title='Multiple Transfers Allowed'
+                      checked={multipleTransfersAllowed}
+                      onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
+                      visible={transferAllowed}
+                    />
+                  </View>
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => props.proceed(donateClaimFromInputs())}
+                >
+                  <Text>Finish...</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }} />
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={props.cancel}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+              </View>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </Modal>
     )
   }
@@ -609,66 +613,68 @@ export function ConstructCredentialScreen({ navigation }) {
         transparent={true}
         onRequestClose={props.cancel}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View>
-
+        <ScrollView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
               <View>
-                <Text style={styles.modalText}>I Know About...</Text>
-                <TextInput
-                  value={knowsText}
-                  onChangeText={setKnowsText}
-                  editable
-                  style={{ borderWidth: 1 }}
-                  multiline={true}
-                  autoCapitalize={'none'}
-                />
+
+                <View>
+                  <Text style={styles.modalText}>I Know About...</Text>
+                  <TextInput
+                    value={knowsText}
+                    onChangeText={setKnowsText}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    multiline={true}
+                    autoCapitalize={'none'}
+                  />
+                </View>
+
+                <View style={{ padding: 20 }} />
+                <View>
+                  <Text style={styles.modalText}>I Am Looking For...</Text>
+                  <TextInput
+                    value={seeksText}
+                    onChangeText={setSeeksText}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    multiline={true}
+                    autoCapitalize={'none'}
+                  />
+                </View>
+
+                <View style={{ padding: 20 }} />
+                <View>
+                  <Text style={styles.modalText}>I Am Located...</Text>
+                  <TextInput
+                    value={located}
+                    onChangeText={setLocated}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    multiline={true}
+                    autoCapitalize={'none'}
+                  />
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => props.proceed(constructPerson())}
+                >
+                  <Text>Finish...</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }} />
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={props.cancel}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+
               </View>
-
-              <View style={{ padding: 20 }} />
-              <View>
-                <Text style={styles.modalText}>I Am Looking For...</Text>
-                <TextInput
-                  value={seeksText}
-                  onChangeText={setSeeksText}
-                  editable
-                  style={{ borderWidth: 1 }}
-                  multiline={true}
-                  autoCapitalize={'none'}
-                />
-              </View>
-
-              <View style={{ padding: 20 }} />
-              <View>
-                <Text style={styles.modalText}>I Am Located...</Text>
-                <TextInput
-                  value={located}
-                  onChangeText={setLocated}
-                  editable
-                  style={{ borderWidth: 1 }}
-                  multiline={true}
-                  autoCapitalize={'none'}
-                />
-              </View>
-
-              <View style={{ padding: 10 }} />
-              <TouchableHighlight
-                style={styles.saveButton}
-                onPress={() => props.proceed(constructPerson())}
-              >
-                <Text>Finish...</Text>
-              </TouchableHighlight>
-              <View style={{ padding: 5 }} />
-              <TouchableHighlight
-                style={styles.cancelButton}
-                onPress={props.cancel}
-              >
-                <Text>Cancel</Text>
-              </TouchableHighlight>
-
             </View>
           </View>
-        </View>
+        </ScrollView>
       </Modal>
     )
   }
@@ -699,39 +705,41 @@ export function ConstructCredentialScreen({ navigation }) {
         transparent={true}
         onRequestClose={props.cancel}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View>
-              <Text style={styles.modalText}>Accept</Text>
+        <ScrollView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View>
+                <Text style={styles.modalText}>Accept</Text>
 
-              <View style={{ padding: 5 }}>
-                <TextInput
-                  value={pledge}
-                  onChangeText={setPledge}
-                  editable
-                  style={{ borderWidth: 1 }}
-                  multiline={true}
-                />
+                <View style={{ padding: 5 }}>
+                  <TextInput
+                    value={pledge}
+                    onChangeText={setPledge}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    multiline={true}
+                  />
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => props.proceed(constructPledge())}
+                >
+                  <Text>Finish...</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }} />
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={props.cancel}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+
               </View>
-
-              <View style={{ padding: 10 }} />
-              <TouchableHighlight
-                style={styles.saveButton}
-                onPress={() => props.proceed(constructPledge())}
-              >
-                <Text>Finish...</Text>
-              </TouchableHighlight>
-              <View style={{ padding: 5 }} />
-              <TouchableHighlight
-                style={styles.cancelButton}
-                onPress={props.cancel}
-              >
-                <Text>Cancel</Text>
-              </TouchableHighlight>
-
             </View>
           </View>
-        </View>
+        </ScrollView>
       </Modal>
     )
   }
@@ -769,72 +777,74 @@ export function ConstructCredentialScreen({ navigation }) {
         transparent={true}
         onRequestClose={props.cancel}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            {
-              selectFromContacts
-              ? <ContactSelectModal
-                  cancel={ () => { setSelectFromContacts(false) } }
-                  proceed={ (did) => { setIdentifier(did); setSelectFromContacts(false) }}
-                />
-              : <View/>
-            }
+        <ScrollView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              {
+                selectFromContacts
+                ? <ContactSelectModal
+                    cancel={ () => { setSelectFromContacts(false) } }
+                    proceed={ (did) => { setIdentifier(did); setSelectFromContacts(false) }}
+                  />
+                : <View/>
+              }
 
-            <View>
-              <Text style={styles.modalText}>Witness</Text>
+              <View>
+                <Text style={styles.modalText}>Witness</Text>
 
-              <View style={{ padding: 5 }}>
-                <Text>Identifier</Text>
-                <TextInput
-                  value={identifier}
-                  onChangeText={setIdentifier}
-                  editable
-                  style={{ borderWidth: 1, width: 300 }}
-                  autoCapitalize={'none'}
-                  autoCorrect={false}
-                />
-                {
-                  allContacts.length > 0
-                  ? <TouchableHighlight
-                      style={styles.moreButton}
-                      onPress={() => setSelectFromContacts(true)}
-                    >
-                      <Text>Pick</Text>
-                    </TouchableHighlight>
-                  : <View />
-                }
+                <View style={{ padding: 5 }}>
+                  <Text>Identifier</Text>
+                  <TextInput
+                    value={identifier}
+                    onChangeText={setIdentifier}
+                    editable
+                    style={{ borderWidth: 1, width: 300 }}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
+                  />
+                  {
+                    allContacts.length > 0
+                    ? <TouchableHighlight
+                        style={styles.moreButton}
+                        onPress={() => setSelectFromContacts(true)}
+                      >
+                        <Text>Pick</Text>
+                      </TouchableHighlight>
+                    : <View />
+                  }
+                </View>
+
+                <View style={{ marginTop: 20 }}>
+                  <Text>What I Saw</Text>
+                  <TextInput
+                    value={text}
+                    onChangeText={setText}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    multiline={true}
+                  />
+                  <Text>* Note that this description will be visible to the world, so beware not to include names, addresses, etc.</Text>
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => props.proceed(constructWitness())}
+                >
+                  <Text>Finish...</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }} />
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={props.cancel}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+
               </View>
-
-              <View style={{ marginTop: 20 }}>
-                <Text>What I Saw</Text>
-                <TextInput
-                  value={text}
-                  onChangeText={setText}
-                  editable
-                  style={{ borderWidth: 1 }}
-                  multiline={true}
-                />
-                * Note that this description will be visible to the world, so beware not to include names, addresses, etc.
-              </View>
-
-              <View style={{ padding: 10 }} />
-              <TouchableHighlight
-                style={styles.saveButton}
-                onPress={() => props.proceed(constructWitness())}
-              >
-                <Text>Finish...</Text>
-              </TouchableHighlight>
-              <View style={{ padding: 5 }} />
-              <TouchableHighlight
-                style={styles.cancelButton}
-                onPress={props.cancel}
-              >
-                <Text>Cancel</Text>
-              </TouchableHighlight>
-
             </View>
           </View>
-        </View>
+        </ScrollView>
       </Modal>
     )
   }
