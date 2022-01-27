@@ -16,6 +16,10 @@ export function isDid(value) {
   return value && value.startsWith("did:") && (value.substring(5).indexOf(":") > -1)
 }
 
+export function rawAddressOfDid(did) {
+  return did.split(":")[2]
+}
+
 // return first 3 chars + "..." + last 3 chars
 const firstAndLast3 = (text) => {
   return text.slice(0,3) + "..." + text.slice(-3)
@@ -80,8 +84,9 @@ export const firstAndLast3OfDid = (did) => {
   if (isHiddenDid(did)) {
     return "(HIDDEN)"
   }
-  const lastChars = did.split(":")[2]
+  const lastChars = rawAddressOfDid(did)
   if (!lastChars) {
+    // There's no second colon, which should never happen.
     return firstAndLast3(did.substring("did:".length))
   }
   if (lastChars.startsWith("0x")) { // Ethereum DIDs

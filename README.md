@@ -17,7 +17,7 @@ Run ios:
 
 `yarn run ios`
 
-(If there's a complaint about Metro, `yarn start` before that.)
+(If there's a complaint about Metro, `yarn start` before that, maybe with the `--reset-cache` flag.)
 
 Run android:
 
@@ -57,6 +57,15 @@ yarn start --reset-cache # which you'll have to kill because it doesn't stop
 
 ## Test
 
+Automatically with: `yarn test`
+
+... but note:
+
+- The App-test.js fails. Haven't had time to look into it.
+- It requires node v14+. (I don't know why `yarn run ios` works but the tests don't.) (If you want a hack for v12, change the `??` to a `||` in node_modules/did-jwt/lib/index.js)
+
+Manually
+
 - Without an Endorser.ch server
   - Create IDs, export, and import.
   - Create contacts.
@@ -70,6 +79,7 @@ yarn start --reset-cache # which you'll have to kill because it doesn't stop
   - Run report searches for the individual, eg. for 'carp'
 - On an actual device (remember the table-name fiasco!)
   - Android - must use Play Store to release to internal testing (because fiasco wasn't caught when connected)
+    - To work with different versions, increment versionCode in different clones of the repo (built from scratch), and test in Internal Testing with alternating builds & uploads.
   - iOS - TestFlight is recommended (though potentially OK to use Xcode, since it would have caught the fiasco)
 
 

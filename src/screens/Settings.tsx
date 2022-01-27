@@ -105,7 +105,7 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
   }
 }
 
-// Import and existing ID
+// Import an existing ID
 const importAndStoreIdentifier = async (mnemonic: string, mnemonicPassword: string, toLowercase: boolean, previousIdentifiers: Array<IIdentifier>) => {
 
   // just to get rid of variability that might cause an error
@@ -156,24 +156,26 @@ const importAndStoreIdentifier = async (mnemonic: string, mnemonicPassword: stri
 
   if (toLowercase) {
     const foundEqual = R.find(
-      (id) => id.did === address,
-      previousIdentifiers
+      (id) => utility.rawAddressOfDid(id.did) === address,
+      prevIds
     )
     if (foundEqual) {
-      // They're trying to create a lowercase version of one that exists normal.
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Won't create a lowercase version of the DID since a regular version exists."}))
+      // They're trying to create a lowercase version of one that exists in normal case.
+      // (We really should notify the user.)
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Will create a normal-case version of the DID since a regular version exists."}))
     } else {
       address = address.toLowerCase()
     }
   } else {
     // They're not trying to convert to lowercase.
-    const foundLower = R.find(
-      (id) => id.did === address.toLowerCase(),
-      previousIdentifiers
+    const foundLower = R.find((id) =>
+      utility.rawAddressOfDid(id.did) === address.toLowerCase(),
+      prevIds
     )
     if (foundLower) {
-      // They're not creating a lowercase version, but a normal one exists.
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Must create a lowercase version of the DID since a lowercase version exists."}))
+      // They're trying to create a normal case version of one that exists in lowercase.
+      // (We really should notify the user.)
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Will create a lowercase version of the DID since a lowercase version exists."}))
       address = address.toLowerCase()
     }
   }
