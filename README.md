@@ -102,7 +102,7 @@ To Release:
 - (I recommend starting with ios since it takes longer to get approved.)
 - android
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number to match ios)
-    - Always increment the versionCode (and ensure you don't already have a larger release in ios just for consistency's sake).  It is possible to reuse the versionName.
+    - Always increment the versionCode (and ensure you don't already have a larger release in ios, just for consistency's sake).  It is possible to reuse the versionName.
   - `cd android; bundle exec fastlane beta; cd ..`
     - It will prompt for credentials.
     - For error: "Keystore file 'endorser-mobile/android/fastlane/../app/google...keystore' not found for signing config 'externalOverride'."
@@ -115,9 +115,10 @@ To Release:
       - In Production, "Create new release" or "Edit release", or
       - In "Releases overview" under "Latest releases" click arrow on right of next release. (When do we see this?)
     - After uploading, "Save", "Review Release", then "Rollout to internal testing" or "Rollout to Production".
+
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json
-  - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION one less than the versionCode wanted (eg. in android). (Note that EndorserMobile/Info.plist CFBundleVersion is automatically incremented by fastlane beta.)
+  - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION one less than the versionCode wanted (eg. one less that what's in android). (Note that EndorserMobile/Info.plist CFBundleVersion is automatically incremented by fastlane beta.)
   - Create a release in App Store Connect
     - Have a test build?  IDK... maybe don't click 'Expire'
     - For a new one: in App Connect -> App Store next to iOS App, click the "+"

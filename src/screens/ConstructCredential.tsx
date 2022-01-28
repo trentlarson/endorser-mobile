@@ -19,6 +19,8 @@ import { agent, dbConnection } from '../veramo/setup'
 const debug = Debug('endorser-mobile:share-credential')
 
 function donateClaim(grantId: string, funderId: string, fundedId: string, price: number, priceCurrency: string, comments: string, expiration: string, termsOfService: string, transfersAllowed: number) {
+  console.log("Setting funded ID " + fundedId)
+  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Setting funded ID " + fundedId}))
   return {
     "@context": "https://schema.org",
 
@@ -204,7 +206,7 @@ export function ConstructCredentialScreen({ navigation }) {
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Pledge A Life Of Gifts'}
-                    onPress={() => setAskForPledgeInfo("I help to create a world based on giving, in ways that fulfill me.")}
+                    onPress={() => setAskForPledgeInfo("I am building a society based on giving, in ways that fulfill me.")}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
@@ -236,13 +238,15 @@ export function ConstructCredentialScreen({ navigation }) {
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [recipientId, setRecipientId] = useState<string>('')
     const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
-    const [termsOfService, setTermsOfService] = useState<string>("Recipient will acknowledge receipt of contract and funds (eg. with TakeAction). Recipient logs final payment (eg. with GiveAction) and provider agrees (eg. with AgreeAction).")
+    const [termsOfService, setTermsOfService] = useState<string>("Recipient will acknowledge receipt of contract and funds (ie. with confirmation AgreeAction). Recipient logs final payment (with GiveAction) and provider agrees (eg. with AgreeAction).")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
 
     const allContacts = useSelector((state) => state.contacts || [])
 
     function loanOrCreditClaim(txnId: string, providerId: string, recipientId: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
+      console.log("Setting recipient ID " + recipientId)
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Setting recipient ID " + recipientId}))
       return {
         "@context": "https://schema.org",
         "@type": "LoanOrCredit",
@@ -415,7 +419,7 @@ export function ConstructCredentialScreen({ navigation }) {
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [fundedId, setFundedId] = useState<string>('')
     const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
-    const [termsOfService, setTermsOfService] = useState<string>("We talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc. Recipient will record delivery with TakeAction.")
+    const [termsOfService, setTermsOfService] = useState<string>("We talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc. Recipient will record delivery with a confirming AcceptAction.")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
 

@@ -53,7 +53,7 @@ export function MyCredentialsScreen({ navigation }) {
             const currency = result.claim.priceCurrency || "UNKNOWN"
             currencyTotals[currency] = result.claim.price + (currencyTotals[currency] || 0)
           }
-          if (result.claim.duration) { // (possibly unused in app)
+          if (result.claim.duration) { // (unused in app, at least in early 2022)
             const thisDuration = Duration.fromISO(result.claim.duration)
             if (!thisDuration.invalid) {
               durationTotal = durationTotal.plus(thisDuration)

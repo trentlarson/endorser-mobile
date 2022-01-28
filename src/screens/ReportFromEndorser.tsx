@@ -92,6 +92,9 @@ export function ReportScreen({ navigation }) {
             {
               R.keys(obj).map((key, index) => {
                 const newline = obj[key] instanceof Object ? "\n" : ""
+if (claimId == 61 && key === 'recipient') {
+  console.log('claim 61 recipient value', obj[key])
+}
                 return (
                   <Text key={ index } style={{ marginLeft: 20 }}>
                     { key } : { newline }{ objectToYamlReact(obj[key], claimId, obj[key + 'VisibleToDids']) }
