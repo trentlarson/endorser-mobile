@@ -225,8 +225,16 @@ function HelpScreen() {
         <View style={{ padding: 20 }}>
           <Text style={{ fontWeight: 'bold' }}>What is even the purpose of this thing?</Text>
           <Text style={{ padding: 5 }}>This uses the power of cryptography to build confidence: when you make claims and then your friends and family confirm those claims, you gain much more utility, control, and security in your online life.</Text>
-          <Text style={{ padding: 5 }}>For an example, look at <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/reportBestAttendance')}>this report of meeting attendance on the Endorser server</Text>.  Attendees can see their own info and their contacts' info but you cannot see it... until someone brings you into their confidence. So make some claims, confirm others' claims, and build a network of trust -- with trustworthy communications, all verifiable cryptographically.</Text>
+          <Text style={{ padding: 5 }}>For an example, look at <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/reportBestAttendance')}>this report of meeting attendance on the Endorser server</Text>.  Attendees can see their own info and their contacts' info but you cannot see it... until someone brings you into their confidence. So make some claims, confirm others' claims, and build a network of trust -- with trustworthy communifcations, all verifiable cryptographically.</Text>
           <Text style={{ padding: 5, color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/docs')}>For more info, see the Docs section on the Endorser server.</Text>
+        </View>
+
+        <View style={{ padding: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>What data is visible to others?</Text>
+          <Text style={{ padding: 5 }}>All data that you enter except for your ID is visible to everyone. Yes, that means anyone in the world can see those data points, so don't type in any personally identifiable information.</Text>
+          <Text style={{ padding: 5 }}>Your ID is visible only to people who you allow.</Text>
+          <Text style={{ padding: 5 }}>Your contact list is not saved to a server and not revealed to any other users (although they may check if they are visible to you).</Text>
+          <Text style={{ padding: 5 }}>See the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/privacy-policy')}>Privacy Policy</Text> for more information.</Text>
         </View>
 
         <View style={{ padding: 20 }}>
