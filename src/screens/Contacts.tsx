@@ -253,15 +253,6 @@ export function ContactsScreen({ navigation, route }) {
     })
   }
 
-  const deleteFirstContact = async () => {
-    if (allContacts.length > 0) {
-      const first = allContacts[0]
-      const conn = await dbConnection
-      await conn.manager.delete(Contact, { 'did' : first.did })
-      utility.loadContacts(appSlice, appStore, dbConnection)
-    }
-  }
-
   const deleteContact = async (did) => {
     const conn = await dbConnection
     await conn.manager.delete(Contact, { 'did' : did })
@@ -468,15 +459,6 @@ export function ContactsScreen({ navigation, route }) {
             />
           </View>
         </View>
-        { appStore.getState().testMode
-          ? <View style={{ marginTop: 5 }}>
-              <Button
-                title="Delete First Contact"
-                onPress={deleteFirstContact}
-              />
-            </View>
-          : <View/>
-        }
         <View style={{ padding: 10 }}>
           { allContacts && allContacts.length > 0
             ? <View>
