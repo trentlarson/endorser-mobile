@@ -45,11 +45,15 @@ export function MyCredentialsScreen({ navigation }) {
       let durationTotal = Duration.fromMillis(0)
       for (result of results) {
         if (result.claim) {
-          if (result.claim.amount) {
+          if (result.claim.amount) { // LoanOrCredit, MonetaryGrant
             const currency = result.claim.currency || "UNKNOWN"
             currencyTotals[currency] = result.claim.amount + (currencyTotals[currency] || 0)
           }
-          if (result.claim.duration) {
+          if (result.claim.price) { // Offer, DonateAction
+            const currency = result.claim.priceCurrency || "UNKNOWN"
+            currencyTotals[currency] = result.claim.price + (currencyTotals[currency] || 0)
+          }
+          if (result.claim.duration) { // (possibly unused in app)
             const thisDuration = Duration.fromISO(result.claim.duration)
             if (!thisDuration.invalid) {
               durationTotal = durationTotal.plus(thisDuration)
@@ -65,6 +69,8 @@ export function MyCredentialsScreen({ navigation }) {
   const isUser = did => did === identifiers[0].did
 
   const removeSchemaContext = obj => obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
+
+  const displayAmount = (curr, amt) => '' + amt + ' ' + (curr === 'HUR' ? 'hours' : curr)
 
   // Hack because without this it doesn't scroll to the bottom: https://stackoverflow.com/a/67244863/845494
   const screenHeight = Dimensions.get('window').height - 200
@@ -109,7 +115,7 @@ export function MyCredentialsScreen({ navigation }) {
                             <Text>{totalDuration || ''}</Text>
                             {
                               R.map(
-                                arr => <Text key={arr[0]}>{'' + arr[1] + ' ' + arr[0]}</Text>,
+                                arr => <Text key={arr[0]}>{displayAmount(arr[0], arr[1])}</Text>,
                                 R.toPairs(totalCurrencies)
                               )
                             }
