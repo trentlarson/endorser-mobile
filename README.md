@@ -118,7 +118,7 @@ To Release:
 
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json
-  - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION one less than the versionCode wanted (eg. one less that what's in android). (Note that EndorserMobile/Info.plist CFBundleVersion is automatically incremented by fastlane beta.)
+  - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION same as the versionCode wanted (eg. what's in android).
   - Create a release in App Store Connect
     - Have a test build?  IDK... maybe don't click 'Expire'
     - For a new one: in App Connect -> App Store next to iOS App, click the "+"

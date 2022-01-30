@@ -19,7 +19,8 @@ platform :ios do
 
   desc "Push a new beta build to TestFlight"
   lane :beta do
-    increment_build_number(xcodeproj: "EndorserMobile.xcodeproj")
+    # Android doesn't auto-increment, unfortunately.
+    #increment_build_number(xcodeproj: "EndorserMobile.xcodeproj")
     build_app(workspace: "EndorserMobile.xcworkspace", scheme: "EndorserMobile", export_xcargs: "-allowProvisioningUpdates")
     upload_to_testflight
   end
