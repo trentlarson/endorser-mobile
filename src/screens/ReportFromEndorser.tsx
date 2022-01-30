@@ -60,6 +60,44 @@ export function ReportScreen({ navigation }) {
   **/
 
   const objectToYamlReact = (obj, claimId, visibleToDids) => {
+    return (
+      <View>
+        {
+          obj.map((item, index) =>
+            <View key={ index } style={{ marginLeft: 5 }}>
+              {
+                item.claimType === 'DonateAction'
+                ?
+                  <Text
+                    style={{ color: 'blue' }}
+                    onPress={() => navigation.navigate(
+                      'Sign Credential',
+                      { credentialSubject:
+                        { '@context': 'http://schema.org',
+                          '@type': 'GiveAction',
+                          agent: item.claim.agent,
+                          recipient: item.claim.recipient,
+                          identifier: item.claim.identifier,
+                          price: item.claim.price,
+                          priceCurrency: item.claim.priceCurrency,
+                        }
+                      }
+                    )}
+                  >
+                    Record as Paid
+                  </Text>
+                :
+                  <View />
+              }
+              <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id) }
+            </View>
+          )
+        }
+      </View>
+    )
+  }
+
+  const objectToYamlReactRecur = (obj, claimId, visibleToDids) => {
     if (obj instanceof Object) {
       if (Array.isArray(obj)) {
         // array: loop through elements
@@ -68,7 +106,7 @@ export function ReportScreen({ navigation }) {
             {
               obj.map((item, index) =>
                 <View key={ index } style={{ marginLeft: 5 }}>
-                  <Text>- </Text>{ objectToYamlReact(item, claimId || item.id) }
+                  <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id) }
                 </View>
               )
               /** This complained about being inside a ScrollView, and about nesting.
@@ -77,7 +115,7 @@ export function ReportScreen({ navigation }) {
                 keyExtractor={(item, index) => "" + index}
                 renderItem={(item, index) =>
                   <View style={{ marginLeft: 5 }}>
-                    <Text>- </Text>{ objectToYamlReact(item, claimId || item.id) }
+                    <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id) }
                   </View>
                 }
               />
@@ -92,12 +130,9 @@ export function ReportScreen({ navigation }) {
             {
               R.keys(obj).map((key, index) => {
                 const newline = obj[key] instanceof Object ? "\n" : ""
-if (claimId == 61 && key === 'recipient') {
-  console.log('claim 61 recipient value', obj[key])
-}
                 return (
                   <Text key={ index } style={{ marginLeft: 20 }}>
-                    { key } : { newline }{ objectToYamlReact(obj[key], claimId, obj[key + 'VisibleToDids']) }
+                    { key } : { newline }{ objectToYamlReactRecur(obj[key], claimId, obj[key + 'VisibleToDids']) }
                   </Text>
                 )}
               )

@@ -273,7 +273,7 @@ function HelpScreen() {
         </View>
 
         <View style={{ padding: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>This is stupid (or fantastic). Who do I blame?</Text>
+          <Text style={{ fontWeight: 'bold' }}>Who do I call out for this?</Text>
           <Text style={{ padding: 5 }}>Trent, via:</Text>
           <Text style={{ padding: 5 }} selectable={true}>CommunityEndorser@gmail.com</Text>
         </View>

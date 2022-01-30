@@ -43,20 +43,32 @@ export function MyCredentialsScreen({ navigation }) {
       // add up any amount or time values
       let currencyTotals = {}
       let durationTotal = Duration.fromMillis(0)
+      let outstandingTotals = {} // mapping from txn ID string to number hours
       for (result of results) {
         if (result.claim) {
-          if (result.claim.amount) { // LoanOrCredit, MonetaryGrant
-            const currency = result.claim.currency || "UNKNOWN"
-            currencyTotals[currency] = result.claim.amount + (currencyTotals[currency] || 0)
-          }
-          if (result.claim.price) { // Offer, DonateAction
-            const currency = result.claim.priceCurrency || "UNKNOWN"
-            currencyTotals[currency] = result.claim.price + (currencyTotals[currency] || 0)
-          }
-          if (result.claim.duration) { // (unused in app, at least in early 2022)
-            const thisDuration = Duration.fromISO(result.claim.duration)
-            if (!thisDuration.invalid) {
-              durationTotal = durationTotal.plus(thisDuration)
+          if (result.claim['@type'] === 'GiveAction') {
+            if (outstandingTotals[result.claim.identifier] !== 0) {
+              const price = result.claim.amount || result.claim.price
+              const currency = result.claim.currency || result.claim.priceCurrency || "UNKNOWN"
+              currencyTotals[currency] = (currencyTotals[currency] || 0) - price
+              outstandingTotals[result.claim.identifier] = 0
+            }
+          } else {
+            if (result.claim.amount) { // LoanOrCredit, MonetaryGrant
+              const currency = result.claim.currency || "UNKNOWN"
+              currencyTotals[currency] = result.claim.amount + (currencyTotals[currency] || 0)
+              outstandingTotals[result.claim.identifier] = result.claim.amount
+            }
+            if (result.claim.price) { // Offer, DonateAction
+              const currency = result.claim.priceCurrency || "UNKNOWN"
+              currencyTotals[currency] = result.claim.price + (currencyTotals[currency] || 0)
+              outstandingTotals[result.claim.identifier] = result.claim.amount
+            }
+            if (result.claim.duration) { // (unused in app, at least in early 2022)
+              const thisDuration = Duration.fromISO(result.claim.duration)
+              if (!thisDuration.invalid) {
+                durationTotal = durationTotal.plus(thisDuration)
+              }
             }
           }
         }
