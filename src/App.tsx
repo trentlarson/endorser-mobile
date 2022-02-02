@@ -141,6 +141,7 @@ function HomeScreen({ navigation }) {
                     identifier={ allIdentifiers[0] }
                     navigation={ navigation }
                   />
+                  <View style={{ marginTop: 5 }}/>
                   <Button
                     title={'Confirm Others'}
                     onPress={() => navigation.navigate('Confirm Others')}
@@ -154,14 +155,17 @@ function HomeScreen({ navigation }) {
                 title="Claim / Ask / Offer"
                 onPress={() => navigation.navigate('Create Credential')}
               />
+              <View style={{ marginTop: 5 }}/>
               <Button
                 title={'Agree / Certify / Confirm'}
                 onPress={() => navigation.navigate('Confirm Others')}
               />
+              <View style={{ marginTop: 5 }}/>
               <Button
                 title="Search"
                 onPress={() => navigation.navigate('Reports from Endorser server')}
               />
+              <View style={{ marginTop: 5 }}/>
               <Button
                 title="Scan Presentation"
                 onPress={() => navigation.navigate('Scan Presentation')}
@@ -171,6 +175,7 @@ function HomeScreen({ navigation }) {
                 title="Manage Contacts"
                 onPress={() => navigation.navigate('Contacts')}
               />
+              <View style={{ marginTop: 5 }}/>
               <Button
                 title="Manage Profile & Settings"
                 onPress={() => navigation.navigate('Settings')}
@@ -193,11 +198,12 @@ function HomeScreen({ navigation }) {
                 title="Create New Identifier"
                 onPress={() => navigation.navigate('Settings')}
               />
+              <View style={{ marginTop: 5 }}/>
               <Button
                 title="Import Seed Phrase"
                 onPress={() => navigation.navigate('Import Seed Phrase')}
               />
-              <View style={{ marginTop: 50 }}/>
+              <View style={{ marginTop: 5 }}/>
               <Button
                 title="Scan Presentation"
                 onPress={() => navigation.navigate('Scan Presentation')}
@@ -206,6 +212,7 @@ function HomeScreen({ navigation }) {
           )
         )
         }
+        <View style={{ marginTop: 5 }}/>
         <Button
           title="Get Help"
           onPress={() => navigation.navigate('Help')}

@@ -278,11 +278,12 @@ export function ContactsScreen({ navigation, route }) {
             title="Scan to Import"
             onPress={() => navigation.navigate('Contact Import')}
           />
-
+          <View style={{ marginTop: 5 }}/>
           <Button
             title="Import Bulk (CSV)"
             onPress={setWantsCsv}
           />
+
           <Modal
             animationType="slide"
             transparent={true}
@@ -503,6 +504,7 @@ export function ContactsScreen({ navigation, route }) {
                               title={`Can ${contact.name || 'They'} See My Activity?`}
                               onPress={() => {checkVisibility(contact)}}
                             />
+                            <View style={{ marginTop: 5 }}/>
                             <Button
                               title="Make Me Visible"
                               onPress={() => {allowToSeeMe(contact)}}
@@ -524,12 +526,14 @@ export function ContactsScreen({ navigation, route }) {
                                 onPress={() => {allowToSeeMe(contact)}}
                               />
                             }
+                            <View style={{ marginTop: 5 }}/>
                             <Button
                               title={`(Double-Check Visibility)`}
                               onPress={() => {checkVisibility(contact)}}
                             />
                           </View>
                     }
+                    <View style={{ marginTop: 5 }}/>
                     { appStore.getState().testMode
                       ? <View><Button title={'Delete'} onPress={() => deleteContact(contact.did)}/></View>
                       : <View/>

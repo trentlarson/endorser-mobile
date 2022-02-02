@@ -19,8 +19,6 @@ import { agent, dbConnection } from '../veramo/setup'
 const debug = Debug('endorser-mobile:share-credential')
 
 function donateClaim(grantId: string, funderId: string, fundedId: string, price: number, priceCurrency: string, comments: string, expiration: string, termsOfService: string, transfersAllowed: number) {
-  console.log("Setting funded ID " + fundedId)
-  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Setting funded ID " + fundedId}))
   return {
     "@context": "https://schema.org",
 
@@ -245,8 +243,6 @@ export function ConstructCredentialScreen({ navigation }) {
     const allContacts = useSelector((state) => state.contacts || [])
 
     function loanOrCreditClaim(txnId: string, providerId: string, recipientId: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
-      console.log("Setting recipient ID " + recipientId)
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Setting recipient ID " + recipientId}))
       return {
         "@context": "https://schema.org",
         "@type": "LoanOrCredit",
