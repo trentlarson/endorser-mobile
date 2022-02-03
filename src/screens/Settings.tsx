@@ -382,7 +382,8 @@ export function SettingsScreen({navigation}) {
         Alert.alert('You can lose data in Test Mode. If unsure: exit, or restart the app.')
       } else {
         // now going into real mode, but if the servers were switched then warn
-        if (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER) {
+        if (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
+            || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER) {
           Alert.alert('Beware! Your servers are not set to the default production servers.')
         }
       }
@@ -608,10 +609,12 @@ export function SettingsScreen({navigation}) {
                       title='Use public prod servers'
                       onPress={setToProdServers}
                     />
+                    <View style={{ marginTop: 5 }}/>
                     <Button
                       title='Use public test servers'
                       onPress={setToTestServers}
                     />
+                    <View style={{ marginTop: 5 }}/>
                     <Button
                       title='Use local test servers'
                       onPress={setToLocalServers}
@@ -626,14 +629,17 @@ export function SettingsScreen({navigation}) {
                   title='Log Contact Table'
                   onPress={logDatabaseTable('contact')}
                 />
+                <View style={{ marginTop: 5 }}/>
                 <Button
                   title='Log Identifier Table'
                   onPress={logDatabaseTable('identifier')}
                 />
+                <View style={{ marginTop: 5 }}/>
                 <Button
                   title='Log Key Table'
                   onPress={logDatabaseTable('key')}
                 />
+                <View style={{ marginTop: 5 }}/>
                 <Button
                   title='Log Settings Table'
                   onPress={logDatabaseTable('settings')}

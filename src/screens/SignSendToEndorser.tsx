@@ -5,7 +5,7 @@ import { ActivityIndicator, Button, Linking, SafeAreaView, ScrollView, Text, Tex
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
-import { appSlice, appStore } from '../veramo/appSlice'
+import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 import { agent, dbConnection } from '../veramo/setup'
 
 const debug = Debug('endorser-mobile:share-credential')
@@ -164,7 +164,15 @@ export function SignCredentialScreen({ navigation, route }) {
         <View style={{ padding: 20 }}>
           { id0 ? (
             <View>
-              <Text style={{ fontSize: 30, fontWeight: 'bold', marginBottom: 10 }}>Sign</Text>
+              <Text style={{ fontSize: 30, fontWeight: 'bold', marginBottom: 10 }}>
+                Sign
+                {
+                  (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
+                   || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
+                   ? " - Custom Servers"
+                   : ""
+                }
+              </Text>
               <View>
                 {
                   fetched ? (
@@ -177,7 +185,6 @@ export function SignCredentialScreen({ navigation, route }) {
                               'Sorry, something went wrong trying to go to the Endorser server.',
                             ),
                           )
-                          setFetched(false)
                         }}
                       />
                     ) : ( /* fetched && !endorserId */
@@ -194,7 +201,7 @@ export function SignCredentialScreen({ navigation, route }) {
                       claimStr ? (
                         <View>
                           <Text>Below is the information for your final review.</Text>
-                          <Text style={{ color: 'red' }}>This is not yet submitted; click 'Sign & Store' to send.</Text>
+                          <Text style={{ color: 'red' }}>This is not yet submitted; click 'Sign & Store' to sign and send it.</Text>
                         </View>
                       ) : ( /* !fetched && !fetching && !claimStr */
                         <Text>No claim found.  Go back and try again.</Text>
@@ -215,7 +222,8 @@ export function SignCredentialScreen({ navigation, route }) {
                         onPress={signAndSend}
                       />
                   }
-                  <Text style={{ marginTop: 75, marginBottom: 5 }}>Claim Details for Your Review:</Text>
+                  <Text style={{ marginTop: 75, marginBottom: 5 }}>Details</Text>
+                  <Text style={{ fontSize: 11 }}>Signing As:</Text>
                   <Text style={{ fontSize: 11 }}>{id0.did}</Text>
                   { !hasMnemonic ? (
                     <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>

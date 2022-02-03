@@ -274,7 +274,7 @@ export function ReportScreen({ navigation }) {
                           ? didsForLinkedModal.map((did) => {
                               const contact = R.find(con => con.did === did, allContacts)
                               return (
-                                <Text key={ did } style={{ padding: 10 }}>
+                                <Text key={ did } style={{ padding: 10 }} selectable={ true }>
                                   { utility.didInContext(did, identifiers, allContacts) }
                                 </Text>
                               )

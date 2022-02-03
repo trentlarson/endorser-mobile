@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux'
 import { styles } from './style'
 import { Contact } from '../entity/contact'
 import * as utility from '../utility/utility'
-import { appSlice, appStore } from '../veramo/appSlice'
+import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 import { agent, dbConnection } from '../veramo/setup'
 
 export function ContactsScreen({ navigation, route }) {
@@ -273,7 +273,15 @@ export function ContactsScreen({ navigation, route }) {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 10 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Contacts</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>
+            Contacts
+            {
+              (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
+               || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
+               ? " - Custom Servers"
+               : ""
+            }
+          </Text>
           <Button
             title="Scan to Import"
             onPress={() => navigation.navigate('Contact Import')}
