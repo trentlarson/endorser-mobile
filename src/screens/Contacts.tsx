@@ -361,9 +361,10 @@ export function ContactsScreen({ navigation, route }) {
                 <TextInput
                   value={editContactName}
                   onChangeText={setEditContactName}
-                  editable
-                  style={{ borderWidth: 1 }}
                   autoCapitalize={'none'}
+                  editable
+                  placeholder={'Enter Name'}
+                  style={{ borderWidth: 1 }}
                 />
 
                 <TouchableHighlight

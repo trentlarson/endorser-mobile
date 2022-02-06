@@ -167,7 +167,7 @@ function HomeScreen({ navigation }) {
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Scan Presentation"
+                title="Scan A Presented Claim"
                 onPress={() => navigation.navigate('Scan Presentation')}
               />
               <View style={{ marginTop: 50 }}/>
@@ -205,7 +205,7 @@ function HomeScreen({ navigation }) {
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Scan Presentation"
+                title="Scan A Presented Claim"
                 onPress={() => navigation.navigate('Scan Presentation')}
               />
             </View>
