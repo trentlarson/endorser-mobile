@@ -89,6 +89,26 @@ export function ReportScreen({ navigation }) {
                 :
                   <View />
               }
+              {
+                item.claimType !== 'AgreeAction'
+                ?
+                  <Text
+                    style={{ color: 'blue' }}
+                    onPress={() => navigation.navigate(
+                      'Sign Credential',
+                      { credentialSubject:
+                        { '@context': 'http://schema.org',
+                          '@type': 'AgreeAction',
+                          object: item.claim,
+                        }
+                      }
+                    )}
+                  >
+                    Agree
+                  </Text>
+                :
+                  <View />
+              }
               <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id) }
             </View>
           )

@@ -4,8 +4,9 @@ import * as didJwt from 'did-jwt'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { Alert, Button, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
+import { Alert, Button, FlatList, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
+import RadioGroup, {RadioButtonProps} from 'react-native-radio-buttons-group'
 import { useSelector } from 'react-redux'
 
 import { ContactSelectModal } from './ContactSelect'
@@ -22,7 +23,6 @@ function donateClaim(grantId: string, funderId: string, fundedId: string, price:
   return {
     "@context": "https://schema.org",
 
-    // An alternative is a Grant (even MonetaryGrant)
     "@type": "DonateAction",
 
     "description": comments,
@@ -53,7 +53,8 @@ function donateClaim(grantId: string, funderId: string, fundedId: string, price:
 export function ConstructCredentialScreen({ navigation }) {
 
   const [askForCreditInfo, setAskForCreditInfo] = useState<boolean>(false)
-  const [askForDonationInfo, setAskForDonationInfo] = useState<string>(null)
+  const [askForGaveInfo, setAskForGaveInfo] = useState<boolean>(false)
+  const [askForOfferInfo, setAskForOfferInfo] = useState<boolean>(false)
   const [askForPersonInfo, setAskForPersonInfo] = useState<boolean>(false)
   const [askForPledgeInfo, setAskForPledgeInfo] = useState<string>('')
   const [askForWitnessInfo, setAskForWitnessInfo] = useState<string>('')
@@ -97,19 +98,6 @@ export function ConstructCredentialScreen({ navigation }) {
               )}
               <View style={{ padding: 10 }}>
                 {
-                  askForDonationInfo != null
-                  ? <DonationModal
-                      sponsorId={ identifiers[0].did }
-                      cancel={ () => setAskForDonationInfo(null) }
-                      kind={ askForDonationInfo }
-                      proceed={ claim => {
-                        setAskForDonationInfo(null)
-                        navigation.navigate('Sign Credential', { credentialSubject: claim })
-                      }}
-                    />
-                  : <View/>
-                }
-                {
                   askForCreditInfo
                   ? <CreditModal
                       providerId={ identifiers[0].did }
@@ -118,6 +106,30 @@ export function ConstructCredentialScreen({ navigation }) {
                         setAskForCreditInfo(false)
                         navigation.navigate('Sign Credential', { credentialSubject: claim })
                       }}
+                    />
+                  : <View/>
+                }
+                {
+                  askForGaveInfo
+                  ? <GaveModal
+                      cancel={ () => setAskForGaveInfo(false) }
+                      proceed={ claim => {
+                        setAskForGaveInfo(false)
+                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                      }}
+                      userId={ identifiers[0].did }
+                    />
+                  : <View/>
+                }
+                {
+                  askForOfferInfo
+                  ? <OfferModal
+                      cancel={ () => setAskForOfferInfo(false) }
+                      proceed={ claim => {
+                        setAskForOfferInfo(false)
+                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                      }}
+                      userId={ identifiers[0].did }
                     />
                   : <View/>
                 }
@@ -173,20 +185,29 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
+                    title={'Witness To Something Remarkable'}
+                    onPress={() => setAskForWitnessInfo("They ")}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
+                  <Text>Transactions</Text>
+                  <Button
+                    title={'Gave'}
+                    onPress={() => setAskForGaveInfo(true)}
+                  />
+                  <View style={{ padding: 5 }} />
+                  <Button
                     title={'Generate Credit'}
                     onPress={() => setAskForCreditInfo(true)}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Offer Time Donation'}
-                    onPress={() => setAskForDonationInfo('time')}
+                    title={'Offer (Time, Money, etc)'}
+                    onPress={() => setAskForOfferInfo(true)}
                   />
                   <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Offer Money Donation'}
-                    onPress={() => setAskForDonationInfo('money')}
-                  />
-                  <View style={{ padding: 5 }} />
+                  <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
+                  <Text>Pledges</Text>
                   <Button
                     title={'Pledge To Thick Red Line'}
                     onPress={() => setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate. I pledge only to act to protect lives, liberty, and property. I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")}
@@ -206,12 +227,10 @@ export function ConstructCredentialScreen({ navigation }) {
                     title={'Pledge A Life Of Gifts'}
                     onPress={() => setAskForPledgeInfo("I am building a society based on giving, in ways that fulfill me.")}
                   />
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Witness To Something Remarkable'}
-                    onPress={() => setAskForWitnessInfo("They ")}
-                  />
                 </View>
+                <View style={{ padding: 5 }} />
+                <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%' }}/>
+                <Text>Note that you can use any of those as a template and then edit before signing the final record.</Text>
               </View>
             </View>
           ) : (
@@ -236,7 +255,7 @@ export function ConstructCredentialScreen({ navigation }) {
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
     const [recipientId, setRecipientId] = useState<string>('')
     const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
-    const [termsOfService, setTermsOfService] = useState<string>("Recipient will acknowledge receipt of contract and funds (ie. with confirmation AgreeAction). Recipient logs final payment (with GiveAction) and provider agrees (eg. with AgreeAction).")
+    const [termsOfService, setTermsOfService] = useState<string>("Recipient may acknowledge receipt of terms (with AcceptAction). Recipient will log final payment (with GiveAction) and provider will agree (with AgreeAction).")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
 
@@ -407,6 +426,7 @@ export function ConstructCredentialScreen({ navigation }) {
     - proceed function that takes the claim
     - cancel function
    **/
+  /** unused
   function DonationModal(props) {
 
     const [comment, setComment] = useState<string>('')
@@ -576,6 +596,455 @@ export function ConstructCredentialScreen({ navigation }) {
       </Modal>
     )
   }
+  **/
+
+  /**
+    props has:
+    - proceed function that takes the claim
+    - cancel function
+   **/
+  function GaveModal(props) {
+
+    const [agentId, setAgentId] = useState<string>(props.userId)
+    const [description, setDescription] = useState<string>(null)
+    const [objectGiven, setObjectGiven] = useState<string>(null)
+    const [recipientId, setRecipientId] = useState<string>(null)
+    const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
+    const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
+
+    const allContacts = useSelector((state) => state.contacts || [])
+
+    function possiblyFinish(proceedToFinish) {
+      if (objectGiven == null) {
+        Alert.alert('You must indicate the object given.')
+      } else {
+        let result = {
+          "@context": "https://schema.org",
+          "@type": "GiveAction",
+          object: objectGiven,
+        }
+        result.agent = agentId ? { identifier: agentId } : undefined
+        result.recipient = recipientId ? { identifier: recipientId } : undefined
+        result.description = description || undefined
+        proceedToFinish(result)
+      }
+    }
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={props.cancel}
+      >
+        <ScrollView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+
+              {
+                selectAgentFromContacts
+                ? <ContactSelectModal
+                    cancel={ () => { setSelectAgentFromContacts(false) } }
+                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                  />
+                : <View/>
+              }
+              {
+                selectRecipientFromContacts
+                ? <ContactSelectModal
+                    cancel={ () => { setSelectRecipientFromContacts(false) } }
+                    proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
+                  />
+                : <View/>
+              }
+
+              <View>
+                <Text style={styles.modalText}>Gave</Text>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Giver</Text>
+                  <TextInput
+                    value={agentId}
+                    onChangeText={setAgentId}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
+                  />
+                  {
+                    allContacts.length > 0
+                    ? <TouchableHighlight
+                        style={styles.moreButton}
+                        onPress={() => setSelectAgentFromContacts(true)}
+                      >
+                        <Text>Pick</Text>
+                      </TouchableHighlight>
+                    : <View />
+                  }
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Recipient</Text>
+                  <TextInput
+                    value={recipientId}
+                    onChangeText={setRecipientId}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
+                  />
+                  {
+                    allContacts.length > 0
+                    ? <TouchableHighlight
+                        style={styles.moreButton}
+                        onPress={() => setSelectRecipientFromContacts(true)}
+                      >
+                        <Text>Pick</Text>
+                      </TouchableHighlight>
+                    : <View />
+                  }
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Object Given</Text>
+                  <TextInput
+                    value={objectGiven}
+                    onChangeText={setObjectGiven}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Comment</Text>
+                  <TextInput
+                    value={description}
+                    onChangeText={setDescription}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => possiblyFinish(props.proceed)}
+                >
+                  <Text>Finish...</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }} />
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={props.cancel}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </Modal>
+    )
+  }
+
+  /**
+    props has:
+    - userId for the current user's ID
+    - proceed function that takes the claim
+    - cancel function
+   **/
+  function OfferModal(props) {
+
+    const INITIAL_UNIT_BUTTONS: RadioButtonProps[] = [{
+      id: '1', // acts as primary key, should be unique and non-empty string
+      label: 'hours',
+      selected: true,
+      value: 'HUR',
+    }, {
+      id: '2',
+      label: 'bitcoin',
+      value: 'BTC',
+    }, {
+      id: '3',
+      label: 'dollars',
+      value: 'USD',
+    }, {
+      id: '4',
+      label: 'other',
+      value: '',
+    }]
+    const selected = R.find(R.prop('selected'), INITIAL_UNIT_BUTTONS)
+
+    const [agentId, setAgentId] = useState<string>(props.userId)
+    const [amountStr, setAmountStr] = useState<number>('')
+    const [description, setDescription] = useState<string>(null)
+    const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
+    const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
+    const [recipientId, setRecipientId] = useState<string>(null)
+    const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
+    const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
+    const [termsOfService, setTermsOfService] = useState<string>('')
+    const [transferAllowed, setTransferAllowed] = useState<boolean>(false)
+    const [unit, setUnit] = useState<string>(selected && selected.value)
+    const [unitButtons, setUnitButtons] = useState<RadioButtonProps[]>(INITIAL_UNIT_BUTTONS)
+    const [validThrough, setValidThrough] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
+
+    const allContacts = useSelector((state) => state.contacts || [])
+
+    function toggleIsSpecificAmount() {
+      setIsSpecificAmount(!isSpecificAmount)
+    }
+
+    function setUnitSelection(buttons) {
+      setUnitButtons(buttons)
+      const selectedButton = R.find(R.prop('selected'), buttons)
+      setUnit(selectedButton.value)
+    }
+
+    function possiblyFinish(proceedToFinish) {
+
+      // An embedded item is useful for later reference (via identifier).
+      // Other apps may choose to use price & priceCurrency.
+      if (!isSpecificAmount && !description) {
+        Alert.alert('You must describe the offering or give a specific amount.')
+      } else if (isSpecificAmount && (!amountStr || !unit)) {
+        Alert.alert('You must give a specific amount and unit.')
+      } else {
+        let result = {
+          "@context": "https://schema.org",
+          "@type": "Offer",
+          identifier: crypto.randomBytes(16).toString('hex'),
+          numberOfTransfersAllowed: multipleTransfersAllowed ? Number.MAX_SAFE_INTEGER : (transferAllowed ? 1 : 0),
+          offeredBy: { identifier: agentId },
+        }
+
+        result.description = description || undefined
+
+        // TypeAndQuantityNode
+        result.itemOffered =
+          (!isSpecificAmount || (!amountStr || !unit))
+          ? undefined
+          : {
+            amountOfThisGood: Number(amountStr),
+            /**
+              These units are typically in currency or time.
+
+              Units for currencies are described in multiple places at schema.org:
+              https://schema.org/currency
+              https://schema.org/priceCurrency
+              https://schema.org/price
+
+              We've chosen HUR from UN/CEFACT for the length of time.
+              Alternatively, units for time at schema.org can be in ISO 8601 format.
+            **/
+            unitCode: unit,
+          }
+
+        result.recipient = recipientId ? { identifier: recipientId } : undefined
+
+        result.termsOfService = termsOfService ? termsOfService : undefined
+
+        result.validThrough = validThrough ? validThrough : undefined
+
+        proceedToFinish(result)
+      }
+    }
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={props.cancel}
+      >
+        <ScrollView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+
+              {
+                selectAgentFromContacts
+                ? <ContactSelectModal
+                    cancel={ () => { setSelectAgentFromContacts(false) } }
+                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                  />
+                : <View/>
+              }
+              {
+                selectRecipientFromContacts
+                ? <ContactSelectModal
+                    cancel={ () => { setSelectRecipientFromContacts(false) } }
+                    proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
+                  />
+                : <View/>
+              }
+
+              <View>
+                <Text style={styles.modalText}>Offer</Text>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Agent</Text>
+                  <TextInput
+                    value={agentId}
+                    onChangeText={setAgentId}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
+                  />
+                  {
+                    allContacts.length > 0
+                    ? <TouchableHighlight
+                        style={styles.moreButton}
+                        onPress={() => setSelectAgentFromContacts(true)}
+                      >
+                        <Text>Pick</Text>
+                      </TouchableHighlight>
+                    : <View />
+                  }
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Recipient</Text>
+                  <TextInput
+                    value={recipientId}
+                    onChangeText={setRecipientId}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
+                  />
+                  {
+                    allContacts.length > 0
+                    ? <TouchableHighlight
+                        style={styles.moreButton}
+                        onPress={() => setSelectRecipientFromContacts(true)}
+                      >
+                        <Text>Pick</Text>
+                      </TouchableHighlight>
+                    : <View />
+                  }
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Description</Text>
+                  <TextInput
+                    value={description}
+                    onChangeText={setDescription}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Terms, Conditions, Limitations, etc</Text>
+                  <TextInput
+                    value={termsOfService}
+                    onChangeText={setTermsOfService}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <CheckBox
+                  title='This is a specific amount.'
+                  checked={isSpecificAmount}
+                  onPress={toggleIsSpecificAmount}
+                />
+
+                {
+                  isSpecificAmount ? (
+                    <View>
+                      <View style={{ padding: 5 }}>
+                        <Text>Amount</Text>
+                        <TextInput
+                          value={amountStr}
+                          onChangeText={setAmountStr}
+                          editable
+                          style={{ borderWidth: 1 }}
+                        />
+                      </View>
+
+                      <View style={{ padding: 5 }}>
+                        <Text>Unit</Text>
+                        <TextInput
+                          value={unit}
+                          onChangeText={setUnit}
+                          editable
+                          style={{ borderWidth: 1 }}
+                          width={ 50 }
+                        />
+                        {
+                          (R.find(R.prop('selected'), unitButtons).value == '') ? (
+                            <Text>
+                              You can see the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://www.xe.com/iso4217.php')}>codes for currencies here</Text> and the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('http://wiki.goodrelations-vocabulary.org/Documentation/UN/CEFACT_Common_Codes')}>codes for other units here</Text>.
+                            </Text>
+                          ) : (
+                            <View/>
+                          )
+                        }
+                        <RadioGroup
+                          layout='row'
+                          radioButtons={unitButtons}
+                          onPress={setUnitSelection}
+                        />
+                      </View>
+
+                    </View>
+                  ) : (
+                    <View/>
+                  )
+                }
+
+                <View style={{ padding: 5 }}>
+                  <Text>Valid Through</Text>
+                  <TextInput
+                    value={validThrough}
+                    onChangeText={setValidThrough}
+                    editable
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <CheckBox
+                    title='Transfer Allowed'
+                    checked={transferAllowed}
+                    onPress={() => {setTransferAllowed(!transferAllowed)}}
+                  />
+                  <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
+                    <CheckBox
+                      title='Multiple Transfers Allowed'
+                      checked={multipleTransfersAllowed}
+                      onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
+                      visible={transferAllowed}
+                    />
+                  </View>
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => possiblyFinish(props.proceed)}
+                >
+                  <Text>Finish...</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }} />
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={props.cancel}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+              </View>
+
+            </View>
+          </View>
+        </ScrollView>
+      </Modal>
+    )
+  }
 
   /**
     props has:
@@ -694,7 +1163,7 @@ export function ConstructCredentialScreen({ navigation }) {
       return {
         "@context": "http://schema.org",
         "@type": "AcceptAction",
-        "agent": props.agent,
+        "agent": { identifier: props.agent },
         "object": pledge,
       }
     }
@@ -766,7 +1235,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
         "@context": "http://purl.org/vocab/bio/0.1/",
         "@type": "Event",
-        "agent": identifier,
+        "agent": { identifier: identifier },
         "description": text,
       }
     }
