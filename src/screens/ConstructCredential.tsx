@@ -21,7 +21,6 @@ const debug = Debug('endorser-mobile:share-credential')
 
 export function ConstructCredentialScreen({ navigation }) {
 
-  const [askForCreditInfo, setAskForCreditInfo] = useState<boolean>(false)
   const [askForGaveInfo, setAskForGaveInfo] = useState<boolean>(false)
   const [askForOfferInfo, setAskForOfferInfo] = useState<boolean>(false)
   const [askForPersonInfo, setAskForPersonInfo] = useState<boolean>(false)
@@ -55,18 +54,6 @@ export function ConstructCredentialScreen({ navigation }) {
                  <Text/>
               )}
               <View style={{ padding: 10 }}>
-                {
-                  askForCreditInfo
-                  ? <CreditModal
-                      providerId={ identifiers[0].did }
-                      cancel={ () => setAskForCreditInfo(false) }
-                      proceed={ claim => {
-                        setAskForCreditInfo(false)
-                        navigation.navigate('Sign Credential', { credentialSubject: claim })
-                      }}
-                    />
-                  : <View/>
-                }
                 {
                   askForGaveInfo
                   ? <GaveModal
@@ -155,11 +142,6 @@ export function ConstructCredentialScreen({ navigation }) {
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Generate Credit'}
-                    onPress={() => setAskForCreditInfo(true)}
-                  />
-                  <View style={{ padding: 5 }} />
-                  <Button
                     title={'Offer (Time, Money, etc)'}
                     onPress={() => setAskForOfferInfo(true)}
                   />
@@ -205,6 +187,7 @@ export function ConstructCredentialScreen({ navigation }) {
     - proceed function that takes the claim
     - cancel function
    **/
+  /** unused
   function CreditModal(props) {
 
     const [amountStr, setAmountStr] = useState<string>('')
@@ -376,6 +359,7 @@ export function ConstructCredentialScreen({ navigation }) {
       </Modal>
     )
   }
+  **/
 
   /**
     props has:
@@ -799,6 +783,8 @@ export function ConstructCredentialScreen({ navigation }) {
         Alert.alert('You must describe the offering or give a specific amount.')
       } else if (isSpecificAmount && (!amountStr || !unit)) {
         Alert.alert('You must give a specific amount and unit.')
+      } else if (isSpecificAmount && isNaN(Number(amountStr))) {
+        Alert.alert('You must give a valid numeric amount.')
       } else {
         let result = {
           "@context": "https://schema.org",
