@@ -19,6 +19,26 @@ import { agent, dbConnection } from '../veramo/setup'
 
 const debug = Debug('endorser-mobile:share-credential')
 
+const INITIAL_UNIT_BUTTONS: RadioButtonProps[] = [{
+  id: '1', // acts as primary key, should be unique and non-empty string
+  label: 'hours',
+  selected: true,
+  value: 'HUR',
+}, {
+  id: '2',
+  label: 'bitcoin',
+  value: 'BTC',
+}, {
+  id: '3',
+  label: 'dollars',
+  value: 'USD',
+}, {
+  id: '4',
+  label: 'other',
+  value: '',
+}]
+const INITIAL_SELECTED_BUTTON = R.find(R.prop('selected'), INITIAL_UNIT_BUTTONS)
+
 export function ConstructCredentialScreen({ navigation }) {
 
   const [askForGaveInfo, setAskForGaveInfo] = useState<boolean>(false)
@@ -137,13 +157,13 @@ export function ConstructCredentialScreen({ navigation }) {
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Transactions</Text>
                   <Button
-                    title={'Gave'}
-                    onPress={() => setAskForGaveInfo(true)}
+                    title={'Offer'}
+                    onPress={() => setAskForOfferInfo(true)}
                   />
                   <View style={{ padding: 5 }} />
                   <Button
-                    title={'Offer (Time, Money, etc)'}
-                    onPress={() => setAskForOfferInfo(true)}
+                    title={'Gave'}
+                    onPress={() => setAskForGaveInfo(true)}
                   />
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
@@ -579,23 +599,63 @@ export function ConstructCredentialScreen({ navigation }) {
   function GaveModal(props) {
 
     const [agentId, setAgentId] = useState<string>(props.userId)
+    const [amountStr, setAmountStr] = useState<number>('')
     const [description, setDescription] = useState<string>(null)
+    const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
     const [objectGiven, setObjectGiven] = useState<string>(null)
     const [recipientId, setRecipientId] = useState<string>(null)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
+    const [unit, setUnit] = useState<string>(INITIAL_SELECTED_BUTTON && INITIAL_SELECTED_BUTTON.value)
+    const [unitButtons, setUnitButtons] = useState<RadioButtonProps[]>(INITIAL_UNIT_BUTTONS)
 
     const allContacts = useSelector((state) => state.contacts || [])
 
+    function toggleIsSpecificAmount() {
+      setIsSpecificAmount(!isSpecificAmount)
+    }
+
+    function setUnitSelection(buttons) {
+      setUnitButtons(buttons)
+      const selectedButton = R.find(R.prop('selected'), buttons)
+      setUnit(selectedButton.value)
+    }
+
     function possiblyFinish(proceedToFinish) {
-      if (objectGiven == null) {
+      if (!isSpecificAmount && !objectGiven) {
         Alert.alert('You must indicate the object given.')
+      } else if (isSpecificAmount && (!amountStr || !unit)) {
+        Alert.alert('You must give a specific amount and unit.')
+      } else if (isSpecificAmount && isNaN(Number(amountStr))) {
+        Alert.alert('You must give a valid numeric amount.')
       } else {
         let result = {
           "@context": "https://schema.org",
           "@type": "GiveAction",
-          object: objectGiven,
         }
+
+        result.object =
+          !isSpecificAmount
+          ? objectGiven
+          : {
+            // TypeAndQuantityNode
+
+            amountOfThisGood: Number(amountStr),
+
+            /**
+              These units are typically in currency or time.
+
+              Units for currencies are described in multiple places at schema.org:
+              https://schema.org/currency
+              https://schema.org/priceCurrency
+              https://schema.org/price
+
+              We've chosen HUR from UN/CEFACT for the length of time.
+              Alternatively, units for time at schema.org can be in ISO 8601 format.
+            **/
+            unitCode: unit,
+          }
+
         result.agent = agentId ? { identifier: agentId } : undefined
         result.recipient = recipientId ? { identifier: recipientId } : undefined
         result.description = description || undefined
@@ -677,16 +737,72 @@ export function ConstructCredentialScreen({ navigation }) {
                   }
                 </View>
 
-                <View style={{ padding: 5 }}>
-                  <Text>Object Given</Text>
-                  <TextInput
-                    value={objectGiven}
-                    onChangeText={setObjectGiven}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
+                {
+                  !isSpecificAmount ? (
+                    <View style={{ padding: 5 }}>
+                      <Text>Object Given</Text>
+                      <TextInput
+                        value={objectGiven}
+                        onChangeText={setObjectGiven}
+                        editable
+                        multiline={true}
+                        style={{ borderWidth: 1 }}
+                      />
+                    </View>
+                  ) : (
+                    <View />
+                  )
+                }
+
+                <CheckBox
+                  title='This is a specific amount.'
+                  checked={isSpecificAmount}
+                  onPress={toggleIsSpecificAmount}
+                />
+
+                {
+                  isSpecificAmount ? (
+                    <View>
+                      <View style={{ padding: 5 }}>
+                        <Text>Amount</Text>
+                        <TextInput
+                          value={amountStr}
+                          onChangeText={setAmountStr}
+                          editable
+                          style={{ borderWidth: 1 }}
+                        />
+                      </View>
+
+                      <View style={{ padding: 5 }}>
+                        <Text>Unit</Text>
+                        <TextInput
+                          value={unit}
+                          onChangeText={setUnit}
+                          editable
+                          style={{ borderWidth: 1 }}
+                          width={ 50 }
+                        />
+                        {
+                          (R.find(R.prop('selected'), unitButtons).value == '') ? (
+                            <Text>
+                              You can see the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://www.xe.com/iso4217.php')}>codes for currencies here</Text> and the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('http://wiki.goodrelations-vocabulary.org/Documentation/UN/CEFACT_Common_Codes')}>codes for other units here</Text>.
+                            </Text>
+                          ) : (
+                            <View/>
+                          )
+                        }
+                        <RadioGroup
+                          layout='row'
+                          radioButtons={unitButtons}
+                          onPress={setUnitSelection}
+                        />
+                      </View>
+
+                    </View>
+                  ) : (
+                    <View />
+                  )
+                }
 
                 <View style={{ padding: 5 }}>
                   <Text>Comment</Text>
@@ -729,26 +845,6 @@ export function ConstructCredentialScreen({ navigation }) {
    **/
   function OfferModal(props) {
 
-    const INITIAL_UNIT_BUTTONS: RadioButtonProps[] = [{
-      id: '1', // acts as primary key, should be unique and non-empty string
-      label: 'hours',
-      selected: true,
-      value: 'HUR',
-    }, {
-      id: '2',
-      label: 'bitcoin',
-      value: 'BTC',
-    }, {
-      id: '3',
-      label: 'dollars',
-      value: 'USD',
-    }, {
-      id: '4',
-      label: 'other',
-      value: '',
-    }]
-    const selected = R.find(R.prop('selected'), INITIAL_UNIT_BUTTONS)
-
     const [agentId, setAgentId] = useState<string>(props.userId)
     const [amountStr, setAmountStr] = useState<number>('')
     const [description, setDescription] = useState<string>(null)
@@ -759,7 +855,7 @@ export function ConstructCredentialScreen({ navigation }) {
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
     const [termsOfService, setTermsOfService] = useState<string>('')
     const [transferAllowed, setTransferAllowed] = useState<boolean>(false)
-    const [unit, setUnit] = useState<string>(selected && selected.value)
+    const [unit, setUnit] = useState<string>(INITIAL_SELECTED_BUTTON && INITIAL_SELECTED_BUTTON.value)
     const [unitButtons, setUnitButtons] = useState<RadioButtonProps[]>(INITIAL_UNIT_BUTTONS)
     const [validThrough, setValidThrough] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
 
@@ -796,12 +892,14 @@ export function ConstructCredentialScreen({ navigation }) {
 
         result.description = description || undefined
 
-        // TypeAndQuantityNode
         result.itemOffered =
-          (!isSpecificAmount || (!amountStr || !unit))
+          !isSpecificAmount
           ? undefined
           : {
+            // TypeAndQuantityNode
+
             amountOfThisGood: Number(amountStr),
+
             /**
               These units are typically in currency or time.
 
