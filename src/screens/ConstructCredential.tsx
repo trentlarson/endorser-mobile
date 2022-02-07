@@ -19,37 +19,6 @@ import { agent, dbConnection } from '../veramo/setup'
 
 const debug = Debug('endorser-mobile:share-credential')
 
-function donateClaim(grantId: string, funderId: string, fundedId: string, price: number, priceCurrency: string, comments: string, expiration: string, termsOfService: string, transfersAllowed: number) {
-  return {
-    "@context": "https://schema.org",
-
-    "@type": "DonateAction",
-
-    "description": comments,
-    "agent": {
-      "identifier": funderId,
-    },
-    "recipient": {
-      "identifier": fundedId,
-    },
-    "identifier": grantId,
-
-    "price": price,
-
-    // eg. ISO 4217 or UN/CEFACT Common Codes; see https://schema.org/price
-    "priceCurrency": priceCurrency,
-
-    //-- The rest are not in the schema.org spec for DonateAction.
-
-    "expires": expiration,
-    "termsOfService": termsOfService,
-
-    //-- The rest are new, not in the schema.org spec anywhere.
-
-    "numberOfTransfersAllowed": transfersAllowed,
-  }
-}
-
 export function ConstructCredentialScreen({ navigation }) {
 
   const [askForCreditInfo, setAskForCreditInfo] = useState<boolean>(false)
@@ -62,17 +31,6 @@ export function ConstructCredentialScreen({ navigation }) {
 
   const identifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
-
-  let currentOrPreviousSat = DateTime.local()
-  let todayIsSaturday = true
-  if (currentOrPreviousSat.weekday !== 6) {
-    // it's not Saturday, so let's default to last Saturday
-    currentOrPreviousSat = currentOrPreviousSat.minus({week:1})
-    todayIsSaturday = false
-  }
-  const eventStartDateObj = currentOrPreviousSat.set({weekday:6}).set({hour:9}).startOf("hour")
-  // Hack, but the full ISO pushes the length to 340 which crashes verifyJWT!  Crazy!
-  const TODAY_OR_PREV_START_DATE = eventStartDateObj.toISO({suppressMilliseconds:true})
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
@@ -440,6 +398,37 @@ export function ConstructCredentialScreen({ navigation }) {
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
 
     const allContacts = useSelector((state) => state.contacts || [])
+
+    function donateClaim(grantId: string, funderId: string, fundedId: string, price: number, priceCurrency: string, comments: string, expiration: string, termsOfService: string, transfersAllowed: number) {
+      return {
+        "@context": "https://schema.org",
+
+        "@type": "DonateAction",
+
+        "description": comments,
+        "agent": {
+          "identifier": funderId,
+        },
+        "recipient": {
+          "identifier": fundedId,
+        },
+        "identifier": grantId,
+
+        "price": price,
+
+        // eg. ISO 4217 or UN/CEFACT Common Codes; see https://schema.org/price
+        "priceCurrency": priceCurrency,
+
+        //-- The rest are not in the schema.org spec for DonateAction.
+
+        "expires": expiration,
+        "termsOfService": termsOfService,
+
+        //-- The rest are new, not in the schema.org spec anywhere.
+
+        "numberOfTransfersAllowed": transfersAllowed,
+      }
+    }
 
     function donateClaimFromInputs() {
       return donateClaim(
