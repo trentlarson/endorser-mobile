@@ -40,41 +40,48 @@ export function MyCredentialsScreen({ navigation }) {
     }).then(results => {
       setSearchResults(results)
 
-      // add up any amount or time values
-      let currencyTotals = {}
-      let durationTotal = Duration.fromMillis(0)
-      let outstandingTotals = {} // mapping from txn ID string to number hours
+      // add up any promised amount or time values
+      let promisedCurrencyTotals = {}
+      let numUnknowns = 0;
       for (result of results) {
-        if (result.claim) {
-          if (result.claim['@type'] === 'GiveAction') {
-            if (outstandingTotals[result.claim.identifier] !== 0) {
-              const price = result.claim.amount || result.claim.price
-              const currency = result.claim.currency || result.claim.priceCurrency || "UNKNOWN"
-              currencyTotals[currency] = (currencyTotals[currency] || 0) - price
-              outstandingTotals[result.claim.identifier] = 0
-            }
-          } else {
-            if (result.claim.amount) { // LoanOrCredit, MonetaryGrant
-              const currency = result.claim.currency || "UNKNOWN"
-              currencyTotals[currency] = result.claim.amount + (currencyTotals[currency] || 0)
-              outstandingTotals[result.claim.identifier] = result.claim.amount
-            }
-            if (result.claim.price) { // Offer, DonateAction
-              const currency = result.claim.priceCurrency || "UNKNOWN"
-              currencyTotals[currency] = result.claim.price + (currencyTotals[currency] || 0)
-              outstandingTotals[result.claim.identifier] = result.claim.amount
-            }
-            if (result.claim.duration) { // (unused in app, at least in early 2022)
-              const thisDuration = Duration.fromISO(result.claim.duration)
-              if (!thisDuration.invalid) {
-                durationTotal = durationTotal.plus(thisDuration)
-              }
-            }
+        const claim = result.claim;
+        if (!claim) continue;
+        const claimType = claim['@type']
+        if (!claimType) continue;
+
+        if (claimType === 'Offer') {
+          if (!claim.offeredBy && !claim.seller) { numUnknowns++; continue; }
+          if (claim.offeredBy.identifier !== identifiers[0].did
+              && claim.seller.identifier !== identifiers[0].did) {
+            numUnknowns++; continue;
           }
+          const node = claim.itemOffered
+          if (!node) { numUnknowns++; continue; }
+          const amount = node.amountOfThisGood
+          if (isNaN(amount)) { numUnknowns++; continue; }
+          const currency = node.unitCode
+          if (!currency) { numUnknowns++; continue; }
+          promisedCurrencyTotals[currency] = (promisedCurrencyTotals[currency] || 0) + amount
+
+        } else if (claimType === 'GiveAction') {
+          if (!claim.agent || claim.agent.identifier !== identifiers[0].did) {
+            numUnknowns++; continue;
+          }
+          const node = claim.object
+          if (!node) { numUnknowns++; continue; }
+          const amount = node.amountOfThisGood
+          if (isNaN(amount)) { numUnknowns++; continue; }
+          const currency = node.unitCode
+          if (!currency) { numUnknowns++; continue; }
+          promisedCurrencyTotals[currency] = (promisedCurrencyTotals[currency] || 0) - amount
+        } else {
+          // unknown type
         }
       }
-      setTotalCurrencies(currencyTotals)
-      setTotalDuration(durationTotal.toMillis() === 0 ? '' : durationTotal.as('hours') + ' hours')
+      setTotalCurrencies(promisedCurrencyTotals)
+      if (numUnknowns > 0) {
+        console.log('Got', numUnknowns, 'transactions that were not formatted right.')
+      }
     })
   }
 
@@ -82,7 +89,8 @@ export function MyCredentialsScreen({ navigation }) {
 
   const removeSchemaContext = obj => obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
 
-  const displayAmount = (curr, amt) => '' + amt + ' ' + (curr === 'HUR' ? 'hours' : curr)
+  const displayAmount = (curr, amt) =>
+    '' + amt + ' ' + (curr === 'HUR' ? 'hours' : curr)
 
   // Hack because without this it doesn't scroll to the bottom: https://stackoverflow.com/a/67244863/845494
   const screenHeight = Dimensions.get('window').height - 200

@@ -650,8 +650,8 @@ export function ConstructCredentialScreen({ navigation }) {
               https://schema.org/priceCurrency
               https://schema.org/price
 
-              We've chosen HUR from UN/CEFACT for the length of time.
-              Alternatively, units for time at schema.org can be in ISO 8601 format.
+              We've chosen "HUR" from UN/CEFACT for time in hours.
+              (Many other units for time at schema.org are in ISO 8601 duration format.)
             **/
             unitCode: unit,
           }
