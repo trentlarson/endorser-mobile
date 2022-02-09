@@ -73,6 +73,7 @@
     "@types/react-test-renderer": "^16.9.2",
     "babel-jest": "^25.1.0",
     "eslint": "^6.5.1",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^25.1.0",
     "metro-react-native-babel-preset": "^0.59.0",
     "react-native-clean-project": "^3.4.0",
@@ -89,6 +90,13 @@
       "jsx",
       "json",
       "node"
+    ],
+    "moduleNameMapper": {
+      ".+\\.(css|styl|less|sass|scss|png|jpg|ttf|woff|woff2)$": "identity-obj-proxy"
+    },
+    "setupFiles": [
+      "<rootDir>/src/test/jest.setup.js",
+      "./node_modules/react-native-gesture-handler/jestSetup.js"
     ]
   },
   "react-native": {

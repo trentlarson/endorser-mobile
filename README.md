@@ -61,8 +61,7 @@ Automatically with: `yarn test`
 
 ... but note:
 
-- The App-test.js fails. Haven't had time to look into it.
-- It requires node v14+. (I don't know why `yarn run ios` works but the tests don't.) (If you want a hack for v12, change the `??` to a `||` in node_modules/did-jwt/lib/index.js)
+- The App-test.js fails with "NativeModule.RNPermissions is null". I've tried but failed with the recommendation here: https://github.com/zoontek/react-native-permissions#testing-with-jest
 
 Manually
 
