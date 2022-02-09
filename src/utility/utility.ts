@@ -1,6 +1,7 @@
 import { classToPlain } from 'class-transformer'
 import crypto from 'crypto';
 import * as didJwt from 'did-jwt'
+import { DateTime } from 'luxon'
 import * as R from 'ramda'
 
 import { Contact } from '../entity/contact'
@@ -281,4 +282,93 @@ export const getContactPayloadFromJwtUrl = (jwtUrlText: string) => {
   const jwt = didJwt.decodeJWT(jwtText)
 
   return jwt.payload
+}
+
+/**
+ * wrappedClaims are results from an Endorser.ch search
+ **/
+export const countTransactions = (wrappedClaims, userDid: string) => {
+
+  const SCHEMA_ORG = 'https://schema.org'
+
+  // add up any promised amount or time values
+  let outstandingCurrencyTotals = {} // map of currency code to outstanding amount promised
+  let outstandingInvoiceTotals = {} // map of invoice ID to outstanding amount promised
+  let totalCurrencyPaid = {} // map of currency code to amount paid
+  let totalCurrencyPromised = {} // map of currency code to total amount promised
+  let numPaid = 0;
+  let numPromised = 0;
+  let numUnknowns = 0;
+  for (jwt of wrappedClaims) {
+    const claim = jwt.claim;
+    if (!claim) continue;
+    const claimContext = claim['context']
+    if (!claimContext) continue;
+    const claimType = claim['@type']
+    if (!claimType) continue;
+
+    if (claimContext === SCHEMA_ORG && claimType === 'Offer') {
+      if (!claim.offeredBy && !claim.seller) { numUnknowns++; continue; }
+      if ((claim.offeredBy && claim.offeredBy.identifier !== userDid)
+          || (claim.seller && claim.seller.identifier !== userDid)) {
+        numUnknowns++; continue;
+      }
+      const node = claim.itemOffered
+      if (!node) { numUnknowns++; continue; }
+      const amount = node.amountOfThisGood
+      if (isNaN(amount)) { numUnknowns++; continue; }
+      const currency = node.unitCode
+      if (!currency) { numUnknowns++; continue; }
+      const invoiceNum = claim.identifier || (claim.recipient && claim.recipient.identifier)
+
+      if (!claim.validThrough || DateTime.fromISO(claim.validThrough) < DateTime.local()) {
+        // this is still outstanding
+        if (invoiceNum) {
+          // there shouldn't be duplicates; we'll assume the last one is the most correct
+          // ... but we probably won't test for this because it shouldn't be defined behavior
+          if (outstandingInvoiceTotals[invoiceNum]) {
+            // so if there is a previous invoice, we'll undo that one from the totals
+            outstandingCurrencyTotals[currency] = (outstandingCurrencyTotals[currency] || 0) - outstandingInvoiceTotals[invoiceNum]
+          }
+
+          outstandingInvoiceTotals[invoiceNum] = amount
+        }
+        // with or without an invoice number, it's outstanding
+        outstandingCurrencyTotals[currency] = (outstandingCurrencyTotals[currency] || 0) + amount
+      }
+
+      totalCurrencyPromised[currency] = (totalCurrencyPromised[currency] || 0) + amount
+      numPromised++;
+
+    } else if (claimContext === SCHEMA_ORG && claimType === 'GiveAction') {
+      if (!claim.agent || claim.agent.identifier !== userDid) {
+        // just double-checking that this user really is the giver
+        numUnknowns++; continue;
+      }
+      const node = claim.object
+      if (!node) { numUnknowns++; continue; }
+      const amount = node.amountOfThisGood
+      if (isNaN(amount)) { numUnknowns++; continue; }
+      const currency = node.unitCode
+      if (!currency) { numUnknowns++; continue; }
+      const invoiceNum = claim.offerId || (claim.recipient && claim.recipient.identifier)
+
+      if (invoiceNum && outstandingInvoiceTotals[invoiceNum]) {
+        // only decrement the promise if there's a tie to a known invoice or recipient
+        const amountPaid = Math.min(amount, outstandingCurrencyTotals[currency])
+        outstandingInvoiceTotals[invoiceNum] = outstandingInvoiceTotals[invoiceNum] - amountPaid
+        outstandingCurrencyTotals[currency] = outstandingCurrencyTotals[currency] - amountPaid
+      }
+
+      totalCurrencyPaid[currency] = (totalCurrencyPaid[currency] || 0) + amount
+
+      numPaid++;
+
+    } else {
+      // unknown type, which we'll just ignore
+    }
+  }
+
+  return { outstandingCurrencyTotals, outstandingInvoiceTotals, totalCurrencyPaid, totalCurrencyPromised, numPaid, numPromised, numUnknowns }
+
 }
