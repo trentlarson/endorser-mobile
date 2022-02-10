@@ -321,7 +321,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
       if (!currency) { numUnknowns++; continue; }
       const invoiceNum = claim.identifier || (claim.recipient && claim.recipient.identifier)
 
-      if (!claim.validThrough || DateTime.fromISO(claim.validThrough) < DateTime.local()) {
+      if (!claim.validThrough || DateTime.fromISO(claim.validThrough) > DateTime.local()) {
         // this is still outstanding
         if (invoiceNum) {
           // there shouldn't be duplicates; we'll assume the last one is the most correct

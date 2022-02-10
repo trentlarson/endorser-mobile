@@ -1,3 +1,4 @@
+import { DateTime, Duration } from 'luxon'
 import * as utility from '../src/utility/utility'
 
 test('first and last 3', () => {
@@ -91,13 +92,26 @@ test('account Offers & Gives', () => {
     '@type': 'Offer',
     itemOffered: { amountOfThisGood: 1, unitCode: 'BTC' },
     offeredBy: { identifier: TEST_USER_DID },
-    recipient: { identifier: TEST_USER1_DID }
+    recipient: { identifier: TEST_USER1_DID },
+    validThrough: DateTime.local().plus(Duration.fromISO('P6M')),
   }})
   outputExp.numPromised = 4
   outputExp.outstandingCurrencyTotals = { "BTC": 1, "HUR": 6 }
   outputExp.outstandingInvoiceTotals = { "0f21cc1d44412b4ac4cb47973554fd79": 2, "ef56cb471f43cdd024b06baa11a8ce24": 1 }
   outputExp.outstandingInvoiceTotals[TEST_USER1_DID] = 1
   outputExp.totalCurrencyPromised = { "BTC": 1, "HUR": 6 }
+  expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
+
+  input = input.concat({ claim: {
+    'context': 'https://schema.org',
+    '@type': 'Offer',
+    itemOffered: { amountOfThisGood: 1, unitCode: 'BTC' },
+    offeredBy: { identifier: TEST_USER_DID },
+    recipient: { identifier: TEST_USER1_DID },
+    validThrough: DateTime.local().minus(Duration.fromISO('P6M')),
+  }})
+  outputExp.numPromised = 5
+  outputExp.totalCurrencyPromised["BTC"] = 2
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
 
