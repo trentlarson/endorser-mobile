@@ -355,7 +355,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
 
       if (invoiceNum && outstandingInvoiceTotals[invoiceNum]) {
         // only decrement the promise if there's a tie to a known invoice or recipient
-        const amountPaid = Math.min(amount, outstandingCurrencyTotals[currency])
+        const amountPaid = Math.min(amount, outstandingInvoiceTotals[invoiceNum])
         outstandingInvoiceTotals[invoiceNum] = outstandingInvoiceTotals[invoiceNum] - amountPaid
         outstandingCurrencyTotals[currency] = outstandingCurrencyTotals[currency] - amountPaid
       }
