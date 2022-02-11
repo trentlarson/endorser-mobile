@@ -25,10 +25,10 @@ test('account Offers & Gives', () => {
   }
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
-  input[0] = { claim: { 'context': 'http://somewhere.else' }}
+  input[0] = { claim: { '@context': 'http://somewhere.else' }}
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
-  input[0] = { claim: { 'context': 'https://schema.org' }}
+  input[0] = { claim: { '@context': 'https://schema.org' }}
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[0].claim['@type'] = 'Offer'
@@ -45,7 +45,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
-    'context': 'https://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'Offer',
     itemOffered: { amountOfThisGood: 3 },
     offeredBy: { identifier: TEST_USER_DID },
@@ -62,7 +62,7 @@ test('account Offers & Gives', () => {
 
   const OFFER_ID = '0f21cc1d44412b4ac4cb47973554fd79'
   input = input.concat({ claim: {
-    'context': 'https://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'Offer',
     identifier: OFFER_ID,
     itemOffered: { amountOfThisGood: 2, unitCode: 'HUR' },
@@ -75,7 +75,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
-    'context': 'https://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'Offer',
     identifier: 'ef56cb471f43cdd024b06baa11a8ce24',
     itemOffered: { amountOfThisGood: 1, unitCode: 'HUR' },
@@ -88,7 +88,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
-    'context': 'https://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'Offer',
     itemOffered: { amountOfThisGood: 1, unitCode: 'BTC' },
     offeredBy: { identifier: TEST_USER_DID },
@@ -103,7 +103,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
-    'context': 'https://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'Offer',
     itemOffered: { amountOfThisGood: 1, unitCode: 'BTC' },
     offeredBy: { identifier: TEST_USER_DID },
@@ -118,7 +118,7 @@ test('account Offers & Gives', () => {
   // Now for "Give"
 
   input = input.concat({ claim: {
-    'context': 'https://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'GiveAction',
     object: { amountOfThisGood: 1, unitCode: 'bad-txn-no-agent' },
   }})
@@ -126,7 +126,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
-    'context': 'https://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'GiveAction',
     agent: { identifier: TEST_USER_DID },
     object: { amountOfThisGood: 1, unitCode: 'HUR' },
@@ -136,7 +136,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
-    'context': 'https://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'GiveAction',
     agent: { identifier: TEST_USER_DID },
     offerId: OFFER_ID,
@@ -149,7 +149,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
-    'context': 'https://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'GiveAction',
     agent: { identifier: TEST_USER_DID },
     object: { amountOfThisGood: 2, unitCode: 'HUR' },
@@ -162,7 +162,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
-    'context': 'https://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'GiveAction',
     agent: { identifier: TEST_USER_DID },
     object: { amountOfThisGood: 1.5, unitCode: 'BTC' },

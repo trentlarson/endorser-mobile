@@ -302,7 +302,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
   for (jwt of wrappedClaims) {
     const claim = jwt.claim;
     if (!claim) continue;
-    const claimContext = claim['context']
+    const claimContext = claim['@context']
     if (!claimContext) continue;
     const claimType = claim['@type']
     if (!claimType) continue;

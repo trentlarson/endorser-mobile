@@ -1,5 +1,4 @@
 import * as R from 'ramda'
-import { Duration } from 'luxon'
 import React, { useState } from 'react'
 import { ActivityIndicator, Button, Dimensions, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
@@ -16,7 +15,6 @@ export function MyCredentialsScreen({ navigation }) {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
   const [totalCurrencies, setTotalCurrencies] = useState<Record<string,number>>({})
-  const [totalDuration, setTotalDuration] = useState<string>('')
 
   const identifiers = useSelector((state) => state.identifiers || [])
 
@@ -40,47 +38,11 @@ export function MyCredentialsScreen({ navigation }) {
     }).then(results => {
       setSearchResults(results)
 
-      // add up any promised amount or time values
-      let promisedCurrencyTotals = {}
-      let numUnknowns = 0;
-      for (result of results) {
-        const claim = result.claim;
-        if (!claim) continue;
-        const claimType = claim['@type']
-        if (!claimType) continue;
-
-        if (claimType === 'Offer') {
-          if (!claim.offeredBy && !claim.seller) { numUnknowns++; continue; }
-          if (claim.offeredBy.identifier !== identifiers[0].did
-              && claim.seller.identifier !== identifiers[0].did) {
-            numUnknowns++; continue;
-          }
-          const node = claim.itemOffered
-          if (!node) { numUnknowns++; continue; }
-          const amount = node.amountOfThisGood
-          if (isNaN(amount)) { numUnknowns++; continue; }
-          const currency = node.unitCode
-          if (!currency) { numUnknowns++; continue; }
-          promisedCurrencyTotals[currency] = (promisedCurrencyTotals[currency] || 0) + amount
-
-        } else if (claimType === 'GiveAction') {
-          if (!claim.agent || claim.agent.identifier !== identifiers[0].did) {
-            numUnknowns++; continue;
-          }
-          const node = claim.object
-          if (!node) { numUnknowns++; continue; }
-          const amount = node.amountOfThisGood
-          if (isNaN(amount)) { numUnknowns++; continue; }
-          const currency = node.unitCode
-          if (!currency) { numUnknowns++; continue; }
-          promisedCurrencyTotals[currency] = (promisedCurrencyTotals[currency] || 0) - amount
-        } else {
-          // unknown type
-        }
-      }
-      setTotalCurrencies(promisedCurrencyTotals)
-      if (numUnknowns > 0) {
-        console.log('Got', numUnknowns, 'transactions that were not formatted right.')
+      const accounting = utility.countTransactions(results, identifiers[0].did)
+console.log('accounting',accounting)
+      setTotalCurrencies(accounting.outstandingCurrencyTotals)
+      if (accounting.numUnknowns > 0) {
+        console.log('Got', accounting.numUnknowns, 'transactions that were not formatted right.')
       }
     })
   }
@@ -126,13 +88,12 @@ export function MyCredentialsScreen({ navigation }) {
                   <View>
                     <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
                     {
-                      (R.equals(totalCurrencies, {}) && !totalDuration)
+                      (R.equals(totalCurrencies, {}))
                       ? <View/>
                       :
                         <View>
                           <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly' }}>
-                            <Text>Totals</Text>
-                            <Text>{totalDuration || ''}</Text>
+                            <Text>Total Outstanding Offers</Text>
                             {
                               R.map(
                                 arr => <Text key={arr[0]}>{displayAmount(arr[0], arr[1])}</Text>,
