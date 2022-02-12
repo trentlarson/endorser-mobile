@@ -15,6 +15,7 @@ export function MyCredentialsScreen({ navigation }) {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
   const [totalCurrencies, setTotalCurrencies] = useState<Record<string,number>>({})
+  const [outstandingPerCurrency, setOutstandingPerCurrency] = useState<Record<string,Record>>({})
 
   const identifiers = useSelector((state) => state.identifiers || [])
 
@@ -39,11 +40,23 @@ export function MyCredentialsScreen({ navigation }) {
       setSearchResults(results)
 
       const accounting = utility.countTransactions(results, identifiers[0].did)
-console.log('accounting',accounting)
       setTotalCurrencies(accounting.outstandingCurrencyTotals)
       if (accounting.numUnknowns > 0) {
-        console.log('Got', accounting.numUnknowns, 'transactions that were not formatted right.')
+        //console.log('Got', accounting.numUnknowns, 'transactions that were not formatted right.')
       }
+
+      let outPerCur = {}
+      for (promised of accounting.allPromised) {
+        const invoiceNum =
+          promised.claim.identifier
+          || (promised.claim.recipient && promised.claim.recipient.identifier)
+        if (accounting.outstandingInvoiceTotals[invoiceNum] > 0
+            && promised.claim.itemOffered) {
+          let node = promised.claim.itemOffered
+          outPerCur[node.unitCode] = (outPerCur[node.unitCode] || []).concat([promised])
+        }
+      }
+      setOutstandingPerCurrency(outPerCur)
     })
   }
 
@@ -96,7 +109,16 @@ console.log('accounting',accounting)
                             <Text>Total Outstanding Offers</Text>
                             {
                               R.map(
-                                arr => <Text key={arr[0]}>{displayAmount(arr[0], arr[1])}</Text>,
+                                arr =>
+                                  <Text
+                                    key={arr[0]}
+                                    style={{ color: 'blue' }}
+                                    onPress={ () =>
+                                      console.log('outstandingPerCurrency(arr[0])', outstandingPerCurrency[arr[0]])
+                                    }
+                                  >
+                                    {displayAmount(arr[0], arr[1])}
+                                  </Text>,
                                 R.toPairs(totalCurrencies)
                               )
                             }
