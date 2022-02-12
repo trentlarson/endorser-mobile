@@ -64,8 +64,9 @@ export function MyCredentialsScreen({ navigation }) {
 
   const removeSchemaContext = obj => obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
 
-  const displayAmount = (curr, amt) =>
-    '' + amt + ' ' + (curr === 'HUR' ? 'hours' : curr)
+  const displayCurrencyLabel = (curr) => (curr === 'HUR' ? 'hours' : curr)
+
+  const displayAmount = (curr, amt) => '' + amt + ' ' + displayCurrencyLabel(curr)
 
   // Hack because without this it doesn't scroll to the bottom: https://stackoverflow.com/a/67244863/845494
   const screenHeight = Dimensions.get('window').height - 200
@@ -114,7 +115,13 @@ export function MyCredentialsScreen({ navigation }) {
                                     key={arr[0]}
                                     style={{ color: 'blue' }}
                                     onPress={ () =>
-                                      console.log('outstandingPerCurrency(arr[0])', outstandingPerCurrency[arr[0]])
+                                      navigation.navigate(
+                                        'Your Offers',
+                                        {
+                                          currencyLabel: displayCurrencyLabel(arr[0]),
+                                          offerList: outstandingPerCurrency[arr[0]],
+                                        }
+                                      )
                                     }
                                   >
                                     {displayAmount(arr[0], arr[1])}

@@ -21,6 +21,7 @@ import { ContactImportScreen } from './screens/ContactImportScan.tsx'
 import { ContactsScreen } from './screens/Contacts'
 import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./screens/Settings";
 import { MyCredentialsScreen } from './screens/MyCredentials'
+import { MyOffersScreen } from './screens/MyOffers'
 import { PresentCredentialScreen } from './screens/PresentCredential'
 import { ReportScreen } from './screens/ReportFromEndorser'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
@@ -58,7 +59,8 @@ export default function App() {
             <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
-            <Stack.Screen name="My Credentials" component={MyCredentialsScreen} />
+            <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
+            <Stack.Screen name="Your Offers" component={MyOffersScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
             <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
             <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
@@ -184,7 +186,7 @@ function HomeScreen({ navigation }) {
                 <View style={{ marginTop: 10, marginBottom: 10 }}>
                   <Text style={{ color: 'red', textAlign: 'center' }}>Your identity is not encrypted.</Text>
                   <Button
-                    title="Encrypt My Identity"
+                    title="Encrypt Your Identity"
                     onPress={() => navigation.navigate('Import Seed Phrase')}
                   />
                 </View>

@@ -322,7 +322,7 @@ export function ReportScreen({ navigation }) {
                 <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Your Credentials</Text>
                 <Button
                   title="Search"
-                  onPress={() => navigation.navigate('My Credentials')}
+                  onPress={() => navigation.navigate('Your Credentials')}
                 />
               </View>
             :

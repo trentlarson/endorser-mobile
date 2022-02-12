@@ -510,7 +510,7 @@ export function ContactsScreen({ navigation, route }) {
                         ?
                           <View>
                             <Button style={{ textAlign: 'center' }}
-                              title={`Can ${contact.name || 'They'} See My Activity?`}
+                              title={`Can ${contact.name || 'They'} See Your Activity?`}
                               onPress={() => {checkVisibility(contact)}}
                             />
                             <View style={{ marginTop: 5 }}/>
