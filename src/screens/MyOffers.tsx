@@ -36,6 +36,7 @@ export function MyOffersScreen({ navigation, route }) {
             </View>
           )
         }}
+        style={{ padding: 10 }}
       />
     </SafeAreaView>
   )
