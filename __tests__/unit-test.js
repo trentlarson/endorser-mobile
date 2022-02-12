@@ -1,4 +1,5 @@
 import { DateTime, Duration } from 'luxon'
+import * as R from 'ramda'
 import * as utility from '../src/utility/utility'
 
 test('first and last 3', () => {
@@ -13,16 +14,17 @@ test('first and last 3', () => {
 test('account Offers & Gives', () => {
   const TEST_USER_DID = 'did:none:test-user-0'
   const TEST_USER1_DID = 'did:none:test-user-1'
-  let input = []
-  const outputExp = {
+  const EMPTY_OUTPUT = {
+    allPaid: [],
+    allPromised: [],
     outstandingCurrencyTotals: {},
     outstandingInvoiceTotals: {},
     totalCurrencyPaid: {},
     totalCurrencyPromised: {},
-    numPaid: 0,
-    numPromised: 0,
     numUnknowns: 0
   }
+  let input = []
+  let outputExp = R.clone(EMPTY_OUTPUT)
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[0] = { claim: { '@context': 'http://somewhere.else' }}
@@ -54,7 +56,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[1].claim.itemOffered = { amountOfThisGood: 3, unitCode: 'HUR' }
-  outputExp.numPromised = 1
+  outputExp.allPromised = [input[1]]
   outputExp.numUnknowns = 1
   outputExp.outstandingCurrencyTotals = { "HUR": 3 }
   outputExp.totalCurrencyPromised = { "HUR": 3 }
@@ -68,7 +70,7 @@ test('account Offers & Gives', () => {
     itemOffered: { amountOfThisGood: 2, unitCode: 'HUR' },
     offeredBy: { identifier: TEST_USER_DID },
   }})
-  outputExp.numPromised = 2
+  outputExp.allPromised = [input[1], input[2]]
   outputExp.outstandingCurrencyTotals = { "HUR": 5 }
   outputExp.outstandingInvoiceTotals = { "0f21cc1d44412b4ac4cb47973554fd79": 2 }
   outputExp.totalCurrencyPromised = { "HUR": 5 }
@@ -81,7 +83,7 @@ test('account Offers & Gives', () => {
     itemOffered: { amountOfThisGood: 1, unitCode: 'HUR' },
     offeredBy: { identifier: TEST_USER_DID },
   }})
-  outputExp.numPromised = 3
+  outputExp.allPromised = [input[1], input[2], input[3]]
   outputExp.outstandingCurrencyTotals = { "HUR": 6 }
   outputExp.outstandingInvoiceTotals = { "0f21cc1d44412b4ac4cb47973554fd79": 2, "ef56cb471f43cdd024b06baa11a8ce24": 1 }
   outputExp.totalCurrencyPromised = { "HUR": 6 }
@@ -95,7 +97,7 @@ test('account Offers & Gives', () => {
     recipient: { identifier: TEST_USER1_DID },
     validThrough: DateTime.local().plus(Duration.fromISO('P6M')),
   }})
-  outputExp.numPromised = 4
+  outputExp.allPromised = [input[1], input[2], input[3], input[4]]
   outputExp.outstandingCurrencyTotals = { "BTC": 1, "HUR": 6 }
   outputExp.outstandingInvoiceTotals = { "0f21cc1d44412b4ac4cb47973554fd79": 2, "ef56cb471f43cdd024b06baa11a8ce24": 1 }
   outputExp.outstandingInvoiceTotals[TEST_USER1_DID] = 1
@@ -110,7 +112,7 @@ test('account Offers & Gives', () => {
     recipient: { identifier: TEST_USER1_DID },
     validThrough: DateTime.local().minus(Duration.fromISO('P6M')),
   }})
-  outputExp.numPromised = 5
+  outputExp.allPromised = [input[1], input[2], input[3], input[4], input[5]]
   outputExp.totalCurrencyPromised["BTC"] = 2
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
@@ -132,7 +134,7 @@ test('account Offers & Gives', () => {
     object: { amountOfThisGood: 1, unitCode: 'HUR' },
   }})
   outputExp.totalCurrencyPaid = { "HUR": 1 }
-  outputExp.numPaid = 1
+  outputExp.allPaid = [input[7]]
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
@@ -145,7 +147,7 @@ test('account Offers & Gives', () => {
   outputExp.totalCurrencyPaid = { "HUR": 2 }
   outputExp.outstandingCurrencyTotals["HUR"] = 5
   outputExp.outstandingInvoiceTotals[OFFER_ID] = 1
-  outputExp.numPaid = 2
+  outputExp.allPaid = [input[7], input[8]]
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
@@ -158,7 +160,7 @@ test('account Offers & Gives', () => {
   outputExp.totalCurrencyPaid = { "HUR": 4 }
   outputExp.outstandingCurrencyTotals["HUR"] = 5
   outputExp.outstandingInvoiceTotals[OFFER_ID] = 1
-  outputExp.numPaid = 3
+  outputExp.allPaid = [input[7], input[8], input[9]]
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({ claim: {
@@ -169,7 +171,14 @@ test('account Offers & Gives', () => {
     recipient: 'did:none:test-user-recipient',
   }})
   outputExp.totalCurrencyPaid["BTC"] = 1.5
-  outputExp.numPaid = 4
+  outputExp.allPaid = [input[7], input[8], input[9], input[10]]
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
+
+
+  // Now for another user
+
+  outputExp = R.clone(EMPTY_OUTPUT)
+  outputExp.numUnknowns = 11
+  expect(utility.countTransactions(input, TEST_USER1_DID)).toEqual(outputExp)
 
 })

@@ -285,22 +285,32 @@ export const getContactPayloadFromJwtUrl = (jwtUrlText: string) => {
 }
 
 /**
- * wrappedClaims are results from an Endorser.ch search
+ * wrappedClaims are results from an Endorser.ch search, with 'claim' field
+ *
+ * results is an object with these fields:
+ * - allPromised are all promised objects with a 'claim' (ie. Offer); note that some may be paid off
+ * - allPaid are all paid objects with a 'claim' (ie. GiveAction)
+ * - numUnknowns are recognized claims (ie. Offer, GiveAction) but missing some necessary fields
+ * - outstandingCurrencyTotals is a map of currency code to outstanding amount promised
+ * - outstandingInvoiceTotals is a map of invoice ID (ie. offerId or recipient.identifier) to outstanding amount promised
+ * - totalCurrencyPaid is a map of currency code to amount paid
+ * - totalCurrencyPromised is a map of currency code to total amount promised
+ *
  **/
 export const countTransactions = (wrappedClaims, userDid: string) => {
 
   const SCHEMA_ORG = 'https://schema.org'
 
   // add up any promised amount or time values
+  let allPaid = [];
+  let allPromised = [];
+  let numUnknowns = 0;
   let outstandingCurrencyTotals = {} // map of currency code to outstanding amount promised
   let outstandingInvoiceTotals = {} // map of invoice ID to outstanding amount promised
   let totalCurrencyPaid = {} // map of currency code to amount paid
   let totalCurrencyPromised = {} // map of currency code to total amount promised
-  let numPaid = 0;
-  let numPromised = 0;
-  let numUnknowns = 0;
-  for (jwt of wrappedClaims) {
-    const claim = jwt.claim;
+  for (jwtEntry of wrappedClaims) {
+    const claim = jwtEntry.claim;
     if (!claim) continue;
     const claimContext = claim['@context']
     if (!claimContext) continue;
@@ -338,7 +348,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
       }
 
       totalCurrencyPromised[currency] = (totalCurrencyPromised[currency] || 0) + amount
-      numPromised++;
+      allPromised = allPromised.concat([jwtEntry]);
 
     } else if (claimContext === SCHEMA_ORG && claimType === 'GiveAction') {
       if (!claim.agent || claim.agent.identifier !== userDid) {
@@ -362,13 +372,13 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
 
       totalCurrencyPaid[currency] = (totalCurrencyPaid[currency] || 0) + amount
 
-      numPaid++;
+      allPaid = allPaid.concat([jwtEntry]);
 
     } else {
       // unknown type, which we'll just ignore
     }
   }
 
-  return { outstandingCurrencyTotals, outstandingInvoiceTotals, totalCurrencyPaid, totalCurrencyPromised, numPaid, numPromised, numUnknowns }
+  return { allPaid, allPromised, outstandingCurrencyTotals, outstandingInvoiceTotals, totalCurrencyPaid, totalCurrencyPromised, numUnknowns }
 
 }
