@@ -12,10 +12,12 @@ import { agent } from '../veramo/setup'
 export function MyCredentialsScreen({ navigation }) {
 
   const [loading, setLoading] = useState<boolean>(false)
+  const [outstandingPerCurrency, setOutstandingPerCurrency] = useState<Record<string,Record>>({})
+  const [paidPerCurrency, setPaidPerCurrency] = useState<Record<string,Record>>({})
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
-  const [totalCurrencies, setTotalCurrencies] = useState<Record<string,number>>({})
-  const [outstandingPerCurrency, setOutstandingPerCurrency] = useState<Record<string,Record>>({})
+  const [totalCurrenciesOutstanding, setTotalCurrenciesOutstanding] = useState<Record<string,number>>({})
+  const [totalCurrenciesPaid, setTotalCurrenciesPaid] = useState<Record<string,number>>({})
 
   const identifiers = useSelector((state) => state.identifiers || [])
 
@@ -40,7 +42,8 @@ export function MyCredentialsScreen({ navigation }) {
       setSearchResults(results)
 
       const accounting = utility.countTransactions(results, identifiers[0].did)
-      setTotalCurrencies(accounting.outstandingCurrencyTotals)
+      setTotalCurrenciesOutstanding(accounting.outstandingCurrencyTotals)
+      setTotalCurrenciesPaid(accounting.totalCurrencyPaid)
       if (accounting.numUnknowns > 0) {
         //console.log('Got', accounting.numUnknowns, 'transactions that were not formatted right.')
       }
@@ -57,6 +60,15 @@ export function MyCredentialsScreen({ navigation }) {
         }
       }
       setOutstandingPerCurrency(outPerCur)
+
+      let paidPerCur = {}
+      for (paid of accounting.allPaid) {
+        if (paid.claim.object) {
+          let node = paid.claim.object
+          paidPerCur[node.unitCode] = (paidPerCur[node.unitCode] || []).concat([paid])
+        }
+      }
+      setPaidPerCurrency(paidPerCur)
     })
   }
 
@@ -102,7 +114,7 @@ export function MyCredentialsScreen({ navigation }) {
                   <View>
                     <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
                     {
-                      (R.equals(totalCurrencies, {}))
+                      (R.equals(totalCurrenciesOutstanding, {}))
                       ? <View/>
                       :
                         <View>
@@ -126,7 +138,38 @@ export function MyCredentialsScreen({ navigation }) {
                                   >
                                     {displayAmount(arr[0], arr[1])}
                                   </Text>,
-                                R.toPairs(totalCurrencies)
+                                R.toPairs(totalCurrenciesOutstanding)
+                              )
+                            }
+                          </View>
+                        </View>
+                    }
+                    {
+                      (R.equals(totalCurrenciesPaid, {}))
+                      ? <View/>
+                      :
+                        <View>
+                          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly' }}>
+                            <Text>Total Paid</Text>
+                            {
+                              R.map(
+                                arr =>
+                                  <Text
+                                    key={arr[0]}
+                                    style={{ color: 'blue' }}
+                                    onPress={ () =>
+                                      navigation.navigate(
+                                        'Your Given',
+                                        {
+                                          currencyLabel: displayCurrencyLabel(arr[0]),
+                                          givenList: paidPerCurrency[arr[0]],
+                                        }
+                                      )
+                                    }
+                                  >
+                                    {displayAmount(arr[0], arr[1])}
+                                  </Text>,
+                                R.toPairs(totalCurrenciesPaid)
                               )
                             }
                           </View>
@@ -154,9 +197,7 @@ export function MyCredentialsScreen({ navigation }) {
                           <Pressable
                             style={{ padding: 10 }}
                             onPress={ () =>
-                              isUser(data.item.issuer)
-                              ? navigation.navigate('Present Credential', { fullClaim: data.item })
-                              : null
+                              navigation.navigate('Present Credential', { fullClaim: data.item })
                             }
                           >
                             <Text style={{ color: "blue" }}>Present it</Text>
@@ -165,7 +206,30 @@ export function MyCredentialsScreen({ navigation }) {
                       }
 
                       {
-                        !isUser(data.item.issuer)
+                        isUser(data.item.issuer) && data.item.claim['@type'] === 'Offer'
+                        ?
+                          <Pressable
+                            style={{ padding: 10 }}
+                            onPress={ () =>
+                              navigation.navigate('Sign Credential', {
+                                credentialSubject: {
+                                  "@context": "https://schema.org",
+                                  "@type": "GiveAction",
+                                  agent: { identifier: identifiers[0].did },
+                                  offerId: data.item.claim.identifier,
+                                  recipient: data.item.claim.recipient,
+                                  object: data.item.claim.itemOffered,
+                                }
+                              })
+                            }
+                          >
+                            <Text style={{ color: "blue" }}>Mark given</Text>
+                          </Pressable>
+                        : <View/>
+                      }
+
+                      {
+                        !isUser(data.item.issuer) && data.item.claim['@type'] != 'AgreeAction'
                         ?
                           <Pressable
                             style={{ padding: 10 }}
@@ -186,8 +250,9 @@ export function MyCredentialsScreen({ navigation }) {
                       }
 
                       {
-                        data.item.claim['@type'] === 'LoanOrCredit'
-                        || data.item.claim['@type'] === 'GiveAction'
+                        !isUser(data.item.issuer)
+                        && (data.item.claim['@type'] === 'LoanOrCredit'
+                            || data.item.claim['@type'] === 'GiveAction')
                         ?
                           <Pressable
                             style={{ padding: 10 }}
@@ -196,6 +261,7 @@ export function MyCredentialsScreen({ navigation }) {
                                 credentialSubject: {
                                   "@context": "https://schema.org",
                                   "@type": "TakeAction",
+                                  agent: { identifier: identifiers[0].did },
                                   object: removeSchemaContext(data.item.claim),
                                 }
                               })

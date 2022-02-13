@@ -309,7 +309,8 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
   let outstandingInvoiceTotals = {} // map of invoice ID to outstanding amount promised
   let totalCurrencyPaid = {} // map of currency code to amount paid
   let totalCurrencyPromised = {} // map of currency code to total amount promised
-  for (jwtEntry of wrappedClaims) {
+  const wrappedClaims2 = wrappedClaims.sort((j1, j2) => DateTime.fromISO(j1.issuedAt.replace(" ", "T")).toMillis() - DateTime.fromISO(j2.issuedAt.replace(" ", "T")).toMillis())
+  for (jwtEntry of wrappedClaims2) {
     const claim = jwtEntry.claim;
     if (!claim) continue;
     const claimContext = claim['@context']
