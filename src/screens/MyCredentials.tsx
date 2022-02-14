@@ -6,11 +6,12 @@ import { useSelector } from 'react-redux'
 
 import { styles } from './style'
 import * as utility from '../utility/utility'
-import { appStore } from '../veramo/appSlice'
+import { appSlice, appStore } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
 
 export function MyCredentialsScreen({ navigation }) {
 
+  const [loadedNumber, setLoadedNumber] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
   const [outstandingPerCurrency, setOutstandingPerCurrency] = useState<Record<string,Record>>({})
   const [paidPerCurrency, setPaidPerCurrency] = useState<Record<string,Record>>({})
@@ -21,7 +22,7 @@ export function MyCredentialsScreen({ navigation }) {
 
   const identifiers = useSelector((state) => state.identifiers || [])
 
-  const searchEndorser = async () => {
+  const searchEndorserForString = async () => {
     setLoading(true)
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
@@ -40,36 +41,84 @@ export function MyCredentialsScreen({ navigation }) {
       return response.json()
     }).then(results => {
       setSearchResults(results)
-
-      const accounting = utility.countTransactions(results, identifiers[0].did)
-      setTotalCurrenciesOutstanding(accounting.outstandingCurrencyTotals)
-      setTotalCurrenciesPaid(accounting.totalCurrencyPaid)
-      if (accounting.numUnknowns > 0) {
-        //console.log('Got', accounting.numUnknowns, 'transactions that were not formatted right.')
-      }
-
-      let outPerCur = {}
-      for (promised of accounting.allPromised) {
-        const invoiceNum =
-          promised.claim.identifier
-          || (promised.claim.recipient && promised.claim.recipient.identifier)
-        if (accounting.outstandingInvoiceTotals[invoiceNum] > 0
-            && promised.claim.itemOffered) {
-          let node = promised.claim.itemOffered
-          outPerCur[node.unitCode] = (outPerCur[node.unitCode] || []).concat([promised])
-        }
-      }
-      setOutstandingPerCurrency(outPerCur)
-
-      let paidPerCur = {}
-      for (paid of accounting.allPaid) {
-        if (paid.claim.object) {
-          let node = paid.claim.object
-          paidPerCur[node.unitCode] = (paidPerCur[node.unitCode] || []).concat([paid])
-        }
-      }
-      setPaidPerCurrency(paidPerCur)
     })
+  }
+
+  /**
+   * return Promise of
+   *   jwts: array of JWT objects
+   *   maybeMore: boolean telling whether there may be more
+   */
+  const moreTransactions = async (prevId) => {
+    const endorserApiServer = appStore.getState().apiServer
+    const token = await utility.accessToken(identifiers[0])
+    let maybeMoreAfterQuery = prevId == null ? '' : '&afterId=' + prevId
+    return fetch(endorserApiServer + '/api/reportAll/claimsForIssuerWithTypes?claimTypes=' + encodeURIComponent(JSON.stringify(["GiveAction","Offer"]) + maybeMoreAfterQuery), {
+      method: 'GET',
+      headers: {
+        "Content-Type": "application/json",
+        "Uport-Push-Token": token,
+      }
+    }).then(response => {
+      if (response.status !== 200) {
+        throw Error('There was a low-level error from the server.')
+      }
+      return response.json()
+    }).then(results => {
+      if (results.data) {
+        return results
+      } else {
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Unsuccessful results for searchEndorserForTransactions: " + JSON.stringify(results)}))
+        throw Error(results.error || 'The server got an error. (For details, see the log on the Settings page.)')
+      }
+    })
+  }
+
+  const searchEndorserForTransactions = async () => {
+    setLoading(true)
+    setLoadedNumber(0)
+    let allResults = []
+    let maybeMoreAfter
+    do {
+      let nextResults = await moreTransactions(maybeMoreAfter)
+      if (nextResults.data) {
+        allResults = allResults.concat(nextResults.data)
+        setLoadedNumber(allResults.length)
+        maybeMoreAfter = nextResults.maybeMoreAfter
+      }
+    } while (maybeMoreAfter)
+
+    setLoading(false)
+    setSearchResults(allResults)
+
+    const accounting = utility.countTransactions(allResults, identifiers[0].did)
+    setTotalCurrenciesOutstanding(accounting.outstandingCurrencyTotals)
+    setTotalCurrenciesPaid(accounting.totalCurrencyPaid)
+    if (accounting.numUnknowns > 0) {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: 'Got ' + accounting.numUnknowns + ' transactions that were not formatted right.'}))
+    }
+
+    let outPerCur = {}
+    for (promised of accounting.allPromised) {
+      const invoiceNum =
+        promised.claim.identifier
+        || (promised.claim.recipient && promised.claim.recipient.identifier)
+      if (accounting.outstandingInvoiceTotals[invoiceNum] > 0
+          && promised.claim.itemOffered) {
+        let node = promised.claim.itemOffered
+        outPerCur[node.unitCode] = (outPerCur[node.unitCode] || []).concat([promised])
+      }
+    }
+    setOutstandingPerCurrency(outPerCur)
+
+    let paidPerCur = {}
+    for (paid of accounting.allPaid) {
+      if (paid.claim.object) {
+        let node = paid.claim.object
+        paidPerCur[node.unitCode] = (paidPerCur[node.unitCode] || []).concat([paid])
+      }
+    }
+    setPaidPerCurrency(paidPerCur)
   }
 
   const isUser = did => did === identifiers[0].did
@@ -87,23 +136,30 @@ export function MyCredentialsScreen({ navigation }) {
     <SafeAreaView>
       <View style={{ padding: 20, height: screenHeight }}>
         <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search</Text>
-        <Text>Filter (optional)</Text>
-        <TextInput
-          autoCapitalize={'none'}
-          value={searchTerm}
-          onChangeText={setSearchTerm}
-          editable
-          style={{ borderWidth: 1 }}
-        />
         {
           loading
           ?
-            <ActivityIndicator color="#00FF00" />
+            <View>
+              <Text>Loaded { loadedNumber }...</Text>
+              <ActivityIndicator color="#00FF00" />
+            </View>
           :
             <View>
+              <Text>Filter (optional)</Text>
+              <TextInput
+                autoCapitalize={'none'}
+                value={searchTerm}
+                onChangeText={setSearchTerm}
+                editable
+                style={{ borderWidth: 1 }}
+              />
               <Button
-                title="Search"
-                onPress={searchEndorser}
+                title="Search For Filter"
+                onPress={searchEndorserForString}
+              />
+              <Button
+                title="Search For Transactional Claims"
+                onPress={searchEndorserForTransactions}
               />
               <FlatList
                 data={searchResults}
@@ -223,7 +279,7 @@ export function MyCredentialsScreen({ navigation }) {
                               })
                             }
                           >
-                            <Text style={{ color: "blue" }}>Mark given</Text>
+                            <Text style={{ color: "blue" }}>Mark as given</Text>
                           </Pressable>
                         : <View/>
                       }

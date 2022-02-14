@@ -238,6 +238,7 @@ export function ReportScreen({ navigation }) {
                     title="Search"
                     onPress={searchEndorser}
                   />
+                  <Text style={{ padding: 10 }}>(Only retrieves the 50 most recent matching claims.)</Text>
 
                   {
                     searchResults == null
