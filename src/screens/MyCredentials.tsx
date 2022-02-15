@@ -14,6 +14,7 @@ export function MyCredentialsScreen({ navigation }) {
   const [loadedNumber, setLoadedNumber] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
   const [outstandingPerCurrency, setOutstandingPerCurrency] = useState<Record<string,Record>>({})
+  const [outstandingPerInvoice, setOutstandingPerInvoice] = useState<Record<string,Record>>({})
   const [paidPerCurrency, setPaidPerCurrency] = useState<Record<string,Record>>({})
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
@@ -97,6 +98,8 @@ export function MyCredentialsScreen({ navigation }) {
     if (accounting.numUnknowns > 0) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: 'Got ' + accounting.numUnknowns + ' transactions that were not formatted right.'}))
     }
+
+    setOutstandingPerInvoice(accounting.outstandingInvoiceTotals)
 
     let outPerCur = {}
     for (promised of accounting.allPromised) {
@@ -264,23 +267,27 @@ export function MyCredentialsScreen({ navigation }) {
                       {
                         isUser(data.item.issuer) && data.item.claim['@type'] === 'Offer'
                         ?
-                          <Pressable
-                            style={{ padding: 10 }}
-                            onPress={ () =>
-                              navigation.navigate('Sign Credential', {
-                                credentialSubject: {
-                                  "@context": "https://schema.org",
-                                  "@type": "GiveAction",
-                                  agent: { identifier: identifiers[0].did },
-                                  offerId: data.item.claim.identifier,
-                                  recipient: data.item.claim.recipient,
-                                  object: data.item.claim.itemOffered,
-                                }
-                              })
-                            }
-                          >
-                            <Text style={{ color: "blue" }}>Mark as given</Text>
-                          </Pressable>
+                          (outstandingPerInvoice[data.item.claim.identifier || (data.item.claim.recipient && data.claim.recipient.identifier)])
+                          ?
+                            <Pressable
+                              style={{ padding: 10 }}
+                              onPress={ () =>
+                                navigation.navigate('Sign Credential', {
+                                  credentialSubject: {
+                                    "@context": "https://schema.org",
+                                    "@type": "GiveAction",
+                                    agent: { identifier: identifiers[0].did },
+                                    offerId: data.item.claim.identifier,
+                                    recipient: data.item.claim.recipient,
+                                    object: data.item.claim.itemOffered,
+                                  }
+                                })
+                              }
+                            >
+                              <Text style={{ color: "blue" }}>Mark as given</Text>
+                            </Pressable>
+                          :
+                            <Text style={{ padding: 10 }}>(All paid)</Text>
                         : <View/>
                       }
 
