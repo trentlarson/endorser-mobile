@@ -21,6 +21,7 @@ import { ContactImportScreen } from './screens/ContactImportScan.tsx'
 import { ContactsScreen } from './screens/Contacts'
 import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./screens/Settings";
 import { MyCredentialsScreen } from './screens/MyCredentials'
+import { MyGivenScreen } from './screens/MyGiven'
 import { MyOffersScreen } from './screens/MyOffers'
 import { PresentCredentialScreen } from './screens/PresentCredential'
 import { ReportScreen } from './screens/ReportFromEndorser'
@@ -60,6 +61,7 @@ export default function App() {
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
             <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
+            <Stack.Screen name="Your Given" component={MyGivenScreen} />
             <Stack.Screen name="Your Offers" component={MyOffersScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
             <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
