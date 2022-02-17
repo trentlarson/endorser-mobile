@@ -26,9 +26,12 @@ export function MyGivenScreen({ navigation, route }) {
           if (data.item.claim.recipient) {
             label = "Recipient"
             recipient = utility.didInContext(data.item.claim.recipient.identifier, allIdentifiers, allContacts)
-          } else {
+          } else if (data.item.claim.identifier) {
             label = "Invoice"
             recipient = data.item.claim.identifier
+          } else {
+            label = "Unknown Recipient"
+            recipient = ""
           }
           return (
             <View>

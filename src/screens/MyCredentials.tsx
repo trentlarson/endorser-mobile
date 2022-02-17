@@ -1,7 +1,8 @@
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, Dimensions, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Button, Dimensions, FlatList, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
+import Icon from 'react-native-vector-icons/FontAwesome'
 import { useSelector } from 'react-redux'
 
 import { styles } from './style'
@@ -17,7 +18,8 @@ export function MyCredentialsScreen({ navigation }) {
   const [outstandingPerInvoice, setOutstandingPerInvoice] = useState<Record<string,Record>>({})
   const [paidPerCurrency, setPaidPerCurrency] = useState<Record<string,Record>>({})
   const [searchTerm, setSearchTerm] = useState<string>('')
-  const [searchResults, setSearchResults] = useState()
+  const [searchResults, setSearchResults] = useState(null)
+  const [showSearchInfoModal, setShowSearchInfoModal] = useState(false)
   const [totalCurrenciesOutstanding, setTotalCurrenciesOutstanding] = useState<Record<string,number>>({})
   const [totalCurrenciesPaid, setTotalCurrenciesPaid] = useState<Record<string,number>>({})
 
@@ -42,6 +44,11 @@ export function MyCredentialsScreen({ navigation }) {
       return response.json()
     }).then(results => {
       setSearchResults(results)
+      setOutstandingPerCurrency({})
+      setOutstandingPerInvoice({})
+      setPaidPerCurrency({})
+      setTotalCurrenciesOutstanding({})
+      setTotalCurrenciesPaid({})
     })
   }
 
@@ -122,6 +129,8 @@ export function MyCredentialsScreen({ navigation }) {
       }
     }
     setPaidPerCurrency(paidPerCur)
+
+    setSearchTerm('')
   }
 
   const isUser = did => did === identifiers[0].did
@@ -148,7 +157,26 @@ export function MyCredentialsScreen({ navigation }) {
             </View>
           :
             <View>
-              <Text>Filter (optional)</Text>
+              <Text>Filter (optional) <Icon name="info-circle" onPress={() => setShowSearchInfoModal(true)} />
+              </Text>
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={!!showSearchInfoModal}
+              >
+                <View style={styles.centeredView}>
+                  <View style={styles.modalView}>
+                    <Text>This only retrieves the 50 most recent matches.</Text>
+                    <TouchableHighlight
+                      onPress={() => {
+                        setShowSearchInfoModal(false)
+                      }}
+                    >
+                      <Text>Close</Text>
+                    </TouchableHighlight>
+                  </View>
+                </View>
+              </Modal>
               <TextInput
                 autoCapitalize={'none'}
                 value={searchTerm}
@@ -160,6 +188,7 @@ export function MyCredentialsScreen({ navigation }) {
                 title="Search For Filter"
                 onPress={searchEndorserForString}
               />
+
               <Button
                 title="Search For Transactional Claims"
                 onPress={searchEndorserForTransactions}
@@ -168,10 +197,14 @@ export function MyCredentialsScreen({ navigation }) {
                 data={searchResults}
                 keyExtractor={item => item.id.toString()}
                 ItemSeparatorComponent={() => <View style={styles.line} />}
-                ListEmptyComponent={<Text>None</Text>}
+                ListEmptyComponent={<Text>{ searchResults == null ? "" : "None" }</Text>}
                 ListHeaderComponent={
                   <View>
-                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
+                    {
+                      searchResults != null
+                      ? <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
+                      : <Text />
+                    }
                     {
                       (R.equals(totalCurrenciesOutstanding, {}))
                       ? <View/>
@@ -341,7 +374,6 @@ export function MyCredentialsScreen({ navigation }) {
                     <View style={styles.line} />
                   </View>
                 }
-                ListFooterComponent={<View style={styles.line} />}
               />
             </View>
         }
