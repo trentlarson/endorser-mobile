@@ -61,7 +61,7 @@ export function MyCredentialsScreen({ navigation }) {
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
     let maybeMoreAfterQuery = prevId == null ? '' : '&afterId=' + prevId
-    return fetch(endorserApiServer + '/api/reportAll/claimsForIssuerWithTypes?claimTypes=' + encodeURIComponent(JSON.stringify(["GiveAction","Offer"]) + maybeMoreAfterQuery), {
+    return fetch(endorserApiServer + '/api/reportAll/claimsForIssuerWithTypes?claimTypes=' + encodeURIComponent(JSON.stringify(["GiveAction","Offer"])) + maybeMoreAfterQuery, {
       method: 'GET',
       headers: {
         "Content-Type": "application/json",
