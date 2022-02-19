@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux'
 
 import { styles } from './style'
 import * as utility from '../utility/utility'
-import { appStore } from '../veramo/appSlice'
+import { appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
 import { MyCredentialsScreen } from './MyCredentials'
 
@@ -214,7 +214,14 @@ export function ReportScreen({ navigation }) {
       <ScrollView horizontal={ true }>{/* horizontal scrolling for long string values */}
         <ScrollView>{/* vertical scrolling */}
           <View style={{ padding: 20 }}>
-            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search All</Text>
+            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search All
+                {
+                  (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
+                   || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
+                   ? " - Custom Servers"
+                   : ""
+                }
+            </Text>
             <TextInput
               autoCapitalize={'none'}
               value={searchTerm}

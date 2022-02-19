@@ -14,6 +14,8 @@ export function MyCredentialsScreen({ navigation }) {
 
   const [loadedNumber, setLoadedNumber] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
+  const [numUnknowns, setNumUnknowns] = useState<number>(0)
+  const [numStranges, setNumStranges] = useState<number>(0)
   const [outstandingPerCurrency, setOutstandingPerCurrency] = useState<Record<string,Record>>({})
   const [outstandingPerInvoice, setOutstandingPerInvoice] = useState<Record<string,Record>>({})
   const [paidPerCurrency, setPaidPerCurrency] = useState<Record<string,Record>>({})
@@ -100,6 +102,8 @@ export function MyCredentialsScreen({ navigation }) {
     setSearchResults(allResults)
 
     const accounting = utility.countTransactions(allResults, identifiers[0].did)
+    setNumStranges(accounting.numStranges)
+    setNumUnknowns(accounting.numUnknowns)
     setTotalCurrenciesOutstanding(accounting.outstandingCurrencyTotals)
     setTotalCurrenciesPaid(accounting.totalCurrencyPaid)
     if (accounting.numUnknowns > 0) {
@@ -143,6 +147,17 @@ export function MyCredentialsScreen({ navigation }) {
 
   // Hack because without this it doesn't scroll to the bottom: https://stackoverflow.com/a/67244863/845494
   const screenHeight = Dimensions.get('window').height - 200
+
+  const goVerifyCredential = async (wrappedClaim) => {
+    const vc = await agent.createVerifiableCredential({
+      credential: {
+        credentialSubject: wrappedClaim.claim,
+        id: appStore.getState().apiServer + '/api/claim/' + wrappedClaim.id,
+        issuer: { id: wrappedClaim.issuer },
+      }
+    })
+    navigation.navigate('Verify Credential', { vc: vc })
+  }
 
   return (
     <SafeAreaView>
@@ -267,6 +282,14 @@ export function MyCredentialsScreen({ navigation }) {
                           </View>
                         </View>
                     }
+
+                    {
+                      (numStranges > 0) ? <Text>{numStranges} Strange Claims</Text> : <Text />
+                    }
+
+                    {
+                      (numUnknowns > 0) ? <Text>{numUnknowns} Unknowns</Text> : <Text />
+                    }
                     <View style={styles.line} />
                   </View>
                 }
@@ -283,6 +306,18 @@ export function MyCredentialsScreen({ navigation }) {
                     }</Text>
 
                     <View style={{ flexDirection: 'row' }}>
+                      {
+                        isUser(data.item.issuer)
+                        ?
+                          <Pressable
+                            style={{ padding: 10 }}
+                            onPress={ () => goVerifyCredential(data.item) }
+                          >
+                            <Text style={{ color: "blue" }}>Check it</Text>
+                          </Pressable>
+                        : <View/>
+                      }
+
                       {
                         isUser(data.item.issuer)
                         ?

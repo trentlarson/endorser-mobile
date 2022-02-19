@@ -18,7 +18,7 @@ export function ScanPresentationScreen({ navigation }) {
   }
 
   const onSuccessfulQrText = async (qrText) => {
-    navigation.navigate('Verify Credential', { vpStr: qrText })
+    navigation.navigate('Verify Credential', { vcStr: qrText })
   }
 
   return (
@@ -56,8 +56,8 @@ export function ScanPresentationScreen({ navigation }) {
 
 export function VerifyCredentialScreen({ navigation, route }) {
 
-  const { vpStr } = route.params
-  const vp = JSON.parse(vpStr)
+  const { vc, vcStr } = route.params
+  const vcObj = vc || (vcStr && JSON.parse(vcStr))
 
   const [confirmError, setConfirmError] = useState<string>('')
   const [credentialSubject, setCredentialSubject] = useState<any>(undefined)
@@ -99,7 +99,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
         {
           // this checks the JWT time
-          const then = DateTime.fromISO(vp.issuanceDate)
+          const then = DateTime.fromISO(vcObj.issuanceDate)
           setHowLongAgo(then.toRelativeCalendar())
         }
 
@@ -109,7 +109,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
           try {
 
-            verifiedResponse = await didJwt.verifyJWT(vp.proof.jwt, {resolver: DEFAULT_BASIC_RESOLVER, auth: true})
+            verifiedResponse = await didJwt.verifyJWT(vcObj.proof.jwt, {resolver: DEFAULT_BASIC_RESOLVER, auth: true})
             //console.log("verifiedResponse",verifiedResponse)
 
             // if we're here, it must have passed validation
@@ -131,8 +131,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
           if (verifiedResponse.payload.vc
               && verifiedResponse.payload.vc.credentialSubject) {
             setCredentialSubject(verifiedResponse.payload.vc.credentialSubject)
-            if (vp.credentialSubject) {
-              setCredentialSubjectsMatch(R.equals(vp.credentialSubject, verifiedResponse.payload.vc.credentialSubject))
+            if (vcObj.credentialSubject) {
+              setCredentialSubjectsMatch(R.equals(vcObj.credentialSubject, verifiedResponse.payload.vc.credentialSubject))
             } else {
               // nothing to compare to, so don't say it doesn't match
               setCredentialSubjectsMatch(true)
@@ -142,8 +142,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
           }
 
           setIssuer(verifiedResponse.issuer)
-          // there's also a signer.id ... is it ever different?
 
+          // there's also a signer.id ... is it ever different?
         }
 
         {
@@ -152,11 +152,11 @@ export function VerifyCredentialScreen({ navigation, route }) {
           let identifiers = await agent.didManagerFind()
 
           const endorserSubstring = '/api/claim/'
-          const endorIndex = !vp.id ? -1 : vp.id.indexOf(endorserSubstring)
-          if (vp['type']
-              && vp['type'].findIndex(elem => elem === 'VerifiableCredential') > -1
+          const endorIndex = !vcObj.id ? -1 : vcObj.id.indexOf(endorserSubstring)
+          if (vcObj['type']
+              && vcObj['type'].findIndex(elem => elem === 'VerifiableCredential') > -1
               && endorIndex > -1) {
-            const endorId = vp.id.substring(endorIndex + endorserSubstring.length)
+            const endorId = vcObj.id.substring(endorIndex + endorserSubstring.length)
             setEndorserId(endorId)
 
             const url = appStore.getState().apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + endorId
@@ -200,17 +200,16 @@ export function VerifyCredentialScreen({ navigation, route }) {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Verification</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Details</Text>
           {
             loading
             ? <ActivityIndicator color="#00FF00" />
             : <View style={{ marginTop: 20}}/>
           }
+          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Claim</Text>
+          <Text selectable={true}>{ JSON.stringify(credentialSubject) }</Text>
+
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Validity</Text>
-          <View style={{ flex: 1, flexDirection: 'row' }}>
-            <Text style={{ width: '20%' }}>Claim</Text>
-            <Text style={{ width: '80%' }} selectable={true}>{ JSON.stringify(credentialSubject) }</Text>
-          </View>
           <View style={{ flex: 1, flexDirection: 'row' }}>
             <Text style={{ width: '20%' }}>Issuer</Text>
             <Text style={{ width: '80%' }} selectable={true}>{ utility.didInContext(issuer, identifiers, allContacts) }</Text>
@@ -227,18 +226,18 @@ export function VerifyCredentialScreen({ navigation, route }) {
           }
           <View style={{ flex: 1, flexDirection: 'row' }}>
             <Text style={{ width: '30%' }}>Valid Signature?</Text>
-            <Text>
+            <Text style={{ width: '70%' }}>
               { detectedSigValid ? 'Yes' : '' }
               { detectedSigInvalid ? 'No, the signature is not valid!' : '' }
               { detectedSigProblem ? 'No... it is not outright fraud but there is something wrong with it.' : '' }
             </Text>
           </View>
           <View style={{ flex: 1, flexDirection: 'row' }}>
-            <Text style={{ width: '30%' }}>When?</Text>
+            <Text style={{ width: '30%' }}>When</Text>
             <Text>{ howLongAgo }</Text>
           </View>
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
-          <Text>There are { nonHiddenIdList.length } that you can see.</Text>
+          <Text>There { nonHiddenIdList.length === 1 ? 'is' : 'are' } { nonHiddenIdList.length } that you can see.</Text>
           <View style={{ padding: 5 }}>
             {
               nonHiddenIdList.map(did => <Text key={did} selectable={true}>{ utility.didInContext(issuer, identifiers, allContacts) }</Text>)
@@ -261,7 +260,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           <View style={{ height: 0.8, width: "100%", backgroundColor: "#000000", marginTop: 200, marginBottom: 100 }} />
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Details</Text>
           <Text>{ endorserId ? 'Credential ' + endorserId : ''}</Text>
-          <Text selectable={true}>{ vpStr }</Text>
+          <Text selectable={true}>{ JSON.stringify(vcObj) }</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

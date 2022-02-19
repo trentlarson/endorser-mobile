@@ -116,7 +116,7 @@ function didInfo(did, identifiers, contacts) {
 export function didInContext(did, identifiers, contacts) {
   let shortName = didInfo(did, identifiers, contacts)
   let visibleDid = shortName === UNKNOWN_CONTACT ? did : firstAndLast3OfDid(did)
-  return shortName + " (" + visibleDid + ")"
+  return shortName + (visibleDid && " (" + visibleDid + ")")
 }
 
 /**
@@ -290,7 +290,8 @@ export const getContactPayloadFromJwtUrl = (jwtUrlText: string) => {
  * results is an object with these fields:
  * - allPromised are all promised objects with a 'claim' (ie. Offer); note that some may be paid off
  * - allPaid are all paid objects with a 'claim' (ie. GiveAction)
- * - numUnknowns are recognized claims (ie. Offer, GiveAction) but missing some necessary fields
+ * - numStranges are recognized claims (ie. Offer, GiveAction) but missing some necessary fields
+ * - numUnknowns are unrecognized claims (ie. not Offer or GiveAction)
  * - outstandingCurrencyTotals is a map of currency code to outstanding amount promised
  * - outstandingInvoiceTotals is a map of invoice ID (ie. offerId or recipient.identifier) to outstanding amount promised
  * - totalCurrencyPaid is a map of currency code to amount paid
@@ -304,6 +305,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
   // add up any promised amount or time values
   let allPaid = [];
   let allPromised = [];
+  let numStranges = 0;
   let numUnknowns = 0;
   let outstandingCurrencyTotals = {} // map of currency code to outstanding amount promised
   let outstandingInvoiceTotals = {} // map of invoice ID to outstanding amount promised
@@ -319,17 +321,17 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
     if (!claimType) continue;
 
     if (claimContext === SCHEMA_ORG && claimType === 'Offer') {
-      if (!claim.offeredBy && !claim.seller) { numUnknowns++; continue; }
+      if (!claim.offeredBy && !claim.seller) { numStranges++; continue; }
       if ((claim.offeredBy && claim.offeredBy.identifier !== userDid)
           || (claim.seller && claim.seller.identifier !== userDid)) {
-        numUnknowns++; continue;
+        numStranges++; continue;
       }
       const node = claim.itemOffered
-      if (!node) { numUnknowns++; continue; }
+      if (!node) { numStranges++; continue; }
       const amount = node.amountOfThisGood
-      if (isNaN(amount)) { numUnknowns++; continue; }
+      if (isNaN(amount)) { numStranges++; continue; }
       const currency = node.unitCode
-      if (!currency) { numUnknowns++; continue; }
+      if (!currency) { numStranges++; continue; }
       const invoiceNum = claim.identifier || (claim.recipient && claim.recipient.identifier)
 
       if (!claim.validThrough || DateTime.fromISO(claim.validThrough) > DateTime.local()) {
@@ -354,14 +356,14 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
     } else if (claimContext === SCHEMA_ORG && claimType === 'GiveAction') {
       if (!claim.agent || claim.agent.identifier !== userDid) {
         // just double-checking that this user really is the giver
-        numUnknowns++; continue;
+        numStranges++; continue;
       }
       const node = claim.object
-      if (!node) { numUnknowns++; continue; }
+      if (!node) { numStranges++; continue; }
       const amount = node.amountOfThisGood
-      if (isNaN(amount)) { numUnknowns++; continue; }
+      if (isNaN(amount)) { numStranges++; continue; }
       const currency = node.unitCode
-      if (!currency) { numUnknowns++; continue; }
+      if (!currency) { numStranges++; continue; }
       const invoiceNum = claim.offerId || (claim.recipient && claim.recipient.identifier)
 
       if (invoiceNum && outstandingInvoiceTotals[invoiceNum]) {
@@ -380,6 +382,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
     }
   }
 
-  return { allPaid, allPromised, outstandingCurrencyTotals, outstandingInvoiceTotals, totalCurrencyPaid, totalCurrencyPromised, numUnknowns }
+  numUnknowns = wrappedClaims2.length - numStranges
+  return { allPaid, allPromised, numStranges, numUnknowns, outstandingCurrencyTotals, outstandingInvoiceTotals, totalCurrencyPaid, totalCurrencyPromised }
 
 }
