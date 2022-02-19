@@ -44,6 +44,19 @@ yarn install
 yarn start --reset-cache # which you'll have to kill because it doesn't stop
 ```
 
+- This error comes when there is no internet connection, especially when run locally.
+
+```
+(node:54926) UnhandledPromiseRejectionWarning: TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'XMLHttpRequest'
+    |     property 'upload' -> object with constructor 'XMLHttpRequestUpload'
+    --- property '_request' closes the circle
+    at JSON.stringify (<anonymous>)
+    at /Users/tlarson/dev/home/endorser-ch/node_modules/ethjs-query/lib/index.js:108:99
+    at processTicksAndRejections (internal/process/task_queues.js:93:5)
+(node:54926) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). (rejection id: 1)
+```
+
 
 ### Create a New DB Migration
 
