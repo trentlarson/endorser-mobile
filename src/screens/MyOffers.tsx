@@ -33,6 +33,7 @@ export function MyOffersScreen({ navigation, route }) {
           return (
             <View>
               <Text>{ data.item.claim.itemOffered.amountOfThisGood } to { label } { recipient }</Text>
+              <Text style={{ color: 'blue' }} onPress={() => navigation.navigate('Verify Credential', { wrappedClaim: data.item })}>See Details</Text>
             </View>
           )
         }}

@@ -25,6 +25,7 @@ export function ReportScreen({ navigation }) {
   const allContacts = useSelector((state) => state.contacts || [])
 
   /** This works, but I like the 'React' version better.
+   *
   const objectToYamlString = (obj, indentLevel) => {
     if (indentLevel == null) {
       indentLevel = 0
@@ -57,8 +58,12 @@ export function ReportScreen({ navigation }) {
       return JSON.stringify(obj)
     }
   }
+  *
   **/
 
+  /**
+   * Render each claim with links to take actions.
+   */
   const objectToYamlReact = (obj, claimId, visibleToDids) => {
     return (
       <View>
@@ -117,6 +122,9 @@ export function ReportScreen({ navigation }) {
     )
   }
 
+  /**
+   * see objectToYamlReact for items that include actions
+   */
   const objectToYamlReactRecur = (obj, claimId, visibleToDids) => {
     if (obj instanceof Object) {
       if (Array.isArray(obj)) {
@@ -179,7 +187,6 @@ export function ReportScreen({ navigation }) {
       )
     }
   }
-
   const filteredResultOutput = (results) => {
     // assuming results is an array
     const filteredResults =

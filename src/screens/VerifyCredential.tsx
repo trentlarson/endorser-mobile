@@ -56,7 +56,10 @@ export function ScanPresentationScreen({ navigation }) {
 
 export function VerifyCredentialScreen({ navigation, route }) {
 
-  const { vc, vcStr } = route.params
+  // wrappedClaim is directly from Endorser server
+  // vc is Verified Credential format
+  const { vc, vcStr, wrappedClaim } = route.params
+
   const vcObj = vc || (vcStr && JSON.parse(vcStr))
 
   const [confirmError, setConfirmError] = useState<string>('')
@@ -97,14 +100,18 @@ export function VerifyCredentialScreen({ navigation, route }) {
         setDetectedSigValid(false)
         setHowLongAgo('')
 
-        {
+        if (wrappedClaim) {
+          setCredentialSubject(wrappedClaim.claim)
+        }
+
+        if (vcObj) {
           // this checks the JWT time
           const then = DateTime.fromISO(vcObj.issuanceDate)
           setHowLongAgo(then.toRelativeCalendar())
         }
 
         let verifiedResponse: JWTVerified = undefined
-        {
+        if (vcObj) {
           // this checks the JWT signature
 
           try {
@@ -151,15 +158,25 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
           let identifiers = await agent.didManagerFind()
 
-          const endorserSubstring = '/api/claim/'
-          const endorIndex = !vcObj.id ? -1 : vcObj.id.indexOf(endorserSubstring)
-          if (vcObj['type']
-              && vcObj['type'].findIndex(elem => elem === 'VerifiableCredential') > -1
-              && endorIndex > -1) {
-            const endorId = vcObj.id.substring(endorIndex + endorserSubstring.length)
-            setEndorserId(endorId)
+          let foundEndorserId
+          if (wrappedClaim) {
+            foundEndorserId = wrappedClaim.id
 
-            const url = appStore.getState().apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + endorId
+          } else if (vcObj) {
+            const endorIndex = !vcObj.id ? -1 : vcObj.id.indexOf(endorserSubstring)
+            if (vcObj['type']
+                && vcObj['type'].findIndex(elem => elem === 'VerifiableCredential') > -1
+                && endorIndex > -1) {
+              foundEndorserId = vcObj.id.substring(endorIndex + endorserSubstring.length)
+            }
+          }
+
+          const endorserSubstring = '/api/claim/'
+          if (foundEndorserId) {
+
+            setEndorserId(foundEndorserId)
+
+            const url = appStore.getState().apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + foundEndorserId
             const userToken = await utility.accessToken(identifiers[0])
             await fetch(url, {
               headers: {
@@ -209,33 +226,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Claim</Text>
           <Text selectable={true}>{ JSON.stringify(credentialSubject) }</Text>
 
-          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Validity</Text>
-          <View style={{ flex: 1, flexDirection: 'row' }}>
-            <Text style={{ width: '20%' }}>Issuer</Text>
-            <Text style={{ width: '80%' }} selectable={true}>{ utility.didInContext(issuer, identifiers, allContacts) }</Text>
-          </View>
-          {
-            credentialSubject
-            ?
-              <View style={{ flex: 1, flexDirection: 'row' }}>
-                <Text style={{ width: '30%' }}>Consistent?</Text>
-                <Text>{ credentialSubjectsMatch ? 'Yes' : 'No' }</Text>
-              </View>
-            :
-              <View/>
-          }
-          <View style={{ flex: 1, flexDirection: 'row' }}>
-            <Text style={{ width: '30%' }}>Valid Signature?</Text>
-            <Text style={{ width: '70%' }}>
-              { detectedSigValid ? 'Yes' : '' }
-              { detectedSigInvalid ? 'No, the signature is not valid!' : '' }
-              { detectedSigProblem ? 'No... it is not outright fraud but there is something wrong with it.' : '' }
-            </Text>
-          </View>
-          <View style={{ flex: 1, flexDirection: 'row' }}>
-            <Text style={{ width: '30%' }}>When</Text>
-            <Text>{ howLongAgo }</Text>
-          </View>
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
           <Text>There { nonHiddenIdList.length === 1 ? 'is' : 'are' } { nonHiddenIdList.length } that you can see.</Text>
           <View style={{ padding: 5 }}>
@@ -257,10 +247,49 @@ export function VerifyCredentialScreen({ navigation, route }) {
             }
           </View>
           <Text>{ confirmError }</Text>
+
+          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Validity</Text>
+          {
+            vcObj
+            ? (
+              <View>
+                <View style={{ flex: 1, flexDirection: 'row' }}>
+                  <Text style={{ width: '20%' }}>Issuer</Text>
+                  <Text style={{ width: '80%' }} selectable={true}>{ utility.didInContext(issuer, identifiers, allContacts) }</Text>
+                </View>
+                {
+                  credentialSubject
+                  ?
+                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                      <Text style={{ width: '30%' }}>Consistent?</Text>
+                      <Text>{ credentialSubjectsMatch ? 'Yes' : 'No' }</Text>
+                    </View>
+                  :
+                    <View/>
+                }
+                <View style={{ flex: 1, flexDirection: 'row' }}>
+                  <Text style={{ width: '30%' }}>Valid Signature?</Text>
+                  <Text style={{ width: '70%' }}>
+                    { detectedSigValid ? 'Yes' : '' }
+                    { detectedSigInvalid ? 'No, the signature is not valid!' : '' }
+                    { detectedSigProblem ? 'No... it is not outright fraud but there is something wrong with it.' : '' }
+                  </Text>
+                </View>
+                <View style={{ flex: 1, flexDirection: 'row' }}>
+                  <Text style={{ width: '30%' }}>When</Text>
+                  <Text>{ howLongAgo }</Text>
+                </View>
+              </View>
+            ) : (
+              <Text>There is no validity information.</Text>
+            )
+          }
+
           <View style={{ height: 0.8, width: "100%", backgroundColor: "#000000", marginTop: 200, marginBottom: 100 }} />
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Details</Text>
           <Text>{ endorserId ? 'Credential ' + endorserId : ''}</Text>
-          <Text selectable={true}>{ JSON.stringify(vcObj) }</Text>
+          <Text selectable={true}>{ vcObj ? JSON.stringify(vcObj) : '' }</Text>
+          <Text selectable={true}>{ wrappedClaim ? JSON.stringify(wrappedClaim) : '' }</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

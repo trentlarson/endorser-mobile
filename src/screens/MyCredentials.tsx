@@ -220,6 +220,7 @@ export function MyCredentialsScreen({ navigation }) {
                       ? <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
                       : <Text />
                     }
+
                     {
                       (R.equals(totalCurrenciesOutstanding, {}))
                       ? <View/>
@@ -284,11 +285,11 @@ export function MyCredentialsScreen({ navigation }) {
                     }
 
                     {
-                      (numStranges > 0) ? <Text>{numStranges} Strange Claims</Text> : <Text />
+                      (numStranges > 0) ? <Text>{numStranges} Strange Claims</Text> : <View />
                     }
 
                     {
-                      (numUnknowns > 0) ? <Text>{numUnknowns} Unknowns</Text> : <Text />
+                      (numUnknowns > 0) ? <Text>{numUnknowns} Unknowns</Text> : <View />
                     }
                     <View style={styles.line} />
                   </View>
@@ -335,7 +336,7 @@ export function MyCredentialsScreen({ navigation }) {
                       {
                         isUser(data.item.issuer) && data.item.claim['@type'] === 'Offer'
                         ?
-                          (outstandingPerInvoice[data.item.claim.identifier || (data.item.claim.recipient && data.claim.recipient.identifier)])
+                          (outstandingPerInvoice[data.item.claim.identifier || (data.item.claim.recipient && data.item.claim.recipient.identifier)])
                           ?
                             <Pressable
                               style={{ padding: 10 }}

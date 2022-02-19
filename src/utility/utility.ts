@@ -314,11 +314,11 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
   const wrappedClaims2 = wrappedClaims.sort((j1, j2) => DateTime.fromISO(j1.issuedAt.replace(" ", "T")).toMillis() - DateTime.fromISO(j2.issuedAt.replace(" ", "T")).toMillis())
   for (jwtEntry of wrappedClaims2) {
     const claim = jwtEntry.claim;
-    if (!claim) continue;
+    if (!claim) { numUnknowns++; continue; }
     const claimContext = claim['@context']
-    if (!claimContext) continue;
+    if (!claimContext) { numUnknowns++; continue; }
     const claimType = claim['@type']
-    if (!claimType) continue;
+    if (!claimType) { numUnknowns++; continue; }
 
     if (claimContext === SCHEMA_ORG && claimType === 'Offer') {
       if (!claim.offeredBy && !claim.seller) { numStranges++; continue; }
@@ -379,10 +379,10 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
 
     } else {
       // unknown type, which we'll just ignore
+      numUnknowns++
     }
   }
 
-  numUnknowns = wrappedClaims2.length - numStranges
   return { allPaid, allPromised, numStranges, numUnknowns, outstandingCurrencyTotals, outstandingInvoiceTotals, totalCurrencyPaid, totalCurrencyPromised }
 
 }
