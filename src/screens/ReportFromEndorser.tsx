@@ -31,7 +31,15 @@ export function ReportScreen({ navigation }) {
       showClaimsWithoutDids
       ? results
       : R.filter(utility.containsNonHiddenDid, results)
-    return <YamlFormat source={ filteredResults } />
+    return <YamlFormat
+      source={ filteredResults }
+      navigation={ navigation }
+      onClickVisibleDid={ setDidForVisibleModal }
+      onClickVisibleToDids={ (claimId, visibleToDids) => {
+        setClaimIdForLinkedModal(claimId)
+        setDidsForLinkedModal(visibleToDids)
+      }}
+     />
   }
 
   const searchEndorser = async () => {

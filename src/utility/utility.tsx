@@ -38,7 +38,7 @@ export const BVCButton = ({ identifier, navigation, description }) => {
  * obj is any object or array
  * claimId (optional) is the ID for server lookup
  */
-export const YamlFormat = ({ source, claimId }) => {
+export const YamlFormat = ({ source, claimId, navigation, onClickVisibleDid, onClickVisibleToDids }) => {
   return (
     <View>
       {
@@ -88,7 +88,7 @@ export const YamlFormat = ({ source, claimId }) => {
               :
                 <View />
             }
-            <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id) }
+            <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleDid, onClickVisibleToDids) }
           </View>
         )
       }
@@ -99,7 +99,7 @@ export const YamlFormat = ({ source, claimId }) => {
 /**
  * see objectToYamlReact for items that include actions
  */
-const objectToYamlReactRecur = (obj, claimId, visibleToDids) => {
+const objectToYamlReactRecur = (obj, claimId, visibleToDids, onClickVisibleDid, onClickVisibleToDids) => {
   if (obj instanceof Object) {
     if (Array.isArray(obj)) {
       // array: loop through elements
@@ -108,7 +108,7 @@ const objectToYamlReactRecur = (obj, claimId, visibleToDids) => {
           {
             obj.map((item, index) =>
               <View key={ index } style={{ marginLeft: 5 }}>
-                <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id) }
+                <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleDid, onClickVisibleToDids) }
               </View>
             )
             /** This complained about being inside a ScrollView, and about nesting.
@@ -117,7 +117,7 @@ const objectToYamlReactRecur = (obj, claimId, visibleToDids) => {
               keyExtractor={(item, index) => "" + index}
               renderItem={(item, index) =>
                 <View style={{ marginLeft: 5 }}>
-                  <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id) }
+                  <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleDid, onClickVisibleToDids) }
                 </View>
               }
             />
@@ -134,7 +134,7 @@ const objectToYamlReactRecur = (obj, claimId, visibleToDids) => {
               const newline = obj[key] instanceof Object ? "\n" : ""
               return (
                 <Text key={ index } style={{ marginLeft: 20 }}>
-                  { key } : { newline }{ objectToYamlReactRecur(obj[key], claimId, obj[key + 'VisibleToDids']) }
+                  { key } : { newline }{ objectToYamlReactRecur(obj[key], claimId, obj[key + 'VisibleToDids'], onClickVisibleDid, onClickVisibleToDids) }
                 </Text>
               )}
             )
@@ -146,10 +146,10 @@ const objectToYamlReactRecur = (obj, claimId, visibleToDids) => {
     const isVisibleDid = (typeof obj == 'string' && utility.isDid(obj) && !utility.isHiddenDid(obj))
     const style = (visibleToDids != null || isVisibleDid) ? { color: 'blue' } : {}
     const onPress =
-      (visibleToDids != null)
-      ? () => { setClaimIdForLinkedModal(claimId); setDidsForLinkedModal(visibleToDids) }
-      : isVisibleDid
-        ? () => { setDidForVisibleModal(obj) }
+      isVisibleDid
+      ? () => { onClickVisibleDid(obj) }
+      : (visibleToDids != null)
+        ? () => { onClickVisibleToDids(claimId, visibleToDids) }
         : () => {}
     return (
       <Text
