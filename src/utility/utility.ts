@@ -284,42 +284,42 @@ export const getContactPayloadFromJwtUrl = (jwtUrlText: string) => {
   return jwt.payload
 }
 
-  /** This works, but I like the 'React' version better. See ClaimYaml utility.tsx
-   *
-  const objectToYamlString = (obj, indentLevel) => {
-    if (indentLevel == null) {
-      indentLevel = 0
-    }
-    const indentString = R.join('', R.repeat('     ', indentLevel))
-
-    if (obj instanceof Object) {
-      if (Array.isArray(obj)) {
-        // array: loop through elements
-        return (
-          R.join(
-            "",
-            obj.map((item, index) =>
-              "\n" + indentString + "- " + objectToYamlString(item, indentLevel + 1)
-            )
-          )
-        )
-      } else {
-        // regular object: loop through keys
-        return (
-          R.join(
-            "",
-            R.keys(obj).map((key, index) =>
-              "\n" + indentString + key + " : " + objectToYamlString(obj[key], indentLevel + 1)
-            )
-          )
-        )
-      }
-    } else {
-      return JSON.stringify(obj)
-    }
+/** This works, but I like the 'React' version better. See ClaimYaml utility.tsx
+ *
+const objectToYamlString = (obj, indentLevel) => {
+  if (indentLevel == null) {
+    indentLevel = 0
   }
-  *
-  **/
+  const indentString = R.join('', R.repeat('     ', indentLevel))
+
+  if (obj instanceof Object) {
+    if (Array.isArray(obj)) {
+      // array: loop through elements
+      return (
+        R.join(
+          "",
+          obj.map((item, index) =>
+            "\n" + indentString + "- " + objectToYamlString(item, indentLevel + 1)
+          )
+        )
+      )
+    } else {
+      // regular object: loop through keys
+      return (
+        R.join(
+          "",
+          R.keys(obj).map((key, index) =>
+            "\n" + indentString + key + " : " + objectToYamlString(obj[key], indentLevel + 1)
+          )
+        )
+      )
+    }
+  } else {
+    return JSON.stringify(obj)
+  }
+}
+*
+**/
 
 /**
  * wrappedClaims are results from an Endorser.ch search, with 'claim' field
