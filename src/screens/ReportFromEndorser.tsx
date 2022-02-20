@@ -34,7 +34,6 @@ export function ReportScreen({ navigation }) {
     return <YamlFormat
       source={ filteredResults }
       navigation={ navigation }
-      onClickVisibleDid={ setDidForVisibleModal }
       onClickVisibleToDids={ (claimId, visibleToDids) => {
         setClaimIdForLinkedModal(claimId)
         setDidsForLinkedModal(visibleToDids)
@@ -115,28 +114,6 @@ export function ReportScreen({ navigation }) {
                           { filteredResultOutput(searchResults) }
                         </View>
                   }
-
-                  <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={!!didForVisibleModal}
-                  >
-                    <View style={styles.centeredView}>
-                      <View style={styles.modalView}>
-                        <Text>
-                          { utility.didInContext(didForVisibleModal, identifiers, allContacts) }
-                        </Text>
-                        <TouchableHighlight
-                          style={styles.cancelButton}
-                          onPress={() => {
-                            setDidForVisibleModal(null)
-                          }}
-                        >
-                          <Text>Close</Text>
-                        </TouchableHighlight>
-                      </View>
-                    </View>
-                  </Modal>
 
                   <Modal
                     animationType="slide"

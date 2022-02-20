@@ -1,9 +1,11 @@
 import { DateTime } from 'luxon'
 import * as R from 'ramda'
-import React from 'react'
-import { Button, Text, View } from 'react-native'
+import React, { useState } from 'react'
+import { Button, Modal, Text, TouchableHighlight, View } from 'react-native'
+import { useSelector } from 'react-redux'
 
 import * as utility from './utility'
+import { styles } from '../screens/style'
 
 function setClaimToAttendance(id: IIdentifier | undefined, startTime: string, navigation) {
   const claimObj = utility.bvcClaim(id ? id.did : 'UNKNOWN', startTime)
@@ -38,7 +40,79 @@ export const BVCButton = ({ identifier, navigation, description }) => {
  * obj is any object or array
  * claimId (optional) is the ID for server lookup
  */
-export const YamlFormat = ({ source, claimId, navigation, onClickVisibleDid, onClickVisibleToDids }) => {
+export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }) => {
+
+  const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
+
+  const identifiers = useSelector((state) => state.identifiers || [])
+  const allContacts = useSelector((state) => state.contacts || [])
+
+  /**
+   * see objectToYamlReact for items that include actions
+   */
+  const objectToYamlReactRecur = (obj, claimId, visibleToDids, onClickVisibleToDids) => {
+    if (obj instanceof Object) {
+      if (Array.isArray(obj)) {
+        // array: loop through elements
+        return (
+          <View style={{ padding: 1 }}>
+            {
+              obj.map((item, index) =>
+                <View key={ index } style={{ marginLeft: 5 }}>
+                  <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleToDids) }
+                </View>
+              )
+              /** This complained about being inside a ScrollView, and about nesting.
+              <FlatList
+                data={ obj }
+                keyExtractor={(item, index) => "" + index}
+                renderItem={(item, index) =>
+                  <View style={{ marginLeft: 5 }}>
+                    <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleToDids) }
+                  </View>
+                }
+              />
+              **/
+            }
+          </View>
+        )
+      } else {
+        // regular object: loop through keys
+        return (
+          <View style={{ padding: 1 }}>
+            {
+              R.keys(obj).map((key, index) => {
+                const newline = obj[key] instanceof Object ? "\n" : ""
+                return (
+                  <Text key={ index } style={{ marginLeft: 20 }}>
+                    { key } : { newline }{ objectToYamlReactRecur(obj[key], claimId, obj[key + 'VisibleToDids'], onClickVisibleToDids) }
+                  </Text>
+                )}
+              )
+            }
+          </View>
+        )
+      }
+    } else {
+      const isVisibleDid = (typeof obj == 'string' && utility.isDid(obj) && !utility.isHiddenDid(obj))
+      const style = (visibleToDids != null || isVisibleDid) ? { color: 'blue' } : {}
+      const onPress =
+        isVisibleDid
+        ? () => { setDidForVisibleModal(obj) }
+        : (visibleToDids != null)
+          ? () => { onClickVisibleToDids(claimId, visibleToDids) }
+          : () => {}
+      return (
+        <Text
+          style={ style }
+          onPress={ onPress }
+        >
+          { JSON.stringify(obj) }
+        </Text>
+      )
+    }
+  }
+
   return (
     <View>
       {
@@ -88,76 +162,33 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleDid, onC
               :
                 <View />
             }
-            <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleDid, onClickVisibleToDids) }
+            <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleToDids) }
           </View>
         )
       }
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={!!didForVisibleModal}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text>
+              { utility.didInContext(didForVisibleModal, identifiers, allContacts) }
+            </Text>
+            <TouchableHighlight
+              style={styles.cancelButton}
+              onPress={() => {
+                setDidForVisibleModal(null)
+              }}
+            >
+              <Text>Close</Text>
+            </TouchableHighlight>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   )
-}
-
-/**
- * see objectToYamlReact for items that include actions
- */
-const objectToYamlReactRecur = (obj, claimId, visibleToDids, onClickVisibleDid, onClickVisibleToDids) => {
-  if (obj instanceof Object) {
-    if (Array.isArray(obj)) {
-      // array: loop through elements
-      return (
-        <View style={{ padding: 1 }}>
-          {
-            obj.map((item, index) =>
-              <View key={ index } style={{ marginLeft: 5 }}>
-                <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleDid, onClickVisibleToDids) }
-              </View>
-            )
-            /** This complained about being inside a ScrollView, and about nesting.
-            <FlatList
-              data={ obj }
-              keyExtractor={(item, index) => "" + index}
-              renderItem={(item, index) =>
-                <View style={{ marginLeft: 5 }}>
-                  <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleDid, onClickVisibleToDids) }
-                </View>
-              }
-            />
-            **/
-          }
-        </View>
-      )
-    } else {
-      // regular object: loop through keys
-      return (
-        <View style={{ padding: 1 }}>
-          {
-            R.keys(obj).map((key, index) => {
-              const newline = obj[key] instanceof Object ? "\n" : ""
-              return (
-                <Text key={ index } style={{ marginLeft: 20 }}>
-                  { key } : { newline }{ objectToYamlReactRecur(obj[key], claimId, obj[key + 'VisibleToDids'], onClickVisibleDid, onClickVisibleToDids) }
-                </Text>
-              )}
-            )
-          }
-        </View>
-      )
-    }
-  } else {
-    const isVisibleDid = (typeof obj == 'string' && utility.isDid(obj) && !utility.isHiddenDid(obj))
-    const style = (visibleToDids != null || isVisibleDid) ? { color: 'blue' } : {}
-    const onPress =
-      isVisibleDid
-      ? () => { onClickVisibleDid(obj) }
-      : (visibleToDids != null)
-        ? () => { onClickVisibleToDids(claimId, visibleToDids) }
-        : () => {}
-    return (
-      <Text
-        style={ style }
-        onPress={ onPress }
-      >
-        { JSON.stringify(obj) }
-      </Text>
-    )
-  }
 }
