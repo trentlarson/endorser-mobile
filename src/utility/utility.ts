@@ -120,20 +120,30 @@ export function didInContext(did, identifiers, contacts) {
 }
 
 /**
- return readable description of claim if possible
- identifiers is a list of objects with a 'did' field, each representhing the user
- contacts is a list of objects with a 'did' field for others and a 'name' field for their name
+ return readable summary of claim if possible
  extraTitle is optional
  **/
-export const claimDescription = (claim, identifiers, contacts, extraTitle) => {
+export const claimSummary = (claim, extraTitle) => {
   if (claim.claim) {
     // probably a Verified Credential
     claim = claim.claim
   }
   let type = claim['@type'] || 'UnknownType'
-  let prefix = capitalizeAndInsertSpacesBeforeCaps(type) + (extraTitle || '') + '\n'
+  return capitalizeAndInsertSpacesBeforeCaps(type) + (extraTitle || '')
+}
 
-  let details
+/**
+ return readable description of claim if possible
+ identifiers is a list of objects with a 'did' field, each representhing the user
+ contacts is a list of objects with a 'did' field for others and a 'name' field for their name
+ **/
+export const claimSpecialDescription = (claim, identifiers, contacts) => {
+  if (claim.claim) {
+    // probably a Verified Credential
+    claim = claim.claim
+  }
+  const type = claim['@type'] || 'UnknownType'
+
   if (type === "JoinAction") {
     const contactInfo = didInContext(claim.agent.did, identifiers, contacts)
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
@@ -144,14 +154,13 @@ export const claimDescription = (claim, identifiers, contacts, extraTitle) => {
     fullEvent = fullEvent ? " at " + fullEvent : "";
     let eventDate = claim.event && claim.event.startTime;
     eventDate = eventDate ? " at " + eventDate : "";
-    details = contactInfo + fullEvent + eventDate;
+    return contactInfo + fullEvent + eventDate;
+
   } else if (type === "Tenure") {
     var polygon = claim.spatialUnit.geo.polygon
-    details = didInContext(claim.party.did, identifiers, contacts) + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
-  } else {
-    details = JSON.stringify(claim)
+    return didInContext(claim.party.did, identifiers, contacts) + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
   }
-  return prefix + details
+  return null
 }
 
 export const accessToken = async (identifier) => {

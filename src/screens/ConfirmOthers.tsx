@@ -136,13 +136,23 @@ export function ConfirmOthersScreen({ navigation }) {
             >
               {/* Why does any CheckBox in here give this error when you start the app: "Please provide SecretBox to the KeyStore"?
               <CheckBox
-                title={ utility.claimDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || []) }
+                title={
+                  utility.claimSummary(data.item)
+                  + "\n"
+                  + (utility.claimSpecialDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || [])
+                    || JSON.stringify(data.item))
+                }
                 checked={!!selectedClaimsToConfirm[data.item.id.toString()]}
                 onPress={() => { toggleSelectedClaim(data.item) }}
               />
               */}
               <Text onPress={() => { toggleSelectedClaim(data.item) }}>
-                <Text>{utility.claimDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || [])}</Text>
+                <Text>{ utility.claimSummary(data.item) + "\n" }</Text>
+                <Text>{
+                  utility.claimSpecialDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || [])
+                  || JSON.stringify(data.item)
+                  }
+                </Text>
                 { "\n" }
                 <Text style={{ color: "blue" }}>{ selectedClaimsToConfirm[data.item.id.toString()] ? "(on)" : "(off)" }</Text>
               </Text>

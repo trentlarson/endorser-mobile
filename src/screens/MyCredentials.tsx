@@ -298,12 +298,18 @@ export function MyCredentialsScreen({ navigation }) {
                   <View>
 
                     <Text selectable={true}>{
-                      utility.claimDescription(
+                      utility.claimSummary(
                         data.item,
-                        identifiers,
-                        appStore.getState().contacts || [],
                         isUser(data.item.issuer) ? '' : ' (issued by a someone else)'
                       )
+                    }</Text>
+                    <Text selectable={true}>{
+                      utility.claimSpecialDescription(
+                        data.item,
+                        identifiers,
+                        appStore.getState().contacts || []
+                      )
+                      || JSON.stringify(data.item)
                     }</Text>
 
                     <View style={{ flexDirection: 'row' }}>
