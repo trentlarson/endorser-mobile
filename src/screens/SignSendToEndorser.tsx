@@ -2,6 +2,7 @@ import Debug from 'debug'
 import * as didJwt from 'did-jwt'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import { CheckBox } from "react-native-elements"
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
@@ -22,6 +23,7 @@ export function SignCredentialScreen({ navigation, route }) {
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [id0, setId0] = useState<Identifier>()
   const [jwt, setJwt] = useState<JWT>()
+  const [sendToEndorser, setSendToEndorser] = useState<boolean>(true)
 
   const endorserViewLink = (endorserId) => {
     return appStore.getState().viewServer + '/reportClaim?claimId=' + endorserId
@@ -77,7 +79,7 @@ export function SignCredentialScreen({ navigation, route }) {
   }
 
   /**
-   * return claim ID from Endorser server
+   * return claim ID from Endorser server, or nothing if they didn't choose to send it
    */
   async function signAndSend(): string {
     try {
@@ -98,10 +100,15 @@ export function SignCredentialScreen({ navigation, route }) {
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
       const vcJwt: string = await didJwt.createJWT(utility.vcPayload(did, vcClaim),{ issuer: did, signer })
       setJwt(vcJwt)
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT and now sending..."}))
-      let result = await sendToEndorserSite(vcJwt)
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the signing & sending with result: " + JSON.stringify(result)}))
-      return result
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
+      if (sendToEndorser) {
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... now sending JWT to server..."}))
+        let result = await sendToEndorserSite(vcJwt)
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the signing & sending with result: " + JSON.stringify(result)}))
+        return result
+      } else {
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... so we're done."}))
+      }
     } catch (e) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
@@ -173,6 +180,7 @@ export function SignCredentialScreen({ navigation, route }) {
                    : ""
                 }
               </Text>
+              <Text>{jwt ? "The credential is signed." : ""} </Text>
               <View>
                 {
                   fetched ? (
@@ -201,7 +209,7 @@ export function SignCredentialScreen({ navigation, route }) {
                       claimStr ? (
                         <View>
                           <Text>Below is the information for your final review.</Text>
-                          <Text style={{ color: 'red' }}>This is not yet submitted; click 'Sign & Store' to sign and send it.</Text>
+                          <Text style={{ color: 'red' }}>This is not yet submitted; click 'Sign' to sign and send it.</Text>
                         </View>
                       ) : ( /* !fetched && !fetching && !claimStr */
                         <Text>No claim found.  Go back and try again.</Text>
@@ -215,13 +223,38 @@ export function SignCredentialScreen({ navigation, route }) {
                   {
                     (claimJsonError && claimJsonError.length > 0)
                     ?
-                      <Text style={{ textAlign: 'center' }}>Sign & Store{'\n'}(... after fixing the formatting error.)</Text>
+                      <Text style={{ textAlign: 'center' }}>Sign{'\n'}(... after fixing the formatting error.)</Text>
                     :
-                      <Button
-                        title={'Sign & Store'}
-                        onPress={signAndSend}
-                      />
+                      <View>
+                        <Button
+                          title={'Sign'}
+                          onPress={signAndSend}
+                        />
+                        <CheckBox
+                          title='Store on Server for Selective Disclosure'
+                          checked={sendToEndorser}
+                          onPress={() => setSendToEndorser(!sendToEndorser)}
+                        />
+                      </View>
                   }
+
+                  {
+                    jwt ? (
+                      <View>
+                        <View style={{ marginTop: 50 }} />
+                        <Text>JWT</Text>
+                        <TextInput
+                          multiline={true}
+                          style={{ borderWidth: 1, height: 300 }}
+                        >
+                          { jwt }
+                        </TextInput>
+                      </View>
+                    ) : ( /* !jwt */
+                      <Text/>
+                    )
+                  }
+
                   <Text style={{ marginTop: 75, marginBottom: 5 }}>Details</Text>
                   <Text style={{ fontSize: 11 }}>Signing As:</Text>
                   <Text style={{ fontSize: 11 }}>{id0.did}</Text>
@@ -250,23 +283,6 @@ export function SignCredentialScreen({ navigation, route }) {
                       <View/>
                   }
                 </View>
-
-                {
-                  jwt ? (
-                    <View>
-                      <View style={{ marginTop: 800 }} />
-                      <Text>JWT</Text>
-                      <TextInput
-                        multiline={true}
-                        style={{ borderWidth: 1, height: 300 }}
-                      >
-                        { jwt }
-                      </TextInput>
-                    </View>
-                  ) : ( /* !jwt */
-                    <Text/>
-                  )
-                }
               </View>
             </View>
           ) : (

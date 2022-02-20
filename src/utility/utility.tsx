@@ -76,7 +76,7 @@ export const YamlFormat = ({ source, navigation }) => {
 
   const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [didsForLinkedModal, setDidsForLinkedModal] = useState<Array<string>>(null)
-  const [claimIdForLinkedModal, setClaimIdForLinkedModal] = useState<string>()
+  const [claimIdForLinkedModal, setClaimIdForLinkedModal] = useState<string>(null)
 
   const identifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])

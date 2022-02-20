@@ -96,7 +96,7 @@ export const firstAndLast3OfDid = (did) => {
   return firstAndLast3(lastChars)
 }
 
-const UNKNOWN_CONTACT = "?"
+const UNKNOWN_CONTACT = "Unknown"
 
 // always returns text; if unknown then UNKNOWN_CONTACT
 function didInfo(did, identifiers, contacts) {
