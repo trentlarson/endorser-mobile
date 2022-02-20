@@ -72,7 +72,7 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
  * obj is any object or array
  * claimId (optional) is the ID for server lookup
  */
-export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }) => {
+export const YamlFormat = ({ source, navigation }) => {
 
   const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [didsForLinkedModal, setDidsForLinkedModal] = useState<Array<string>>(null)
@@ -84,7 +84,7 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
   /**
    * see objectToYamlReact for items that include actions
    */
-  const objectToYamlReactRecur = (obj, claimId, visibleToDids, onClickVisibleToDids) => {
+  const objectToYamlReactRecur = (obj, claimId, visibleToDids) => {
     if (obj instanceof Object) {
       if (Array.isArray(obj)) {
         // array: loop through elements
@@ -93,7 +93,7 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
             {
               obj.map((item, index) =>
                 <View key={ index } style={{ marginLeft: 5 }}>
-                  <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleToDids) }
+                  <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null) }
                 </View>
               )
               /** This complained about being inside a ScrollView, and about nesting.
@@ -102,7 +102,7 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
                 keyExtractor={(item, index) => "" + index}
                 renderItem={(item, index) =>
                   <View style={{ marginLeft: 5 }}>
-                    <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleToDids) }
+                    <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null) }
                   </View>
                 }
               />
@@ -119,7 +119,7 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
                 const newline = obj[key] instanceof Object ? "\n" : ""
                 return (
                   <Text key={ index } style={{ marginLeft: 20 }}>
-                    { key } : { newline }{ objectToYamlReactRecur(obj[key], claimId, obj[key + 'VisibleToDids'], onClickVisibleToDids) }
+                    { key } : { newline }{ objectToYamlReactRecur(obj[key], claimId, obj[key + 'VisibleToDids']) }
                   </Text>
                 )}
               )
@@ -207,7 +207,7 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
               :
                 <View />
             }
-            <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleToDids) }
+            <Text>- </Text>{ objectToYamlReactRecur(item, item.id) }
 
             <View style={styles.line} />
           </View>
