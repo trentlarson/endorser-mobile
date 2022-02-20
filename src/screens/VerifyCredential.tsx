@@ -8,6 +8,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
 import * as utility from '../utility/utility'
+import { VisibleDidModal } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
 import { agent, dbConnection, DEFAULT_BASIC_RESOLVER } from '../veramo/setup'
 
@@ -68,6 +69,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [detectedSigInvalid, setDetectedSigInvalid] = useState<boolean>(false)
   const [detectedSigProblem, setDetectedSigProblem] = useState<boolean>(false)
   const [detectedSigValid, setDetectedSigValid] = useState<boolean>(false)
+  const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [endorserId, setEndorserId] = useState<string>('')
   const [howLongAgo, setHowLongAgo] = useState<string>('')
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
@@ -243,7 +245,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           </Text>
           <View style={{ padding: 5 }}>
             {
-              visibleTo.map(did => <Text key={did} style={{ fontSize: 11 }} selectable={true}>{did}</Text>)
+              visibleTo.map(did => <Text key={did} style={{ color: 'blue', fontSize: 11 }} selectable={true} onPress={() => setDidForVisibleModal(did)}>{did}</Text>)
             }
           </View>
           <Text>{ confirmError }</Text>
@@ -284,6 +286,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
               <Text>There is no validity information.</Text>
             )
           }
+
+          <VisibleDidModal didForVisibility={didForVisibleModal} setDidForVisibility={setDidForVisibleModal} />
 
           <View style={{ height: 0.8, width: "100%", backgroundColor: "#000000", marginTop: 200, marginBottom: 100 }} />
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Details</Text>

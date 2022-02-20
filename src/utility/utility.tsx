@@ -34,6 +34,38 @@ export const BVCButton = ({ identifier, navigation, description }) => {
   )
 }
 
+export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
+
+ const allidentifiers = useSelector((state) => state.identifiers || [])
+ const allContacts = useSelector((state) => state.contacts || [])
+
+ return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={!!didForVisibility}
+    >
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Text>
+            { utility.didInContext(didForVisibility, allidentifiers, allContacts) }
+          </Text>
+          <TouchableHighlight
+            style={styles.cancelButton}
+            onPress={() => {
+              setDidForVisibility(null)
+            }}
+          >
+            <Text>Close</Text>
+          </TouchableHighlight>
+        </View>
+      </View>
+    </Modal>
+  )
+}
+
+
+
 /**
  * Render each claim with links to take actions.
  *
@@ -182,27 +214,7 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
         )
       }
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={!!didForVisibleModal}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text>
-              { utility.didInContext(didForVisibleModal, identifiers, allContacts) }
-            </Text>
-            <TouchableHighlight
-              style={styles.cancelButton}
-              onPress={() => {
-                setDidForVisibleModal(null)
-              }}
-            >
-              <Text>Close</Text>
-            </TouchableHighlight>
-          </View>
-        </View>
-      </Modal>
+      <VisibleDidModal didForVisibility={didForVisibleModal} setDidForVisibility={setDidForVisibleModal} />
 
       <Modal
         animationType="slide"
@@ -215,14 +227,14 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
               This person can be seen by the people in your network, below.
               Ask one of them to give you more information about this claim:
             </Text>
-            <Text selectable={true}>{ claimIdForLinkedModal }</Text>
+            <Text style={{ padding: 10 }} selectable={true}>{ claimIdForLinkedModal }</Text>
 
             {
               didsForLinkedModal != null
               ? didsForLinkedModal.map((did) => {
                   const contact = R.find(con => con.did === did, allContacts)
                   return (
-                    <Text key={ did } style={{ padding: 10 }} selectable={ true }>
+                    <Text key={ did } style={{ padding: 10 }}>
                       { utility.didInContext(did, identifiers, allContacts) }
                     </Text>
                   )
