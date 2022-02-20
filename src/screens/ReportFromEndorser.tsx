@@ -1,29 +1,22 @@
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, FlatList, Linking, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, View } from 'react-native'
+import { ActivityIndicator, Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { CheckBox } from 'react-native-elements'
-import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
 import { styles } from './style'
 import * as utility from '../utility/utility'
 import { YamlFormat } from '../utility/utility.tsx'
 import { appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
-import { agent } from '../veramo/setup'
-import { MyCredentialsScreen } from './MyCredentials'
 
 export function ReportScreen({ navigation }) {
 
-  const [claimIdForLinkedModal, setClaimIdForLinkedModal] = useState<string>()
-  const [didsForLinkedModal, setDidsForLinkedModal] = useState<Array<string>>(null)
-  const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
   const [showClaimsWithoutDids, setShowClaimsWithoutDids] = useState(false)
 
   const identifiers = useSelector((state) => state.identifiers || [])
-  const allContacts = useSelector((state) => state.contacts || [])
 
   const filteredResultOutput = (results) => {
     // assuming results is an array
@@ -31,14 +24,7 @@ export function ReportScreen({ navigation }) {
       showClaimsWithoutDids
       ? results
       : R.filter(utility.containsNonHiddenDid, results)
-    return <YamlFormat
-      source={ filteredResults }
-      navigation={ navigation }
-      onClickVisibleToDids={ (claimId, visibleToDids) => {
-        setClaimIdForLinkedModal(claimId)
-        setDidsForLinkedModal(visibleToDids)
-      }}
-     />
+    return <YamlFormat source={ filteredResults } navigation={ navigation } />
   }
 
   const searchEndorser = async () => {
@@ -114,43 +100,6 @@ export function ReportScreen({ navigation }) {
                           { filteredResultOutput(searchResults) }
                         </View>
                   }
-
-                  <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={!!didsForLinkedModal}
-                  >
-                    <View style={styles.centeredView}>
-                      <View style={styles.modalView}>
-                        <Text>
-                          This person can be seen by the people in your network, below.
-                          Ask one of them to give you more information about <Text style={{ color: 'blue' }} onPress={() => Linking.openURL(appStore.getState().viewServer + '/reportClaim?claimId=' + claimIdForLinkedModal)}>this claim</Text>.
-                        </Text>
-
-                        {
-                          didsForLinkedModal != null
-                          ? didsForLinkedModal.map((did) => {
-                              const contact = R.find(con => con.did === did, allContacts)
-                              return (
-                                <Text key={ did } style={{ padding: 10 }} selectable={ true }>
-                                  { utility.didInContext(did, identifiers, allContacts) }
-                                </Text>
-                              )
-                            })
-                          : <View/>
-                        }
-                        <TouchableHighlight
-                          style={styles.cancelButton}
-                          onPress={() => {
-                            setDidsForLinkedModal(null)
-                          }}
-                        >
-                          <Text>Close</Text>
-                        </TouchableHighlight>
-                      </View>
-                    </View>
-                  </Modal>
-
                 </View>
             }
           </View>

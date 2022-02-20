@@ -43,6 +43,8 @@ export const BVCButton = ({ identifier, navigation, description }) => {
 export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }) => {
 
   const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
+  const [didsForLinkedModal, setDidsForLinkedModal] = useState<Array<string>>(null)
+  const [claimIdForLinkedModal, setClaimIdForLinkedModal] = useState<string>()
 
   const identifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
@@ -95,12 +97,12 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
       }
     } else {
       const isVisibleDid = (typeof obj == 'string' && utility.isDid(obj) && !utility.isHiddenDid(obj))
-      const style = (visibleToDids != null || isVisibleDid) ? { color: 'blue' } : {}
+      const style = (isVisibleDid || visibleToDids != null) ? { color: 'blue' } : {}
       const onPress =
         isVisibleDid
         ? () => { setDidForVisibleModal(obj) }
         : (visibleToDids != null)
-          ? () => { onClickVisibleToDids(claimId, visibleToDids) }
+          ? () => { setDidsForLinkedModal(visibleToDids); setClaimIdForLinkedModal(claimId); }
           : () => {}
       return (
         <Text
@@ -118,6 +120,17 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
       {
         source.map((item, index) =>
           <View key={ index } style={{ marginLeft: 5 }}>
+            {
+              <Text
+                style={{ color: 'blue' }}
+                onPress={() => navigation.navigate(
+                  'Verify Credential',
+                  { wrappedClaim: item }
+                )}
+              >
+                Check
+              </Text>
+            }
             {
               item.claimType === 'DonateAction'
               ?
@@ -163,6 +176,8 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
                 <View />
             }
             <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id, null, onClickVisibleToDids) }
+
+            <View style={styles.line} />
           </View>
         )
       }
@@ -181,6 +196,43 @@ export const YamlFormat = ({ source, claimId, navigation, onClickVisibleToDids }
               style={styles.cancelButton}
               onPress={() => {
                 setDidForVisibleModal(null)
+              }}
+            >
+              <Text>Close</Text>
+            </TouchableHighlight>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={!!didsForLinkedModal}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text>
+              This person can be seen by the people in your network, below.
+              Ask one of them to give you more information about this claim:
+            </Text>
+            <Text selectable={true}>{ claimIdForLinkedModal }</Text>
+
+            {
+              didsForLinkedModal != null
+              ? didsForLinkedModal.map((did) => {
+                  const contact = R.find(con => con.did === did, allContacts)
+                  return (
+                    <Text key={ did } style={{ padding: 10 }} selectable={ true }>
+                      { utility.didInContext(did, identifiers, allContacts) }
+                    </Text>
+                  )
+                })
+              : <View/>
+            }
+            <TouchableHighlight
+              style={styles.cancelButton}
+              onPress={() => {
+                setDidsForLinkedModal(null)
               }}
             >
               <Text>Close</Text>
