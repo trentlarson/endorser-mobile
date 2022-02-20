@@ -232,7 +232,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           <Text>There { nonHiddenIdList.length === 1 ? 'is' : 'are' } { nonHiddenIdList.length } that you can see.</Text>
           <View style={{ padding: 5 }}>
             {
-              nonHiddenIdList.map(did => <Text key={did} selectable={true}>{ utility.didInContext(issuer, identifiers, allContacts) }</Text>)
+              nonHiddenIdList.map(did => <Text key={did} selectable={true}>{ utility.didInContext(did, identifiers, allContacts) }</Text>)
             }
           </View>
           <Text>{ numHidden ? 'There ' + (numHidden === 1 ? 'is' : 'are') + ' ' + numHidden + ' that you cannot see.' : '' }</Text>

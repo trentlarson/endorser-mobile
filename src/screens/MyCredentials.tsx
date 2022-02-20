@@ -300,7 +300,7 @@ export function MyCredentialsScreen({ navigation }) {
                     <Text selectable={true}>{
                       utility.claimSummary(
                         data.item,
-                        isUser(data.item.issuer) ? '' : ' (issued by a someone else)'
+                        isUser(data.item.issuer) ? '' : ' (issued by someone else)'
                       )
                     }</Text>
                     <Text selectable={true}>{

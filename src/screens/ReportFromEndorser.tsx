@@ -31,9 +31,9 @@ export function ReportScreen({ navigation }) {
 
     let urlSuffix
     let oneResult = false
-    if (param.searchTerm) {
+    if (param.searchTerm != null) {
       urlSuffix = '?claimContents=' + param.searchTerm
-    } else if (param.claimId) {
+    } else if (param.claimId != null) {
       urlSuffix = '/' + param.claimId
       oneResult = true
     }
