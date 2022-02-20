@@ -27,24 +27,39 @@ export function ReportScreen({ navigation }) {
     return <YamlFormat source={ filteredResults } navigation={ navigation } />
   }
 
-  const searchEndorser = async () => {
-    setLoading(true)
-    const token = await utility.accessToken(identifiers[0])
-    fetch(appStore.getState().apiServer + '/api/claim?claimContents=' + searchTerm, {
-      method: 'GET',
-      headers: {
-        "Content-Type": "application/json",
-        "Uport-Push-Token": token,
-      }
-    }).then(response => {
-      setLoading(false)
-      if (response.status !== 200) {
-        throw Error('There was an error from the server.')
-      }
-      return response.json()
-    }).then(result => {
-      setSearchResults(result)
-    })
+  const searchEndorser = async (param) => {
+
+    let urlSuffix
+    let oneResult = false
+    if (param.searchTerm) {
+      urlSuffix = '?claimContents=' + param.searchTerm
+    } else if (param.claimId) {
+      urlSuffix = '/' + param.claimId
+      oneResult = true
+    }
+
+    if (urlSuffix) {
+      setLoading(true)
+      const token = await utility.accessToken(identifiers[0])
+      fetch(appStore.getState().apiServer + '/api/claim' + urlSuffix, {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json",
+          "Uport-Push-Token": token,
+        }
+      }).then(response => {
+        setLoading(false)
+        if (response.status !== 200) {
+          throw Error('There was an error from the server.')
+        }
+        return response.json()
+      }).then(result => {
+        let correctResults = oneResult ? [result] : result
+        setSearchResults(correctResults)
+      })
+    } else {
+      console.log('The call to searchEndorser needs searchTerm or claimId in param, but got', param)
+    }
   }
 
   return (
@@ -80,9 +95,19 @@ export function ReportScreen({ navigation }) {
               :
                 <View>
                   <Button
-                    title="Search"
-                    onPress={searchEndorser}
+                    title="Search for Contents"
+                    onPress={() => searchEndorser({ searchTerm: searchTerm })}
                   />
+                  {
+                    searchTerm && searchTerm.length === 26
+                    ?
+                      <Button
+                        title="Find by ID"
+                        onPress={() => searchEndorser({ claimId: searchTerm })}
+                      />
+                    :
+                      <View />
+                  }
                   <Text style={{ padding: 10 }}>(Only retrieves the 50 most recent matching claims.)</Text>
 
                   {
