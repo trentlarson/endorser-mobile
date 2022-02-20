@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux'
 
 import { styles } from './style'
 import * as utility from '../utility/utility'
+import { YamlFormat } from '../utility/utility.tsx'
 import { appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
 import { MyCredentialsScreen } from './MyCredentials'
@@ -24,176 +25,13 @@ export function ReportScreen({ navigation }) {
   const identifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
 
-  /** This works, but I like the 'React' version better.
-   *
-  const objectToYamlString = (obj, indentLevel) => {
-    if (indentLevel == null) {
-      indentLevel = 0
-    }
-    const indentString = R.join('', R.repeat('     ', indentLevel))
-
-    if (obj instanceof Object) {
-      if (Array.isArray(obj)) {
-        // array: loop through elements
-        return (
-          R.join(
-            "",
-            obj.map((item, index) =>
-              "\n" + indentString + "- " + objectToYamlString(item, indentLevel + 1)
-            )
-          )
-        )
-      } else {
-        // regular object: loop through keys
-        return (
-          R.join(
-            "",
-            R.keys(obj).map((key, index) =>
-              "\n" + indentString + key + " : " + objectToYamlString(obj[key], indentLevel + 1)
-            )
-          )
-        )
-      }
-    } else {
-      return JSON.stringify(obj)
-    }
-  }
-  *
-  **/
-
-  /**
-   * Render each claim with links to take actions.
-   */
-  const objectToYamlReact = (obj, claimId, visibleToDids) => {
-    return (
-      <View>
-        {
-          obj.map((item, index) =>
-            <View key={ index } style={{ marginLeft: 5 }}>
-              {
-                item.claimType === 'DonateAction'
-                ?
-                  <Text
-                    style={{ color: 'blue' }}
-                    onPress={() => navigation.navigate(
-                      'Sign Credential',
-                      { credentialSubject:
-                        { '@context': 'http://schema.org',
-                          '@type': 'GiveAction',
-                          agent: item.claim.agent,
-                          recipient: item.claim.recipient,
-                          identifier: item.claim.identifier,
-                          price: item.claim.price,
-                          priceCurrency: item.claim.priceCurrency,
-                        }
-                      }
-                    )}
-                  >
-                    Record as Paid
-                  </Text>
-                :
-                  <View />
-              }
-              {
-                item.claimType !== 'AgreeAction'
-                ?
-                  <Text
-                    style={{ color: 'blue' }}
-                    onPress={() => navigation.navigate(
-                      'Sign Credential',
-                      { credentialSubject:
-                        { '@context': 'http://schema.org',
-                          '@type': 'AgreeAction',
-                          object: item.claim,
-                        }
-                      }
-                    )}
-                  >
-                    Agree
-                  </Text>
-                :
-                  <View />
-              }
-              <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id) }
-            </View>
-          )
-        }
-      </View>
-    )
-  }
-
-  /**
-   * see objectToYamlReact for items that include actions
-   */
-  const objectToYamlReactRecur = (obj, claimId, visibleToDids) => {
-    if (obj instanceof Object) {
-      if (Array.isArray(obj)) {
-        // array: loop through elements
-        return (
-          <View style={{ padding: 1 }}>
-            {
-              obj.map((item, index) =>
-                <View key={ index } style={{ marginLeft: 5 }}>
-                  <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id) }
-                </View>
-              )
-              /** This complained about being inside a ScrollView, and about nesting.
-              <FlatList
-                data={ obj }
-                keyExtractor={(item, index) => "" + index}
-                renderItem={(item, index) =>
-                  <View style={{ marginLeft: 5 }}>
-                    <Text>- </Text>{ objectToYamlReactRecur(item, claimId || item.id) }
-                  </View>
-                }
-              />
-              **/
-            }
-          </View>
-        )
-      } else {
-        // regular object: loop through keys
-        return (
-          <View style={{ padding: 1 }}>
-            {
-              R.keys(obj).map((key, index) => {
-                const newline = obj[key] instanceof Object ? "\n" : ""
-                return (
-                  <Text key={ index } style={{ marginLeft: 20 }}>
-                    { key } : { newline }{ objectToYamlReactRecur(obj[key], claimId, obj[key + 'VisibleToDids']) }
-                  </Text>
-                )}
-              )
-            }
-          </View>
-        )
-      }
-    } else {
-      const isVisibleDid = (typeof obj == 'string' && utility.isDid(obj) && !utility.isHiddenDid(obj))
-      const style = (visibleToDids != null || isVisibleDid) ? { color: 'blue' } : {}
-      const onPress =
-        (visibleToDids != null)
-        ? () => { setClaimIdForLinkedModal(claimId); setDidsForLinkedModal(visibleToDids) }
-        : isVisibleDid
-          ? () => { setDidForVisibleModal(obj) }
-          : () => {}
-      return (
-        <Text
-          style={ style }
-          onPress={ onPress }
-        >
-          { JSON.stringify(obj) }
-        </Text>
-      )
-    }
-  }
   const filteredResultOutput = (results) => {
     // assuming results is an array
     const filteredResults =
       showClaimsWithoutDids
       ? results
       : R.filter(utility.containsNonHiddenDid, results)
-    return objectToYamlReact(filteredResults)
+    return <YamlFormat source={ filteredResults } />
   }
 
   const searchEndorser = async () => {
