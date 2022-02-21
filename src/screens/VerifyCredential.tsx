@@ -75,8 +75,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [issuer, setIssuer] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
-  const [nonHiddenIdList, setNonHiddenIdList] = useState([])
   const [numHidden, setNumHidden] = useState<number>(0)
+  const [visibleIdList, setVisibleIdList] = useState([])
   const [visibleTo, setVisibleTo] = useState<string[]>([])
 
   const allContacts = useSelector((state) => state.contacts || [])
@@ -195,7 +195,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
               .then(result => {
                 let resultList1 = result.result || []
                 let resultList2 = R.reject(utility.isHiddenDid, resultList1)
-                setNonHiddenIdList(resultList2)
+                setVisibleIdList(resultList2)
                 setNumHidden(resultList1.length - resultList2.length)
 
                 setVisibleTo(result.resultVisibleToDids || [])
@@ -229,26 +229,38 @@ export function VerifyCredentialScreen({ navigation, route }) {
           <Text selectable={true}>{ JSON.stringify(credentialSubject) }</Text>
 
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
-          <Text>There { nonHiddenIdList.length === 1 ? 'is' : 'are' } { nonHiddenIdList.length } that you can see.</Text>
           <View style={{ padding: 5 }}>
+            <Text>There { visibleIdList.length === 1 ? 'is' : 'are' } { visibleIdList.length } that you can see.</Text>
             {
-              nonHiddenIdList.map(did => <Text key={did} selectable={true}>{ utility.didInContext(did, identifiers, allContacts) }</Text>)
+              visibleIdList.map(did => <Text key={did} selectable={true}>{ utility.didInContext(did, identifiers, allContacts) }</Text>)
             }
           </View>
-          <Text>{ numHidden ? 'There ' + (numHidden === 1 ? 'is' : 'are') + ' ' + numHidden + ' that you cannot see.' : '' }</Text>
-          <Text>
-            {
-              visibleTo.length > 0
-              ? 'They are confirmed by these others in your network:'
-              : 'There are no other confirmations of this outside your immediate network.'
-            }
-          </Text>
+          <View style={{ padding: 5 }}>
+            <Text>{ numHidden ? 'There ' + (numHidden === 1 ? 'is' : 'are') + ' ' + numHidden + ' that you cannot see.' : '' }</Text>
+            <Text>
+              {
+                visibleTo.length > 0
+                ? 'They are submitted by these others in your network.'
+                : 'There are no other confirmations of this outside your immediate network.'
+              }
+            </Text>
+          </View>
           <View style={{ padding: 5 }}>
             {
               visibleTo.map(did => <Text key={did} style={{ color: 'blue', fontSize: 11 }} selectable={true} onPress={() => setDidForVisibleModal(did)}>{did}</Text>)
             }
           </View>
-          <Text>{ confirmError }</Text>
+          <View style={{ padding: 5 }}>
+            <Text>{ confirmError }</Text>
+          </View>
+          {
+            endorserId
+            ? <View style={{ padding: 5 }}>
+                <Text>To get more details, send this claim ID to one of those people you know and ask for more information:</Text>
+                <Text style={{ padding: 10 }} selectable={true}>{ endorserId }</Text>
+              </View>
+            : <Text>There is no more information about this credential.</Text>
+          }
 
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Validity</Text>
           {
@@ -291,7 +303,11 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
           <View style={{ height: 0.8, width: "100%", backgroundColor: "#000000", marginTop: 200, marginBottom: 100 }} />
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Details</Text>
-          <Text>{ endorserId ? 'Credential ' + endorserId : ''}</Text>
+          {
+            endorserId != null
+            ? <View><Text>ID on Server</Text><Text selectable={true}>{endorserId}</Text></View>
+            : <View />
+          }
           <Text selectable={true}>{ vcObj ? JSON.stringify(vcObj) : '' }</Text>
           <Text selectable={true}>{ wrappedClaim ? JSON.stringify(wrappedClaim) : '' }</Text>
         </View>
