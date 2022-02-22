@@ -147,66 +147,83 @@ export const YamlFormat = ({ source, navigation }) => {
     }
   }
 
+  let finalSource = source
+  let hideActions = false
+  if (source == null) {
+    finalSource = []
+  } else if (!Array.isArray(source)) {
+    // it's a single item, so we'll hide the actions
+    finalSource = [ source ]
+    hideActions = true
+  }
   return (
     <View>
       {
-        source.map((item, index) =>
+        finalSource.map((item, index) =>
           <View key={ index } style={{ marginLeft: 5 }}>
             {
-              <Text
-                style={{ color: 'blue' }}
-                onPress={() => navigation.navigate(
-                  'Verify Credential',
-                  { wrappedClaim: item }
-                )}
-              >
-                Check
-              </Text>
-            }
-            {
-              item.claimType === 'DonateAction'
+              hideActions
               ?
-                <Text
-                  style={{ color: 'blue' }}
-                  onPress={() => navigation.navigate(
-                    'Sign Credential',
-                    { credentialSubject:
-                      { '@context': 'http://schema.org',
-                        '@type': 'GiveAction',
-                        agent: item.claim.agent,
-                        recipient: item.claim.recipient,
-                        identifier: item.claim.identifier,
-                        price: item.claim.price,
-                        priceCurrency: item.claim.priceCurrency,
-                      }
-                    }
-                  )}
-                >
-                  Record as Paid
-                </Text>
-              :
                 <View />
-            }
-            {
-              item.claimType !== 'AgreeAction'
-              ?
-                <Text
-                  style={{ color: 'blue' }}
-                  onPress={() => navigation.navigate(
-                    'Sign Credential',
-                    { credentialSubject:
-                      { '@context': 'http://schema.org',
-                        '@type': 'AgreeAction',
-                        object: item.claim,
-                      }
-                    }
-                  )}
-                >
-                  Agree
-                </Text>
               :
-                <View />
+                <View>
+                  <Text
+                    style={{ color: 'blue' }}
+                    onPress={() => navigation.navigate(
+                      'Verify Credential',
+                      { wrappedClaim: item }
+                    )}
+                  >
+                    Check
+                  </Text>
+                  {
+                    item.claimType === 'DonateAction'
+                    || item.claim && item.claim['@type'] === 'DonateAction'
+                    ?
+                      <Text
+                        style={{ color: 'blue' }}
+                        onPress={() => navigation.navigate(
+                          'Sign Credential',
+                          { credentialSubject:
+                            { '@context': 'http://schema.org',
+                              '@type': 'GiveAction',
+                              agent: item.claim.agent,
+                              recipient: item.claim.recipient,
+                              identifier: item.claim.identifier,
+                              price: item.claim.price,
+                              priceCurrency: item.claim.priceCurrency,
+                            }
+                          }
+                        )}
+                      >
+                        Record as Paid
+                      </Text>
+                    :
+                      <View />
+                  }
+                  {
+                    item.claimType !== 'AgreeAction'
+                    ?
+                      <Text
+                        style={{ color: 'blue' }}
+                        onPress={() => navigation.navigate(
+                          'Sign Credential',
+                          { credentialSubject:
+                            { '@context': 'http://schema.org',
+                              '@type': 'AgreeAction',
+                              object: item.claim,
+                            }
+                          }
+                        )}
+                      >
+                        Agree
+                      </Text>
+                    :
+                      <View />
+                  }
+                </View>
             }
+
             <Text>- </Text>{ objectToYamlReactRecur(item, item.id) }
 
             <View style={styles.line} />

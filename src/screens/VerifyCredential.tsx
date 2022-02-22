@@ -8,7 +8,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
 import * as utility from '../utility/utility'
-import { VisibleDidModal } from '../utility/utility.tsx'
+import { VisibleDidModal, YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
 import { agent, dbConnection, DEFAULT_BASIC_RESOLVER } from '../veramo/setup'
 
@@ -72,24 +72,14 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [endorserId, setEndorserId] = useState<string>('')
   const [howLongAgo, setHowLongAgo] = useState<string>('')
-  const [identifiers, setIdentifiers] = useState<Identifier[]>([])
   const [issuer, setIssuer] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [numHidden, setNumHidden] = useState<number>(0)
   const [visibleIdList, setVisibleIdList] = useState([])
   const [visibleTo, setVisibleTo] = useState<string[]>([])
 
+  const identifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
-
-  useFocusEffect(
-    React.useCallback(() => {
-
-      agent.didManagerFind().then(ids => setIdentifiers(ids))
-
-      utility.loadContacts(appSlice, appStore, dbConnection)
-
-    }, [])
-  )
 
   useFocusEffect(
     React.useCallback(() => {
@@ -158,13 +148,12 @@ export function VerifyCredentialScreen({ navigation, route }) {
         {
           // this retrieves confirmations
 
-          let identifiers = await agent.didManagerFind()
-
           let foundEndorserId
           if (wrappedClaim) {
             foundEndorserId = wrappedClaim.id
 
           } else if (vcObj) {
+            const endorserSubstring = '/api/claim/'
             const endorIndex = !vcObj.id ? -1 : vcObj.id.indexOf(endorserSubstring)
             if (vcObj['type']
                 && vcObj['type'].findIndex(elem => elem === 'VerifiableCredential') > -1
@@ -173,7 +162,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
             }
           }
 
-          const endorserSubstring = '/api/claim/'
           if (foundEndorserId) {
 
             setEndorserId(foundEndorserId)
@@ -226,7 +214,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
             : <View style={{ marginTop: 20}}/>
           }
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Claim</Text>
-          <Text selectable={true}>{ JSON.stringify(credentialSubject) }</Text>
+          <YamlFormat source={credentialSubject} navigation={navigation} />
 
 
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
