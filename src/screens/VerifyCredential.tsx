@@ -261,12 +261,12 @@ export function VerifyCredentialScreen({ navigation, route }) {
             }
           </View>
           {
-            endorserId
+            endorserId && visibleTo.length > 0
             ? <View style={{ padding: 5 }}>
-                <Text>To get more details, send this claim ID to one of those people and ask for more information:</Text>
+                <Text>To get more details, send this claim ID to one of those people and ask them to search for more information:</Text>
                 <Text style={{ padding: 10 }} selectable={true}>{ endorserId }</Text>
               </View>
-            : <Text>There is no more information about this credential.</Text>
+            : <View />
           }
           <View style={{ padding: 5 }}>
             <Text>{ confirmError }</Text>
