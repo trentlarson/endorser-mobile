@@ -228,39 +228,50 @@ export function VerifyCredentialScreen({ navigation, route }) {
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Claim</Text>
           <Text selectable={true}>{ JSON.stringify(credentialSubject) }</Text>
 
+
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
+
+
+          {/* Show any directly visible. */}
           <View style={{ padding: 5 }}>
-            <Text>There { visibleIdList.length === 1 ? 'is' : 'are' } { visibleIdList.length } that you can see.</Text>
+            <Text>There are { visibleIdList.length > 0 ? 'some by these ' + visibleIdList.length : 'none by any' } people in your network.</Text>
             {
               visibleIdList.map(did => <Text key={did} selectable={true}>{ utility.didInContext(did, identifiers, allContacts) }</Text>)
             }
           </View>
+
+
+          {/* Now show number hidden. */}
           <View style={{ padding: 5 }}>
-            <Text>{ numHidden ? 'There ' + (numHidden === 1 ? 'is' : 'are') + ' ' + numHidden + ' that you cannot see.' : '' }</Text>
+            <Text>{ 'There are ' + (numHidden > 0 ? 'some by ' + numHidden : 'none by any') + ' people outside your network.' }</Text>
+          </View>
+
+
+          {/* Now show how to get to those hidden. */}
+          <View style={{ padding: 5 }}>
             <Text>
               {
                 visibleTo.length > 0
-                ? 'They are submitted by these others in your network.'
-                : 'There are no other confirmations of this outside your immediate network.'
+                ? 'They are visible to these others in your network:'
+                : 'They are not visible to anyone inside your network.'
               }
             </Text>
-          </View>
-          <View style={{ padding: 5 }}>
             {
               visibleTo.map(did => <Text key={did} style={{ color: 'blue', fontSize: 11 }} selectable={true} onPress={() => setDidForVisibleModal(did)}>{did}</Text>)
             }
           </View>
-          <View style={{ padding: 5 }}>
-            <Text>{ confirmError }</Text>
-          </View>
           {
             endorserId
             ? <View style={{ padding: 5 }}>
-                <Text>To get more details, send this claim ID to one of those people you know and ask for more information:</Text>
+                <Text>To get more details, send this claim ID to one of those people and ask for more information:</Text>
                 <Text style={{ padding: 10 }} selectable={true}>{ endorserId }</Text>
               </View>
             : <Text>There is no more information about this credential.</Text>
           }
+          <View style={{ padding: 5 }}>
+            <Text>{ confirmError }</Text>
+          </View>
+
 
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Validity</Text>
           {
