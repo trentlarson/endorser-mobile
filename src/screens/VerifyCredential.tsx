@@ -222,16 +222,16 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
           {/* Show any directly visible. */}
           <View style={{ padding: 5 }}>
-            <Text>There are { visibleIdList.length > 0 ? 'some by these ' + visibleIdList.length : 'none by any' } people in your network.</Text>
+            <Text>
+              {
+                visibleIdList.length > 0
+                ? 'This is confirmed by these in your network:'
+                : 'This is not confirmed by anyone in your network.'
+              }
+            </Text>
             {
-              visibleIdList.map(did => <Text key={did} selectable={true}>{ utility.didInContext(did, identifiers, allContacts) }</Text>)
+              visibleIdList.map(did => <Text key={did} selectable={true}>* { utility.didInContext(did, identifiers, allContacts) }</Text>)
             }
-          </View>
-
-
-          {/* Now show number hidden. */}
-          <View style={{ padding: 5 }}>
-            <Text>{ 'There are ' + (numHidden > 0 ? 'some by ' + numHidden : 'none by any') + ' people outside your network.' }</Text>
           </View>
 
 
@@ -240,22 +240,30 @@ export function VerifyCredentialScreen({ navigation, route }) {
             <Text>
               {
                 visibleTo.length > 0
-                ? 'They are visible to these others in your network:'
-                : 'They are not visible to anyone inside your network.'
+                ? 'Those who confirmed are visible to these others in your network:'
+                : 'Anyone else who confirmed is not visible to those in your network.'
               }
             </Text>
             {
-              visibleTo.map(did => <Text key={did} style={{ color: 'blue', fontSize: 11 }} selectable={true} onPress={() => setDidForVisibleModal(did)}>{did}</Text>)
+              visibleTo.map(did => <Text key={did} style={{ color: 'blue', fontSize: 11 }} selectable={true} onPress={() => setDidForVisibleModal(did)}>* {did}</Text>)
             }
           </View>
           {
-            endorserId && visibleTo.length > 0
+            endorserId && (visibleIdList.length > 0 || visibleTo.length > 0)
             ? <View style={{ padding: 5 }}>
                 <Text>To get more details, send this claim ID to one of those people and ask them to search for more information:</Text>
                 <Text style={{ padding: 10 }} selectable={true}>{ endorserId }</Text>
               </View>
             : <View />
           }
+
+
+          {/* Now show number hidden. */}
+          <View style={{ padding: 5 }}>
+            <Text>{ 'There are ' + (numHidden > 0 ? 'confirmations by ' + numHidden : 'no confirmations by anyone') + ' outside your network.' }</Text>
+          </View>
+
+
           <View style={{ padding: 5 }}>
             <Text>{ confirmError }</Text>
           </View>

@@ -85,7 +85,7 @@ export function ContactsScreen({ navigation, route }) {
       contact.name = conInfo.own.name
       contact.pubKeyBase64 = conInfo.own.publicEncKey
       await saveContact(contact)
-      setQuickMessage('Created')
+      setQuickMessage('Added ' + conInfo.own.name)
       setTimeout(() => { setQuickMessage(null) }, 1000)
       return utility.loadContacts(appSlice, appStore, dbConnection)
     } else if (contactDid != null && contactDid != '') {
@@ -94,7 +94,7 @@ export function ContactsScreen({ navigation, route }) {
       contact.name = contactName
       contact.pubKeyBase64 = contactPubKeyBase64
       await saveContact(contact)
-      setQuickMessage('Created')
+      setQuickMessage('Added ' + contactName)
       setTimeout(() => { setQuickMessage(null) }, 1000)
       return utility.loadContacts(appSlice, appStore, dbConnection)
     } else {

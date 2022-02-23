@@ -384,7 +384,7 @@ export function SettingsScreen({navigation}) {
         // now going into real mode, but if the servers were switched then warn
         if (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
             || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER) {
-          Alert.alert('Beware! Your servers are not set to the default production servers.')
+          //Alert.alert('Beware! Your servers are not set to the default production servers.')
         }
       }
     }
@@ -442,7 +442,7 @@ export function SettingsScreen({navigation}) {
                 :
                   <View><Text>Checking for identifiers...</Text></View>
               :
-                <View style={{ marginBottom: 60 }}>
+                <View>
 
                   {
                   !hasMnemonic ? (

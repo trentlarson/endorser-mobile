@@ -83,16 +83,35 @@ Manually
   - Create contacts.
 - With an Endorser.ch server
   - On a public test server
-    - Run in Test Mode (under Settings) and click the button to choose the test server.
+    - Run in Test Mode (under Settings & Advanced Mode) and click the button to choose the test server.
   - On your machine
     - Run endorser-ch test/test.sh, then copy the endorser-ch-test-local.sqlite3 to endorser-ch-dev.sqlite3, then run the server.
-  - Import via the mnemonic, eg. #3 from endorser-ch test/util.js
-  - Submit claims & confirmations.
-  - Run report searches for the individual, eg. for 'carp'
+
+  - Create an identifier & add name.
+  - As a second user, import via the mnemonic, eg. #3 from endorser-ch test/util.js
+
+  - Submit a claim. Run search for this individual's claims, and then for all claims.
+  - As a second user, check that they cannot see the claim details.
+  - As a third user, check that they cannot see the claim details.
+  - As a fourth user, check that they cannot see the claim details.
+
+  - As the second and third user, share contact info.
+  - As the initial user, allow the second and third user to see them.
+  - As the second user, check that they can see the claim details.
+  - As the fourth user, check that they can access people in their network who can get to the claim.
+
+  - As the third user, check that they can confirm the first claim.
+  - As the fourth user, check that they can see people in their network who can get to the confirmation info.
+
+  - As the third user, check that they cannot see the claim details but can see a link.
+  - As the second user, submit confirmation.
+
 - On an actual device (remember the table-name fiasco!)
   - Android - must use Play Store to release to internal testing (because fiasco wasn't caught when connected)
     - To work with different versions, increment versionCode in different clones of the repo (built from scratch), and test in Internal Testing with alternating builds & uploads.
   - iOS - TestFlight is recommended (though potentially OK to use Xcode, since it would have caught the fiasco)
+
+
 
 
 
