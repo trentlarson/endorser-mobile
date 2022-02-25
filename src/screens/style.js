@@ -52,6 +52,9 @@ export const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: "center"
   },
+  itemSelected: {
+    backgroundColor: "#88FFFF",
+  },
   line: {
     height: 0.8,
     width: "100%",

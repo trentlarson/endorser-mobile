@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Button, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
 
+import { styles } from './style'
 import * as utility from '../utility/utility'
 import { YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
@@ -144,7 +145,7 @@ export function ConfirmOthersScreen({ navigation }) {
               {/* Why does any CheckBox in here show the startup errors in the UI when you start the app, eg "Please provide SecretBox to the KeyStore"? Those errors are in the console on every run, but they only show in the UI when I put a CheckBox in this screen.
               <Text>{ utility.claimSummary(data.item) }</Text>
               <CheckBox
-                title={ <YamlFormat source={ data.item } navigation={ navigation } /> }
+                title={ <YamlFormat source={ data.item.claim || data.item } navigation={ navigation } /> }
                 checked={!!selectedClaimsToConfirm[data.item.id.toString()]}
                 onPress={() => { toggleSelectedClaim(data.item) }}
               />
@@ -153,7 +154,7 @@ export function ConfirmOthersScreen({ navigation }) {
                 <Text>{ utility.claimSummary(data.item) + "\n" }</Text>
                 <Text>{
                   utility.claimSpecialDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || [])
-                  || <YamlFormat source={ data.item } navigation={ navigation } />
+                  || <YamlFormat source={ data.item.claim || data.item } navigation={ navigation } />
                   }
                 </Text>
                 { "\n" }
@@ -187,14 +188,3 @@ export function ConfirmOthersScreen({ navigation }) {
     </SafeAreaView>
   )
 }
-
-const styles = StyleSheet.create({
-  itemSelected: {
-    backgroundColor: "#88FFFF",
-  },
-  line: {
-    height: 0.8,
-    width: "100%",
-    backgroundColor: "rgba(0,0,0,0.9)",
-  },
-})
