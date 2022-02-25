@@ -5,6 +5,7 @@ import { ActivityIndicator, Alert, Button, FlatList, StyleSheet, Text, TextInput
 import { CheckBox } from "react-native-elements"
 
 import * as utility from '../utility/utility'
+import { YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
 import { agent, dbConnection } from '../veramo/setup'
 
@@ -140,7 +141,7 @@ export function ConfirmOthersScreen({ navigation }) {
                   utility.claimSummary(data.item)
                   + "\n"
                   + (utility.claimSpecialDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || [])
-                    || JSON.stringify(data.item))
+                    || <YamlFormat source={ data.item } navigation={ navigation } />
                 }
                 checked={!!selectedClaimsToConfirm[data.item.id.toString()]}
                 onPress={() => { toggleSelectedClaim(data.item) }}
@@ -150,7 +151,7 @@ export function ConfirmOthersScreen({ navigation }) {
                 <Text>{ utility.claimSummary(data.item) + "\n" }</Text>
                 <Text>{
                   utility.claimSpecialDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || [])
-                  || JSON.stringify(data.item)
+                  || <YamlFormat source={ data.item } navigation={ navigation } />
                   }
                 </Text>
                 { "\n" }
