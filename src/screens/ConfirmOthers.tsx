@@ -123,6 +123,11 @@ export function ConfirmOthersScreen({ navigation }) {
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Confirm</Text>
               <Text style={{ color: 'red' }}>{loadError}</Text>
+              <Button
+                title="Finish..."
+                onPress={ setConfirmations }
+              />
+              <View style={styles.line}/>
             </View>
           }
           ListEmptyComponent={
@@ -155,7 +160,7 @@ export function ConfirmOthersScreen({ navigation }) {
                   }
                 </Text>
                 { "\n" }
-                <Text style={{ color: "blue" }}>{ selectedClaimsToConfirm[data.item.id.toString()] ? "(on)" : "(off)" }</Text>
+                <Text style={{ color: "blue" }}>{ selectedClaimsToConfirm[data.item.id.toString()] ? "(disable)" : "(enable)" }</Text>
               </Text>
             </TouchableOpacity>
           }
