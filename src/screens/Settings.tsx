@@ -3,7 +3,7 @@ import * as crypto from 'crypto'
 import { HDNode } from '@ethersproject/hdnode'
 import * as R from 'ramda'
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Alert, Button, Linking, Modal, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native"
+import { ActivityIndicator, Alert, Button, Linking, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, View } from "react-native"
 import { CheckBox } from "react-native-elements"
 import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
@@ -212,6 +212,7 @@ const logDatabaseTable = (tableName) => async () => {
 
 export function SettingsScreen({navigation}) {
 
+  const [confirmDeleteLastIdentifier, setConfirmDeleteLastIdentifier] = useState<boolean>(false)
   const [createStatus, setCreateStatus] = useState<string>('')
   const [creatingId, setCreatingId] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
@@ -545,11 +546,51 @@ export function SettingsScreen({navigation}) {
                   <View style={{ padding: 5 }} />
                   <Button title="Import ID" onPress={()=>navigation.navigate('Import Seed Phrase')} />
                   <View style={{ padding: 5 }} />
-                  <Button title="Delete Last ID" onPress={deleteLastIdentifier} />
+                  <Button title="Delete Last ID" onPress={() => setConfirmDeleteLastIdentifier(true)} />
                 </View>
               : <View/>
             }
           </View>
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!confirmDeleteLastIdentifier}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+
+                <Text>
+                  Are you sure you want to delete the last identifier? This cannot be undone.
+                </Text>
+
+                <View style={{ padding: 5 }}/>
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    deleteLastIdentifier()
+                    setConfirmDeleteLastIdentifier(false)
+
+                    setQuickMessage('Deleted')
+                    setTimeout(() => { setQuickMessage(null) }, 2000)
+                  }}
+                >
+                  <Text>Yes</Text>
+                </TouchableHighlight>
+
+                <View style={{ padding: 5 }}/>
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => {
+                    setConfirmDeleteLastIdentifier(false)
+                  }}
+                >
+                  <Text>No</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </Modal>
+
           <View>
             <Text style={{ fontSize: 30, fontWeight: 'bold', marginTop: 20 }}>Other</Text>
 
