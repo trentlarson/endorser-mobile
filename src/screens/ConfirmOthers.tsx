@@ -1,7 +1,7 @@
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, Button, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Button, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
 
 import * as utility from '../utility/utility'
@@ -116,6 +116,7 @@ export function ConfirmOthersScreen({ navigation }) {
   }, [])
 
   return (
+    <SafeAreaView>
     <View style={{ padding: 20 }}>
       <View syle={{ textAlign: 'left' }}>
         <FlatList
@@ -140,14 +141,10 @@ export function ConfirmOthersScreen({ navigation }) {
             <TouchableOpacity
               style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
             >
-              {/* Why does any CheckBox in here give this error when you start the app: "Please provide SecretBox to the KeyStore"?
+              {/* Why does any CheckBox in here show the startup errors in the UI when you start the app, eg "Please provide SecretBox to the KeyStore"? Those errors are in the console on every run, but they only show in the UI when I put a CheckBox in this screen.
+              <Text>{ utility.claimSummary(data.item) }</Text>
               <CheckBox
-                title={
-                  utility.claimSummary(data.item)
-                  + "\n"
-                  + (utility.claimSpecialDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || [])
-                    || <YamlFormat source={ data.item } navigation={ navigation } />
-                }
+                title={ <YamlFormat source={ data.item } navigation={ navigation } /> }
                 checked={!!selectedClaimsToConfirm[data.item.id.toString()]}
                 onPress={() => { toggleSelectedClaim(data.item) }}
               />
@@ -187,6 +184,7 @@ export function ConfirmOthersScreen({ navigation }) {
         />
       </View>
     </View>
+    </SafeAreaView>
   )
 }
 
