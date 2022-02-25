@@ -548,10 +548,7 @@ export function ContactsScreen({ navigation, route }) {
                           </View>
                     }
                     <View style={{ marginTop: 5 }}/>
-                    { appStore.getState().testMode
-                      ? <View><Button title={'Delete'} onPress={() => setConfirmDeleteContact(contact.did)}/></View>
-                      : <View/>
-                    }
+                    <View><Button title={'Delete'} onPress={() => setConfirmDeleteContact(contact.did)}/></View>
                   </View>
                 }
               </View>
