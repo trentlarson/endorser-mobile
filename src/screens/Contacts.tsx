@@ -16,6 +16,7 @@ import { agent, dbConnection } from '../veramo/setup'
 
 export function ContactsScreen({ navigation, route }) {
 
+  const [confirmDeleteContact, setConfirmDeleteContact] = useState<string>(null)
   const [contactDid, setContactDid] = useState<string>()
   const [contactName, setContactName] = useState<string>()
   const [contactPubKeyBase64, setContactPubKeyBase64] = useState<string>()
@@ -37,6 +38,7 @@ export function ContactsScreen({ navigation, route }) {
   const [storingVisibility, setStoringVisibility] = useState<boolean>(false)
   const [visibilityError, setVisibilityError] = useState<boolean>(false)
 
+  const allIdentifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
 
   let contactFields = [];
@@ -86,7 +88,7 @@ export function ContactsScreen({ navigation, route }) {
       contact.pubKeyBase64 = conInfo.own.publicEncKey
       await saveContact(contact)
       setQuickMessage('Added ' + conInfo.own.name)
-      setTimeout(() => { setQuickMessage(null) }, 1000)
+      setTimeout(() => { setQuickMessage(null) }, 2000)
       return utility.loadContacts(appSlice, appStore, dbConnection)
     } else if (contactDid != null && contactDid != '') {
       const contact = new Contact()
@@ -95,7 +97,7 @@ export function ContactsScreen({ navigation, route }) {
       contact.pubKeyBase64 = contactPubKeyBase64
       await saveContact(contact)
       setQuickMessage('Added ' + contactName)
-      setTimeout(() => { setQuickMessage(null) }, 1000)
+      setTimeout(() => { setQuickMessage(null) }, 2000)
       return utility.loadContacts(appSlice, appStore, dbConnection)
     } else {
       Alert.alert("There must be a URL or a DID to create a contact.");
@@ -262,7 +264,7 @@ export function ContactsScreen({ navigation, route }) {
   useFocusEffect(
     React.useCallback(() => {
 
-      setId0(appStore.getState().identifiers && appStore.getState().identifiers[0])
+      setId0(allIdentifiers[0])
 
       utility.loadContacts(appSlice, appStore, dbConnection)
 
@@ -443,6 +445,7 @@ export function ContactsScreen({ navigation, route }) {
               editable
               style={{ borderWidth: 1 }}
               autoCapitalize={'words'}
+              autoCorrect={false}
             />
             <Text>DID</Text>
             <TextInput
@@ -451,6 +454,7 @@ export function ContactsScreen({ navigation, route }) {
               editable
               style={{ borderWidth: 1 }}
               autoCapitalize={'none'}
+              autoCorrect={false}
             />
             <Text>Public Key (base64-encoded, optional)</Text>
             <TextInput
@@ -459,6 +463,7 @@ export function ContactsScreen({ navigation, route }) {
               editable
               style={{ borderWidth: 1 }}
               autoCapitalize={'none'}
+              autoCorrect={false}
             />
           </View>
           <View style={{ alignItems: "center" }}>
@@ -544,7 +549,7 @@ export function ContactsScreen({ navigation, route }) {
                     }
                     <View style={{ marginTop: 5 }}/>
                     { appStore.getState().testMode
-                      ? <View><Button title={'Delete'} onPress={() => deleteContact(contact.did)}/></View>
+                      ? <View><Button title={'Delete'} onPress={() => setConfirmDeleteContact(contact.did)}/></View>
                       : <View/>
                     }
                   </View>
@@ -552,6 +557,46 @@ export function ContactsScreen({ navigation, route }) {
               </View>
             </View>
           ))}
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!confirmDeleteContact}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+
+                <Text>
+                  Are you sure you want to delete this contact? This cannot be undone.
+                  { "\n\n" + utility.didInContext(confirmDeleteContact, allIdentifiers, allContacts) }
+                </Text>
+
+                <View style={{ padding: 5 }}/>
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    deleteContact(confirmDeleteContact)
+                    setConfirmDeleteContact(null)
+                    setQuickMessage('Deleted')
+                    setTimeout(() => { setQuickMessage(null) }, 2000)
+                  }}
+                >
+                  <Text>Yes</Text>
+                </TouchableHighlight>
+
+                <View style={{ padding: 5 }}/>
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => {
+                    setConfirmDeleteContact(null)
+                  }}
+                >
+                  <Text>No</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </Modal>
+
         </View>
       </ScrollView>
     </SafeAreaView>

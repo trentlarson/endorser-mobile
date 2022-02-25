@@ -36,7 +36,7 @@ export const BVCButton = ({ identifier, navigation, description }) => {
 
 export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
 
- const allidentifiers = useSelector((state) => state.identifiers || [])
+ const allIdentifiers = useSelector((state) => state.identifiers || [])
  const allContacts = useSelector((state) => state.contacts || [])
 
  return (
@@ -48,7 +48,7 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text>
-            { utility.didInContext(didForVisibility, allidentifiers, allContacts) }
+            { utility.didInContext(didForVisibility, allIdentifiers, allContacts) }
           </Text>
           <TouchableHighlight
             style={styles.cancelButton}
