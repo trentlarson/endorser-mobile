@@ -147,7 +147,7 @@ export const claimSpecialDescription = (claim, identifiers, contacts) => {
   if (type === "JoinAction") {
     const contactInfo = didInContext(claim.agent.did, identifiers, contacts)
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
-    eventOrganizer = eventOrganizer ? eventOrganizer : "";
+    eventOrganizer = eventOrganizer || "";
     let eventName = claim.event && claim.event.name;
     eventName = eventName ? " " + eventName : "";
     let fullEvent = eventOrganizer + eventName;

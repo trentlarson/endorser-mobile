@@ -7,6 +7,7 @@ import QRCodeScanner from 'react-native-qrcode-scanner'
 import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
+import { styles } from './style'
 import * as utility from '../utility/utility'
 import { VisibleDidModal, YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
@@ -215,6 +216,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           }
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Claim</Text>
           <YamlFormat source={credentialSubject} navigation={navigation} />
+          <View style={styles.line} />
 
 
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>

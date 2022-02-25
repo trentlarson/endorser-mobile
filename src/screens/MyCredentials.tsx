@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux'
 
 import { styles } from './style'
 import * as utility from '../utility/utility'
+import { YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
 
@@ -294,6 +295,9 @@ export function MyCredentialsScreen({ navigation }) {
                     <View style={styles.line} />
                   </View>
                 }
+
+                ListFooterComponent={<View style={{ marginBottom: 50}} />}
+
                 renderItem={data =>
                   <View>
 
@@ -303,14 +307,8 @@ export function MyCredentialsScreen({ navigation }) {
                         isUser(data.item.issuer) ? '' : ' (issued by someone else)'
                       )
                     }</Text>
-                    <Text selectable={true}>{
-                      utility.claimSpecialDescription(
-                        data.item,
-                        identifiers,
-                        appStore.getState().contacts || []
-                      )
-                      || JSON.stringify(data.item)
-                    }</Text>
+
+                    <YamlFormat source={ data.item.claim || data.item } navigation={navigation} />
 
                     <View style={{ flexDirection: 'row' }}>
                       {

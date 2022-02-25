@@ -24,7 +24,7 @@ export function ReportScreen({ navigation }) {
       showClaimsWithoutDids
       ? results
       : R.filter(utility.containsNonHiddenDid, results)
-    return <YamlFormat source={ filteredResults } navigation={ navigation } />
+    return <YamlFormat source={ filteredResults } navigation={navigation} afterItemCss={styles.line} />
   }
 
   const searchEndorser = async (param) => {

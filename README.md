@@ -106,6 +106,8 @@ Manually
   - As the third user, check that they cannot see the claim details but can see a link.
   - As the second user, submit confirmation.
 
+  - Create an Offer, show total outstanding, mark as given, see adjustment of totals.
+
 - On an actual device (remember the table-name fiasco!)
   - Android - must use Play Store to release to internal testing (because fiasco wasn't caught when connected)
     - To work with different versions, increment versionCode in different clones of the repo (built from scratch), and test in Internal Testing with alternating builds & uploads.

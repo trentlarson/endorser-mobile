@@ -69,10 +69,10 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
 /**
  * Render each claim with links to take actions.
  *
- * obj is any object or array
+ * source is any object or array
  * claimId (optional) is the ID for server lookup
  */
-export const YamlFormat = ({ source, navigation }) => {
+export const YamlFormat = ({ source, navigation, afterItemCss }) => {
 
   const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [didsForLinkedModal, setDidsForLinkedModal] = useState<Array<string>>(null)
@@ -226,7 +226,7 @@ export const YamlFormat = ({ source, navigation }) => {
 
             <Text>- </Text>{ objectToYamlReactRecur(item, item.id) }
 
-            <View style={styles.line} />
+            <View style={ afterItemCss || {} } />
           </View>
         )
       }
