@@ -555,6 +555,7 @@ export function ContactsScreen({ navigation, route }) {
             </View>
           ))}
 
+          {/* Note that something similar is in Settings.tsx... almost time to abstract it. */}
           <Modal
             animationType="slide"
             transparent={true}
