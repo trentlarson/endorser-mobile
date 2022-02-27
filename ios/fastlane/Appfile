@@ -1,7 +1,7 @@
 app_identifier("ch.endorser.EndorserMobile") # The bundle identifier of your app
 apple_id("CommunityEndorser@gmail.com") # Your Apple email address
 
-itc_team_id("122655138") # App Store Connect Team ID
+itc_team_id("1556368693") # App Store Connect Team ID
 team_id("GM3FS5JQPH") # Developer Portal Team ID
 
 # For more information about the Appfile, see:

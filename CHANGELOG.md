@@ -12,7 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.0.17]
+## [6.1.79] - 2022-02-27
+
+### Added
+- Add totals for transactional claims of Offer & GiveAction.
+- Allow 'Check' on search results, and show claim ID on Verify screen.
+- Confirm before deleting identifiers and contacts.
+
+### Changed
+- Format more results in YAML.
+
+
+
+
+## [6.0.17] - 2022-01-17 - 52bc890dc8d8c54575908a0fb66c67a4aa8e8952
 
 ### Added
 - Encrypt mnemonic seed phrase
