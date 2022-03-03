@@ -965,6 +965,11 @@ export function ConstructCredentialScreen({ navigation }) {
                     autoCorrect={false}
                   />
                   {
+                    agentId != props.userId
+                    ? <Text style={{ color: 'red' }}>It is very strange to put someone else as the Agent making this offer.</Text>
+                    : <View />
+                  }
+                  {
                     allContacts.length > 0
                     ? <TouchableHighlight
                         style={styles.moreButton}
