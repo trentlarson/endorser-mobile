@@ -100,7 +100,8 @@ export function MyCredentialsScreen({ navigation }) {
     } while (maybeMoreAfter)
 
     setLoading(false)
-    setSearchResults(allResults)
+    const displayResults = R.reverse(allResults) // we will keep the convention of reverse chronological order
+    setSearchResults(displayResults)
 
     const accounting = utility.countTransactions(allResults, identifiers[0].did)
     setNumStranges(accounting.numStranges)
