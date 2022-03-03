@@ -158,7 +158,7 @@ export function ConfirmOthersScreen({ navigation }) {
                   }
                 </Text>
                 { "\n" }
-                <Text style={{ color: "blue" }}>{ selectedClaimsToConfirm[data.item.id.toString()] ? "(disable)" : "(enable)" }</Text>
+                <Text style={{ color: "blue" }}>{ selectedClaimsToConfirm[data.item.id.toString()] ? "(unselect)" : "(select)" }</Text>
               </Text>
             </TouchableOpacity>
           }
