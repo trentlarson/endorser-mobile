@@ -15,7 +15,7 @@ import { IIdentifier } from "@veramo/core"
 import * as pkg from '../../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
-import { DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER, appSlice, appStore } from "../veramo/appSlice"
+import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER, LOCAL_ENDORSER_API_SERVER, LOCAL_ENDORSER_VIEW_SERVER, TEST_ENDORSER_API_SERVER, TEST_ENDORSER_VIEW_SERVER } from "../veramo/appSlice"
 import { agent, dbConnection, DEFAULT_DID_PROVIDER_NAME } from "../veramo/setup"
 import { styles } from './style'
 
@@ -251,16 +251,16 @@ export function SettingsScreen({navigation}) {
   const inputApiRef = useRef()
   const inputViewRef = useRef()
   const setToLocalServers = useCallback(() => {
-    inputApiRef.current.setNativeProps({ text: 'http://127.0.0.1:3000' })
-    inputViewRef.current.setNativeProps({ text: 'http://127.0.0.1:3001' })
-    appStore.dispatch(appSlice.actions.setApiServer('http://127.0.0.1:3000'))
-    appStore.dispatch(appSlice.actions.setViewServer('http://127.0.0.1:3001'))
+    inputApiRef.current.setNativeProps({ text: LOCAL_ENDORSER_API_SERVER })
+    inputViewRef.current.setNativeProps({ text: LOCAL_ENDORSER_VIEW_SERVER })
+    appStore.dispatch(appSlice.actions.setApiServer(LOCAL_ENDORSER_API_SERVER))
+    appStore.dispatch(appSlice.actions.setViewServer(LOCAL_ENDORSER_VIEW_SERVER))
   })
   const setToTestServers = useCallback(() => {
-    inputApiRef.current.setNativeProps({ text: TEST_API_URL })
-    inputViewRef.current.setNativeProps({ text: TEST_VIEW_URL })
-    appStore.dispatch(appSlice.actions.setApiServer(TEST_API_URL))
-    appStore.dispatch(appSlice.actions.setViewServer(TEST_VIEW_URL))
+    inputApiRef.current.setNativeProps({ text: TEST_ENDORSER_API_SERVER })
+    inputViewRef.current.setNativeProps({ text: TEST_ENDORSER_VIEW_SERVER })
+    appStore.dispatch(appSlice.actions.setApiServer(TEST_ENDORSER_API_SERVER))
+    appStore.dispatch(appSlice.actions.setViewServer(TEST_ENDORSER_VIEW_SERVER))
   })
   const setToProdServers = useCallback(() => {
     inputApiRef.current.setNativeProps({ text: DEFAULT_ENDORSER_API_SERVER })

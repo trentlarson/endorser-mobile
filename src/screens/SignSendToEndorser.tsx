@@ -225,17 +225,21 @@ export function SignCredentialScreen({ navigation, route }) {
                     ?
                       <Text style={{ textAlign: 'center' }}>Sign{'\n'}(... after fixing the formatting error.)</Text>
                     :
-                      <View>
-                        <Button
-                          title={'Sign'}
-                          onPress={signAndSend}
-                        />
-                        <CheckBox
-                          title='Store on Server for Selective Disclosure'
-                          checked={sendToEndorser}
-                          onPress={() => setSendToEndorser(!sendToEndorser)}
-                        />
-                      </View>
+                      endorserId || fetching
+                      ?
+                        <View />
+                      :
+                        <View>
+                          <Button
+                            title={'Sign'}
+                            onPress={signAndSend}
+                          />
+                          <CheckBox
+                            title='Store on Server for Selective Disclosure'
+                            checked={sendToEndorser}
+                            onPress={() => setSendToEndorser(!sendToEndorser)}
+                          />
+                        </View>
                   }
 
                   {

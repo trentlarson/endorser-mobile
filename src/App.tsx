@@ -176,12 +176,12 @@ function HomeScreen({ navigation }) {
               />
               <View style={{ marginTop: 50 }}/>
               <Button
-                title="Manage Contacts"
+                title="See Contacts"
                 onPress={() => navigation.navigate('Contacts')}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Manage Profile & Settings"
+                title="See Profile & Settings"
                 onPress={() => navigation.navigate('Settings')}
               />
               {oldMnemonic ? (

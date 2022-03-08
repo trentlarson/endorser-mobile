@@ -216,7 +216,7 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                           }
                         )}
                       >
-                        Agree
+                        Agree / Confirm
                       </Text>
                     :
                       <View />
