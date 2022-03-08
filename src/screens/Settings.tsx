@@ -511,18 +511,6 @@ export function SettingsScreen({navigation}) {
                   )
                   }
 
-                  <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={!!quickMessage}
-                  >
-                    <View style={styles.centeredView}>
-                      <View style={styles.modalView}>
-                        <Text>{ quickMessage }</Text>
-                      </View>
-                    </View>
-                  </Modal>
-
                   <View style={{ marginTop: 20, marginBottom: 20 }}>
                     <Button
                     title="Export Seed Phrase"
@@ -551,6 +539,18 @@ export function SettingsScreen({navigation}) {
               : <View/>
             }
           </View>
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!quickMessage}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text>{ quickMessage }</Text>
+              </View>
+            </View>
+          </Modal>
 
           {/* Note that something similar is in Contacts.tsx... almost time to abstract it. */}
           <Modal
