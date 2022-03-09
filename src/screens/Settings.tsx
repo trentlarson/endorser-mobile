@@ -592,7 +592,7 @@ export function SettingsScreen({navigation}) {
             </View>
           </Modal>
 
-          <View>
+          <View style={{ marginBottom: 50 }}>
             <Text style={{ fontSize: 30, fontWeight: 'bold', marginTop: 20 }}>Other</Text>
 
             <View>
