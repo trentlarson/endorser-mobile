@@ -43,6 +43,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
   const [askForGaveInfo, setAskForGaveInfo] = useState<boolean>(false)
   const [askForOfferInfo, setAskForOfferInfo] = useState<boolean>(false)
+  const [askForPlanInfo, setAskForPlanInfo] = useState<boolean>(false)
   const [askForPersonInfo, setAskForPersonInfo] = useState<boolean>(false)
   const [askForPledgeInfo, setAskForPledgeInfo] = useState<string>('')
   const [askForWitnessInfo, setAskForWitnessInfo] = useState<string>('')
@@ -95,6 +96,18 @@ export function ConstructCredentialScreen({ navigation }) {
                         navigation.navigate('Sign Credential', { credentialSubject: claim })
                       }}
                       userId={ identifiers[0].did }
+                    />
+                  : <View/>
+                }
+                {
+                  askForPlanInfo
+                  ? <PlanModal
+                      userId={ identifiers[0].did }
+                      cancel={ () => setAskForPlanInfo(false) }
+                      proceed={ claim => {
+                        setAskForPlanInfo(false)
+                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                      }}
                     />
                   : <View/>
                 }
@@ -156,6 +169,11 @@ export function ConstructCredentialScreen({ navigation }) {
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Transactions</Text>
+                  <Button
+                    title={'Plan'}
+                    onPress={() => setAskForPlanInfo(true)}
+                  />
+                  <View style={{ padding: 5 }} />
                   <Button
                     title={'Offer'}
                     onPress={() => setAskForOfferInfo(true)}
@@ -590,6 +608,178 @@ export function ConstructCredentialScreen({ navigation }) {
     )
   }
   **/
+
+  /**
+    props has:
+    - proceed function that takes the claim
+    - cancel function
+   **/
+  function PlanModal(props) {
+
+    const [agentId, setAgentId] = useState<string>(props.userId)
+    const [endTime, setEndTime] = useState<string>(null)
+    const [planDescription, setPlanDescription] = useState<string>(null)
+    const [planIdentifier, setPlanIdentifier] = useState<string>(null)
+    const [resultDescription, setResultDescription] = useState<string>(null)
+    const [resultIdentifier, setResultIdentifier] = useState<string>(null)
+    const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
+
+    const allContacts = useSelector((state) => state.contacts || [])
+
+    function possiblyFinish(proceedToFinish) {
+      // yes, this may throw an error
+      const isoEndTime = endTime && new Date(endTime).toISOString()
+
+      if (!planDescription && !resultDescription) {
+        Alert.alert('You must describe either the plan or the result.')
+      } else {
+        let result = {
+          "@context": "https://schema.org",
+          "@type": "PlanAction",
+        }
+
+        const planId = planIdentifier || crypto.randomBytes(16).toString('hex')
+
+        result.agent = agentId ? { identifier: agentId } : undefined
+        result.description = planDescription || undefined
+        result.endTime = isoEndTime || undefined
+        result.identifier = planId
+
+        const resultId = resultIdentifier || crypto.randomBytes(16).toString('hex')
+
+        result.result = {
+          "@type": "CreativeWork",
+          identifier: resultId,
+          description: resultDescription || undefined
+        }
+
+        proceedToFinish(result)
+      }
+    }
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={props.cancel}
+      >
+        <ScrollView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+
+              {
+                selectAgentFromContacts
+                ? <ContactSelectModal
+                    cancel={ () => { setSelectAgentFromContacts(false) } }
+                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                  />
+                : <View/>
+              }
+
+              <View>
+                <Text style={styles.modalText}>Plan</Text>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Planner</Text>
+                  <TextInput
+                    value={agentId}
+                    onChangeText={setAgentId}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
+                  />
+                  {
+                    allContacts.length > 0
+                    ? <TouchableHighlight
+                        style={styles.moreButton}
+                        onPress={() => setSelectAgentFromContacts(true)}
+                      >
+                        <Text>Pick</Text>
+                      </TouchableHighlight>
+                    : <View />
+                  }
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Description of Plan</Text>
+                  <TextInput
+                    value={planDescription}
+                    onChangeText={setPlanDescription}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Target Date</Text>
+                  <TextInput
+                    value={endTime}
+                    onChangeText={setEndTime}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>ID of Plan</Text>
+                  <TextInput
+                    value={planIdentifier}
+                    onChangeText={setPlanIdentifier}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <Text style={styles.modalText}>Result</Text>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Description of Result</Text>
+                  <TextInput
+                    value={resultDescription}
+                    onChangeText={setResultDescription}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>ID of Result</Text>
+                  <TextInput
+                    value={resultIdentifier}
+                    onChangeText={setResultIdentifier}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => possiblyFinish(props.proceed)}
+                >
+                  <Text>Finish...</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }} />
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={props.cancel}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </Modal>
+    )
+  }
 
   /**
     props has:
