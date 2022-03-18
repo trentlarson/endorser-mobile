@@ -20,7 +20,8 @@ export function ContactsScreen({ navigation, route }) {
   const [contactDid, setContactDid] = useState<string>()
   const [contactName, setContactName] = useState<string>()
   const [contactPubKeyBase64, setContactPubKeyBase64] = useState<string>()
-  const [contactsCsv, setContactsCsv] = useState<string>('')
+  const [contactsCsvText, setContactsCsvText] = useState<string>('')
+  const [contactsCsvUrl, setContactsCsvUrl] = useState<string>('')
   const [contactUrl, setContactUrl] = useState<string>('')
   const [editContactIndex, setEditContactIndex] = useState<number>(null)
   const [editContactName, setEditContactName] = useState<string>(null)
@@ -30,7 +31,8 @@ export function ContactsScreen({ navigation, route }) {
   const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
-  const [wantsCsv, setWantsCsv] = useState<boolean>(false)
+  const [wantsCsvText, setWantsCsvText] = useState<boolean>(false)
+  const [wantsCsvUrl, setWantsCsvUrl] = useState<boolean>(false)
 
   // these are tracking progress when saving data
   const [csvErrors, setCsvErrors] = useState<Array<string>>([])
@@ -49,10 +51,6 @@ export function ContactsScreen({ navigation, route }) {
     if (sampleContact.hasOwnProperty(field)) {
       contactFields = R.concat(contactFields, [field])
     }
-  }
-
-  const clearModalAndRedirect = () => {
-    setWantsCsv(false)
   }
 
   const copyToClipboard = () => {
@@ -106,13 +104,13 @@ export function ContactsScreen({ navigation, route }) {
     return utility.loadContacts(appSlice, appStore, dbConnection)
   }
 
-  const createContactsFromCsv = async () => {
+  const createContactsFromThisCsvText = async (csvText) => {
     setSaving(true)
 
     let contacts = []
     let messages = []
     let showingTrimmedMessage = false
-    const parsed = Papa.parse(contactsCsv, {dynamicTyping: true, skipEmptyLines: true})
+    const parsed = Papa.parse(csvText, {dynamicTyping: true, skipEmptyLines: true})
     for (let contactArray of parsed.data) {
       // each contactArray has the fields detected for one row of input
       if (contactArray.length === 0) {
@@ -156,7 +154,6 @@ export function ContactsScreen({ navigation, route }) {
       setSaving(false)
       setCsvErrors(messages)
       setCsvMessages(['Saved ' + savedContacts.length + ' contacts.'])
-      setWantsCsv(false)
     })
     .then(() => {
       if (wantsToBeVisible) {
@@ -167,7 +164,39 @@ export function ContactsScreen({ navigation, route }) {
     .then(() => {
       return utility.loadContacts(appSlice, appStore, dbConnection)
     })
+    .catch((err) => {
+      setCsvErrors(R.concat(messages, ['Got an error saving contacts: ' + err]))
+    })
+  }
 
+  const createContactsFromCsvTextInput = async () => {
+    await createContactsFromThisCsvText(contactsCsvText)
+    setContactsCsvText(null)
+    setWantsCsvText(null)
+  }
+
+  const createContactsFromThisCsvUrl = async (url) => {
+    setSaving(true)
+
+    return fetch(url)
+    .then(response => {
+      if (response.status !== 200) {
+        throw Error('There was an error from the server trying to retrieve contacts.')
+      }
+      return response.text()
+    }).then(result => {
+      return createContactsFromThisCsvText(result)
+    })
+    .catch((err) => {
+      setCsvErrors(['Got an error retrieving contacts: ' + err])
+    })
+
+  }
+
+  const createContactsFromCsvUrlInput = async () => {
+    await createContactsFromThisCsvUrl(contactsCsvUrl)
+    setContactsCsvUrl(null)
+    setWantsCsvUrl(null)
   }
 
   /**
@@ -286,21 +315,11 @@ export function ContactsScreen({ navigation, route }) {
                : ""
             }
           </Text>
-          <Button
-            title="Scan to Import"
-            onPress={() => navigation.navigate('Contact Import')}
-          />
-          <View style={{ marginTop: 5 }}/>
-          <Text>... or:</Text>
-          <Button
-            title="Import Bulk (CSV)"
-            onPress={setWantsCsv}
-          />
 
           <Modal
             animationType="slide"
             transparent={true}
-            visible={!!wantsCsv}
+            visible={!!wantsCsvText}
           >
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
@@ -311,6 +330,7 @@ export function ContactsScreen({ navigation, route }) {
 
                     <Text
                       style={styles.modalText}>Enter in CSV format (columns in order)
+                      &nbsp;
                       <Text
                         style={{ color: 'blue' }}
                         onPress={() => Alert.alert("Columns are:\n " + contactFields.join(', ') + "\n\nPaste content (because manual newlines don't work as expected).")}>
@@ -321,11 +341,11 @@ export function ContactsScreen({ navigation, route }) {
                     <TextInput
                       multiline={true}
                       style={{ borderWidth: 1, height: 100 }}
-                      onChangeText={setContactsCsv}
+                      onChangeText={setContactsCsvText}
                       autoCapitalize={'none'}
                       autoCorrect={false}
                     >
-                      { contactsCsv }
+                      { contactsCsvText }
                     </TextInput>
 
                     <CheckBox
@@ -336,7 +356,7 @@ export function ContactsScreen({ navigation, route }) {
 
                     <TouchableHighlight
                       style={styles.saveButton}
-                      onPress={createContactsFromCsv}
+                      onPress={() => createContactsFromCsvTextInput()}
                     >
                       <Text>Save</Text>
                     </TouchableHighlight>
@@ -344,7 +364,65 @@ export function ContactsScreen({ navigation, route }) {
                     <TouchableHighlight
                       style={styles.cancelButton}
                       onPress={() => {
-                        setWantsCsv(false)
+                        setWantsCsvText(false)
+                      }}
+                    >
+                      <Text>Cancel</Text>
+                    </TouchableHighlight>
+                  </View>
+                )}
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!wantsCsvUrl}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                { saving ? (
+                  <ActivityIndicator color="#00ff00" />
+                ) : (
+                  <View>
+
+                    <Text
+                      style={styles.modalText}>Enter URL containing a CSV format
+                      &nbsp;
+                      <Text
+                        style={{ color: 'blue' }}
+                        onPress={() => Alert.alert("Columns are:\n " + contactFields.join(', ') + "\n\nPaste content (because manual newlines don't work as expected).")}>
+                        (?)
+                      </Text>
+                    </Text>
+
+                    <TextInput
+                      style={{ borderWidth: 1, width: 300 }}
+                      onChangeText={setContactsCsvUrl}
+                      autoCapitalize={'none'}
+                      autoCorrect={false}
+                    >
+                      { contactsCsvUrl }
+                    </TextInput>
+
+                    <CheckBox
+                      title={ 'After saving, make my claims visible to all.' }
+                      checked={wantsToBeVisible}
+                      onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
+                    />
+
+                    <TouchableHighlight
+                      style={styles.saveButton}
+                      onPress={() => createContactsFromCsvUrlInput()}
+                    >
+                      <Text>Save</Text>
+                    </TouchableHighlight>
+                    <View style={{ padding: 5 }}/>
+                    <TouchableHighlight
+                      style={styles.cancelButton}
+                      onPress={() => {
+                        setWantsCsvUrl(false)
                       }}
                     >
                       <Text>Cancel</Text>
@@ -371,6 +449,8 @@ export function ContactsScreen({ navigation, route }) {
                   autoCapitalize={'words'}
                   autoCorrect={false}
                 />
+
+                <View style={{ padding: 5 }}/>
                 <Text>DID</Text>
                 <TextInput
                   value={contactDid}
@@ -380,6 +460,8 @@ export function ContactsScreen({ navigation, route }) {
                   autoCapitalize={'none'}
                   autoCorrect={false}
                 />
+
+                <View style={{ padding: 5 }}/>
                 <Text>Public Key (base64-encoded, optional)</Text>
                 <TextInput
                   value={contactPubKeyBase64}
@@ -475,6 +557,43 @@ export function ContactsScreen({ navigation, route }) {
             </View>
           </Modal>
 
+          <Button
+            title="Scan QR Code"
+            onPress={() => navigation.navigate('Contact Import')}
+          />
+
+          <Text>... or:</Text>
+          <View style={{ alignItems: "center" }}>
+            <Button
+              style={{ alignItems: "center" }}
+              title='Enter Endorser.ch URL'
+              onPress={() => setInputContactUrl(true)}
+            />
+          </View>
+
+          <Text>... or:</Text>
+          <View style={{ alignItems: "center" }}>
+            <Button
+              style={{ alignItems: "center" }}
+              title='Enter Name & ID'
+              onPress={() => setInputContactData(true)}
+            />
+          </View>
+
+          <View style={{ marginTop: 5 }}/>
+          <Text>... or:</Text>
+          <Button
+            title="Import Bulk - Paste CSV"
+            onPress={setWantsCsvText}
+          />
+
+          <View style={{ marginTop: 5 }}/>
+          <Text>... or:</Text>
+          <Button
+            title="Import Bulk - URL"
+            onPress={setWantsCsvUrl}
+          />
+
           {csvMessages.length > 0 ? (
             <View style={{ marginBottom: 20 }}>
               <Text>{ csvMessages.join("\n") }</Text>
@@ -491,15 +610,6 @@ export function ContactsScreen({ navigation, route }) {
             <View />
           )}
 
-          <Text>... or:</Text>
-          <View style={{ alignItems: "center" }}>
-            <Button
-              style={{ alignItems: "center" }}
-              title='Create from Endorser.ch URL'
-              onPress={() => setInputContactUrl(true)}
-            />
-          </View>
-
           <Modal
             animationType="slide"
             transparent={true}
@@ -512,14 +622,6 @@ export function ContactsScreen({ navigation, route }) {
             </View>
           </Modal>
 
-          <Text>... or:</Text>
-          <View style={{ alignItems: "center" }}>
-            <Button
-              style={{ alignItems: "center" }}
-              title='Enter Name & ID'
-              onPress={() => setInputContactData(true)}
-            />
-          </View>
         </View>
         <View style={{ padding: 10 }}>
           { allContacts && allContacts.length > 0
