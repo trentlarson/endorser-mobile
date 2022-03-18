@@ -26,6 +26,7 @@ export function ContactsScreen({ navigation, route }) {
   const [editContactName, setEditContactName] = useState<string>(null)
   const [id0, setId0] = useState<Identifier>()
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
+  const [inputContactData, setInputContactData] = useState<boolean>(false)
   const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
@@ -93,12 +94,14 @@ export function ContactsScreen({ navigation, route }) {
       contact.name = contactName
       contact.pubKeyBase64 = contactPubKeyBase64
       setContactDid(null)
+      setContactName(null)
+      setContactPubKeyBase64(null)
     } else {
       Alert.alert("There must be a URL or a DID to create a contact.");
       return
     }
     await saveContact(contact)
-    setQuickMessage('Added ' + contact.name)
+    setQuickMessage('Added ' + (contact.name ? contact.name : '(but without a name)'))
     setTimeout(() => { setQuickMessage(null) }, 2000)
     return utility.loadContacts(appSlice, appStore, dbConnection)
   }
@@ -355,6 +358,58 @@ export function ContactsScreen({ navigation, route }) {
           <Modal
             animationType="slide"
             transparent={true}
+            visible={inputContactData}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text>Name (optional)</Text>
+                <TextInput
+                  value={contactName}
+                  onChangeText={setContactName}
+                  editable
+                  style={{ borderWidth: 1, width: 100 }}
+                  autoCapitalize={'words'}
+                  autoCorrect={false}
+                />
+                <Text>DID</Text>
+                <TextInput
+                  value={contactDid}
+                  onChangeText={setContactDid}
+                  editable
+                  style={{ borderWidth: 1, width: 200 }}
+                  autoCapitalize={'none'}
+                  autoCorrect={false}
+                />
+                <Text>Public Key (base64-encoded, optional)</Text>
+                <TextInput
+                  value={contactPubKeyBase64}
+                  onChangeText={setContactPubKeyBase64}
+                  editable
+                  style={{ borderWidth: 1, width: 200 }}
+                  autoCapitalize={'none'}
+                  autoCorrect={false}
+                />
+
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => { createContact(); setInputContactData(false) } }
+                >
+                  <Text>Save</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }}/>
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={() => { setInputContactData(false) }}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            animationType="slide"
+            transparent={true}
             visible={inputContactUrl}
           >
             <View style={styles.centeredView}>
@@ -366,8 +421,7 @@ export function ContactsScreen({ navigation, route }) {
                   autoCapitalize={'none'}
                   autoCorrect={false}
                   editable
-                  placeholder={'URL'}
-                  style={{ borderWidth: 1 }}
+                  style={{ borderWidth: 1, width: 200 }}
                 />
 
                 <TouchableHighlight
@@ -458,42 +512,12 @@ export function ContactsScreen({ navigation, route }) {
             </View>
           </Modal>
 
-          <Text>... or enter details by hand:</Text>
-          <View style={{ padding: 5 }}></View>
-          <View>
-            <Text>Name (optional)</Text>
-            <TextInput
-              value={contactName}
-              onChangeText={setContactName}
-              editable
-              style={{ borderWidth: 1 }}
-              autoCapitalize={'words'}
-              autoCorrect={false}
-            />
-            <Text>DID</Text>
-            <TextInput
-              value={contactDid}
-              onChangeText={setContactDid}
-              editable
-              style={{ borderWidth: 1 }}
-              autoCapitalize={'none'}
-              autoCorrect={false}
-            />
-            <Text>Public Key (base64-encoded, optional)</Text>
-            <TextInput
-              value={contactPubKeyBase64}
-              onChangeText={setContactPubKeyBase64}
-              editable
-              style={{ borderWidth: 1 }}
-              autoCapitalize={'none'}
-              autoCorrect={false}
-            />
-          </View>
+          <Text>... or:</Text>
           <View style={{ alignItems: "center" }}>
             <Button
               style={{ alignItems: "center" }}
-              title='Create'
-              onPress={createContact}
+              title='Enter Name & ID'
+              onPress={() => setInputContactData(true)}
             />
           </View>
         </View>
