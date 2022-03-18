@@ -316,6 +316,52 @@ export function ContactsScreen({ navigation, route }) {
             }
           </Text>
 
+          <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
+          <Text>Import</Text>
+
+          <Button
+            title="Scan QR Code"
+            onPress={() => navigation.navigate('Contact Import')}
+          />
+
+          <Button
+            style={{ alignItems: "center" }}
+            title='Enter Endorser.ch URL'
+            onPress={() => setInputContactUrl(true)}
+          />
+
+          <Button
+            style={{ alignItems: "center" }}
+            title='Enter Name & ID'
+            onPress={() => setInputContactData(true)}
+          />
+
+          <Button
+            title="Import Bulk - Paste CSV"
+            onPress={setWantsCsvText}
+          />
+
+          <Button
+            title="Import Bulk - URL"
+            onPress={setWantsCsvUrl}
+          />
+
+          {csvMessages.length > 0 ? (
+            <View style={{ marginBottom: 20 }}>
+              <Text>{ csvMessages.join("\n") }</Text>
+            </View>
+          ) : (
+            <View />
+          )}
+          {csvErrors.length > 0 ? (
+            <View style={{ marginBottom: 20 }}>
+              <Text style={{ color: 'red' }}>Got these messages while parsing the input:</Text>
+              <Text>{ "- " + csvErrors.join("\n- ") }</Text>
+            </View>
+          ) : (
+            <View />
+          )}
+
           <Modal
             animationType="slide"
             transparent={true}
@@ -556,59 +602,6 @@ export function ContactsScreen({ navigation, route }) {
               </View>
             </View>
           </Modal>
-
-          <Button
-            title="Scan QR Code"
-            onPress={() => navigation.navigate('Contact Import')}
-          />
-
-          <Text>... or:</Text>
-          <View style={{ alignItems: "center" }}>
-            <Button
-              style={{ alignItems: "center" }}
-              title='Enter Endorser.ch URL'
-              onPress={() => setInputContactUrl(true)}
-            />
-          </View>
-
-          <Text>... or:</Text>
-          <View style={{ alignItems: "center" }}>
-            <Button
-              style={{ alignItems: "center" }}
-              title='Enter Name & ID'
-              onPress={() => setInputContactData(true)}
-            />
-          </View>
-
-          <View style={{ marginTop: 5 }}/>
-          <Text>... or:</Text>
-          <Button
-            title="Import Bulk - Paste CSV"
-            onPress={setWantsCsvText}
-          />
-
-          <View style={{ marginTop: 5 }}/>
-          <Text>... or:</Text>
-          <Button
-            title="Import Bulk - URL"
-            onPress={setWantsCsvUrl}
-          />
-
-          {csvMessages.length > 0 ? (
-            <View style={{ marginBottom: 20 }}>
-              <Text>{ csvMessages.join("\n") }</Text>
-            </View>
-          ) : (
-            <View />
-          )}
-          {csvErrors.length > 0 ? (
-            <View style={{ marginBottom: 20 }}>
-              <Text style={{ color: 'red' }}>Got these messages while parsing the input:</Text>
-              <Text>{ "- " + csvErrors.join("\n- ") }</Text>
-            </View>
-          ) : (
-            <View />
-          )}
 
           <Modal
             animationType="slide"
