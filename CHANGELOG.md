@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Move contact creation data entry (by URL or by hand) into modals.
 
 
 
+
+## [6.1.80]
 ## [6.1.79] - 2022-02-27 - 21ddc5327c44aee36656f213d1fee1a2b286ff1b
 
 ### Added
