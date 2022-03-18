@@ -21,6 +21,7 @@ test('account Offers & Gives', () => {
     outstandingInvoiceTotals: {},
     totalCurrencyPaid: {},
     totalCurrencyPromised: {},
+    numStranges: 0,
     numUnknowns: 0
   }
   let input = []
@@ -28,6 +29,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[0] = { claim: { '@context': 'http://somewhere.else' }}
+  outputExp.numUnknowns = 1
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[0] = {
@@ -37,7 +39,8 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[0].claim['@type'] = 'Offer'
-  outputExp.numUnknowns = 1
+  outputExp.numStranges = 1
+  outputExp.numUnknowns = 0
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[0].claim.seller = { identifier: 'did:none:test-user-bad' }
@@ -58,12 +61,13 @@ test('account Offers & Gives', () => {
       offeredBy: { identifier: TEST_USER_DID },
     }
   })
-  outputExp.numUnknowns = 2
+  outputExp.numStranges = 2
+  outputExp.numUnknowns = 0
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[1].claim.itemOffered = { amountOfThisGood: 3, unitCode: 'HUR' }
   outputExp.allPromised = [input[1]]
-  outputExp.numUnknowns = 1
+  outputExp.numStranges = 1
   outputExp.outstandingCurrencyTotals = { "HUR": 3 }
   outputExp.totalCurrencyPromised = { "HUR": 3 }
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
@@ -145,7 +149,8 @@ test('account Offers & Gives', () => {
       object: { amountOfThisGood: 1, unitCode: 'bad-txn-no-agent' },
     }
   })
-  outputExp.numUnknowns = 2
+  outputExp.numStranges = 2
+  outputExp.numUnknowns = 0
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({
@@ -211,7 +216,7 @@ test('account Offers & Gives', () => {
   // Now for another user
 
   outputExp = R.clone(EMPTY_OUTPUT)
-  outputExp.numUnknowns = 11
+  outputExp.numStranges = 11
   expect(utility.countTransactions(input, TEST_USER1_DID)).toEqual(outputExp)
 
 })
