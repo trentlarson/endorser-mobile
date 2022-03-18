@@ -26,6 +26,7 @@ export function ContactsScreen({ navigation, route }) {
   const [editContactName, setEditContactName] = useState<string>(null)
   const [id0, setId0] = useState<Identifier>()
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
+  const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
   const [wantsCsv, setWantsCsv] = useState<boolean>(false)
@@ -80,28 +81,26 @@ export function ContactsScreen({ navigation, route }) {
   }
 
   const createContact = async () => {
+    let contact = new Contact()
     if (contactUrl != null && contactUrl != '') {
       const conInfo = utility.getContactPayloadFromJwtUrl(contactUrl)
-      const contact = new Contact()
       contact.did = conInfo.iss
       contact.name = conInfo.own.name
       contact.pubKeyBase64 = conInfo.own.publicEncKey
-      await saveContact(contact)
-      setQuickMessage('Added ' + conInfo.own.name)
-      setTimeout(() => { setQuickMessage(null) }, 2000)
-      return utility.loadContacts(appSlice, appStore, dbConnection)
+      setContactUrl(null)
     } else if (contactDid != null && contactDid != '') {
-      const contact = new Contact()
       contact.did = contactDid
       contact.name = contactName
       contact.pubKeyBase64 = contactPubKeyBase64
-      await saveContact(contact)
-      setQuickMessage('Added ' + contactName)
-      setTimeout(() => { setQuickMessage(null) }, 2000)
-      return utility.loadContacts(appSlice, appStore, dbConnection)
+      setContactDid(null)
     } else {
       Alert.alert("There must be a URL or a DID to create a contact.");
+      return
     }
+    await saveContact(contact)
+    setQuickMessage('Added ' + contact.name)
+    setTimeout(() => { setQuickMessage(null) }, 2000)
+    return utility.loadContacts(appSlice, appStore, dbConnection)
   }
 
   const createContactsFromCsv = async () => {
@@ -289,6 +288,7 @@ export function ContactsScreen({ navigation, route }) {
             onPress={() => navigation.navigate('Contact Import')}
           />
           <View style={{ marginTop: 5 }}/>
+          <Text>... or:</Text>
           <Button
             title="Import Bulk (CSV)"
             onPress={setWantsCsv}
@@ -355,6 +355,41 @@ export function ContactsScreen({ navigation, route }) {
           <Modal
             animationType="slide"
             transparent={true}
+            visible={inputContactUrl}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text>Paste URL</Text>
+                <TextInput
+                  value={contactUrl}
+                  onChangeText={setContactUrl}
+                  autoCapitalize={'none'}
+                  autoCorrect={false}
+                  editable
+                  placeholder={'URL'}
+                  style={{ borderWidth: 1 }}
+                />
+
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => { createContact(); setInputContactUrl(false) } }
+                >
+                  <Text>Save</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }}/>
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={() => { setInputContactUrl(false) }}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            animationType="slide"
+            transparent={true}
             visible={editContactIndex != null}
           >
             <View style={styles.centeredView}>
@@ -402,24 +437,13 @@ export function ContactsScreen({ navigation, route }) {
             <View />
           )}
 
-          <View style={{ alignItems: "center", marginTop: 10 }}>
-            <Text>... or enter URL by hand:</Text>
-          </View>
-          <View>
-            <TextInput
-              value={contactUrl}
-              onChangeText={setContactUrl}
-              editable
-              style={{ borderWidth: 1 }}
-              autoCapitalize={'none'}
+          <Text>... or:</Text>
+          <View style={{ alignItems: "center" }}>
+            <Button
+              style={{ alignItems: "center" }}
+              title='Create from Endorser.ch URL'
+              onPress={() => setInputContactUrl(true)}
             />
-            <View style={{ alignItems: "center" }}>
-              <Button
-                style={{ alignItems: "center" }}
-                title='Create'
-                onPress={createContact}
-              />
-            </View>
           </View>
 
           <Modal
@@ -434,9 +458,8 @@ export function ContactsScreen({ navigation, route }) {
             </View>
           </Modal>
 
-          <View style={{ alignItems: "center", marginTop: 10 }}>
-            <Text>... or enter details by hand:</Text>
-          </View>
+          <Text>... or enter details by hand:</Text>
+          <View style={{ padding: 5 }}></View>
           <View>
             <Text>Name (optional)</Text>
             <TextInput
@@ -477,9 +500,9 @@ export function ContactsScreen({ navigation, route }) {
         <View style={{ padding: 10 }}>
           { allContacts && allContacts.length > 0
             ? <View>
-                <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%' }}/>
+                <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
                 <Text>All Contacts</Text>
-                <Button title="Copy All to Clipboard (CSV)" onPress={copyToClipboard} />
+                <Button title="Export All to Clipboard (CSV)" onPress={copyToClipboard} />
               </View>
             : <View/>
           }

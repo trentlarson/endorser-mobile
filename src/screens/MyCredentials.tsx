@@ -206,6 +206,7 @@ export function MyCredentialsScreen({ navigation }) {
                 onPress={searchEndorserForString}
               />
 
+              <View style={{ padding: 5 }} />
               <Button
                 title="Search For Transactional Claims"
                 onPress={searchEndorserForTransactions}

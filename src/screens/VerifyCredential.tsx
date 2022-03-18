@@ -216,11 +216,16 @@ export function VerifyCredentialScreen({ navigation, route }) {
           }
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Claim</Text>
           <YamlFormat source={credentialSubject} navigation={navigation} />
-          <View style={styles.line} />
 
+          <View style={styles.line} />{/*----------------------------------------------------------------*/}
 
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
 
+          {
+            loading
+            ? <ActivityIndicator color="#00FF00" />
+            : <View style={{ marginTop: 20}}/>
+          }
 
           {/* Show any directly visible. */}
           <View style={{ padding: 5 }}>

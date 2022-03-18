@@ -945,7 +945,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 }
 
                 <CheckBox
-                  title='This is a specific amount.'
+                  title="I'll specify an amount."
                   checked={isSpecificAmount}
                   onPress={toggleIsSpecificAmount}
                 />
