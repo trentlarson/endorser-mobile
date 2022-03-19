@@ -23,7 +23,7 @@ export function rawAddressOfDid(did) {
 
 // return first 3 chars + "..." + last 3 chars
 const firstAndLast3 = (text) => {
-  return text.slice(0,3) + "..." + text.slice(-3)
+  return text.length < 9 ? text : text.slice(0,3) + "..." + text.slice(-3)
 }
 
 export const isHiddenDid = (did) => {
@@ -106,7 +106,7 @@ function didInfo(did, identifiers, contacts) {
   } else {
     const contact = R.find(c => c.did === did, contacts)
     if (contact) {
-      return contact.name
+      return contact.name == null ? "(no name)" : contact.name
     } else {
       return UNKNOWN_CONTACT
     }

@@ -26,9 +26,9 @@ export function ContactsScreen({ navigation, route }) {
   const [editContactIndex, setEditContactIndex] = useState<number>(null)
   const [editContactName, setEditContactName] = useState<string>(null)
   const [id0, setId0] = useState<Identifier>()
-  const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
   const [inputContactData, setInputContactData] = useState<boolean>(false)
   const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
+  const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
   const [wantsCsvText, setWantsCsvText] = useState<boolean>(false)
@@ -102,6 +102,65 @@ export function ContactsScreen({ navigation, route }) {
     setQuickMessage('Added ' + (contact.name ? contact.name : '(but without a name)'))
     setTimeout(() => { setQuickMessage(null) }, 2000)
     return utility.loadContacts(appSlice, appStore, dbConnection)
+  }
+
+  const createContactFromData = async (did, name, pubKey) => {
+    if (contactDid) {
+      const contact = new Contact()
+      contact.did = did
+      contact.name = name
+      contact.pubKeyBase64 = pubKey
+      return saveContact(contact)
+    } else {
+      Alert.alert("There must be a DID to create a contact.");
+    }
+  }
+
+  const createContactFromDataState = async () => {
+    return createContactFromData(contactDid, contactName, contactPubKeyBase64)
+    .then((result) => {
+      if (result) {
+        setQuickMessage('Added ' + (contactName ? contactName : '(but without a name)'))
+        setTimeout(() => { setQuickMessage(null) }, 2000)
+        utility.loadContacts(appSlice, appStore, dbConnection)
+      }
+    })
+    .finally(() => {
+      setContactDid(null)
+      setContactName(null)
+      setContactPubKeyBase64(null)
+      setInputContactData(false)
+    })
+  }
+
+  const createContactFromUrl = async (url) => {
+    if (url != null && url != '') {
+      const contact = new Contact()
+      const conInfo = utility.getContactPayloadFromJwtUrl(url)
+      contact.did = conInfo.iss
+      contact.name = conInfo.own && conInfo.own.name
+      contact.pubKeyBase64 = conInfo.own && conInfo.own.publicEncKey
+      return saveContact(contact)
+    } else {
+      Alert.alert("There must be a URL to create a contact.");
+    }
+  }
+
+  const createContactFromUrlState = async () => {
+    return createContactFromUrl(contactUrl)
+    .then((result) => {
+console.log('got result', result)
+      if (result) {
+console.log('got real result')
+        setQuickMessage('Added ' + (result.name ? result.name : '(but without a name)'))
+        setTimeout(() => { setQuickMessage(null) }, 2000)
+        utility.loadContacts(appSlice, appStore, dbConnection)
+      }
+    })
+    .finally(() => {
+      setContactUrl(null)
+      setInputContactUrl(false)
+    })
   }
 
   const createContactsFromThisCsvText = async (csvText) => {
@@ -294,11 +353,8 @@ export function ContactsScreen({ navigation, route }) {
 
   useFocusEffect(
     React.useCallback(() => {
-
       setId0(allIdentifiers[0])
-
       utility.loadContacts(appSlice, appStore, dbConnection)
-
     }, [])
   )
 
@@ -324,23 +380,27 @@ export function ContactsScreen({ navigation, route }) {
             onPress={() => navigation.navigate('Contact Import')}
           />
 
-          <Button
-            style={{ alignItems: "center" }}
-            title='Enter Endorser.ch URL'
-            onPress={() => setInputContactUrl(true)}
-          />
-
+          <View style={{ padding: 5 }} />
           <Button
             style={{ alignItems: "center" }}
             title='Enter Name & ID'
             onPress={() => setInputContactData(true)}
           />
 
+          <View style={{ padding: 5 }} />
+          <Button
+            style={{ alignItems: "center" }}
+            title='Enter Endorser.ch URL'
+            onPress={() => setInputContactUrl(true)}
+          />
+
+          <View style={{ padding: 5 }} />
           <Button
             title="Import Bulk from CSV Text"
             onPress={setWantsCsvText}
           />
 
+          <View style={{ padding: 5 }} />
           <Button
             title="Import Bulk from URL"
             onPress={setWantsCsvUrl}
@@ -520,14 +580,14 @@ export function ContactsScreen({ navigation, route }) {
 
                 <TouchableHighlight
                   style={styles.saveButton}
-                  onPress={() => { createContact(); setInputContactData(false) } }
+                  onPress={() => createContactFromDataState() }
                 >
                   <Text>Save</Text>
                 </TouchableHighlight>
                 <View style={{ padding: 5 }}/>
                 <TouchableHighlight
                   style={styles.cancelButton}
-                  onPress={() => { setInputContactData(false) }}
+                  onPress={() => setInputContactData(false) }
                 >
                   <Text>Cancel</Text>
                 </TouchableHighlight>
@@ -554,14 +614,14 @@ export function ContactsScreen({ navigation, route }) {
 
                 <TouchableHighlight
                   style={styles.saveButton}
-                  onPress={() => { createContact(); setInputContactUrl(false) } }
+                  onPress={() => createContactFromUrlState() }
                 >
                   <Text>Save</Text>
                 </TouchableHighlight>
                 <View style={{ padding: 5 }}/>
                 <TouchableHighlight
                   style={styles.cancelButton}
-                  onPress={() => { setInputContactUrl(false) }}
+                  onPress={() => setInputContactUrl(false) }
                 >
                   <Text>Cancel</Text>
                 </TouchableHighlight>
