@@ -29,7 +29,7 @@ export function ContactImportScreen({ navigation }) {
   const identifiers = useSelector((state) => state.identifiers || [])
 
   const onSuccessfulQrEvent = async (e) => {
-    onSuccessfulQrText(e.data)
+    navigation.navigate('Contacts', { scannedDatum: e.data })
   }
 
   const onSuccessfulQrText = async (jwtText) => {
@@ -45,7 +45,7 @@ export function ContactImportScreen({ navigation }) {
   const allowToSeeMe = async (contact) => {
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
-    await fetch(endorserApiServer + '/api/report/canSeeMe', {
+    return fetch(endorserApiServer + '/api/report/canSeeMe', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -183,7 +183,7 @@ export function ContactImportScreen({ navigation }) {
                 { appStore.getState().testMode
                   ? <Button
                       title='Fake It'
-                      onPress={() => onSuccessfulQrText(CURRENT_JWT_PREFIX + "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJpYXQiOjE2MTUyNjMwODc3OTMsImlzcyI6ImRpZDpldGhyOjB4M2YyMDVFMTgwOGU4NWVDREFmYTU0MGYyZEE1N0JkQzhkOWQyZDUxRCIsIm93biI6eyJuYW1lIjoiU3R1ZmYiLCJwdWJsaWNFbmNLZXkiOiJnM1oxbUpzSDlzRVVXM1ZremtXb2tZenlKRUdGUUFidG9QcnFqT0s3RWs0PSJ9fQ.h27enm55_0Bd06UJHAQWRmULwidOOhHNe2reqjYTAcVJvQ0aUTCEmP88HlJcZ3bUa-VbrXT76sqV6i19bQZ_PA")}
+                      onPress={() => navigation.navigate('Contacts', { scannedDatum: CURRENT_JWT_PREFIX + "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJpYXQiOjE2MTUyNjMwODc3OTMsImlzcyI6ImRpZDpldGhyOjB4M2YyMDVFMTgwOGU4NWVDREFmYTU0MGYyZEE1N0JkQzhkOWQyZDUxRCIsIm93biI6eyJuYW1lIjoiU3R1ZmYiLCJwdWJsaWNFbmNLZXkiOiJnM1oxbUpzSDlzRVVXM1ZremtXb2tZenlKRUdGUUFidG9QcnFqT0s3RWs0PSJ9fQ.h27enm55_0Bd06UJHAQWRmULwidOOhHNe2reqjYTAcVJvQ0aUTCEmP88HlJcZ3bUa-VbrXT76sqV6i19bQZ_PA" })}
                     />
                   : <View/>
                 }

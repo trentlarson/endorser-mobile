@@ -275,15 +275,14 @@ export const bvcClaim = (did: string, startTime: string) => {
 }
 
 /**
- @return results of Settings.uportJwtPayload: { iat: number, iss: string (DID), own: { name, publicEncKey } }
+ @return results of Settings.uportJwtPayload: { iat: number, iss: string (DID), own: { name, publicEncKey (base64-encoded key) } }
  */
 export const getContactPayloadFromJwtUrl = (jwtUrlText: string) => {
   let jwtText = jwtUrlText
   const endorserContextLoc = jwtText.indexOf(ENDORSER_JWT_URL_LOCATION)
   if (endorserContextLoc > -1) {
     jwtText = jwtText.substring(endorserContextLoc + ENDORSER_JWT_URL_LOCATION.length)
-  }
-  if (jwtText.startsWith(UPORT_JWT_PREFIX)) {
+  } else if (jwtText.startsWith(UPORT_JWT_PREFIX)) {
     jwtText = jwtText.substring(UPORT_JWT_PREFIX.length)
   }
 

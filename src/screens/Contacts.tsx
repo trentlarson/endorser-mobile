@@ -1,7 +1,7 @@
 import { classToPlain } from 'class-transformer'
 import * as Papa from 'papaparse'
 import * as R from 'ramda'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
 import { CheckBox } from 'react-native-elements'
@@ -25,11 +25,14 @@ export function ContactsScreen({ navigation, route }) {
   const [contactUrl, setContactUrl] = useState<string>('')
   const [editContactIndex, setEditContactIndex] = useState<number>(null)
   const [editContactName, setEditContactName] = useState<string>(null)
+  const [finishedImport, setFinishedImport] = useState<boolean>(false)
   const [id0, setId0] = useState<Identifier>()
   const [inputContactData, setInputContactData] = useState<boolean>(false)
   const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
+  const [scannedImport, setScannedImport] = useState<string>(route.params && route.params.scannedDatum)
+  const [scannedImportHandled, setScannedImportHandled] = useState<boolean>(false)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
   const [wantsCsvText, setWantsCsvText] = useState<boolean>(false)
   const [wantsCsvUrl, setWantsCsvUrl] = useState<boolean>(false)
@@ -52,6 +55,16 @@ export function ContactsScreen({ navigation, route }) {
       contactFields = R.concat(contactFields, [field])
     }
   }
+
+console.log('route.params',route.params)
+console.log('scannedImport',scannedImport)
+  //let scannedDatum: string = null // whatever was scanned, typically a URL
+  if (route.params && route.params.scannedDatum && !scannedImport) {
+    //scannedDatum = route.params.scannedDatum
+    setScannedImport(route.params.scannedDatum)
+  }
+/**
+**/
 
   const copyToClipboard = () => {
     Clipboard.setString(Papa.unparse(allContacts))
@@ -358,6 +371,63 @@ console.log('got real result')
     }, [])
   )
 
+  useFocusEffect(
+    React.useCallback(() => {
+    if (scannedImport) {
+      if (scannedImport.indexOf(utility.ENDORSER_JWT_URL_LOCATION)) {
+        // contact info is embedded in the URL
+        const contactPayload = utility.getContactPayloadFromJwtUrl(scannedImport)
+        setContactDid(contactPayload.iss)
+        setContactName(contactPayload.own && contactPayload.own.name)
+        setContactPubKeyBase64(contactPayload.own && contactPayload.own.publicEncKey)
+        setInputContactData(true)
+      } else {
+        // retrieve from the URL and try to extract
+        Alert.alert("Not implemented")
+      }
+      //setScannedImport(null)
+    }
+    }, [scannedImport])
+  )
+
+  useEffect(() => {
+console.log('got scannedImport',scannedImport,'ask?',!!scannedImport)
+    if (scannedImport) {
+      if (scannedImport.indexOf(utility.ENDORSER_JWT_URL_LOCATION)) {
+        // contact info is embedded in the URL
+        const contactPayload = utility.getContactPayloadFromJwtUrl(scannedImport)
+        setContactDid(contactPayload.iss)
+        setContactName(contactPayload.own && contactPayload.own.name)
+        setContactPubKeyBase64(contactPayload.own && contactPayload.own.publicEncKey)
+        setInputContactData(true)
+      } else {
+        // retrieve from the URL and try to extract
+        Alert.alert("Not implemented")
+      }
+      //setScannedImport(null)
+    }
+  }, [])
+/**
+  useEffect(() => {
+    if (scannedDatum && !finishedImport) {
+      if (scannedDatum.indexOf(utility.ENDORSER_JWT_URL_LOCATION)) {
+        // contact info is embedded in the URL
+        const contactPayload = utility.getContactPayloadFromJwtUrl(scannedDatum)
+        setContactDid(contactPayload.iss)
+        setContactName(contactPayload.own && contactPayload.own.name)
+        setContactPubKeyBase64(contactPayload.own && contactPayload.own.publicEncKey)
+        setInputContactData(true)
+      } else {
+        // retrieve from the URL and try to extract
+        Alert.alert("Not implemented")
+      }
+      scannedDatum = null
+      setFinishedImport(true)
+    }
+  }, [scannedImport])
+**/
+
+
   return (
     <SafeAreaView>
       <ScrollView>
@@ -372,12 +442,36 @@ console.log('got real result')
             }
           </Text>
 
+          {
+/**
+            scannedDatum
+            ?
+              <View>
+                <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
+                <Text>New Contact</Text>
+                <Text>{ scannedDatum }</Text>
+                {
+                  scannedDatum && !finishedImport
+                  ?
+                    <ActivityIndicator color="#00ff00" />
+                  :
+                    <View />
+                }
+              </View>
+            :
+              <View />
+**/
+          }
+
           <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
           <Text>Import</Text>
 
           <Button
             title="Scan QR Code"
-            onPress={() => navigation.navigate('Contact Import')}
+            onPress={() => {
+              setTimeout(() => setScannedImportHandled(false), 500)
+              navigation.navigate('Contact Import')
+            }}
           />
 
           <View style={{ padding: 5 }} />
@@ -584,10 +678,11 @@ console.log('got real result')
                 >
                   <Text>Save</Text>
                 </TouchableHighlight>
+
                 <View style={{ padding: 5 }}/>
                 <TouchableHighlight
                   style={styles.cancelButton}
-                  onPress={() => setInputContactData(false) }
+                  onPress={() => { console.log('turning off data'); setInputContactData(false) }}
                 >
                   <Text>Cancel</Text>
                 </TouchableHighlight>
