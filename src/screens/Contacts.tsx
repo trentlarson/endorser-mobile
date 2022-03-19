@@ -107,8 +107,8 @@ export function ContactsScreen({ navigation, route }) {
   const createContactsFromThisCsvText = async (csvText) => {
     setSaving(true)
 
-    let contacts = []
-    let messages = []
+    let contacts: Array<Contact> = []
+    let messages: Array<string> = []
     let showingTrimmedMessage = false
     const parsed = Papa.parse(csvText, {dynamicTyping: true, skipEmptyLines: true})
     for (let contactArray of parsed.data) {
@@ -337,12 +337,12 @@ export function ContactsScreen({ navigation, route }) {
           />
 
           <Button
-            title="Import Bulk - Paste CSV"
+            title="Import Bulk from CSV Text"
             onPress={setWantsCsvText}
           />
 
           <Button
-            title="Import Bulk - URL"
+            title="Import Bulk from URL"
             onPress={setWantsCsvUrl}
           />
 
@@ -708,6 +708,10 @@ export function ContactsScreen({ navigation, route }) {
 
                 <Text>
                   Are you sure you want to delete this contact? This cannot be undone.
+
+                  {"\n\n"}
+                  If they can see your activity, you may want to hide yourself first. (Double-check visibilty to be sure.)
+
                   { "\n\n" + utility.didInContext(confirmDeleteContact, allIdentifiers, allContacts) }
                 </Text>
 
@@ -718,7 +722,7 @@ export function ContactsScreen({ navigation, route }) {
                     deleteContact(confirmDeleteContact)
                     setConfirmDeleteContact(null)
                     setQuickMessage('Deleted')
-                    setTimeout(() => { setQuickMessage(null) }, 2000)
+                    setTimeout(() => { setQuickMessage(null) }, 1500)
                   }}
                 >
                   <Text>Yes</Text>

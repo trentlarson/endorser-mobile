@@ -153,6 +153,7 @@ export function ContactImportScreen({ navigation }) {
                           >
                             <Text>Cancel</Text>
                           </TouchableHighlight>
+
                           <View style={{ padding: 5 }}/>
                           <TouchableHighlight
                             style={styles.saveButton}
