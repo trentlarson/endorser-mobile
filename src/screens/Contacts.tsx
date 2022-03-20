@@ -126,9 +126,11 @@ export function ContactsScreen({ navigation, route }) {
     return createContactFromData(contactDid, contactName, contactPubKeyBase64)
     .then((result) => {
       if (result) {
-        setQuickMessage('Added ' + (contactName ? contactName : '(but without a name)'))
+        setQuickMessage('Added ' + (result.name ? result.name : '(but without a name)'))
         setTimeout(() => { setQuickMessage(null) }, 2000)
-        utility.loadContacts(appSlice, appStore, dbConnection)
+        if (wantsToBeVisible) {
+          allowToSeeMe(result)
+        }
       }
     })
     .finally(() => {
@@ -159,6 +161,9 @@ export function ContactsScreen({ navigation, route }) {
         setQuickMessage('Added ' + (result.name ? result.name : '(but without a name)'))
         setTimeout(() => { setQuickMessage(null) }, 2000)
         utility.loadContacts(appSlice, appStore, dbConnection)
+        if (wantsToBeVisible) {
+          allowToSeeMe(result)
+        }
       }
     })
     .finally(() => {
@@ -379,7 +384,6 @@ export function ContactsScreen({ navigation, route }) {
           return result.text()
         })
         .then(text => {
-          console.log("fetched", text)
           setContactsCsvText(text)
           setWantsCsvText(true)
         })
@@ -608,6 +612,12 @@ export function ContactsScreen({ navigation, route }) {
                   autoCorrect={false}
                 />
 
+                <CheckBox
+                  title={ 'After saving, make my claims visible to them.' }
+                  checked={wantsToBeVisible}
+                  onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
+                />
+
                 <TouchableHighlight
                   style={styles.saveButton}
                   onPress={() => createContactFromDataState() }
@@ -641,6 +651,12 @@ export function ContactsScreen({ navigation, route }) {
                   autoCorrect={false}
                   editable
                   style={{ borderWidth: 1, width: 200 }}
+                />
+
+                <CheckBox
+                  title={ 'After saving, make my claims visible to them.' }
+                  checked={wantsToBeVisible}
+                  onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                 />
 
                 <TouchableHighlight
