@@ -1,22 +1,14 @@
-import * as didJwt from 'did-jwt'
-import React, { useState } from 'react'
-import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
-import { CheckBox } from 'react-native-elements'
+import React from 'react'
+import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import QRCodeScanner from 'react-native-qrcode-scanner'
-import { useFocusEffect } from '@react-navigation/native'
-import { useSelector } from 'react-redux'
 
 import { styles } from './style'
-import { Contact } from '../entity/contact'
 import { appSlice, appStore } from '../veramo/appSlice'
-import { agent, dbConnection } from '../veramo/setup'
 import * as utility from '../utility/utility'
 
 export function ContactImportScreen({ navigation }) {
 
   const CURRENT_JWT_PREFIX = appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION
-
-  const identifiers = useSelector((state) => state.identifiers || [])
 
   const onSuccessfulQrEvent = async (e) => {
     navigation.navigate('Contacts', { scannedDatum: e.data })
