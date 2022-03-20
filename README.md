@@ -11,6 +11,8 @@ For the reporting facility, we use the [endorser-ch APIs](https://github.com/tre
 
 `yarn install`
 
+Note that there are also some other mobile dependencies, eg. iOS CocoaPods and Android Studio. The tools will prompt you along the way.
+
 Run ios:
 
 `cd ios; pod install; cd ..`

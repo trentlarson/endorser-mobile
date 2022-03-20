@@ -241,7 +241,7 @@ export function ContactsScreen({ navigation, route }) {
   const createContactsFromThisCsvUrl = async (url) => {
     setSaving(true)
 
-    return fetch(url)
+    return fetch(url, { cache: "no-cache" })
     .then(response => {
       if (response.status !== 200) {
         throw Error('There was an error from the server trying to retrieve contacts.')
@@ -365,7 +365,7 @@ export function ContactsScreen({ navigation, route }) {
   useFocusEffect(
     React.useCallback(() => {
     if (scannedImport) {
-      if (scannedImport.indexOf(utility.ENDORSER_JWT_URL_LOCATION)) {
+      if (scannedImport.indexOf(utility.ENDORSER_JWT_URL_LOCATION) > -1) {
         // contact info is embedded in the URL
         const contactPayload = utility.getContactPayloadFromJwtUrl(scannedImport)
         setContactDid(contactPayload.iss)
@@ -374,7 +374,15 @@ export function ContactsScreen({ navigation, route }) {
         setInputContactData(true)
       } else {
         // retrieve from the URL and try to extract
-        Alert.alert("Not implemented")
+        fetch(scannedImport, { cache: "no-cache" })
+        .then(result => {
+          return result.text()
+        })
+        .then(text => {
+          console.log("fetched", text)
+          setContactsCsvText(text)
+          setWantsCsvText(true)
+        })
       }
     }
     }, [scannedImport])
