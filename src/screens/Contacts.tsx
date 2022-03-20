@@ -449,7 +449,7 @@ export function ContactsScreen({ navigation, route }) {
           )}
           {csvErrors.length > 0 ? (
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ color: 'red' }}>Got these messages while parsing the input:</Text>
+              <Text style={{ color: 'red' }}>Here are potential problems with the input:</Text>
               <Text>{ "- " + csvErrors.join("\n- ") }</Text>
             </View>
           ) : (

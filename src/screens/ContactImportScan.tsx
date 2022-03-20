@@ -16,81 +16,10 @@ export function ContactImportScreen({ navigation }) {
 
   const CURRENT_JWT_PREFIX = appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION
 
-  const [contactInfo, setContactInfo] = useState<Contact>()
-
-  const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
-
-  // these are tracking progress when saving data
-  const [saving, setSaving] = useState<boolean>(false)
-  const [storingVisibility, setStoringVisibility] = useState<boolean>(false)
-  const [doneSavingStoring, setDoneSavingStoring] = useState<boolean>(false)
-  const [visibilityError, setVisibilityError] = useState<string>('')
-
   const identifiers = useSelector((state) => state.identifiers || [])
 
   const onSuccessfulQrEvent = async (e) => {
     navigation.navigate('Contacts', { scannedDatum: e.data })
-  }
-
-  const onSuccessfulQrText = async (jwtText) => {
-    return setContactInfo(utility.getContactPayloadFromJwtUrl(jwtText))
-  }
-
-  const clearModalAndRedirect = () => {
-    setContactInfo(null)
-    navigation.navigate('Contacts')
-  }
-
-
-  const allowToSeeMe = async (contact) => {
-    const endorserApiServer = appStore.getState().apiServer
-    const token = await utility.accessToken(identifiers[0])
-    return fetch(endorserApiServer + '/api/report/canSeeMe', {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-        "Uport-Push-Token": token,
-      },
-      body: JSON.stringify({ did: contact.did })
-    }).then(response => {
-      if (response.status !== 200) {
-        throw ('There was an error from the server trying to set you as visible. ' + new Date().getMilliseconds())
-      }
-    })
-  }
-
-  const onAccept = () => {
-    const saveAndRedirect = async() => {
-      setSaving(true)
-      const conn = await dbConnection
-      const contact = new Contact()
-      contact.did = contactInfo.iss
-      contact.name = contactInfo.own && contactInfo.own.name
-      contact.pubKeyBase64 = contactInfo.own && contactInfo.own.publicEncKey
-      const newContact = await conn.manager.save(contact)
-      utility.loadContacts(appSlice, appStore, dbConnection)
-
-      setSaving(false)
-      if (wantsToBeVisible) {
-        setStoringVisibility(true)
-        await allowToSeeMe(contact, identifiers[0])
-        .then(() => {
-          setTimeout(clearModalAndRedirect, 500)
-        })
-        .catch(err => {
-          setVisibilityError('"' + contact.name + '" was saved. However, there was a problem with setting visibility. Mark yourself visible or invisible on the Contacts page.')
-        })
-        .finally(() => {
-          setStoringVisibility(false)
-          setDoneSavingStoring(true)
-        })
-      } else {
-        setDoneSavingStoring(true)
-        setTimeout(clearModalAndRedirect, 500)
-      }
-    }
-
-    saveAndRedirect()
   }
 
   return (
@@ -99,109 +28,29 @@ export function ContactImportScreen({ navigation }) {
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Import Contact</Text>
 
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={!!contactInfo}
-            onRequestClose={() => {
-              Alert.alert("Modal has been closed.");
-            }}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                { saving ? (
-                  <ActivityIndicator color="#00ff00" />
-                ) : (
-                  <View>
-                    { storingVisibility ? (
-                      <View>
-                        <Text style={styles.modalText}>Storing visibility...</Text>
-                        <ActivityIndicator color="#00ff00" />
-                      </View>
-                    ) : (
+          <View>
+            <QRCodeScanner onRead={onSuccessfulQrEvent} />
+            { appStore.getState().testMode
+              ?
+                <View>
+                  <Button
+                    title='Fake Singleton'
+                    onPress={() => navigation.navigate('Contacts', { scannedDatum: CURRENT_JWT_PREFIX + "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJpYXQiOjE2MTUyNjMwODc3OTMsImlzcyI6ImRpZDpldGhyOjB4M2YyMDVFMTgwOGU4NWVDREFmYTU0MGYyZEE1N0JkQzhkOWQyZDUxRCIsIm93biI6eyJuYW1lIjoiU3R1ZmYiLCJwdWJsaWNFbmNLZXkiOiJnM1oxbUpzSDlzRVVXM1ZremtXb2tZenlKRUdGUUFidG9QcnFqT0s3RWs0PSJ9fQ.h27enm55_0Bd06UJHAQWRmULwidOOhHNe2reqjYTAcVJvQ0aUTCEmP88HlJcZ3bUa-VbrXT76sqV6i19bQZ_PA" })}
+                  />
+                  <Button
+                    title='Fake Singleton Too'
+                    onPress={() => navigation.navigate('Contacts', { scannedDatum: CURRENT_JWT_PREFIX + "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJpYXQiOjE2MTUyNjMwODc3OTMsImlzcyI6ImRpZDpldGhyOjB4N3ZyMDVFMTgwOGU4NWVDREFmYTU0MGYyZEE1N0JkQzhkOWQyZDUxRCIsIm93biI6eyJuYW1lIjoiN3R1ZmYiLCJwdWJsaWNFbmNLZXkiOiJNN1oxbUpzSDlzRVVXM1ZremtXb2tZenlKRUdGUUFidG9QcnFqT0s3RWs0PSJ9fQ.h27enm55_0Bd06UJHAQWRmULwidOOhHNe2reqjYTAcVJvQ0aUTCEmP88HlJcZ3bUa-VbrXT76sqV6i19bQZ_PA" })}
+                  />
+                  <Button
+                    title='Fake 127.0.0.1:8080/test.csv'
+                    onPress={() => navigation.navigate('Contacts', { scannedDatum: "http://127.0.0.1:8080/test.csv" })}
+                  />
+                </View>
+              :
+                <View />
+            }
+          </View>
 
-                      doneSavingStoring ? (
-                        visibilityError ? (
-                          <View>
-                            <Text style={styles.modalText}>{ visibilityError }</Text>
-                            <TouchableHighlight
-                              style={styles.cancelButton}
-                              onPress={ clearModalAndRedirect }
-                            >
-                              <Text>OK</Text>
-                            </TouchableHighlight>
-                          </View>
-                        ) : (
-                          <Text style={styles.modalText}>Saved</Text>
-                        )
-                      ) : (
-
-                        <View>
-                          <Text style={styles.modalText}>Save this contact?</Text>
-
-                          <CheckBox
-                            title={ 'Make my claims visible to ' + (contactInfo && contactInfo.own && contactInfo.own.name) }
-                            checked={wantsToBeVisible}
-                            onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
-                          />
-
-                          <TouchableHighlight
-                            style={styles.cancelButton}
-                            onPress={() => {
-                              setContactInfo(null)
-                            }}
-                          >
-                            <Text>Cancel</Text>
-                          </TouchableHighlight>
-
-                          <View style={{ padding: 5 }}/>
-                          <TouchableHighlight
-                            style={styles.saveButton}
-                            onPress={onAccept}
-                          >
-                            <Text>Save</Text>
-                          </TouchableHighlight>
-                        </View>
-                      )
-                    )}
-                  </View>
-                )}
-              </View>
-            </View>
-          </Modal>
-
-          { contactInfo ? (
-              <View>
-                <Text>Name: {(contactInfo.own && contactInfo.own.name) || ''}</Text>
-                <Text style={{ fontSize: 11 }}>Key: {(contactInfo.own && contactInfo.own.publicEncKey) || ''}</Text>
-                {/** fontSize 11 fits on an iPhone without wrapping **/}
-                <Text style={{ fontSize: 11 }}>{contactInfo.iss || ''}</Text>
-              </View>
-            ) : (
-              <View>
-                <QRCodeScanner onRead={onSuccessfulQrEvent} />
-                { appStore.getState().testMode
-                  ?
-                    <View>
-                      <Button
-                        title='Fake Singleton'
-                        onPress={() => navigation.navigate('Contacts', { scannedDatum: CURRENT_JWT_PREFIX + "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJpYXQiOjE2MTUyNjMwODc3OTMsImlzcyI6ImRpZDpldGhyOjB4M2YyMDVFMTgwOGU4NWVDREFmYTU0MGYyZEE1N0JkQzhkOWQyZDUxRCIsIm93biI6eyJuYW1lIjoiU3R1ZmYiLCJwdWJsaWNFbmNLZXkiOiJnM1oxbUpzSDlzRVVXM1ZremtXb2tZenlKRUdGUUFidG9QcnFqT0s3RWs0PSJ9fQ.h27enm55_0Bd06UJHAQWRmULwidOOhHNe2reqjYTAcVJvQ0aUTCEmP88HlJcZ3bUa-VbrXT76sqV6i19bQZ_PA" })}
-                      />
-                      <Button
-                        title='Fake Singleton Too'
-                        onPress={() => navigation.navigate('Contacts', { scannedDatum: CURRENT_JWT_PREFIX + "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJpYXQiOjE2MTUyNjMwODc3OTMsImlzcyI6ImRpZDpldGhyOjB4N3ZyMDVFMTgwOGU4NWVDREFmYTU0MGYyZEE1N0JkQzhkOWQyZDUxRCIsIm93biI6eyJuYW1lIjoiN3R1ZmYiLCJwdWJsaWNFbmNLZXkiOiJNN1oxbUpzSDlzRVVXM1ZremtXb2tZenlKRUdGUUFidG9QcnFqT0s3RWs0PSJ9fQ.h27enm55_0Bd06UJHAQWRmULwidOOhHNe2reqjYTAcVJvQ0aUTCEmP88HlJcZ3bUa-VbrXT76sqV6i19bQZ_PA" })}
-                      />
-                      <Button
-                        title='Fake 127.0.0.1:8080/test.csv'
-                        onPress={() => navigation.navigate('Contacts', { scannedDatum: "http://127.0.0.1:8080/test.csv" })}
-                      />
-                    </View>
-                  :
-                    <View />
-                }
-              </View>
-            )
-          }
         </View>
       </ScrollView>
     </SafeAreaView>
