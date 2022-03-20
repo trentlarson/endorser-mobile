@@ -25,6 +25,7 @@ import { MyGivenScreen } from './screens/MyGiven'
 import { MyOffersScreen } from './screens/MyOffers'
 import { PresentCredentialScreen } from './screens/PresentCredential'
 import { ReportScreen } from './screens/ReportFromEndorser'
+import { ScanAnythingScreen } from './screens/ScanAnything'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
 import { appSlice, appStore } from './veramo/appSlice'
 import { agent, dbConnection } from './veramo/setup'
@@ -65,6 +66,7 @@ export default function App() {
             <Stack.Screen name="Your Offers" component={MyOffersScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
             <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
+            <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
             <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />

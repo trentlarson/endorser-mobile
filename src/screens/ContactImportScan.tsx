@@ -2,7 +2,6 @@ import React from 'react'
 import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import QRCodeScanner from 'react-native-qrcode-scanner'
 
-import { styles } from './style'
 import { appSlice, appStore } from '../veramo/appSlice'
 import * as utility from '../utility/utility'
 

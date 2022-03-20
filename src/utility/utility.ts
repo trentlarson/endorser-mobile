@@ -11,6 +11,7 @@ import { Contact } from '../entity/contact'
 const HIDDEN_DID = 'did:none:HIDDEN'
 
 export const ENDORSER_JWT_URL_LOCATION = '/contact?jwt='
+export const REPLACE_USER_DID_STRING = 'PUT_USER_DID'
 export const UPORT_JWT_PREFIX = 'https://id.uport.me/req/'
 
 export function isDid(value) {

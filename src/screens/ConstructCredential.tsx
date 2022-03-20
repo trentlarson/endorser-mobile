@@ -150,22 +150,26 @@ export function ConstructCredentialScreen({ navigation }) {
                 }
                 <View>
                   <Text>What do you want to assert?</Text>
+
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Advertise or Seek Skills or Services'}
                     onPress={() => setAskForPersonInfo(true)}
                   />
+
                   <View style={{ padding: 5 }} />
                   <BVCButton
                     description='BVC Meeting'
                     identifier={ identifiers[0] }
                     navigation={ navigation }
                   />
+
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Witness To Something Remarkable'}
                     onPress={() => setAskForWitnessInfo("They ")}
                   />
+
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Transactions</Text>
@@ -173,16 +177,19 @@ export function ConstructCredentialScreen({ navigation }) {
                     title={'Plan'}
                     onPress={() => setAskForPlanInfo(true)}
                   />
+
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Offer'}
                     onPress={() => setAskForOfferInfo(true)}
                   />
+
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Gave'}
                     onPress={() => setAskForGaveInfo(true)}
                   />
+
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Pledges</Text>
@@ -190,21 +197,41 @@ export function ConstructCredentialScreen({ navigation }) {
                     title={'Pledge To Thick Red Line'}
                     onPress={() => setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate. I pledge only to act to protect lives, liberty, and property. I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")}
                   />
+
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Pledge Honesty As An Officer'}
                     onPress={() => setAskForPledgeInfo("I commit to tell only the truth when identifying as a government representative.")}
                   />
+
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Pledge Liberty'}
                     onPress={() => setAskForPledgeInfo("We are as gods. I dedicate myself to reach my full potential. I will never ask another person to live for my sake.")}
                   />
+
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Pledge A Life Of Gifts'}
                     onPress={() => setAskForPledgeInfo("I am building a society based on giving, in ways that fulfill me.")}
                   />
+
+                  <View style={{ padding: 5 }} />
+                  <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
+                  <Text>Other</Text>
+                  <Button
+                    title={'Scan For Claim'}
+                    onPress={() => navigation.navigate(
+                      'Scan Content',
+                      {
+                        title: 'Scan Claim Template',
+                        nextScreen: 'Sign Credential',
+                        dataKey: 'credentialSubject',
+                        otherData: { substitute: true }
+                      }
+                    )}
+                  />
+
                 </View>
                 <View style={{ padding: 5 }} />
                 <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%' }}/>

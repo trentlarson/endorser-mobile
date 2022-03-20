@@ -13,7 +13,7 @@ const debug = Debug('endorser-mobile:share-credential')
 
 export function SignCredentialScreen({ navigation, route }) {
 
-  const { credentialSubject } = route.params
+  const { credentialSubject, substitute } = route.params
 
   const [claimJsonError, setClaimJsonError] = useState<string>(null)
   const [claimStr, setClaimStr] = useState<string>(JSON.stringify(credentialSubject))
@@ -142,7 +142,8 @@ export function SignCredentialScreen({ navigation, route }) {
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifier = async () => {
-      setId0(appStore.getState().identifiers && appStore.getState().identifiers[0])
+      const defaultId = appStore.getState().identifiers && appStore.getState().identifiers[0]
+      setId0(defaultId)
 
       let settings = appStore.getState().settings
       if (settings && (settings.mnemEncrBase64 || settings.mnemonic)) {
@@ -162,8 +163,16 @@ export function SignCredentialScreen({ navigation, route }) {
       } catch (err) {
         setClaimJsonError('The claim is not formatted correctly. ' + err)
       }
+
+      if (substitute) {
+        let newClaimStr = claimStr
+        if (id0) {
+          newClaimStr = claimStr.replace(utility.REPLACE_USER_DID_STRING, id0.did)
+        }
+        setClaimStr(newClaimStr)
+      }
     }
-  }, [claimStr])
+  }, [claimStr, id0])
 
   return (
     <SafeAreaView>
@@ -188,11 +197,11 @@ export function SignCredentialScreen({ navigation, route }) {
                       <Button
                         title="Success!  Click here to see your claim on the Endorser server -- but note that you won't see all the info if you're not logged in."
                         onPress={() => {
-                          Linking.openURL(endorserViewLink(endorserId)).catch(err =>
-                            setError(
-                              'Sorry, something went wrong trying to go to the Endorser server.',
-                            ),
-                          )
+                          Linking.openURL(endorserViewLink(endorserId)).catch(err => {
+                            throw Error(
+                              'Sorry, something went wrong trying to let you browse the record on the Endorser server. ' + err,
+                            )
+                          })
                         }}
                       />
                     ) : ( /* fetched && !endorserId */
