@@ -31,8 +31,7 @@ export function ContactsScreen({ navigation, route }) {
   const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
-  const [scannedImport, setScannedImport] = useState<string>(route.params && route.params.scannedDatum)
-  const [scannedImportHandled, setScannedImportHandled] = useState<boolean>(false)
+  const [scannedImport, setScannedImport] = useState<string>(null)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
   const [wantsCsvText, setWantsCsvText] = useState<boolean>(false)
   const [wantsCsvUrl, setWantsCsvUrl] = useState<boolean>(false)
@@ -56,15 +55,9 @@ export function ContactsScreen({ navigation, route }) {
     }
   }
 
-console.log('route.params',route.params)
-console.log('scannedImport',scannedImport)
-  //let scannedDatum: string = null // whatever was scanned, typically a URL
-  if (route.params && route.params.scannedDatum && !scannedImport) {
-    //scannedDatum = route.params.scannedDatum
+  if (route.params && route.params.scannedDatum && (scannedImport != route.params.scannedDatum)) {
     setScannedImport(route.params.scannedDatum)
   }
-/**
-**/
 
   const copyToClipboard = () => {
     Clipboard.setString(Papa.unparse(allContacts))
@@ -162,9 +155,7 @@ console.log('scannedImport',scannedImport)
   const createContactFromUrlState = async () => {
     return createContactFromUrl(contactUrl)
     .then((result) => {
-console.log('got result', result)
       if (result) {
-console.log('got real result')
         setQuickMessage('Added ' + (result.name ? result.name : '(but without a name)'))
         setTimeout(() => { setQuickMessage(null) }, 2000)
         utility.loadContacts(appSlice, appStore, dbConnection)
@@ -385,48 +376,9 @@ console.log('got real result')
         // retrieve from the URL and try to extract
         Alert.alert("Not implemented")
       }
-      //setScannedImport(null)
     }
     }, [scannedImport])
   )
-
-  useEffect(() => {
-console.log('got scannedImport',scannedImport,'ask?',!!scannedImport)
-    if (scannedImport) {
-      if (scannedImport.indexOf(utility.ENDORSER_JWT_URL_LOCATION)) {
-        // contact info is embedded in the URL
-        const contactPayload = utility.getContactPayloadFromJwtUrl(scannedImport)
-        setContactDid(contactPayload.iss)
-        setContactName(contactPayload.own && contactPayload.own.name)
-        setContactPubKeyBase64(contactPayload.own && contactPayload.own.publicEncKey)
-        setInputContactData(true)
-      } else {
-        // retrieve from the URL and try to extract
-        Alert.alert("Not implemented")
-      }
-      //setScannedImport(null)
-    }
-  }, [])
-/**
-  useEffect(() => {
-    if (scannedDatum && !finishedImport) {
-      if (scannedDatum.indexOf(utility.ENDORSER_JWT_URL_LOCATION)) {
-        // contact info is embedded in the URL
-        const contactPayload = utility.getContactPayloadFromJwtUrl(scannedDatum)
-        setContactDid(contactPayload.iss)
-        setContactName(contactPayload.own && contactPayload.own.name)
-        setContactPubKeyBase64(contactPayload.own && contactPayload.own.publicEncKey)
-        setInputContactData(true)
-      } else {
-        // retrieve from the URL and try to extract
-        Alert.alert("Not implemented")
-      }
-      scannedDatum = null
-      setFinishedImport(true)
-    }
-  }, [scannedImport])
-**/
-
 
   return (
     <SafeAreaView>
@@ -442,36 +394,12 @@ console.log('got scannedImport',scannedImport,'ask?',!!scannedImport)
             }
           </Text>
 
-          {
-/**
-            scannedDatum
-            ?
-              <View>
-                <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
-                <Text>New Contact</Text>
-                <Text>{ scannedDatum }</Text>
-                {
-                  scannedDatum && !finishedImport
-                  ?
-                    <ActivityIndicator color="#00ff00" />
-                  :
-                    <View />
-                }
-              </View>
-            :
-              <View />
-**/
-          }
-
           <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
           <Text>Import</Text>
 
           <Button
             title="Scan QR Code"
-            onPress={() => {
-              setTimeout(() => setScannedImportHandled(false), 500)
-              navigation.navigate('Contact Import')
-            }}
+            onPress={() => navigation.navigate('Contact Import') }
           />
 
           <View style={{ padding: 5 }} />
@@ -682,7 +610,7 @@ console.log('got scannedImport',scannedImport,'ask?',!!scannedImport)
                 <View style={{ padding: 5 }}/>
                 <TouchableHighlight
                   style={styles.cancelButton}
-                  onPress={() => { console.log('turning off data'); setInputContactData(false) }}
+                  onPress={() => setInputContactData(false) }
                 >
                   <Text>Cancel</Text>
                 </TouchableHighlight>
