@@ -182,8 +182,8 @@ To Release:
     - This takes about 30 minutes. The upload takes about 10 at the end; there's no prompt after requesting the 6-digit code.
     - After entering the 6-digit code (in about 18 minutes), it should say "Login Successful". It failed when I was on a VPN... maybe because I hadn't created the version in the App Store yet.
   - Submit the release for review (by filling in the "What's New" and "Notes"), and after they approve the review then you can test in TestFlight or release.
-    - Double-check that it's submitted for review: choose the app, click App Review on the side, choose it from Ready For Review list, and hit "Submit to App Review"
-    - Review for TestFlight is different from the app review, so: make sure to choose the group for testing, click on the version build number, and submit for review. (It'll be ready when the build under "Version" has a green check and says "Testing".)
+    - Double-check that it's submitted for review: choose the app, click App Review on the side, choose it from Ready For Review list, and hit "Submit to App Review". (Just "Add to Review" isn't enough.)
+    - Review for TestFlight is different from the app review, so: make sure to choose the group for testing, click on the version build number, and submit for review. (When you first add the build, it'll say "Waiting for Review", then "Processing" on the group "Builds" section. It'll be ready when the build under "Version" has a green check and says "Testing". "App Store Connect Users" doesn't show the same options or details. "Ready to Submit" means you haven't submitted it for testing so try again.)
       - Test that you've got existing data on a device before upgrading in TestFlight.
   - If you haven't told it to release automatically, be sure to click the button.
 
