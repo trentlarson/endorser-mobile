@@ -5,38 +5,41 @@ import QRCodeScanner from 'react-native-qrcode-scanner'
 import { appStore } from '../veramo/appSlice'
 import * as utility from '../utility/utility'
 
-export function ScanAnythingScreen({ navigation, route }) {
-
-  const DATA_KEY = route.params.dataKey
-  const NEXT_SCREEN = route.params.nextScreen
-  const OTHER_DATA = route.params.otherData
-  const TITLE = route.params.title
-
-  const SAMPLE_CREDENTIAL_TEMPLATE = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    'name': 'Galactic Empire',
+const SAMPLE_CREDENTIAL_TEMPLATE = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  'name': 'Galactic Empire',
+  'member': {
+    '@type': 'OrganizationRole',
+    'roleName': 'Darth Vader',
     'member': {
-      '@type': 'OrganizationRole',
-      'roleName': 'Darth Vader',
-      'member': {
-        '@type': 'Person',
-        'identifier': utility.REPLACE_USER_DID_STRING
-      }
+      '@type': 'Person',
+      'identifier': utility.REPLACE_USER_DID_STRING
     }
   }
+}
+const SAMPLE_CREDENTIAL_TEMPLATE_STRING = JSON.stringify(SAMPLE_CREDENTIAL_TEMPLATE)
+
+
+
+
+export function ScanAnythingScreen({ navigation, route }) {
+
+  const nextScreen = route.params.nextScreen
+  const paramsCreator = route.params.paramsCreator || (scanned => JSON.parse(scanned))
+  const title = route.params.title
 
   const onSuccessfulQrEvent = async (e) => {
-    const nextParams = OTHER_DATA || {}
-    nextParams[DATA_KEY] = e.data
-    navigation.navigate(NEXT_SCREEN, nextParams)
+    const nextParams = otherData || {}
+    nextParams[dataKey] = e.data
+    navigation.navigate(nextScreen, nextParams)
   }
 
   return (
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>{ TITLE }</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>{ title }</Text>
 
           <View>
             <QRCodeScanner onRead={onSuccessfulQrEvent} />
@@ -44,19 +47,15 @@ export function ScanAnythingScreen({ navigation, route }) {
               ?
                 <View>
                   <Button
-                    title={ 'Send fake stuff to ' + NEXT_SCREEN + ' screen'}
+                    title={ 'Send fake stuff to ' + nextScreen + ' screen'}
                     onPress={() => {
-                      const nextParams = {}
-                      nextParams[DATA_KEY] = 'Some sample data for you. Yum!'
-                      return navigation.navigate(NEXT_SCREEN, nextParams)
+                      return navigation.navigate(nextScreen, paramsCreator('"Some sample data for you. Yum!"'))
                     }}
                   />
                   <Button
-                    title={ 'Send fake credential template'}
+                    title={ 'Send fake credential template to ' + nextScreen + ' screen'}
                     onPress={() => {
-                      const nextParams = OTHER_DATA || {}
-                      nextParams[DATA_KEY] = SAMPLE_CREDENTIAL_TEMPLATE
-                      return navigation.navigate(NEXT_SCREEN, nextParams)
+                      return navigation.navigate(nextScreen, paramsCreator(SAMPLE_CREDENTIAL_TEMPLATE_STRING))
                     }}
                   />
                 </View>

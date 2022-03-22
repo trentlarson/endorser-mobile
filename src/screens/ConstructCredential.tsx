@@ -226,8 +226,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       {
                         title: 'Scan Claim Template',
                         nextScreen: 'Sign Credential',
-                        dataKey: 'credentialSubject',
-                        otherData: { substitute: true }
+                        paramsCreator: (scanned) => ({ credentialSubject: JSON.parse(scanned), substitute: true })
                       }
                     )}
                   />
