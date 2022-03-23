@@ -6,15 +6,15 @@ import { appStore } from '../veramo/appSlice'
 import * as utility from '../utility/utility'
 
 const SAMPLE_CREDENTIAL_TEMPLATE = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  'name': 'Galactic Empire',
-  'member': {
-    '@type': 'OrganizationRole',
-    'roleName': 'Darth Vader',
-    'member': {
-      '@type': 'Person',
-      'identifier': utility.REPLACE_USER_DID_STRING
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Galactic Empire",
+  "member": {
+    "@type": "OrganizationRole",
+    "roleName": "Darth Vader",
+    "member": {
+      "@type": "Person",
+      "identifier": utility.REPLACE_USER_DID_STRING
     }
   }
 }
