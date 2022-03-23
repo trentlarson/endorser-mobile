@@ -197,7 +197,7 @@ export function ContactsScreen({ navigation, route }) {
             if (typeof value === 'string') {
               value = value.trim()
               if (!showingTrimmedMessage && value !== contactArray[col]) {
-                messages = R.concat(messages, ['Trimmed whitespace around "' + contactArray[col] + '" in the row for "' + contact.name + '". (Will do this for every value but will not warn about any other instances.)'])
+                messages = R.concat(messages, ['Found whitespace around "' + contactArray[col] + '" in the row for "' + contact.name + '". (Trimmed it, and will do this for every value but will not warn about any other instances.)'])
                 showingTrimmedMessage = true
               }
             }
@@ -449,7 +449,7 @@ export function ContactsScreen({ navigation, route }) {
           )}
           {csvErrors.length > 0 ? (
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ color: 'red' }}>Here are potential problems with the input:</Text>
+              <Text style={{ color: 'red' }}>Here are potential issues with the input:</Text>
               <Text>{ "- " + csvErrors.join("\n- ") }</Text>
             </View>
           ) : (

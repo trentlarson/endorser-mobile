@@ -13,7 +13,11 @@ const debug = Debug('endorser-mobile:share-credential')
 
 export function SignCredentialScreen({ navigation, route }) {
 
-  const { credentialSubject, substitute } = route.params
+  let { credentialSubject, scanned, substitute } = route.params
+
+  if (credentialSubject == null && scanned != null) {
+    credentialSubject = JSON.parse(scanned)
+  }
 
   const [claimJsonError, setClaimJsonError] = useState<string>(null)
   const [claimStr, setClaimStr] = useState<string>(JSON.stringify(credentialSubject))

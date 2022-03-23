@@ -25,14 +25,13 @@ const SAMPLE_CREDENTIAL_TEMPLATE_STRING = JSON.stringify(SAMPLE_CREDENTIAL_TEMPL
 
 export function ScanAnythingScreen({ navigation, route }) {
 
+  const nextData = route.params.nextData || {}
   const nextScreen = route.params.nextScreen
-  const paramsCreator = route.params.paramsCreator || (scanned => JSON.parse(scanned))
   const title = route.params.title
 
   const onSuccessfulQrEvent = async (e) => {
-    const nextParams = otherData || {}
-    nextParams[dataKey] = e.data
-    navigation.navigate(nextScreen, nextParams)
+    nextData.scanned = e.data
+    navigation.navigate(nextScreen, nextData)
   }
 
   return (
@@ -49,13 +48,15 @@ export function ScanAnythingScreen({ navigation, route }) {
                   <Button
                     title={ 'Send fake stuff to ' + nextScreen + ' screen'}
                     onPress={() => {
-                      return navigation.navigate(nextScreen, paramsCreator('"Some sample data for you. Yum!"'))
+                      nextData.scanned = '"Some sample data for you. Yum!"'
+                      return navigation.navigate(nextScreen, nextData)
                     }}
                   />
                   <Button
                     title={ 'Send fake credential template to ' + nextScreen + ' screen'}
                     onPress={() => {
-                      return navigation.navigate(nextScreen, paramsCreator(SAMPLE_CREDENTIAL_TEMPLATE_STRING))
+                      nextData.scanned = SAMPLE_CREDENTIAL_TEMPLATE_STRING
+                      return navigation.navigate(nextScreen, nextData)
                     }}
                   />
                 </View>

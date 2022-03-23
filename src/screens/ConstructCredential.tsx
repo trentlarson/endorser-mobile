@@ -221,14 +221,16 @@ export function ConstructCredentialScreen({ navigation }) {
                   <Text>Other</Text>
                   <Button
                     title={'Scan For Claim'}
-                    onPress={() => navigation.navigate(
-                      'Scan Content',
-                      {
-                        title: 'Scan Claim Template',
-                        nextScreen: 'Sign Credential',
-                        paramsCreator: (scanned) => ({ credentialSubject: JSON.parse(scanned), substitute: true })
-                      }
-                    )}
+                    onPress={() =>
+                      navigation.navigate(
+                        'Scan Content',
+                        {
+                          nextData: { substitute: true },
+                          nextScreen: 'Sign Credential',
+                          title: 'Scan Claim Template',
+                        }
+                      )
+                    }
                   />
 
                 </View>
