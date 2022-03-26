@@ -15,12 +15,21 @@ export function SignCredentialScreen({ navigation, route }) {
 
   let { credentialSubject, scanned, substitute } = route.params
 
-  if (credentialSubject == null && scanned != null) {
-    credentialSubject = JSON.parse(scanned)
+  let credSubjArray = []
+  if (credentialSubject != null) {
+    credSubjArray = [ credentialSubject ]
+  } else if (scanned != null) {
+    let scannedCred = JSON.parse(scanned)
+    if (Array.isArray(scannedCred)) {
+      credSubjArray = scannedCred
+    } else {
+      credSubjArray = [ scannedCred ]
+    }
   }
 
   const [claimJsonError, setClaimJsonError] = useState<string>(null)
-  const [claimStr, setClaimStr] = useState<string>(JSON.stringify(credentialSubject))
+  const [claimsMessages, setClaimsMessages] = useState<Array<string>>([])
+  const [claimStr, setClaimStr] = useState<string>(JSON.stringify(credSubjArray[0]))
   const [endorserId, setEndorserId] = useState<string>(null)
   const [fetched, setFetched] = useState<boolean>(false)
   const [fetching, setFetching] = useState<boolean>(false)
@@ -117,9 +126,9 @@ export function SignCredentialScreen({ navigation, route }) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
       // I have seen cases where each of these give different, helpful info.
-      console.log('Error storing identifier, 1:', e)
-      console.log('Error storing identifier, 2: ' + e)
-      console.log('Error storing identifier, 3:', e.toString())
+      console.log('Error signing & sending claim, 1:', e)
+      console.log('Error signing & sending claim, 2: ' + e)
+      console.log('Error signing & sending claim, 3:', e.toString())
       throw e
     }
   }
@@ -161,6 +170,7 @@ export function SignCredentialScreen({ navigation, route }) {
     if (claimStr == null || claimStr.trim() == '') {
       setClaimJsonError('The claim is empty.')
     } else {
+
       try {
         JSON.stringify(JSON.parse(claimStr), null, 2)
         setClaimJsonError('')
@@ -175,8 +185,18 @@ export function SignCredentialScreen({ navigation, route }) {
         }
         setClaimStr(newClaimStr)
       }
+
     }
   }, [claimStr, id0])
+
+  useEffect(() => {
+    if (credSubjArray.length > 1) {
+      const MESSAGE = 'Multiple claims were sent but only one will be signed.'
+      if (claimsMessages.indexOf(MESSAGE) === -1) {
+        setClaimsMessages(claimsMessages.concat(MESSAGE))
+      }
+    }
+  })
 
   return (
     <SafeAreaView>
@@ -280,6 +300,15 @@ export function SignCredentialScreen({ navigation, route }) {
                   ) : (
                      <Text/>
                   )}
+
+                  <View>
+                    {
+                      claimsMessages.map((error, index) => (
+                        <Text style={{ color: 'red' }} key={ index }>{ error }</Text>
+                      ))
+                    }
+                  </View>
+
                   <TextInput
                     multiline={true}
                     style={{ borderWidth: 1, height: 300 }}

@@ -18,7 +18,15 @@ const SAMPLE_CREDENTIAL_TEMPLATE = {
     }
   }
 }
-const SAMPLE_CREDENTIAL_TEMPLATE_STRING = JSON.stringify(SAMPLE_CREDENTIAL_TEMPLATE)
+const SAMPLE_MULTIPLE_CREDENTIALS = [
+  SAMPLE_CREDENTIAL_TEMPLATE,
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    identifier: utility.REPLACE_USER_DID_STRING,
+    knowsAbout: "gardening"
+  }
+]
 
 
 
@@ -55,7 +63,14 @@ export function ScanAnythingScreen({ navigation, route }) {
                   <Button
                     title={ 'Send fake credential template to ' + nextScreen + ' screen'}
                     onPress={() => {
-                      nextData.scanned = SAMPLE_CREDENTIAL_TEMPLATE_STRING
+                      nextData.scanned = JSON.stringify(SAMPLE_CREDENTIAL_TEMPLATE)
+                      return navigation.navigate(nextScreen, nextData)
+                    }}
+                  />
+                  <Button
+                    title={ 'Send fake credential list to ' + nextScreen + ' screen'}
+                    onPress={() => {
+                      nextData.scanned = JSON.stringify(SAMPLE_MULTIPLE_CREDENTIALS)
                       return navigation.navigate(nextScreen, nextData)
                     }}
                   />
