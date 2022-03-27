@@ -101,7 +101,7 @@ export function ConfirmOthersScreen({ navigation }) {
           "@type": "AgreeAction",
           "object": onlyGoodClaims
         }
-        navigation.navigate('Signature Results', { credentialSubject: fullClaim })
+        navigation.navigate('Review to Sign Credential', { credentialSubject: fullClaim })
       }
     }
   }

@@ -8,7 +8,6 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import * as utility from '../utility/utility'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
-import { agent, dbConnection } from '../veramo/setup'
 
 const debug = Debug('endorser-mobile:sign-send--credential')
 
@@ -16,14 +15,16 @@ export function SignCredentialScreen({ navigation, route }) {
 
   let { credentialSubjects, sendToEndorser, identifier } = route.params
 
-  const messages = R.times((n) => 'Did not work with claim #' + (n + 1) + '.', credentialSubjects.length)
-  messages[0] = ''
+  let finalCredSubjs = Array.isArray(credentialSubjects) ? credentialSubjects : [ credentialSubjects ]
 
-  const [endorserId, setEndorserId] = useState<string>(null)
-  const [fetched, setFetched] = useState<boolean>(false)
-  const [fetching, setFetching] = useState<boolean>(false)
-  const [resultMessages, setResultMessages] = useState<Array<string>>(messages)
-  const [jwt, setJwt] = useState<JWT>()
+  let numCreds = finalCredSubjs.length
+  let initialMessages = R.times((n) => 'Not finished with claim #' + (n+1) + '.', numCreds)
+
+  const [endorserIds, setEndorserIds] = useState<Array<string>>(R.times(() => null, numCreds))
+  const [fetched, setFetched] = useState<Array<boolean>>(R.times(() => false, numCreds))
+  const [fetching, setFetching] = useState<Array<boolean>>(R.times(() => false, numCreds))
+  const [resultMessages, setResultMessages] = useState<Array<string>>(initialMessages)
+  const [jwts, setJwts] = useState<Array<JWT>>(R.times(() => null, numCreds))
 
   const endorserViewLink = (endorserId) => {
     return appStore.getState().viewServer + '/reportClaim?claimId=' + endorserId
@@ -32,13 +33,13 @@ export function SignCredentialScreen({ navigation, route }) {
   /**
    * return promise of claim ID from Endorser server
    */
-  async function sendToEndorserSite(jwt: string): Promise<string> {
-    setFetching(true)
+  async function sendToEndorserSite(jwt: string, index: number): Promise<string> {
+    setFetching(R.update(index, true))
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the send to Endorser server..."}))
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifier)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... sending to server..."}))
-    return fetch(endorserApiServer + '/api/claim', {
+    fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -48,8 +49,7 @@ export function SignCredentialScreen({ navigation, route }) {
     })
     .then(async resp => {
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got server response..."}))
-      setFetching(false)
-      setFetched(true)
+      setFetched(R.update(index, true))
       debug('Got endorser.ch status', resp.status)
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got server status " + resp.status + "..."}))
       if (resp.ok) {
@@ -63,7 +63,7 @@ export function SignCredentialScreen({ navigation, route }) {
     })
     .then(json => {
       debug('Got endorser.ch result', json)
-      setEndorserId(json)
+      setEndorserIds(R.update(index, json))
       return json
     })
     .catch(err => {
@@ -73,9 +73,8 @@ export function SignCredentialScreen({ navigation, route }) {
       )
     })
     .finally(() => {
-      setFetching(false)
+      setFetching(R.update(index, false))
     })
-
   }
 
   /**
@@ -99,21 +98,21 @@ export function SignCredentialScreen({ navigation, route }) {
       const vcClaim = credSubj
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
       const vcJwt: string = await didJwt.createJWT(utility.vcPayload(did, vcClaim),{ issuer: did, signer })
-      setJwt(vcJwt)
-      setResultMessages(R.update(index, "Successfully signed claim #" + (index + 1) + ".", resultMessages))
+      setJwts(R.update(index, vcJwt))
+      setResultMessages(R.update(index, "Successfully signed claim #" + (index+1) + "."))
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
       if (sendToEndorser) {
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... now sending JWT to server..."}))
-        let result = await sendToEndorserSite(vcJwt)
-        setResultMessages(R.update(index, "Successfully signed claim #" + (index + 1) + " and sent it to the server.", resultMessages))
+        let result = await sendToEndorserSite(vcJwt, index)
+        setResultMessages(R.update(index, "Successfully signed claim #" + (index+1) + " and sent it to the server."))
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the signing & sending with result: " + JSON.stringify(result)}))
         return result
       } else {
-        setResultMessages(R.update(index, "Successfully signed claim #" + (index + 1) + ", but failed to send it to the server.", resultMessages))
+        setResultMessages(R.update(index, "Successfully signed claim #" + (index+1) + ", but failed to send it to the server."))
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... so we're done."}))
       }
     } catch (e) {
-      setResultMessages(R.update(index, resultMessages[index] + " Something failed in the signing or sending of claim #" + (index + 1) + ".", resultMessages))
+      setResultMessages(R.update(index, resultMessages[index] + " Something failed in the signing or sending of claim #" + (index+1) + "."))
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
       // I have seen cases where each of these give different, helpful info.
@@ -127,10 +126,10 @@ export function SignCredentialScreen({ navigation, route }) {
   useFocusEffect(
     React.useCallback(() => {
       const doActions = async () => {
-        signAndSend(credentialSubjects[0], 0)
+        return finalCredSubjs.map((cred, index) => signAndSend(cred, index))
       }
       doActions()
-    }, [credentialSubjects])
+    }, [finalCredSubjs])
   )
 
   return (
@@ -152,73 +151,84 @@ export function SignCredentialScreen({ navigation, route }) {
               <View>
                 {
                   resultMessages.map((message, index) => (
-                    <Text key={ index }>{ message }</Text>
+                    <View style={{ height: 75 }} key={ index }>
+                      <Text>{ message }</Text>
+
+                      {
+                        fetched[index] ? (
+                          endorserIds[index] ? (
+                            <View>
+                              <Text>Endorser ID { endorserIds[index] }</Text>
+                              <Button
+                                title="Success!"
+                                onPress={() => {
+                                  Linking.openURL(endorserViewLink(endorserIds[index])).catch(err => {
+                                    throw Error(
+                                      'Sorry, something went wrong trying to let you browse the record on the Endorser server. ' + err,
+                                    )
+                                  })
+                                }}
+                              />
+                            </View>
+                          ) : ( /* fetched && !endorserId */
+                            <Text>Got response from the Endorser server but something went wrong.  You might check your data.  If it's good, there may be an error at Endorser.</Text>
+                          )
+                        ) : ( /* !fetched */
+                          fetching[index] ? (
+                            <View>
+                              <ActivityIndicator size="large" color="#00ff00" />
+                              <Text>Saving to the Endorser server...</Text>
+                            </View>
+                          ) : ( /* !fetched && !fetching */
+                            <Text>Something went very wrong.</Text>
+                          )
+                        )
+                      }
+
+                    </View>
                   ))
                 }
               </View>
 
               <View style={{ marginTop: 20 }} />
-              <Text>{jwt ? "The credential is signed." : ""} </Text>
               <View>
+
                 {
-                  fetched ? (
-                    endorserId ? (
-                      <Button
-                        title="Success!  Click here to see your claim on the Endorser server -- but note that you won't see all the info if you're not logged in."
-                        onPress={() => {
-                          Linking.openURL(endorserViewLink(endorserId)).catch(err => {
-                            throw Error(
-                              'Sorry, something went wrong trying to let you browse the record on the Endorser server. ' + err,
-                            )
-                          })
-                        }}
-                      />
-                    ) : ( /* fetched && !endorserId */
-                      <Text>Got response from the Endorser server but something went wrong.  You might check your data.  If it's good, there may be an error at Endorser.</Text>
-                    )
-                  ) : ( /* !fetched */
-                    fetching ? (
-                      <View>
-                        <Text>Saving to the Endorser server...</Text>
-                        <ActivityIndicator size="large" color="#00ff00" />
-                      </View>
-                    ) : ( /* !fetched && !fetching */
-                      <Text>Something went very wrong.</Text>
-                    )
-                  )
+                  finalCredSubjs.map((origCred, index) => (
+                    <View style={{ marginTop: 30 }} key={index}>
+                      <Text style={{ fontSize: 20 }}>Claim #{index+1}</Text>
+
+                      {
+                        jwts[index] ? (
+                          <View>
+                            <View style={{ marginTop: 10 }} />
+                            <Text>JWT with Signature</Text>
+                            <TextInput
+                              multiline={true}
+                              style={{ borderWidth: 1, height: 300 }}
+                            >
+                              { jwts[index] }
+                            </TextInput>
+                          </View>
+                        ) : ( /* !jwt */
+                          <Text>There is no signature for this credential.</Text>
+                        )
+                      }
+
+                      <Text style={{ marginTop: 10, marginBottom: 5 }}>Original Details</Text>
+                      <Text style={{ fontSize: 11 }}>Signed As:</Text>
+                      <Text style={{ fontSize: 11 }}>{identifier.did}</Text>
+
+                      <TextInput
+                        editable={false}
+                        multiline={true}
+                        style={{ borderWidth: 1, height: 300 }}
+                      >
+                        { JSON.stringify(origCred, null, 2) }
+                      </TextInput>
+                    </View>
+                  ))
                 }
-
-                <View>
-
-                  {
-                    jwt ? (
-                      <View>
-                        <View style={{ marginTop: 50 }} />
-                        <Text>JWT</Text>
-                        <TextInput
-                          multiline={true}
-                          style={{ borderWidth: 1, height: 300 }}
-                        >
-                          { jwt }
-                        </TextInput>
-                      </View>
-                    ) : ( /* !jwt */
-                      <Text/>
-                    )
-                  }
-
-                  <Text style={{ marginTop: 75, marginBottom: 5 }}>Details</Text>
-                  <Text style={{ fontSize: 11 }}>Signed As:</Text>
-                  <Text style={{ fontSize: 11 }}>{identifier.did}</Text>
-
-                  <TextInput
-                    editable={false}
-                    multiline={true}
-                    style={{ borderWidth: 1, height: 300 }}
-                  >
-                    { JSON.stringify(credentialSubjects, null, 2) }
-                  </TextInput>
-                </View>
               </View>
             </View>
           ) : (

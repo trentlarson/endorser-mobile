@@ -1,12 +1,10 @@
 import Debug from 'debug'
-import * as didJwt from 'did-jwt'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
 
 import * as utility from '../utility/utility'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
-import { agent, dbConnection } from '../veramo/setup'
 
 const debug = Debug('endorser-mobile:review-credential')
 
@@ -23,12 +21,9 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
   }
 
   const [claimJsonError, setClaimJsonError] = useState<string>(null)
-  const [claimsMessages, setClaimsMessages] = useState<Array<string>>([])
   const [claimStr, setClaimStr] = useState<string>(JSON.stringify(credSubjArray))
-  const [endorserId, setEndorserId] = useState<string>(null)
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [id0, setId0] = useState<Identifier>()
-  const [jwt, setJwt] = useState<JWT>()
   const [sendToEndorser, setSendToEndorser] = useState<boolean>(true)
 
   function formatClaimJson(claimString) {
@@ -94,7 +89,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
           { id0 ? (
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold', marginBottom: 10 }}>
-                Sign
+                Review
                 {
                   (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
                    || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
@@ -102,12 +97,11 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                    : ""
                 }
               </Text>
-              <Text>{jwt ? "The credential is signed." : ""} </Text>
               <View>
                 {
                   claimStr ? (
                     <View>
-                      <Text>Below is the information for your final review.</Text>
+                      <Text>Hit 'sign' if the information below is good.</Text>
                     </View>
                   ) : ( /* !claimStr */
                     <Text>No claim found.  Go back and try again.</Text>
@@ -134,28 +128,11 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                           )}
                         />
                         <CheckBox
-                          title='Store on Server for Selective Disclosure'
+                          title='Store Your Signature on a Server for Selective Disclosure in the Future'
                           checked={sendToEndorser}
                           onPress={() => setSendToEndorser(!sendToEndorser)}
                         />
                       </View>
-                  }
-
-                  {
-                    jwt ? (
-                      <View>
-                        <View style={{ marginTop: 50 }} />
-                        <Text>JWT</Text>
-                        <TextInput
-                          multiline={true}
-                          style={{ borderWidth: 1, height: 300 }}
-                        >
-                          { jwt }
-                        </TextInput>
-                      </View>
-                    ) : ( /* !jwt */
-                      <Text/>
-                    )
                   }
 
                   <Text style={{ marginTop: 75, marginBottom: 5 }}>Details</Text>
@@ -166,14 +143,6 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                   ) : (
                      <Text/>
                   )}
-
-                  <View>
-                    {
-                      claimsMessages.map((error, index) => (
-                        <Text style={{ color: 'red' }} key={ index }>{ error }</Text>
-                      ))
-                    }
-                  </View>
 
                   <TextInput
                     multiline={true}
