@@ -1,42 +1,29 @@
 import Debug from 'debug'
 import * as didJwt from 'did-jwt'
+import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
+import { useFocusEffect } from '@react-navigation/native';
 
-import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 import { agent, dbConnection } from '../veramo/setup'
 
-const debug = Debug('endorser-mobile:share-credential')
+const debug = Debug('endorser-mobile:sign-send--credential')
 
 export function SignCredentialScreen({ navigation, route }) {
 
-  let { credentialSubject, scanned, substitute } = route.params
+  let { credentialSubjects, sendToEndorser, identifier } = route.params
 
-  let credSubjArray = []
-  if (credentialSubject != null) {
-    credSubjArray = [ credentialSubject ]
-  } else if (scanned != null) {
-    let scannedCred = JSON.parse(scanned)
-    if (Array.isArray(scannedCred)) {
-      credSubjArray = scannedCred
-    } else {
-      credSubjArray = [ scannedCred ]
-    }
-  }
+  const messages = R.times((n) => 'Did not work with claim #' + (n + 1) + '.', credentialSubjects.length)
+  messages[0] = ''
 
-  const [claimJsonError, setClaimJsonError] = useState<string>(null)
-  const [claimsMessages, setClaimsMessages] = useState<Array<string>>([])
-  const [claimStr, setClaimStr] = useState<string>(JSON.stringify(credSubjArray[0]))
   const [endorserId, setEndorserId] = useState<string>(null)
   const [fetched, setFetched] = useState<boolean>(false)
   const [fetching, setFetching] = useState<boolean>(false)
-  const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
-  const [id0, setId0] = useState<Identifier>()
+  const [resultMessages, setResultMessages] = useState<Array<string>>(messages)
   const [jwt, setJwt] = useState<JWT>()
-  const [sendToEndorser, setSendToEndorser] = useState<boolean>(true)
 
   const endorserViewLink = (endorserId) => {
     return appStore.getState().viewServer + '/reportClaim?claimId=' + endorserId
@@ -49,7 +36,7 @@ export function SignCredentialScreen({ navigation, route }) {
     setFetching(true)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the send to Endorser server..."}))
     const endorserApiServer = appStore.getState().apiServer
-    const token = await utility.accessToken(id0)
+    const token = await utility.accessToken(identifier)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... sending to server..."}))
     return fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
@@ -94,7 +81,7 @@ export function SignCredentialScreen({ navigation, route }) {
   /**
    * return claim ID from Endorser server, or nothing if they didn't choose to send it
    */
-  async function signAndSend(): string {
+  async function signAndSend(credSubj, index): string {
     try {
       /**
       // would like to use https://www.npmjs.com/package/did-jwt-vc
@@ -107,22 +94,26 @@ export function SignCredentialScreen({ navigation, route }) {
       **/
 
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the signing & sending..."}))
-      const signer = didJwt.SimpleSigner(id0.keys[0].privateKeyHex)
-      const did: string = id0.did
-      const vcClaim = JSON.parse(claimStr)
+      const signer = didJwt.SimpleSigner(identifier.keys[0].privateKeyHex)
+      const did: string = identifier.did
+      const vcClaim = credSubj
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
       const vcJwt: string = await didJwt.createJWT(utility.vcPayload(did, vcClaim),{ issuer: did, signer })
       setJwt(vcJwt)
+      setResultMessages(R.update(index, "Successfully signed claim #" + (index + 1) + ".", resultMessages))
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
       if (sendToEndorser) {
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... now sending JWT to server..."}))
         let result = await sendToEndorserSite(vcJwt)
+        setResultMessages(R.update(index, "Successfully signed claim #" + (index + 1) + " and sent it to the server.", resultMessages))
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the signing & sending with result: " + JSON.stringify(result)}))
         return result
       } else {
+        setResultMessages(R.update(index, "Successfully signed claim #" + (index + 1) + ", but failed to send it to the server.", resultMessages))
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... so we're done."}))
       }
     } catch (e) {
+      setResultMessages(R.update(index, resultMessages[index] + " Something failed in the signing or sending of claim #" + (index + 1) + ".", resultMessages))
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
       // I have seen cases where each of these give different, helpful info.
@@ -133,76 +124,20 @@ export function SignCredentialScreen({ navigation, route }) {
     }
   }
 
-  function formatClaimJson(claimString) {
-    if (claimString) {
-      try {
-        return JSON.stringify(JSON.parse(claimString), null, 2)
-      } catch (err) {
-        return claimString
+  useFocusEffect(
+    React.useCallback(() => {
+      const doActions = async () => {
+        signAndSend(credentialSubjects[0], 0)
       }
-    } else {
-      return ''
-    }
-  }
-
-  function changeCurlyQuotes() {
-    setClaimStr(claimStr.replace(/”/g, "\"").replace(/“/g, "\""))
-  }
-  function hasCurlyQuotes() {
-    return claimStr && (claimStr.match(/”/) || claimStr.match(/“/))
-  }
-
-  // Check for existing identifers on load and set them to state
-  useEffect(() => {
-    const getIdentifier = async () => {
-      const defaultId = appStore.getState().identifiers && appStore.getState().identifiers[0]
-      setId0(defaultId)
-
-      let settings = appStore.getState().settings
-      if (settings && (settings.mnemEncrBase64 || settings.mnemonic)) {
-        setHasMnemonic(true)
-      }
-    }
-    getIdentifier()
-  }, [])
-
-  useEffect(() => {
-    if (claimStr == null || claimStr.trim() == '') {
-      setClaimJsonError('The claim is empty.')
-    } else {
-
-      try {
-        JSON.stringify(JSON.parse(claimStr), null, 2)
-        setClaimJsonError('')
-      } catch (err) {
-        setClaimJsonError('The claim is not formatted correctly. ' + err)
-      }
-
-      if (substitute) {
-        let newClaimStr = claimStr
-        if (id0) {
-          newClaimStr = claimStr.replace(utility.REPLACE_USER_DID_STRING, id0.did)
-        }
-        setClaimStr(newClaimStr)
-      }
-
-    }
-  }, [claimStr, id0])
-
-  useEffect(() => {
-    if (credSubjArray.length > 1) {
-      const MESSAGE = 'Multiple claims were sent but only one will be signed.'
-      if (claimsMessages.indexOf(MESSAGE) === -1) {
-        setClaimsMessages(claimsMessages.concat(MESSAGE))
-      }
-    }
-  })
+      doActions()
+    }, [credentialSubjects])
+  )
 
   return (
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          { id0 ? (
+          { identifier ? (
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold', marginBottom: 10 }}>
                 Sign
@@ -213,6 +148,16 @@ export function SignCredentialScreen({ navigation, route }) {
                    : ""
                 }
               </Text>
+
+              <View>
+                {
+                  resultMessages.map((message, index) => (
+                    <Text key={ index }>{ message }</Text>
+                  ))
+                }
+              </View>
+
+              <View style={{ marginTop: 20 }} />
               <Text>{jwt ? "The credential is signed." : ""} </Text>
               <View>
                 {
@@ -238,42 +183,12 @@ export function SignCredentialScreen({ navigation, route }) {
                         <ActivityIndicator size="large" color="#00ff00" />
                       </View>
                     ) : ( /* !fetched && !fetching */
-
-                      claimStr ? (
-                        <View>
-                          <Text>Below is the information for your final review.</Text>
-                          <Text style={{ color: 'red' }}>This is not yet submitted; click 'Sign' to sign and send it.</Text>
-                        </View>
-                      ) : ( /* !fetched && !fetching && !claimStr */
-                        <Text>No claim found.  Go back and try again.</Text>
-                      )
+                      <Text>Something went very wrong.</Text>
                     )
                   )
                 }
 
                 <View>
-                  <View style={{ padding: 5 }} />
-                  {
-                    (claimJsonError && claimJsonError.length > 0)
-                    ?
-                      <Text style={{ textAlign: 'center' }}>Sign{'\n'}(... after fixing the formatting error.)</Text>
-                    :
-                      endorserId || fetching
-                      ?
-                        <View />
-                      :
-                        <View>
-                          <Button
-                            title={'Sign'}
-                            onPress={signAndSend}
-                          />
-                          <CheckBox
-                            title='Store on Server for Selective Disclosure'
-                            checked={sendToEndorser}
-                            onPress={() => setSendToEndorser(!sendToEndorser)}
-                          />
-                        </View>
-                  }
 
                   {
                     jwt ? (
@@ -293,41 +208,16 @@ export function SignCredentialScreen({ navigation, route }) {
                   }
 
                   <Text style={{ marginTop: 75, marginBottom: 5 }}>Details</Text>
-                  <Text style={{ fontSize: 11 }}>Signing As:</Text>
-                  <Text style={{ fontSize: 11 }}>{id0.did}</Text>
-                  { !hasMnemonic ? (
-                    <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
-                  ) : (
-                     <Text/>
-                  )}
-
-                  <View>
-                    {
-                      claimsMessages.map((error, index) => (
-                        <Text style={{ color: 'red' }} key={ index }>{ error }</Text>
-                      ))
-                    }
-                  </View>
+                  <Text style={{ fontSize: 11 }}>Signed As:</Text>
+                  <Text style={{ fontSize: 11 }}>{identifier.did}</Text>
 
                   <TextInput
+                    editable={false}
                     multiline={true}
                     style={{ borderWidth: 1, height: 300 }}
-                    onChangeText={setClaimStr}
-                    autoCorrect={false}
                   >
-                    { formatClaimJson(claimStr) }
+                    { JSON.stringify(credentialSubjects, null, 2) }
                   </TextInput>
-                  <Text style={{ color: 'red' }}>{ claimJsonError }</Text>
-                  {
-                    hasCurlyQuotes()
-                    ?
-                      <Button
-                        title={'Change Curly Quotes To Regular Quotes'}
-                        onPress={changeCurlyQuotes}
-                      />
-                    :
-                      <View/>
-                  }
                 </View>
               </View>
             </View>

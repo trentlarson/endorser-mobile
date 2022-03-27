@@ -347,7 +347,7 @@ export function MyCredentialsScreen({ navigation }) {
                             <Pressable
                               style={{ padding: 10 }}
                               onPress={ () =>
-                                navigation.navigate('Sign Credential', {
+                                navigation.navigate('Signature Results', {
                                   credentialSubject: {
                                     "@context": "https://schema.org",
                                     "@type": "GiveAction",
@@ -372,7 +372,7 @@ export function MyCredentialsScreen({ navigation }) {
                           <Pressable
                             style={{ padding: 10 }}
                             onPress={ () =>
-                              navigation.navigate('Sign Credential', {
+                              navigation.navigate('Signature Results', {
                                 credentialSubject: {
                                   "@context": "https://schema.org",
                                   "@type": "AgreeAction",
@@ -395,7 +395,7 @@ export function MyCredentialsScreen({ navigation }) {
                           <Pressable
                             style={{ padding: 10 }}
                             onPress={ () =>
-                              navigation.navigate('Sign Credential', {
+                              navigation.navigate('Signature Results', {
                                 credentialSubject: {
                                   "@context": "https://schema.org",
                                   "@type": "TakeAction",

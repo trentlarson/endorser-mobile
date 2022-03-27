@@ -9,7 +9,7 @@ import { styles } from '../screens/style'
 
 function setClaimToAttendance(id: IIdentifier | undefined, startTime: string, navigation) {
   const claimObj = utility.bvcClaim(id ? id.did : 'UNKNOWN', startTime)
-  navigation.navigate('Sign Credential', { credentialSubject: claimObj })
+  navigation.navigate('Review to Sign Credential', { credentialSubject: claimObj })
 }
 
 export const BVCButton = ({ identifier, navigation, description }) => {
@@ -183,7 +183,7 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                       <Text
                         style={{ color: 'blue' }}
                         onPress={() => navigation.navigate(
-                          'Sign Credential',
+                          'Review to Sign Credential',
                           { credentialSubject:
                             { '@context': 'http://schema.org',
                               '@type': 'GiveAction',
@@ -207,7 +207,7 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                       <Text
                         style={{ color: 'blue' }}
                         onPress={() => navigation.navigate(
-                          'Sign Credential',
+                          'Review to Sign Credential',
                           { credentialSubject:
                             { '@context': 'http://schema.org',
                               '@type': 'AgreeAction',

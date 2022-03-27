@@ -81,7 +81,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForGaveInfo(false) }
                       proceed={ claim => {
                         setAskForGaveInfo(false)
-                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
                       }}
                       userId={ identifiers[0].did }
                     />
@@ -93,7 +93,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForOfferInfo(false) }
                       proceed={ claim => {
                         setAskForOfferInfo(false)
-                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
                       }}
                       userId={ identifiers[0].did }
                     />
@@ -106,7 +106,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForPlanInfo(false) }
                       proceed={ claim => {
                         setAskForPlanInfo(false)
-                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -118,7 +118,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForPersonInfo(false) }
                       proceed={ claim => {
                         setAskForPersonInfo(false)
-                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -131,7 +131,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForPledgeInfo('') }
                       proceed={ claim => {
                         setAskForPledgeInfo('')
-                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -143,7 +143,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForWitnessInfo('') }
                       proceed={ claim => {
                         setAskForWitnessInfo('')
-                        navigation.navigate('Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -226,7 +226,7 @@ export function ConstructCredentialScreen({ navigation }) {
                         'Scan Content',
                         {
                           nextData: { substitute: true },
-                          nextScreen: 'Sign Credential',
+                          nextScreen: 'Review to Sign Credential',
                           title: 'Scan Claim Template',
                         }
                       )
