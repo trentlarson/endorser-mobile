@@ -13,12 +13,17 @@ const debug = Debug('endorser-mobile:sign-send--credential')
 
 export function SignCredentialScreen({ navigation, route }) {
 
-  let { credentialSubjects, sendToEndorser, identifier } = route.params
+  const { credentialSubjects, sendToEndorser, identifier } = route.params
 
-  let finalCredSubjs = Array.isArray(credentialSubjects) ? credentialSubjects : [ credentialSubjects ]
+  const finalCredSubjs = Array.isArray(credentialSubjects) ? credentialSubjects : [ credentialSubjects ]
+  const numCreds = finalCredSubjs.length
 
-  let numCreds = finalCredSubjs.length
-  let initialMessages = R.times((n) => 'Not finished with claim #' + (n+1) + '.', numCreds)
+  // return a space & claim number (1-based) for the index (0-based), or '' if there's only one
+  const claimNumber = (index) => {
+    return numCreds === 1 ? '' : ' #' + (index+1)
+  }
+
+  const initialMessages = R.times((n) => 'Not finished with claim' + claimNumber(n) + '.', numCreds)
 
   const [endorserIds, setEndorserIds] = useState<Array<string>>(R.times(() => null, numCreds))
   const [fetched, setFetched] = useState<Array<boolean>>(R.times(() => false, numCreds))
@@ -99,20 +104,20 @@ export function SignCredentialScreen({ navigation, route }) {
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
       const vcJwt: string = await didJwt.createJWT(utility.vcPayload(did, vcClaim),{ issuer: did, signer })
       setJwts(R.update(index, vcJwt))
-      setResultMessages(R.update(index, "Successfully signed claim #" + (index+1) + "."))
+      setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + "."))
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
       if (sendToEndorser) {
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... now sending JWT to server..."}))
         let result = await sendToEndorserSite(vcJwt, index)
-        setResultMessages(R.update(index, "Successfully signed claim #" + (index+1) + " and sent it to the server."))
+        setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + " and sent it to the server."))
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the signing & sending with result: " + JSON.stringify(result)}))
         return result
       } else {
-        setResultMessages(R.update(index, "Successfully signed claim #" + (index+1) + ", but failed to send it to the server."))
+        setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + ", but failed to send it to the server."))
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... so we're done."}))
       }
     } catch (e) {
-      setResultMessages(R.update(index, resultMessages[index] + " Something failed in the signing or sending of claim #" + (index+1) + "."))
+      setResultMessages(R.update(index, resultMessages[index] + " Something failed in the signing or sending of claim" + claimNumber(index) + "."))
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
       // I have seen cases where each of these give different, helpful info.
@@ -196,7 +201,7 @@ export function SignCredentialScreen({ navigation, route }) {
                 {
                   finalCredSubjs.map((origCred, index) => (
                     <View style={{ marginTop: 30 }} key={index}>
-                      <Text style={{ fontSize: 20 }}>Claim #{index+1}</Text>
+                      <Text style={{ fontSize: 20 }}>Claim{ claimNumber(index) }</Text>
 
                       {
                         jwts[index] ? (
