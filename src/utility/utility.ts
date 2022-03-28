@@ -260,7 +260,7 @@ export const createJwt = async (identifier: IIdentifier, payload: any): string =
 
 export const bvcClaim = (did: string, startTime: string) => {
   return {
-    '@context': 'http://schema.org',
+    '@context': 'https://schema.org',
     '@type': 'JoinAction',
     agent: {
       did: did,

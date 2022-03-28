@@ -1356,7 +1356,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
     function constructPerson() {
       let result = {
-        "@context": "http://schema.org",
+        "@context": "https://schema.org",
         "@type": "Person",
         "identifier": props.identifier,
       }
@@ -1457,7 +1457,7 @@ export function ConstructCredentialScreen({ navigation }) {
 
     function constructPledge() {
       return {
-        "@context": "http://schema.org",
+        "@context": "https://schema.org",
         "@type": "AcceptAction",
         "agent": { identifier: props.agent },
         "object": pledge,

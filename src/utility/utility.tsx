@@ -185,7 +185,7 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                         onPress={() => navigation.navigate(
                           'Review to Sign Credential',
                           { credentialSubject:
-                            { '@context': 'http://schema.org',
+                            { '@context': 'https://schema.org',
                               '@type': 'GiveAction',
                               agent: item.claim.agent,
                               recipient: item.claim.recipient,
@@ -209,7 +209,7 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                         onPress={() => navigation.navigate(
                           'Review to Sign Credential',
                           { credentialSubject:
-                            { '@context': 'http://schema.org',
+                            { '@context': 'https://schema.org',
                               '@type': 'AgreeAction',
                               object: item.claim,
                             }
