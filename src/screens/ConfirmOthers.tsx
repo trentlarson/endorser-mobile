@@ -96,12 +96,17 @@ export function ConfirmOthersScreen({ navigation }) {
       const claims = values.map(R.prop('claim'))
       const onlyGoodClaims = R.reject(R.isNil, claims)
       if (onlyGoodClaims.length > 0) {
-        const fullClaim = {
-          "@context": "http://schema.org",
-          "@type": "AgreeAction",
-          "object": onlyGoodClaims
-        }
-        navigation.navigate('Sign Credential', { credentialSubject: fullClaim })
+        const fullClaims = onlyGoodClaims.map(aClaim => {
+          if (aClaim['@context'] === 'https://schema.org') {
+            aClaim['@context'] = undefined
+          }
+          return {
+            "@context": "https://schema.org",
+            "@type": "AgreeAction",
+            "object": aClaim,
+          }
+        })
+        navigation.navigate('Review to Sign Credential', { credentialSubject: fullClaims })
       }
     }
   }

@@ -25,6 +25,7 @@ import { MyGivenScreen } from './screens/MyGiven'
 import { MyOffersScreen } from './screens/MyOffers'
 import { PresentCredentialScreen } from './screens/PresentCredential'
 import { ReportScreen } from './screens/ReportFromEndorser'
+import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
 import { appSlice, appStore } from './veramo/appSlice'
@@ -56,7 +57,7 @@ export default function App() {
             <Stack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
             <Stack.Screen name="Contact Import" component={ContactImportScreen} />
             <Stack.Screen name="Contacts" component={ContactsScreen} />
-            <Stack.Screen name="Sign Credential" component={SignCredentialScreen} />
+            <Stack.Screen name="Signature Results" component={SignCredentialScreen} />
             <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
             <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
@@ -66,6 +67,7 @@ export default function App() {
             <Stack.Screen name="Your Offers" component={MyOffersScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
             <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
+            <Stack.Screen name="Review to Sign Credential" component={ReviewToSignCredentialScreen} />
             <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
             <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />

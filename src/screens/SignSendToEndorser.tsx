@@ -1,33 +1,35 @@
 import Debug from 'debug'
 import * as didJwt from 'did-jwt'
+import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
+import { useFocusEffect } from '@react-navigation/native';
 
-import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
-import { agent, dbConnection } from '../veramo/setup'
 
-const debug = Debug('endorser-mobile:share-credential')
+const debug = Debug('endorser-mobile:sign-send--credential')
 
 export function SignCredentialScreen({ navigation, route }) {
 
-  let { credentialSubject, scanned, substitute } = route.params
+  const { credentialSubjects, sendToEndorser, identifier } = route.params
 
-  if (credentialSubject == null && scanned != null) {
-    credentialSubject = JSON.parse(scanned)
+  const finalCredSubjs = Array.isArray(credentialSubjects) ? credentialSubjects : [ credentialSubjects ]
+  const numCreds = finalCredSubjs.length
+
+  // return a space & claim number (1-based) for the index (0-based), or '' if there's only one
+  const claimNumber = (index) => {
+    return numCreds === 1 ? '' : ' #' + (index+1)
   }
 
-  const [claimJsonError, setClaimJsonError] = useState<string>(null)
-  const [claimStr, setClaimStr] = useState<string>(JSON.stringify(credentialSubject))
-  const [endorserId, setEndorserId] = useState<string>(null)
-  const [fetched, setFetched] = useState<boolean>(false)
-  const [fetching, setFetching] = useState<boolean>(false)
-  const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
-  const [id0, setId0] = useState<Identifier>()
-  const [jwt, setJwt] = useState<JWT>()
-  const [sendToEndorser, setSendToEndorser] = useState<boolean>(true)
+  const initialMessages = R.times((n) => 'Not finished with claim' + claimNumber(n) + '.', numCreds)
+
+  const [endorserIds, setEndorserIds] = useState<Array<string>>(R.times(() => null, numCreds))
+  const [fetched, setFetched] = useState<Array<boolean>>(R.times(() => false, numCreds))
+  const [fetching, setFetching] = useState<Array<boolean>>(R.times(() => false, numCreds))
+  const [resultMessages, setResultMessages] = useState<Array<string>>(initialMessages)
+  const [jwts, setJwts] = useState<Array<JWT>>(R.times(() => null, numCreds))
 
   const endorserViewLink = (endorserId) => {
     return appStore.getState().viewServer + '/reportClaim?claimId=' + endorserId
@@ -36,13 +38,13 @@ export function SignCredentialScreen({ navigation, route }) {
   /**
    * return promise of claim ID from Endorser server
    */
-  async function sendToEndorserSite(jwt: string): Promise<string> {
-    setFetching(true)
+  async function sendToEndorserSite(jwt: string, index: number): Promise<string> {
+    setFetching(R.update(index, true))
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the send to Endorser server..."}))
     const endorserApiServer = appStore.getState().apiServer
-    const token = await utility.accessToken(id0)
+    const token = await utility.accessToken(identifier)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... sending to server..."}))
-    return fetch(endorserApiServer + '/api/claim', {
+    fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -52,8 +54,7 @@ export function SignCredentialScreen({ navigation, route }) {
     })
     .then(async resp => {
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got server response..."}))
-      setFetching(false)
-      setFetched(true)
+      setFetched(R.update(index, true))
       debug('Got endorser.ch status', resp.status)
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got server status " + resp.status + "..."}))
       if (resp.ok) {
@@ -67,7 +68,7 @@ export function SignCredentialScreen({ navigation, route }) {
     })
     .then(json => {
       debug('Got endorser.ch result', json)
-      setEndorserId(json)
+      setEndorserIds(R.update(index, json))
       return json
     })
     .catch(err => {
@@ -77,15 +78,14 @@ export function SignCredentialScreen({ navigation, route }) {
       )
     })
     .finally(() => {
-      setFetching(false)
+      setFetching(R.update(index, false))
     })
-
   }
 
   /**
    * return claim ID from Endorser server, or nothing if they didn't choose to send it
    */
-  async function signAndSend(): string {
+  async function signAndSend(credSubj, index): string {
     try {
       /**
       // would like to use https://www.npmjs.com/package/did-jwt-vc
@@ -98,91 +98,50 @@ export function SignCredentialScreen({ navigation, route }) {
       **/
 
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the signing & sending..."}))
-      const signer = didJwt.SimpleSigner(id0.keys[0].privateKeyHex)
-      const did: string = id0.did
-      const vcClaim = JSON.parse(claimStr)
+      const signer = didJwt.SimpleSigner(identifier.keys[0].privateKeyHex)
+      const did: string = identifier.did
+      const vcClaim = credSubj
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
       const vcJwt: string = await didJwt.createJWT(utility.vcPayload(did, vcClaim),{ issuer: did, signer })
-      setJwt(vcJwt)
+      setJwts(R.update(index, vcJwt))
+      setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + "."))
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
       if (sendToEndorser) {
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... now sending JWT to server..."}))
-        let result = await sendToEndorserSite(vcJwt)
+        let result = await sendToEndorserSite(vcJwt, index)
+        setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + " and sent it to the server."))
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the signing & sending with result: " + JSON.stringify(result)}))
         return result
       } else {
+        setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + ", but failed to send it to the server."))
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... so we're done."}))
       }
     } catch (e) {
+      setResultMessages(R.update(index, resultMessages[index] + " Something failed in the signing or sending of claim" + claimNumber(index) + "."))
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
       // I have seen cases where each of these give different, helpful info.
-      console.log('Error storing identifier, 1:', e)
-      console.log('Error storing identifier, 2: ' + e)
-      console.log('Error storing identifier, 3:', e.toString())
+      console.log('Error signing & sending claim, 1:', e)
+      console.log('Error signing & sending claim, 2: ' + e)
+      console.log('Error signing & sending claim, 3:', e.toString())
       throw e
     }
   }
 
-  function formatClaimJson(claimString) {
-    if (claimString) {
-      try {
-        return JSON.stringify(JSON.parse(claimString), null, 2)
-      } catch (err) {
-        return claimString
+  useFocusEffect(
+    React.useCallback(() => {
+      const doActions = async () => {
+        return finalCredSubjs.map((cred, index) => signAndSend(cred, index))
       }
-    } else {
-      return ''
-    }
-  }
-
-  function changeCurlyQuotes() {
-    setClaimStr(claimStr.replace(/”/g, "\"").replace(/“/g, "\""))
-  }
-  function hasCurlyQuotes() {
-    return claimStr && (claimStr.match(/”/) || claimStr.match(/“/))
-  }
-
-  // Check for existing identifers on load and set them to state
-  useEffect(() => {
-    const getIdentifier = async () => {
-      const defaultId = appStore.getState().identifiers && appStore.getState().identifiers[0]
-      setId0(defaultId)
-
-      let settings = appStore.getState().settings
-      if (settings && (settings.mnemEncrBase64 || settings.mnemonic)) {
-        setHasMnemonic(true)
-      }
-    }
-    getIdentifier()
-  }, [])
-
-  useEffect(() => {
-    if (claimStr == null || claimStr.trim() == '') {
-      setClaimJsonError('The claim is empty.')
-    } else {
-      try {
-        JSON.stringify(JSON.parse(claimStr), null, 2)
-        setClaimJsonError('')
-      } catch (err) {
-        setClaimJsonError('The claim is not formatted correctly. ' + err)
-      }
-
-      if (substitute) {
-        let newClaimStr = claimStr
-        if (id0) {
-          newClaimStr = claimStr.replace(utility.REPLACE_USER_DID_STRING, id0.did)
-        }
-        setClaimStr(newClaimStr)
-      }
-    }
-  }, [claimStr, id0])
+      doActions()
+    }, [finalCredSubjs])
+  )
 
   return (
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          { id0 ? (
+          { identifier ? (
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold', marginBottom: 10 }}>
                 Sign
@@ -193,113 +152,88 @@ export function SignCredentialScreen({ navigation, route }) {
                    : ""
                 }
               </Text>
-              <Text>{jwt ? "The credential is signed." : ""} </Text>
+
               <View>
                 {
-                  fetched ? (
-                    endorserId ? (
-                      <Button
-                        title="Success!  Click here to see your claim on the Endorser server -- but note that you won't see all the info if you're not logged in."
-                        onPress={() => {
-                          Linking.openURL(endorserViewLink(endorserId)).catch(err => {
-                            throw Error(
-                              'Sorry, something went wrong trying to let you browse the record on the Endorser server. ' + err,
-                            )
-                          })
-                        }}
-                      />
-                    ) : ( /* fetched && !endorserId */
-                      <Text>Got response from the Endorser server but something went wrong.  You might check your data.  If it's good, there may be an error at Endorser.</Text>
-                    )
-                  ) : ( /* !fetched */
-                    fetching ? (
-                      <View>
-                        <Text>Saving to the Endorser server...</Text>
-                        <ActivityIndicator size="large" color="#00ff00" />
-                      </View>
-                    ) : ( /* !fetched && !fetching */
+                  resultMessages.map((message, index) => (
+                    <View style={{ height: 75 }} key={ index }>
+                      <Text>{ message }</Text>
 
-                      claimStr ? (
-                        <View>
-                          <Text>Below is the information for your final review.</Text>
-                          <Text style={{ color: 'red' }}>This is not yet submitted; click 'Sign' to sign and send it.</Text>
-                        </View>
-                      ) : ( /* !fetched && !fetching && !claimStr */
-                        <Text>No claim found.  Go back and try again.</Text>
-                      )
-                    )
-                  )
+                      {
+                        fetched[index] ? (
+                          endorserIds[index] ? (
+                            <View>
+                              <Text>Endorser ID { endorserIds[index] }</Text>
+                              <Button
+                                title="Success!"
+                                onPress={() => {
+                                  Linking.openURL(endorserViewLink(endorserIds[index])).catch(err => {
+                                    throw Error(
+                                      'Sorry, something went wrong trying to let you browse the record on the Endorser server. ' + err,
+                                    )
+                                  })
+                                }}
+                              />
+                            </View>
+                          ) : ( /* fetched && !endorserId */
+                            <Text>Got response from the Endorser server but something went wrong.  You might check your data.  If it's good, there may be an error at Endorser.</Text>
+                          )
+                        ) : ( /* !fetched */
+                          fetching[index] ? (
+                            <View>
+                              <ActivityIndicator size="large" color="#00ff00" />
+                              <Text>Saving to the Endorser server...</Text>
+                            </View>
+                          ) : ( /* !fetched && !fetching */
+                            <Text>Something went very wrong.</Text>
+                          )
+                        )
+                      }
+
+                    </View>
+                  ))
                 }
+              </View>
 
-                <View>
-                  <View style={{ padding: 5 }} />
-                  {
-                    (claimJsonError && claimJsonError.length > 0)
-                    ?
-                      <Text style={{ textAlign: 'center' }}>Sign{'\n'}(... after fixing the formatting error.)</Text>
-                    :
-                      endorserId || fetching
-                      ?
-                        <View />
-                      :
-                        <View>
-                          <Button
-                            title={'Sign'}
-                            onPress={signAndSend}
-                          />
-                          <CheckBox
-                            title='Store on Server for Selective Disclosure'
-                            checked={sendToEndorser}
-                            onPress={() => setSendToEndorser(!sendToEndorser)}
-                          />
-                        </View>
-                  }
+              <View style={{ marginTop: 20 }} />
+              <View>
 
-                  {
-                    jwt ? (
-                      <View>
-                        <View style={{ marginTop: 50 }} />
-                        <Text>JWT</Text>
-                        <TextInput
-                          multiline={true}
-                          style={{ borderWidth: 1, height: 300 }}
-                        >
-                          { jwt }
-                        </TextInput>
-                      </View>
-                    ) : ( /* !jwt */
-                      <Text/>
-                    )
-                  }
+                {
+                  finalCredSubjs.map((origCred, index) => (
+                    <View style={{ marginTop: 30 }} key={index}>
+                      <Text style={{ fontSize: 20 }}>Claim{ claimNumber(index) }</Text>
 
-                  <Text style={{ marginTop: 75, marginBottom: 5 }}>Details</Text>
-                  <Text style={{ fontSize: 11 }}>Signing As:</Text>
-                  <Text style={{ fontSize: 11 }}>{id0.did}</Text>
-                  { !hasMnemonic ? (
-                    <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
-                  ) : (
-                     <Text/>
-                  )}
-                  <TextInput
-                    multiline={true}
-                    style={{ borderWidth: 1, height: 300 }}
-                    onChangeText={setClaimStr}
-                    autoCorrect={false}
-                  >
-                    { formatClaimJson(claimStr) }
-                  </TextInput>
-                  <Text style={{ color: 'red' }}>{ claimJsonError }</Text>
-                  {
-                    hasCurlyQuotes()
-                    ?
-                      <Button
-                        title={'Change Curly Quotes To Regular Quotes'}
-                        onPress={changeCurlyQuotes}
-                      />
-                    :
-                      <View/>
-                  }
-                </View>
+                      {
+                        jwts[index] ? (
+                          <View>
+                            <View style={{ marginTop: 10 }} />
+                            <Text>JWT with Signature</Text>
+                            <TextInput
+                              multiline={true}
+                              style={{ borderWidth: 1, height: 300 }}
+                            >
+                              { jwts[index] }
+                            </TextInput>
+                          </View>
+                        ) : ( /* !jwt */
+                          <Text>There is no signature for this credential.</Text>
+                        )
+                      }
+
+                      <Text style={{ marginTop: 10, marginBottom: 5 }}>Original Details</Text>
+                      <Text style={{ fontSize: 11 }}>Signed As:</Text>
+                      <Text style={{ fontSize: 11 }}>{identifier.did}</Text>
+
+                      <TextInput
+                        editable={false}
+                        multiline={true}
+                        style={{ borderWidth: 1, height: 300 }}
+                      >
+                        { JSON.stringify(origCred, null, 2) }
+                      </TextInput>
+                    </View>
+                  ))
+                }
               </View>
             </View>
           ) : (
