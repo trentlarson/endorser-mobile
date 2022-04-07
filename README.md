@@ -59,8 +59,18 @@ yarn start --reset-cache # which you'll have to kill because it doesn't stop
 (node:54926) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). (rejection id: 1)
 ```
 
+- There can be Pod errors by Flipper or YogaKit, or something in XCode about missing `event2/event-config.h`. For example:
 
-### Create a New DB Migration
+```
+The following build commands failed:
+	CompileC /Users/tlarson/Library/Developer/Xcode/DerivedData/EndorserMobile-bxlugkhkwnymbefkkpzsanthvihl/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/Flipper.build/Objects-normal/x86_64/FlipperRSocketResponder.o /Users/tlarson/dev/home/endorser-mobile/ios/Pods/Flipper/xplat/Flipper/FlipperRSocketResponder.cpp normal x86_64 c++ com.apple.compilers.llvm.clang.1_0.compiler (in target 'Flipper' from project 'Pods')
+(1 failure)
+```
+
+We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it still doesn't work you might remove all those flipper references in Podfile, remove Podfile.lock and Pods, and `pod install` again.
+
+
+## Create a New DB Migration
 
 `cd src/migration`
 `npx typeorm migration:create -n YourMigrationName`
