@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+
+## [6.1.84] - 2022-03-27
+
+### Changed
+- Send multiple confirmations & claims separately (instead of as one array of claims).
+
+
+
+
+## [6.1.83] - 2022-03-22 - 0bb6772cd21cfd8004f496894cbd59c33b6decd8
+
+### Added
+- Scan a template to create a claim.
+- Import contacts in bulk via URL.
+
 ### Changed
 - Move contact creation data entry (by URL or by hand) into modals.
 
