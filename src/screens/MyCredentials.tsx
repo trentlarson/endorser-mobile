@@ -322,7 +322,8 @@ export function MyCredentialsScreen({ navigation }) {
                           >
                             <Text style={{ color: "blue" }}>Check it</Text>
                           </Pressable>
-                        : <View/>
+                        :
+                          <View />
                       }
 
                       {
@@ -336,14 +337,14 @@ export function MyCredentialsScreen({ navigation }) {
                           >
                             <Text style={{ color: "blue" }}>Present it</Text>
                           </Pressable>
-                        : <View/>
+                        :
+                          <View />
                       }
 
                       {
                         isUser(data.item.issuer) && data.item.claim['@type'] === 'Offer'
                         ?
-                          (outstandingPerInvoice[data.item.claim.identifier || (data.item.claim.recipient && data.item.claim.recipient.identifier)])
-                          ?
+                          <View>
                             <Pressable
                               style={{ padding: 10 }}
                               onPress={ () =>
@@ -361,9 +362,9 @@ export function MyCredentialsScreen({ navigation }) {
                             >
                               <Text style={{ color: "blue" }}>Mark as given</Text>
                             </Pressable>
-                          :
-                            <Text style={{ padding: 10 }}>(All paid)</Text>
-                        : <View/>
+                          </View>
+                        :
+                          <View />
                       }
 
                       {
@@ -384,7 +385,7 @@ export function MyCredentialsScreen({ navigation }) {
                             <Text style={{ color: "blue" }}>Agree</Text>
                           </Pressable>
                         :
-                          <View/>
+                          <View />
                       }
 
                       {
@@ -408,9 +409,24 @@ export function MyCredentialsScreen({ navigation }) {
                             <Text style={{ color: "blue" }}>Take</Text>
                           </Pressable>
                         :
-                          <View/>
+                          <View />
                       }
 
+                    </View>
+
+                    <View style={{ flexDirection: 'row' }}>
+                      {
+                        isUser(data.item.issuer) && data.item.claim['@type'] === 'Offer'
+                        ?
+                          outstandingPerInvoice[data.item.claim.identifier]
+                          || outstandingPerInvoice[data.item.claim.recipient && data.item.claim.recipient.identifier]
+                          ?
+                            <Text>(Not Fully Paid)</Text>
+                          :
+                            <Text>(No Measurable Balance Remaining)</Text>
+                        :
+                          <View />
+                      }
                     </View>
 
                     <View style={styles.line} />
