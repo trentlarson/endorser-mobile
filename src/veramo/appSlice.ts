@@ -6,6 +6,8 @@ import { Contact } from '../entity/contact'
 import { Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 
+const MAX_LOG_LENGTH = 2000000
+
 export const DEFAULT_ENDORSER_API_SERVER = 'https://endorser.ch:3000'
 export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
 export const LOCAL_ENDORSER_API_SERVER = 'http://127.0.0.1:3000'
@@ -53,6 +55,9 @@ export const appSlice = createSlice({
       state.identifiers = state.identifiers.concat([contents.payload])
     },
     addLog: (state, contents: Payload<LogMsg>) => {
+      if (state.logMessage.length > MAX_LOG_LENGTH) {
+        state.logMessage = "<truncated>\n..." + state.logMessage.substring(state.logMessage.length - (MAX_LOG_LENGTH / 2))
+      }
       if (contents.payload.log) {
         state.logMessage += "\n" + contents.payload.msg
       }
