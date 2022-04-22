@@ -36,6 +36,7 @@ export function MyGivenScreen({ navigation, route }) {
           return (
             <View>
               <Text>{ data.item.claim.object.amountOfThisGood } to { label } { recipient }</Text>
+              <Text style={{ color: 'blue' }} onPress={() => navigation.navigate('Verify Credential', { wrappedClaim: data.item })}>See Details</Text>
             </View>
           )
         }}
