@@ -15,8 +15,7 @@ export function MyCredentialsScreen({ navigation }) {
 
   const [loadedNumber, setLoadedNumber] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
-  const [numUnknowns, setNumUnknowns] = useState<number>(0)
-  const [numStranges, setNumStranges] = useState<number>(0)
+  const [numStrangesAndUnknowns, setNumStrangesAndUnknowns] = useState<number>(0)
   const [outstandingPerCurrency, setOutstandingPerCurrency] = useState<Record<string,Record>>({})
   const [outstandingPerInvoice, setOutstandingPerInvoice] = useState<Record<string,Record>>({})
   const [paidPerCurrency, setPaidPerCurrency] = useState<Record<string,Record>>({})
@@ -104,13 +103,17 @@ export function MyCredentialsScreen({ navigation }) {
     setSearchResults(displayResults)
 
     const accounting = utility.countTransactions(allResults, identifiers[0].did)
-    setNumStranges(accounting.numStranges)
-    setNumUnknowns(accounting.numUnknowns)
     setTotalCurrenciesOutstanding(accounting.outstandingCurrencyTotals)
     setTotalCurrenciesPaid(accounting.totalCurrencyPaid)
-    if (accounting.numUnknowns > 0) {
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: 'Got ' + accounting.numUnknowns + ' transactions that were not formatted right.'}))
+    if (accounting.idsOfStranges.length > 0) {
+      console.log('Got ' + accounting.idsOfStranges.length + ' transaction claims that do not have receipt IDs or measurable details. IDs: ' + accounting.idsOfStranges.join(' '))
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: 'Got ' + accounting.idsOfStranges.length + ' transaction claims that do not have receipt IDs or measurable details. IDs: ' + accounting.idsOfStranges.join(' ')}))
     }
+    if (accounting.idsOfUnknowns.length > 0) {
+      console.log('Got ' + accounting.idsOfUnknowns.length + ' transaction claims that do not seem to be transactions. IDs: ' + accounting.idsOfUnknowns.join(' '))
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: 'Got ' + accounting.idsOfUnknowns.length + ' transaction claims that do not seem to be transactions. IDs: ' + accounting.idsOfUnknowns.join(' ')}))
+    }
+    setNumStrangesAndUnknowns(accounting.idsOfStranges.length + accounting.idsOfUnknowns.length)
 
     setOutstandingPerInvoice(accounting.outstandingInvoiceTotals)
 
@@ -288,11 +291,9 @@ export function MyCredentialsScreen({ navigation }) {
                     }
 
                     {
-                      (numStranges > 0) ? <Text>{numStranges} Strange Claims</Text> : <View />
-                    }
-
-                    {
-                      (numUnknowns > 0) ? <Text>{numUnknowns} Unknowns</Text> : <View />
+                      (numStrangesAndUnknowns > 0)
+                      ? <Text>{numStrangesAndUnknowns} claim{numStrangesAndUnknowns === 1 ? " does " : "s do "}not have measurable detail. For more info, see the log under Advanced Mode in Settings.</Text>
+                      : <View />
                     }
                     <View style={styles.line} />
                   </View>

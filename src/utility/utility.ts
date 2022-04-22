@@ -336,8 +336,8 @@ const objectToYamlString = (obj, indentLevel) => {
  * results is an object with these fields:
  * - allPromised are all promised objects with a 'claim' (ie. Offer); note that some may be paid off
  * - allPaid are all paid objects with a 'claim' (ie. GiveAction)
- * - numStranges are recognized claims (ie. Offer, GiveAction) but missing some necessary fields
- * - numUnknowns are unrecognized claims (ie. not Offer or GiveAction)
+ * - idsOfStranges are recognized claims (ie. Offer, GiveAction) but missing some necessary fields
+ * - idsOfUnknowns are unrecognized claims (ie. not Offer or GiveAction)
  * - outstandingCurrencyTotals is a map of currency code to outstanding amount promised
  * - outstandingInvoiceTotals is a map of invoice ID (ie. offerId or recipient.identifier) to outstanding amount promised
  * - totalCurrencyPaid is a map of currency code to amount paid
@@ -349,10 +349,10 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
   const SCHEMA_ORG = 'https://schema.org'
 
   // add up any promised amount or time values
-  let allPaid = [];
-  let allPromised = [];
-  let numStranges = 0;
-  let numUnknowns = 0;
+  let allPaid = [];     // full claim details
+  let allPromised = []; // full claim details
+  let idsOfStranges = [];
+  let idsOfUnknowns = [];
   let outstandingCurrencyTotals = {} // map of currency code to outstanding amount promised
   let outstandingInvoiceTotals = {} // map of invoice ID to outstanding amount promised
   let totalCurrencyPaid = {} // map of currency code to amount paid
@@ -360,24 +360,24 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
   const wrappedClaims2 = wrappedClaims.sort((j1, j2) => DateTime.fromISO(j1.issuedAt.replace(" ", "T")).toMillis() - DateTime.fromISO(j2.issuedAt.replace(" ", "T")).toMillis())
   for (jwtEntry of wrappedClaims2) {
     const claim = jwtEntry.claim;
-    if (!claim) { numUnknowns++; continue; }
+    if (!claim) { idsOfUnknowns.push(jwtEntry.id); continue; }
     const claimContext = claim['@context']
-    if (!claimContext) { numUnknowns++; continue; }
+    if (!claimContext) { idsOfUnknowns.push(jwtEntry.id); continue; }
     const claimType = claim['@type']
-    if (!claimType) { numUnknowns++; continue; }
+    if (!claimType) { idsOfUnknowns.push(jwtEntry.id); continue; }
 
     if (claimContext === SCHEMA_ORG && claimType === 'Offer') {
-      if (!claim.offeredBy && !claim.seller) { numStranges++; continue; }
+      if (!claim.offeredBy && !claim.seller) { idsOfStranges.push(jwtEntry.id); continue; }
       if ((claim.offeredBy && claim.offeredBy.identifier !== userDid)
           || (claim.seller && claim.seller.identifier !== userDid)) {
-        numStranges++; continue;
+        idsOfStranges.push(jwtEntry.id); continue;
       }
       const node = claim.itemOffered
-      if (!node) { numStranges++; continue; }
+      if (!node) { idsOfStranges.push(jwtEntry.id); continue; }
       const amount = node.amountOfThisGood
-      if (isNaN(amount)) { numStranges++; continue; }
+      if (isNaN(amount)) { idsOfStranges.push(jwtEntry.id); continue; }
       const currency = node.unitCode
-      if (!currency) { numStranges++; continue; }
+      if (!currency) { idsOfStranges.push(jwtEntry.id); continue; }
       const invoiceNum = claim.identifier || (claim.recipient && claim.recipient.identifier)
 
       if (!claim.validThrough || DateTime.fromISO(claim.validThrough) > DateTime.local()) {
@@ -402,14 +402,14 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
     } else if (claimContext === SCHEMA_ORG && claimType === 'GiveAction') {
       if (!claim.agent || claim.agent.identifier !== userDid) {
         // just double-checking that this user really is the giver
-        numStranges++; continue;
+        idsOfStranges.push(jwtEntry.id); continue;
       }
       const node = claim.object
-      if (!node) { numStranges++; continue; }
+      if (!node) { idsOfStranges.push(jwtEntry.id); continue; }
       const amount = node.amountOfThisGood
-      if (isNaN(amount)) { numStranges++; continue; }
+      if (isNaN(amount)) { idsOfStranges.push(jwtEntry.id); continue; }
       const currency = node.unitCode
-      if (!currency) { numStranges++; continue; }
+      if (!currency) { idsOfStranges.push(jwtEntry.id); continue; }
       const invoiceNum = claim.offerId || (claim.recipient && claim.recipient.identifier)
 
       if (invoiceNum && outstandingInvoiceTotals[invoiceNum]) {
@@ -425,10 +425,10 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
 
     } else {
       // unknown type, which we'll just ignore
-      numUnknowns++
+      idsOfUnknowns.push(jwtEntry.id)
     }
   }
 
-  return { allPaid, allPromised, numStranges, numUnknowns, outstandingCurrencyTotals, outstandingInvoiceTotals, totalCurrencyPaid, totalCurrencyPromised }
+  return { allPaid, allPromised, idsOfStranges, idsOfUnknowns, outstandingCurrencyTotals, outstandingInvoiceTotals, totalCurrencyPaid, totalCurrencyPromised }
 
 }
