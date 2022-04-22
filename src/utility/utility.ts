@@ -117,7 +117,7 @@ function didInfo(did, identifiers, contacts) {
 export function didInContext(did, identifiers, contacts) {
   let shortName = didInfo(did, identifiers, contacts)
   let visibleDid = shortName === UNKNOWN_CONTACT ? did : firstAndLast3OfDid(did)
-  return shortName + (visibleDid && " (" + visibleDid + ")")
+  return shortName + (visibleDid ? " (" + visibleDid + ")" : "")
 }
 
 /**
