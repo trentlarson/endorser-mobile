@@ -46,6 +46,7 @@ export function MyCredentialsScreen({ navigation }) {
       return response.json()
     }).then(results => {
       setSearchResults(results)
+      setNumStrangesAndUnknowns(0)
       setOutstandingPerCurrency({})
       setOutstandingPerInvoice({})
       setPaidPerCurrency({})
@@ -105,14 +106,6 @@ export function MyCredentialsScreen({ navigation }) {
     const accounting = utility.countTransactions(allResults, identifiers[0].did)
     setTotalCurrenciesOutstanding(accounting.outstandingCurrencyTotals)
     setTotalCurrenciesPaid(accounting.totalCurrencyPaid)
-    if (accounting.idsOfStranges.length > 0) {
-      console.log('Got ' + accounting.idsOfStranges.length + ' transaction claims that do not have receipt IDs or measurable details. IDs: ' + accounting.idsOfStranges.join(' '))
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: 'Got ' + accounting.idsOfStranges.length + ' transaction claims that do not have receipt IDs or measurable details. IDs: ' + accounting.idsOfStranges.join(' ')}))
-    }
-    if (accounting.idsOfUnknowns.length > 0) {
-      console.log('Got ' + accounting.idsOfUnknowns.length + ' transaction claims that do not seem to be transactions. IDs: ' + accounting.idsOfUnknowns.join(' '))
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: 'Got ' + accounting.idsOfUnknowns.length + ' transaction claims that do not seem to be transactions. IDs: ' + accounting.idsOfUnknowns.join(' ')}))
-    }
     setNumStrangesAndUnknowns(accounting.idsOfStranges.length + accounting.idsOfUnknowns.length)
 
     setOutstandingPerInvoice(accounting.outstandingInvoiceTotals)
@@ -292,7 +285,7 @@ export function MyCredentialsScreen({ navigation }) {
 
                     {
                       (numStrangesAndUnknowns > 0)
-                      ? <Text>{numStrangesAndUnknowns} claim{numStrangesAndUnknowns === 1 ? " does " : "s do "}not have measurable detail. For more info, see the log under Advanced Mode in Settings.</Text>
+                      ? <Text>{numStrangesAndUnknowns} of these claims do{numStrangesAndUnknowns === 1 ? "es" : ""} not have specific, measurable info.</Text>
                       : <View />
                     }
                     <View style={styles.line} />
@@ -417,16 +410,25 @@ export function MyCredentialsScreen({ navigation }) {
 
                     <View style={{ flexDirection: 'row' }}>
                       {
-                        isUser(data.item.issuer) && data.item.claim['@type'] === 'Offer'
+                        data.item.claim['@type'] === 'Offer'
                         ?
-                          outstandingPerInvoice[data.item.claim.identifier]
-                          || outstandingPerInvoice[data.item.claim.recipient && data.item.claim.recipient.identifier]
+                          outstandingPerInvoice[data.item.claim.identifier] > 0
+                          || outstandingPerInvoice[data.item.claim.recipient && data.item.claim.recipient.identifier] > 0
                           ?
                             <Text>(Not Fully Paid)</Text>
                           :
-                            <Text>(No Measurable Balance Remaining)</Text>
+                            outstandingPerInvoice[data.item.claim.identifier] === 0
+                            || outstandingPerInvoice[data.item.claim.recipient && data.item.claim.recipient.identifier] === 0
+                            ?
+                              <Text>(All Paid)</Text>
+                            :
+                              <Text>(Not A Specific Amount)</Text>
                         :
-                          <View />
+                          data.item.claim['@type'] === 'GiveAction'
+                          ?
+                            <Text>(Paid)</Text>
+                          :
+                            <View />
                       }
                     </View>
 
