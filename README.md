@@ -173,6 +173,7 @@ To Release:
 
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json, and CFBundleVersion to be the build number (same as in Android).
+    - Note that you cannot repeat an upload of a build number. (Version is OK.)
   - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION to be the build number (same as CFBundle Version. same as in android).
     - Alternatively, you could enable 'increment_build_number' in ios/fastlane/Fastfile.
     - The project.pbxproj doesn't actually do anything when using fastlane.
