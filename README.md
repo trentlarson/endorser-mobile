@@ -147,9 +147,9 @@ To Do First Release:
 To Release:
 
 - Test everything.
+- Update CHANGELOG.md
 - In package.json, update version
 - Tag
-- In src/veramo/appSlice.ts: check that servers are endorser.ch
 - (I recommend starting with ios since it takes longer to get approved.)
 - android
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number to match ios)

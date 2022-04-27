@@ -12,10 +12,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.1.84] - 2022-03-27
+## [6.1.85] - 2022-04-26
+
+### Changed
+- Added Mutual Integrity Pledge, and pledge descriptions.
+
+### Fixed
+- Fix some display elements for transactional claims.
+
+
+
+
+## [6.1.84] - 2022-03-27 - 395e7770b4dd78bf150d87fea27006bcaae46ad4
 
 ### Changed
 - Send multiple confirmations & claims separately (instead of as one array of claims).
+
+### Fixed
+- Fix references to schema.org to be HTTPS.
 
 
 
