@@ -43,8 +43,9 @@ export function ConstructCredentialScreen({ navigation }) {
 
   const [askForGaveInfo, setAskForGaveInfo] = useState<boolean>(false)
   const [askForOfferInfo, setAskForOfferInfo] = useState<boolean>(false)
-  const [askForPlanInfo, setAskForPlanInfo] = useState<boolean>(false)
   const [askForPersonInfo, setAskForPersonInfo] = useState<boolean>(false)
+  const [askForPlanInfo, setAskForPlanInfo] = useState<boolean>(false)
+  const [askForPledgeAbout, setAskForPledgeAbout] = useState<string>('')
   const [askForPledgeInfo, setAskForPledgeInfo] = useState<string>('')
   const [askForWitnessInfo, setAskForWitnessInfo] = useState<string>('')
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
@@ -126,10 +127,12 @@ export function ConstructCredentialScreen({ navigation }) {
                 {
                   askForPledgeInfo
                   ? <PledgeModal
+                      about={ askForPledgeAbout }
                       agent={ identifiers[0].did }
                       pledge={ askForPledgeInfo }
-                      cancel={ () => setAskForPledgeInfo('') }
+                      cancel={ () => { setAskForPledgeAbout(''); setAskForPledgeInfo(''); } }
                       proceed={ claim => {
+                        setAskForPledgeAbout('')
                         setAskForPledgeInfo('')
                         navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
                       }}
@@ -194,26 +197,47 @@ export function ConstructCredentialScreen({ navigation }) {
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Pledges</Text>
                   <Button
+                    title={'Pledge To Mutual Integrity'}
+                    onPress={() => {
+                      setAskForPledgeAbout("Copyright 2021 Mutual Integrity Foundation")
+                      setAskForPledgeInfo("I pledge to honor my word as my bond and support others as peers in acting with integrity. I accept that dishonoring my word and this pledge will result in a breach of integrity as recorded on my reputation slate until I measure the impact and make amends.")
+                    }}
+                  />
+
+                  <View style={{ padding: 5 }} />
+                  <Button
                     title={'Pledge To Thick Red Line'}
-                    onPress={() => setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate. I pledge only to act to protect lives, liberty, and property. I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")}
+                    onPress={() => {
+                      setAskForPledgeAbout("See ThickRedLine.org")
+                      setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate. I pledge only to act to protect lives, liberty, and property. I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")
+                    }}
                   />
 
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Pledge Honesty As An Officer'}
-                    onPress={() => setAskForPledgeInfo("I commit to tell only the truth when identifying as a government representative.")}
+                    onPress={() => {
+                      setAskForPledgeAbout("This gives citizens confidence to interact.")
+                      setAskForPledgeInfo("I commit to tell only the truth when identifying as a government representative.")
+                    }}
                   />
 
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Pledge Liberty'}
-                    onPress={() => setAskForPledgeInfo("We are as gods. I dedicate myself to reach my full potential. I will never ask another person to live for my sake.")}
+                    onPress={() => {
+                      setAskForPledgeAbout("h/t Stewart Brand, Buddha, & Ayn Rand")
+                      setAskForPledgeInfo("We are as gods. I dedicate myself to reach my full potential. I will never ask another person to live for my sake.")
+                    }}
                   />
 
                   <View style={{ padding: 5 }} />
                   <Button
                     title={'Pledge A Life Of Gifts'}
-                    onPress={() => setAskForPledgeInfo("I am building a society based on giving, in ways that fulfill me.")}
+                    onPress={() => {
+                      setAskForPledgeAbout("See LivesOfGifts.org")
+                      setAskForPledgeInfo("I am building a society based on giving, in ways that fulfill me.")
+                    }}
                   />
 
                   <View style={{ padding: 5 }} />
@@ -1453,6 +1477,8 @@ export function ConstructCredentialScreen({ navigation }) {
    **/
   function PledgeModal(props) {
 
+    const about = props.about
+
     const [pledge, setPledge] = useState<string>(props.pledge)
 
     function constructPledge() {
@@ -1475,6 +1501,8 @@ export function ConstructCredentialScreen({ navigation }) {
             <View style={styles.modalView}>
               <View>
                 <Text style={styles.modalText}>Accept</Text>
+
+                <Text>{about}</Text>
 
                 <View style={{ padding: 5 }}>
                   <TextInput
