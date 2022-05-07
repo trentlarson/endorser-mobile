@@ -169,9 +169,9 @@ export const accessToken = async (identifier) => {
   const signer = didJwt.SimpleSigner(identifier.keys[0].privateKeyHex)
 
   const nowEpoch = Math.floor(Date.now() / 1000)
-  const tomorrowEpoch = nowEpoch + (60 * 60 * 24)
+  const endEpoch = nowEpoch + 60 // add one minute
 
-  const uportTokenPayload = { exp: tomorrowEpoch, iat: nowEpoch, iss: did }
+  const uportTokenPayload = { exp: endEpoch, iat: nowEpoch, iss: did }
   const jwt: string = await didJwt.createJWT(uportTokenPayload, { issuer: did, signer })
   return jwt
 }
