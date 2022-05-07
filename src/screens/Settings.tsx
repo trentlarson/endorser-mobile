@@ -224,6 +224,7 @@ export function SettingsScreen({navigation}) {
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
+  const [showPrivateKey, setShowPrivateKey] = useState<boolean>(false)
   const [storedName, setStoredName] = useState<string>('')
 
   const identifiersSelector = useSelector((state) => state.identifiers || [])
@@ -490,6 +491,26 @@ export function SettingsScreen({navigation}) {
                           <Text style={{ marginBottom: 20 }} selectable={true}>
                             { ident.keys[0].meta && ident.keys[0].meta.derivationPath ? ident.keys[0].meta.derivationPath : 'Unknown. Probably: ' + UPORT_ROOT_DERIVATION_PATH }
                           </Text>
+
+                          <View>
+                            <CheckBox
+                              title='Show Private Key'
+                              checked={showPrivateKey}
+                              onPress={() => setShowPrivateKey(!showPrivateKey)}
+                            />
+                          </View>
+                          {
+                            showPrivateKey
+                            ?
+                              <View>
+                                <Text>Private Key (hex)</Text>
+                                <Text style={{ marginBottom: 20 }} selectable={true}>
+                                  { ident.keys[0].privateKeyHex }
+                                </Text>
+                              </View>
+                            :
+                              <View/>
+                          }
 
                           <QRCode value={qrJwts[ident.did]} size={300}/>
 

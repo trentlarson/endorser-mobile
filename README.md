@@ -169,7 +169,7 @@ To Release:
     - Test
       - First check the old version with existing data on a device.
       - Then: Internal Testing, Create a Release
-    - To release: repeatedly check the "Production" track and the release details/track until it allows you to release to production. (Sometimes it doesn't show for a few minutes. Maybe login/logout would help.)
+    - To release: Go to Internal Testing, then View Release Details, then "Promote release" and select "Production", add details and "Save", then "Start rollout to Production". It'll show as "In review" for a little while. (Old instructions: repeatedly check the "Production" track and the release details/track until it allows you to release to production; sometimes it doesn't show for a few minutes; maybe login/logout would help.)
 
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json, and CFBundleVersion to be the build number (same as in Android).
