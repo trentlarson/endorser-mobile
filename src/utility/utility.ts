@@ -1,3 +1,4 @@
+import { computePublicKey } from '@ethersproject/signing-key'
 import { classToPlain } from 'class-transformer'
 import crypto from 'crypto';
 import * as didJwt from 'did-jwt'
@@ -273,6 +274,18 @@ export const bvcClaim = (did: string, startTime: string) => {
       startTime: startTime,
     }
   }
+}
+
+export const checkPubKeyBase64 = (oldKeyBase64) => {
+  if (!oldKeyBase64) {
+    return oldKeyBase64
+  }
+  const oldKeyBuf = Buffer.from(oldKeyBase64, 'base64')
+  if (oldKeyBase64.length == 32) { // actually a private key
+    const newKeyBase64 = Buffer.from(computePublicKey(oldKeyBuf, true), 'hex').toString('base64')
+    return newKeyBase64
+  }
+  return oldKeyBase64
 }
 
 /**

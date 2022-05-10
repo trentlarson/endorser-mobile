@@ -91,12 +91,12 @@ export function ContactsScreen({ navigation, route }) {
       const conInfo = utility.getContactPayloadFromJwtUrl(contactUrl)
       contact.did = conInfo.iss
       contact.name = conInfo.own.name
-      contact.pubKeyBase64 = conInfo.own.publicEncKey
+      contact.pubKeyBase64 = utility.checkPubKeyBase64(conInfo.own.publicEncKey)
       setContactUrl(null)
     } else if (contactDid != null && contactDid != '') {
       contact.did = contactDid
       contact.name = contactName
-      contact.pubKeyBase64 = contactPubKeyBase64
+      contact.pubKeyBase64 = utility.checkPubKeyBase64(contactPubKeyBase64)
       setContactDid(null)
       setContactName(null)
       setContactPubKeyBase64(null)
@@ -115,7 +115,7 @@ export function ContactsScreen({ navigation, route }) {
       const contact = new Contact()
       contact.did = did
       contact.name = name
-      contact.pubKeyBase64 = pubKey
+      contact.pubKeyBase64 = utility.checkPubKeyBase64(pubKey)
       return saveContact(contact)
     } else {
       Alert.alert("There must be a DID to create a contact.");
@@ -147,7 +147,7 @@ export function ContactsScreen({ navigation, route }) {
       const conInfo = utility.getContactPayloadFromJwtUrl(url)
       contact.did = conInfo.iss
       contact.name = conInfo.own && conInfo.own.name
-      contact.pubKeyBase64 = conInfo.own && conInfo.own.publicEncKey
+      contact.pubKeyBase64 = conInfo.own && utility.checkPubKeyBase64(conInfo.own.publicEncKey)
       return saveContact(contact)
     } else {
       Alert.alert("There must be a URL to create a contact.");
@@ -375,7 +375,7 @@ export function ContactsScreen({ navigation, route }) {
         const contactPayload = utility.getContactPayloadFromJwtUrl(scannedImport)
         setContactDid(contactPayload.iss)
         setContactName(contactPayload.own && contactPayload.own.name)
-        setContactPubKeyBase64(contactPayload.own && contactPayload.own.publicEncKey)
+        setContactPubKeyBase64(contactPayload.own && utility.checkPubKeyBase64(contactPayload.own.publicEncKey))
         setInputContactData(true)
       } else {
         // retrieve from the URL and try to extract

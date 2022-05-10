@@ -1,6 +1,8 @@
 import * as bip39 from 'bip39'
 import * as crypto from 'crypto'
 import { HDNode } from '@ethersproject/hdnode'
+import { computePublicKey, SigningKey } from '@ethersproject/signing-key'
+import { verifyMessage, Wallet } from '@ethersproject/wallet'
 import * as R from 'ramda'
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Alert, Button, Linking, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, View } from "react-native"
@@ -148,8 +150,8 @@ const importAndStoreIdentifier = async (mnemonic: string, mnemonicPassword: stri
   **/
   const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
   const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
-  const privateHex = rootNode.privateKey.substring(2)
-  const publicHex = rootNode.privateKey.substring(2)
+  const privateHex = rootNode.privateKey.substring(2) // original starts with '0x'
+  const publicHex = rootNode.publicKey.substring(2) // original starts with '0x'
   let address = rootNode.address
 
   const prevIds = previousIdentifiers || [];
@@ -456,7 +458,6 @@ export function SettingsScreen({navigation}) {
 
                   {
                   identifiersSelector.map(ident =>
-
                     <View key={ident.did} style={{ marginTop: 20 }}>
 
                       <Text>Identifier</Text>
