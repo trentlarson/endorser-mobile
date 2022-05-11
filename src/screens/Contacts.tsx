@@ -164,6 +164,8 @@ export function ContactsScreen({ navigation, route }) {
         if (wantsToBeVisible) {
           allowToSeeMe(result)
         }
+      } else {
+        // not sure if contact was created, but spec isn't clear
       }
     })
     .finally(() => {

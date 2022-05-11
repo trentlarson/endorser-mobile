@@ -1,8 +1,6 @@
 import * as bip39 from 'bip39'
 import * as crypto from 'crypto'
 import { HDNode } from '@ethersproject/hdnode'
-import { computePublicKey, SigningKey } from '@ethersproject/signing-key'
-import { verifyMessage, Wallet } from '@ethersproject/wallet'
 import * as R from 'ramda'
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { ActivityIndicator, Alert, Button, Linking, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, View } from "react-native"

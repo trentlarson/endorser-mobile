@@ -18,7 +18,7 @@ export class HandlePrivateKeys1652142819353 implements MigrationInterface {
     const resultKeys = await queryRunner.query(selectKeys)
     resultKeys.forEach(async key => {
       if (key.publicKeyHex && key.publicKeyHex.length == 64) {
-        const publicKeyHex = computePublicKey(Buffer.from(key.publicKeyHex, 'hex'), true)
+        publicKeyHex = utility.pubHexFromBuf(Buffer.from(key.publicKeyHex, 'hex'))
         const updateKey = "UPDATE key SET publicKeyHex = '" + publicKeyHex + "' where kid = '" + key.kid + "'"
         const result = await queryRunner.query(updateKey)
         results.push(result)

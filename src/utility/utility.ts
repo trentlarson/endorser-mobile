@@ -276,13 +276,23 @@ export const bvcClaim = (did: string, startTime: string) => {
   }
 }
 
+// from Buffer to hex String (a quirky ethersproject function that I hope we fix)
+export const pubHexFromBuf = (oldKeyBuf) => {
+  // computePublicKey returns value with 0x on front
+  let newKeyHex = computePublicKey(oldKeyBuf, true)
+  if (newKeyHex.startsWith('0x')) {
+    newKeyHex = newKeyHex.substring(2) // remove Ethereum prefix
+  }
+  return newKeyHex
+}
+
 export const checkPubKeyBase64 = (oldKeyBase64) => {
   if (!oldKeyBase64) {
     return oldKeyBase64
   }
   const oldKeyBuf = Buffer.from(oldKeyBase64, 'base64')
-  if (oldKeyBase64.length == 32) { // actually a private key
-    const newKeyBase64 = Buffer.from(computePublicKey(oldKeyBuf, true), 'hex').toString('base64')
+  if (oldKeyBuf.length == 32) { // actually a private key
+    const newKeyBase64 = Buffer.from(pubHexFromBuf(oldKeyBuf), 'hex').toString('base64')
     return newKeyBase64
   }
   return oldKeyBase64
