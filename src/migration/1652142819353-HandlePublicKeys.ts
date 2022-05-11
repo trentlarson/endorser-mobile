@@ -6,9 +6,9 @@ import * as utility from '../utility/utility'
 import { agent } from "../veramo/setup"
 
 // fix historical keys that were incorrect
-export class HandlePrivateKeys1652142819353 implements MigrationInterface {
+export class HandlePublicKeys1652142819353 implements MigrationInterface {
 
-  public name = "HandlePrivateKeys1652142819353"
+  public name = "HandlePublicKeys1652142819353"
 
   public async up(queryRunner: QueryRunner): Promise<void> {
 
