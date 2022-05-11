@@ -1,6 +1,6 @@
 {
   "name": "EndorserMobile",
-  "version": "6.1.86",
+  "version": "6.2.87-rc",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
