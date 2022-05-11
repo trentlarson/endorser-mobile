@@ -12,7 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.1.85] - 2022-04-26
+## [6.2.87] - 2022-05-10
+
+### Added
+- Allow display of private key.
+
+
+
+
+## [6.1.85] - 2022-04-26 - f43e4bfedade82886de3fb2e7d515d44b89011c8
 
 ### Changed
 - Added Mutual Integrity Pledge, and pledge descriptions.
