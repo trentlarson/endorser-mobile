@@ -135,6 +135,8 @@ To Do First Release:
 
 - Android
   - In the android/app folder, put pc-api-....json and google-comm-endo-upload-key.keystore
+- iOS
+  - In Xcode, add the developer account under Preferences. (Maybe import the project.)
 - Configure Apple signing.
   - To renew certificate: https://developer.apple.com/account/resources/certificates/list
     ... and make one for Apple Distribution
@@ -193,7 +195,7 @@ To Release:
     - This takes about 30 minutes. The upload takes about 10 at the end; there's no prompt after requesting the 6-digit code.
     - After entering the 6-digit code (in about 18 minutes), it should say "Login Successful". It failed when I was on a VPN... maybe because I hadn't created the version in the App Store yet.
   - Submit the release for review (by filling in the "What's New" and "Notes"), and after they approve the review then you can test in TestFlight or release.
-    - Double-check that it's submitted for review: choose the app, click App Review on the side, choose it from Ready For Review list, and hit "Submit to App Review". (It should say "Waiting for Review". Just clicking "Add to Review" on the first screen isn't enough.)
+    - Double-check that it's submitted for review: it should say "Waiting for Review". (choose the app, click App Review on the side, choose it from Ready For Review list, and hit "Submit to App Review". Just clicking "Add to Review" on the first screen isn't enough.)
     - Review for TestFlight is different from the app review, so: make sure to choose the group for testing, click on the version build number, and submit for review. (When you first add the build, it'll say "Waiting for Review", then "Processing" on the group "Builds" section. It'll be ready when the build under "Version" has a green check and says "Testing". "App Store Connect Users" doesn't show the same options or details. "Ready to Submit" means you haven't submitted it for testing so try again.)
       - Test that you've got existing data on a device before upgrading in TestFlight.
   - If you haven't told it to release automatically, be sure to click the button.
