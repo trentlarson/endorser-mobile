@@ -1,20 +1,20 @@
 import { computePublicKey } from '@ethersproject/signing-key'
 import { MigrationInterface, QueryRunner } from "typeorm";
 
+// This code is in utility.ts in pubHexFromBuf. Copying here so that we can remove the other later without changing this file.
+function pubHexFromBuf(oldKeyBuf) {
+  // computePublicKey returns value with 0x on front
+  let newKeyHex = computePublicKey(oldKeyBuf, true)
+  if (newKeyHex.startsWith('0x')) {
+    newKeyHex = newKeyHex.substring(2) // remove Ethereum prefix
+  }
+  return newKeyHex
+}
+
 // fix historical keys that were incorrect
 export class HandlePublicKeys1652142819353 implements MigrationInterface {
 
   public name = "HandlePublicKeys1652142819353"
-
-  // This code is in utility.ts in pubHexFromBuf. Copying here so that we can remove the other later without changing this file.
-  private pubHexFromBuf(oldKeyBuf) {
-    // computePublicKey returns value with 0x on front
-    let newKeyHex = computePublicKey(oldKeyBuf, true)
-    if (newKeyHex.startsWith('0x')) {
-      newKeyHex = newKeyHex.substring(2) // remove Ethereum prefix
-    }
-    return newKeyHex
-  }
 
   public async up(queryRunner: QueryRunner): Promise<void> {
 
