@@ -286,6 +286,7 @@ export const pubHexFromBuf = (oldKeyBuf) => {
   return newKeyHex
 }
 
+// this is for some bad legacy data, removable when we have no deployments < 6.2
 export const checkPubKeyBase64 = (oldKeyBase64) => {
   if (!oldKeyBase64) {
     return oldKeyBase64

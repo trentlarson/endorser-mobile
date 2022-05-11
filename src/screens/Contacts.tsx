@@ -206,6 +206,7 @@ export function ContactsScreen({ navigation, route }) {
             contact[contactFields[col]] = value
           }
         }
+        contact.pubKeyBase64 = utility.checkPubKeyBase64(contact.pubKeyBase64)
         contacts = R.concat(contacts, [contact])
         if (contactArray.length < contactFields.length) {
           messages = R.concat(messages, ['There are fewer than ' + contactFields.length + ' fields in the row for "' + contact.name + '". (Will attempt to save anyway.)'])
