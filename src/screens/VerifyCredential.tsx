@@ -167,7 +167,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
             setEndorserId(foundEndorserId)
 
-            const url = appStore.getState().apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + foundEndorserId
+            const url = appStore.getState().apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + encodeURIComponent(foundEndorserId)
             const userToken = await utility.accessToken(identifiers[0])
             await fetch(url, {
               headers: {

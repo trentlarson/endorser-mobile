@@ -38,7 +38,7 @@ export function ConfirmOthersScreen({ navigation }) {
 
       const endorserApiServer = appStore.getState().apiServer
       const token = await utility.accessToken(ids[0])
-      return fetch(endorserApiServer + '/api/claim/?issuedAt_greaterThanOrEqualTo=' + loadMoreStartingStr + "&issuedAt_lessThan=" + loadMoreEndingStr + "&excludeConfirmations=true", {
+      return fetch(endorserApiServer + '/api/claim/?issuedAt_greaterThanOrEqualTo=' + encodeURIComponent(loadMoreStartingStr) + "&issuedAt_lessThan=" + encodeURIComponent(loadMoreEndingStr) + "&excludeConfirmations=true", {
         headers: {
           "Content-Type": "application/json",
           "Uport-Push-Token": token,

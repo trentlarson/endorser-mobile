@@ -32,9 +32,9 @@ export function ReportScreen({ navigation }) {
     let urlSuffix
     let oneResult = false
     if (param.searchTerm != null) {
-      urlSuffix = '?claimContents=' + param.searchTerm
+      urlSuffix = '?claimContents=' + encodeURIComponent(param.searchTerm)
     } else if (param.claimId != null) {
-      urlSuffix = '/' + param.claimId
+      urlSuffix = '/' + encodeURIComponent(param.claimId)
       oneResult = true
     }
 

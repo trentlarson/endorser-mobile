@@ -277,7 +277,7 @@ export function ContactsScreen({ navigation, route }) {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(id0)
-    return fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + contact.did, {
+    return fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + encodeURIComponent(contact.did), {
       headers: {
         "Content-Type": "application/json",
         "Uport-Push-Token": token,
