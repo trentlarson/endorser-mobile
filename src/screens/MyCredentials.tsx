@@ -146,17 +146,6 @@ export function MyCredentialsScreen({ navigation }) {
   // Hack because without this it doesn't scroll to the bottom: https://stackoverflow.com/a/67244863/845494
   const screenHeight = Dimensions.get('window').height - 200
 
-  const goVerifyCredential = async (wrappedClaim) => {
-    const vc = await agent.createVerifiableCredential({
-      credential: {
-        credentialSubject: wrappedClaim.claim,
-        id: appStore.getState().apiServer + '/api/claim/' + wrappedClaim.id,
-        issuer: { id: wrappedClaim.issuer },
-      }
-    })
-    navigation.navigate('Verify Credential', { vc: vc })
-  }
-
   return (
     <SafeAreaView>
       <View style={{ padding: 20, height: screenHeight }}>
@@ -308,31 +297,23 @@ export function MyCredentialsScreen({ navigation }) {
 
                     <View style={{ flexDirection: 'row' }}>
                       {
-                        isUser(data.item.issuer)
-                        ?
-                          <Pressable
-                            style={{ padding: 10 }}
-                            onPress={ () => goVerifyCredential(data.item) }
-                          >
-                            <Text style={{ color: "blue" }}>Check it</Text>
-                          </Pressable>
-                        :
-                          <View />
+                        <Pressable
+                          style={{ padding: 10 }}
+                          onPress={ () => navigation.navigate('Verify Credential', { wrappedClaim: data.item }) }
+                        >
+                          <Text style={{ color: "blue" }}>Check it</Text>
+                        </Pressable>
                       }
 
                       {
-                        isUser(data.item.issuer)
-                        ?
-                          <Pressable
-                            style={{ padding: 10 }}
-                            onPress={ () =>
-                              navigation.navigate('Present Credential', { fullClaim: data.item })
-                            }
-                          >
-                            <Text style={{ color: "blue" }}>Present it</Text>
-                          </Pressable>
-                        :
-                          <View />
+                        <Pressable
+                          style={{ padding: 10 }}
+                          onPress={ () =>
+                            navigation.navigate('Present Credential', { fullClaim: data.item })
+                          }
+                        >
+                          <Text style={{ color: "blue" }}>Present it</Text>
+                        </Pressable>
                       }
 
                       {

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { ActivityIndicator, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import QRCode from "react-native-qrcode-svg"
 import { useFocusEffect } from '@react-navigation/native'
+import { ICreateVerifiablePresentationArgs } from '@veramo/credentials-w3c'
 
 import { appStore } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
@@ -9,7 +10,7 @@ import { agent } from '../veramo/setup'
 export function PresentCredentialScreen({ navigation, route }) {
 
   const [credOrPrezStr, setCredOrPrezStr] = useState<string>()
-  const [qrError, setQrError] = useState<boolean>(false)
+  const [errorMsg, setErrorMsg] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
 
   const { fullClaim } = route.params
@@ -19,36 +20,40 @@ export function PresentCredentialScreen({ navigation, route }) {
       async function createPresentation() {
 
         // based on https://github.com/uport-project/veramo/blob/next/packages/credential-w3c/src/__tests__/action-handler.test.ts#L86
+        let identifiers = appStore.getState().identifiers
         const vc = await agent.createVerifiableCredential({
           credential: {
             credentialSubject: fullClaim.claim,
             id: appStore.getState().apiServer + '/api/claim/' + fullClaim.id,
-            issuer: { id: fullClaim.issuer },
+            issuer: { id: identifiers[0].did },
           }
         })
+        const vcStr = JSON.stringify(vc)
 
-        let vp
-        /** These are currently too long, so you'll have to split into multiple QR codes.
-        let identifiers = appStore.getState().identifiers
-        if (identifiers.length > 0 && identifiers[0].did !== fullClaim.issuer) {
+        let vpStr
+        if (false && identifiers.length > 0) {
           // Verifiable types found here: https://github.com/uport-project/veramo/blob/next/packages/core/src/types/IMessage.ts
           // These will be automatically filled in: @context, type, issuanceDate
           // ... according to https://github.com/uport-project/veramo/blob/next/packages/credential-w3c/src/action-handler.ts#L50
-          const vpArgs = {
+          const vpArgs: ICreateVerifiablePresentationArgs = {
             presentation: {
               holder: identifiers[0].did,
-              verifier: [fullClaim.subject],
               verifiableCredential: [vc],
+              //verifier: [...]
             }
           }
-          vp = await agent.createVerifiablePresentation(vpArgs)
-          console.log('vp length', JSON.stringify(vp).length, vp)
+          const vp = await agent.createVerifiablePresentation(vpArgs)
+          vpStr = JSON.stringify(vp)
         }
-        **/
 
-        const qrObject = vp || vc
-
-        setCredOrPrezStr(JSON.stringify(qrObject))
+        const qrStr = (vpStr || vcStr)
+        if (qrStr.length > 2331) {
+          // It's larger than allowed for default error correction. https://www.npmjs.com/package/qrcode#qr-code-capacity
+          // (Trial and error shows that it can render if a little bigger but not too much.)
+          setErrorMsg('Error: The presentation data is too much for a QR code.')
+        } else {
+          setCredOrPrezStr(qrStr)
+        }
       }
 
       createPresentation().then(() => setLoading(false))
@@ -61,12 +66,12 @@ export function PresentCredentialScreen({ navigation, route }) {
       <ScrollView>
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>{ fullClaim.claim['@type'] || 'Unknown Type' }</Text>
-          <View style={{ padding: 10 }}>
+          <View>
             { loading
               ? <ActivityIndicator color="#00FF00" />
-              : qrError
-                ? <Text>Cannot generate a QR code.</Text>
-                : <QRCode value={credOrPrezStr} size={300} onError={setQrError}/>
+              : errorMsg
+                ? <Text>{errorMsg}</Text>
+                : <QRCode value={credOrPrezStr} size={300} onError={ err => {setErrorMsg(err.toString()) /* Gives an 'update a component' complaint but cannot get around it. */} }/>
             }
           </View>
         </View>
