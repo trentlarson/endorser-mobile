@@ -70,7 +70,8 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
  * Render each claim with links to take actions.
  *
  * source is any object or array
- * claimId (optional) is the ID for server lookup
+ * navigation (optional) is the navigation object (used to provide links to verify cred, etc)
+ * afterItemCss (optional) is CSS to add to add after each item
  */
 export const YamlFormat = ({ source, navigation, afterItemCss }) => {
 
@@ -82,7 +83,8 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
   const allContacts = useSelector((state) => state.contacts || [])
 
   /**
-   * see objectToYamlReact for items that include actions
+   * claimId (optional) is the ID for server lookup
+   * visibleToDids (optional) is the object containing reference to visible DIDs
    */
   const objectToYamlReactRecur = (obj, claimId, visibleToDids) => {
     if (obj instanceof Object) {
@@ -149,6 +151,9 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
 
   let finalSource = source
   let hideActions = false
+  if (!navigation) {
+    hideActions = true
+  }
   if (source == null) {
     finalSource = []
   } else if (!Array.isArray(source)) {

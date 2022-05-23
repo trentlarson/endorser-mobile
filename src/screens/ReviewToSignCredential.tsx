@@ -4,6 +4,7 @@ import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-n
 import { CheckBox } from "react-native-elements"
 
 import * as utility from '../utility/utility'
+import { YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 
 const debug = Debug('endorser-mobile:review-credential')
@@ -101,7 +102,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                 {
                   claimStr ? (
                     <View>
-                      <Text>Hit 'sign' if the information below is good.</Text>
+                      <Text>Hit 'sign' if the Details below are good.</Text>
                     </View>
                   ) : ( /* !claimStr */
                     <Text>No claim found.  Go back and try again.</Text>
@@ -135,7 +136,10 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                       </View>
                   }
 
-                  <Text style={{ marginTop: 75, marginBottom: 5 }}>Details</Text>
+                  <Text style={{ marginTop: 75, marginBottom: 5, fontSize: 20, fontWeight: 'bold' }}>Details</Text>
+                  <YamlFormat source={ JSON.parse(claimStr) } />
+
+                  <Text style={{ marginTop: 200, marginBottom: 5, fontSize: 20, fontWeight: 'bold' }}>Technical Details</Text>
                   <Text style={{ fontSize: 11 }}>Signing As:</Text>
                   <Text style={{ fontSize: 11 }}>{id0.did}</Text>
                   { !hasMnemonic ? (
