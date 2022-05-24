@@ -101,6 +101,7 @@ export function SignCredentialScreen({ navigation, route }) {
       const signer = didJwt.SimpleSigner(identifier.keys[0].privateKeyHex)
       const did: string = identifier.did
       const vcClaim = credSubj
+
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
       const vcJwt: string = await didJwt.createJWT(utility.vcPayload(did, vcClaim),{ issuer: did, signer })
       setJwts(R.update(index, vcJwt))
@@ -203,27 +204,9 @@ export function SignCredentialScreen({ navigation, route }) {
                     <View style={{ marginTop: 30 }} key={index}>
                       <Text style={{ fontSize: 20 }}>Claim{ claimNumber(index) }</Text>
 
-                      {
-                        jwts[index] ? (
-                          <View>
-                            <View style={{ marginTop: 10 }} />
-                            <Text>JWT with Signature</Text>
-                            <TextInput
-                              multiline={true}
-                              style={{ borderWidth: 1, height: 300 }}
-                            >
-                              { jwts[index] }
-                            </TextInput>
-                          </View>
-                        ) : ( /* !jwt */
-                          <Text>There is no signature for this credential.</Text>
-                        )
-                      }
-
                       <Text style={{ marginTop: 10, marginBottom: 5 }}>Original Details</Text>
                       <Text style={{ fontSize: 11 }}>Signed As:</Text>
                       <Text style={{ fontSize: 11 }}>{identifier.did}</Text>
-
                       <TextInput
                         editable={false}
                         multiline={true}
@@ -231,6 +214,19 @@ export function SignCredentialScreen({ navigation, route }) {
                       >
                         { JSON.stringify(origCred, null, 2) }
                       </TextInput>
+
+                      <View>
+                        <View style={{ marginTop: 10 }} />
+                        <Text>JWT with Signature</Text>
+                        <TextInput
+                          editable={false}
+                          multiline={true}
+                          style={{ borderWidth: 1, height: 300 }}
+                        >
+                          { jwts[index] }
+                        </TextInput>
+                      </View>
+
                     </View>
                   ))
                 }
