@@ -88,7 +88,7 @@ export function MyCredentialsScreen({ navigation }) {
   const searchEndorserForTransactions = async () => {
     setLoading(true)
     setLoadedNumber(0)
-    let allResults = []
+    let allResults: Array<utility.EndorserRecord> = []
     let maybeMoreAfter
     do {
       let nextResults = await moreTransactions(maybeMoreAfter)

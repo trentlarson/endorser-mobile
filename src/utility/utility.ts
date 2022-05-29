@@ -7,6 +7,19 @@ import * as R from 'ramda'
 
 import { Contact } from '../entity/contact'
 
+export class EndorserRecord {
+  id: string
+  issuedAt: string
+  issuer: string
+  subject: string | null
+  claimContext: string
+  claimType: string
+  claim: string // JSON.parse this
+  hashHex: string
+  hashChainHex: string | null // these eventually have an immutable value, but it may be empty for a while after recording
+  jwtEncoded?: string // this may not be accessible by the current user/endpoint and thus may not be in result data
+}
+
 // This is used to check for hidden info.
 // See https://github.com/trentlarson/endorser-ch/blob/0cb626f803028e7d9c67f095858a9fc8542e3dbd/server/api/services/util.js#L6
 const HIDDEN_DID = 'did:none:HIDDEN'

@@ -9,11 +9,11 @@ import { agent } from '../veramo/setup'
 
 export function PresentCredentialScreen({ navigation, route }) {
 
-  const [credOrPrezStr, setCredOrPrezStr] = useState<string>()
+  const { fullClaim } = route.params
+
+  const [prezStr, setPrezStr] = useState<string>()
   const [errorMsg, setErrorMsg] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
-
-  const { fullClaim } = route.params
 
   useFocusEffect(
     React.useCallback(() => {
@@ -52,7 +52,7 @@ export function PresentCredentialScreen({ navigation, route }) {
           // (Trial and error shows that it can render if a little bigger but not too much.)
           setErrorMsg('Error: The presentation data is too much for a QR code.')
         } else {
-          setCredOrPrezStr(qrStr)
+          setPrezStr(qrStr)
         }
       }
 
@@ -71,7 +71,7 @@ export function PresentCredentialScreen({ navigation, route }) {
               ? <ActivityIndicator color="#00FF00" />
               : errorMsg
                 ? <Text>{errorMsg}</Text>
-                : <QRCode value={credOrPrezStr} size={300} onError={ err => {setErrorMsg(err.toString()) /* Gives an 'update a component' complaint but cannot get around it. */} }/>
+                : <QRCode value={prezStr} size={300} onError={ err => {setErrorMsg(err.toString()) /* Gives an 'update a component' complaint but cannot get around it. */} }/>
             }
           </View>
         </View>

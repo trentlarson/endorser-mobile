@@ -20,7 +20,7 @@ export function ScanPresentationScreen({ navigation }) {
   }
 
   const onSuccessfulQrText = async (qrText) => {
-    navigation.navigate('Verify Credential', { vcStr: qrText })
+    navigation.navigate('Verify Credential', { veriCredStr: qrText })
   }
 
   return (
@@ -58,11 +58,11 @@ export function ScanPresentationScreen({ navigation }) {
 
 export function VerifyCredentialScreen({ navigation, route }) {
 
-  // wrappedClaim is directly from Endorser server
-  // vc is Verified Credential format
-  const { vc, vcStr, wrappedClaim } = route.params
-
-  const vcObj = vc || (vcStr && JSON.parse(vcStr))
+  // Only one of the following is expected:
+  // - veriCred is Verified Credential
+  // - veriCredStr is JSON.stringified Verified Credential
+  // - wrappedClaim is directly from Endorser server (a utility.EndorserRecord)
+  const { veriCred, veriCredStr, wrappedClaim } = route.params
 
   const [confirmError, setConfirmError] = useState<string>('')
   const [credentialSubject, setCredentialSubject] = useState<any>(undefined)
@@ -76,7 +76,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [issuer, setIssuer] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [numHidden, setNumHidden] = useState<number>(0)
-  const [visibleIdList, setVisibleIdList] = useState([])
+  const [veriCredObject, setVeriCredObject] = useState<any>()
+  const [verifyError, setVerifyError] = useState<string>('')
+  const [visibleIdList, setVisibleIdList] = useState<string[]>([])
   const [visibleTo, setVisibleTo] = useState<string[]>([])
 
   const identifiers = useSelector((state) => state.identifiers || [])
@@ -85,6 +87,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
   useFocusEffect(
     React.useCallback(() => {
       async function verifyAll() {
+
+        let vcObj = veriCred || (veriCredStr && JSON.parse(veriCredStr))
 
         setLoading(true)
         setConfirmError('')
@@ -95,6 +99,46 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
         if (wrappedClaim) {
           setCredentialSubject(wrappedClaim.claim)
+        }
+
+        if (!vcObj && wrappedClaim) {
+          // try to retrive a full VC
+
+          const url = appStore.getState().apiServer + '/api/claim/full/' + encodeURIComponent(wrappedClaim.id)
+          const userToken = await utility.accessToken(identifiers[0])
+          await fetch(url, {
+            headers: {
+              "Content-Type": "application/json",
+              "Uport-Push-Token": userToken
+            }})
+            .then(response => {
+              if (response.status === 200) {
+                return response.json()
+              } else {
+                throw ('While retrieving full claim, got bad response status of ' + response.status)
+              }
+            })
+            .then((result: utility.EndorserRecord) => {
+              if (result.jwtEncoded) {
+                // could take all these items except jwtEncoded from the original wrappedClaim
+                vcObj = {
+                  "@context": [ "https://www.w3.org/2018/credentials/v1" ],
+                  credentialSubject: JSON.parse(result.claim),
+                  id: appStore.getState().apiServer + '/api/claim/' + result.id,
+                  issuer: { id: result.issuer },
+                  issuanceDate: result.issuedAt,
+                  type: [ "VerifiableCredential" ],
+                  proof: {
+                    type: 'JwtProof2020',
+                    jwt: result.jwtEncoded,
+                  }
+                }
+              }
+            })
+            .catch(e => {
+              console.log('Something went wrong trying to access JWT data from Endorser server.', e)
+              setVerifyError('Could not access full proof from Endorser server.')
+            })
         }
 
         if (vcObj) {
@@ -110,7 +154,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           try {
 
             verifiedResponse = await didJwt.verifyJWT(vcObj.proof.jwt, {resolver: DEFAULT_BASIC_RESOLVER, auth: true})
-            //console.log("verifiedResponse",verifiedResponse)
+            //console.log("verifiedResponse", JSON.stringify(verifiedResponse, null, 2))
 
             // if we're here, it must have passed validation
             setDetectedSigValid(true)
@@ -178,7 +222,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
                 if (response.status === 200) {
                   return response.json()
                 } else {
-                  throw ('Got bad response status of ' + response.status)
+                  throw ('While retrieving confirmations, got bad response status of ' + response.status)
                 }
               })
               .then(result => {
@@ -190,12 +234,13 @@ export function VerifyCredentialScreen({ navigation, route }) {
                 setVisibleTo(result.resultVisibleToDids || [])
               })
               .catch(e => {
-                console.log('Something went wrong trying to access data.', e)
-                setConfirmError('Something went wrong trying to access data.')
+                console.log('Something went wrong trying to access confirmation data.', e)
+                setConfirmError('Could not access confirmation data.')
               })
 
           }
         }
+        setVeriCredObject(vcObj)
         setLoading(false)
       }
 
@@ -278,12 +323,12 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Validity</Text>
           {
-            vcObj
+            veriCredObject
             ? (
               <View>
                 <View style={{ flex: 1, flexDirection: 'row' }}>
-                  <Text style={{ width: '20%' }}>Issuer</Text>
-                  <Text style={{ width: '80%' }} selectable={true}>{ utility.didInContext(issuer, identifiers, allContacts) }</Text>
+                  <Text style={{ width: '30%' }}>Issuer</Text>
+                  <Text style={{ width: '70%' }} selectable={true}>{ utility.didInContext(issuer, identifiers, allContacts) }</Text>
                 </View>
                 {
                   credentialSubject
@@ -312,6 +357,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
               <Text>There is no validity information.</Text>
             )
           }
+          <View style={{ padding: 5 }}>
+            <Text>{ verifyError }</Text>
+          </View>
 
           <VisibleDidModal didForVisibility={didForVisibleModal} setDidForVisibility={setDidForVisibleModal} />
 
@@ -322,7 +370,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
             ? <View><Text>ID on Server</Text><Text selectable={true}>{endorserId}</Text></View>
             : <View />
           }
-          <Text selectable={true}>{ vcObj ? JSON.stringify(vcObj) : '' }</Text>
+          <Text selectable={true}>{ veriCredObject ? JSON.stringify(veriCredObject) : '' }</Text>
           <Text selectable={true}>{ wrappedClaim ? JSON.stringify(wrappedClaim) : '' }</Text>
         </View>
       </ScrollView>
