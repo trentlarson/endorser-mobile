@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ActivityIndicator, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import QRCode from "react-native-qrcode-svg"
 import { useFocusEffect } from '@react-navigation/native'
 import { ICreateVerifiablePresentationArgs } from '@veramo/credentials-w3c'
@@ -7,11 +7,19 @@ import { ICreateVerifiablePresentationArgs } from '@veramo/credentials-w3c'
 import { appStore } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
 
+// Here is a size that tested well for scanning with my phone.
+// Maximums: https://www.npmjs.com/package/qrcode#qr-code-capacity
+// Tables: https://www.qrcode.com/en/about/version.html
+// (Trial and error shows that QRCode can handle a max of 2342.)
+const MAX_QR_BYTES = 1133 // 1134 jumps to the next resolution
+
 export function PresentCredentialScreen({ navigation, route }) {
 
   const { fullClaim } = route.params
 
-  const [prezStr, setPrezStr] = useState<string>()
+  const [fullPrezStr, setFullPrezStr] = useState<Array<string>>()
+  const [prezStrs, setPrezStrs] = useState<Array<string>>()
+  const [qrMessage, setQrMessage] = useState<string>()
   const [errorMsg, setErrorMsg] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -30,8 +38,7 @@ export function PresentCredentialScreen({ navigation, route }) {
         })
         const vcStr = JSON.stringify(vc)
 
-        let vpStr
-        if (false && identifiers.length > 0) {
+        if (identifiers.length > 0) {
           // Verifiable types found here: https://github.com/uport-project/veramo/blob/next/packages/core/src/types/IMessage.ts
           // These will be automatically filled in: @context, type, issuanceDate
           // ... according to https://github.com/uport-project/veramo/blob/next/packages/credential-w3c/src/action-handler.ts#L50
@@ -43,17 +50,26 @@ export function PresentCredentialScreen({ navigation, route }) {
             }
           }
           const vp = await agent.createVerifiablePresentation(vpArgs)
-          vpStr = JSON.stringify(vp)
+          const vpStr = JSON.stringify(vp)
+
+          setFullPrezStr(vpStr)
+
+          const qrStrs = []
+          let index = 0
+          while (index < vpStr.length) {
+            let nextIndex = index + MAX_QR_BYTES
+            qrStrs.push(vpStr.substring(index, nextIndex))
+            index = nextIndex
+          }
+          if (qrStrs.length > 0) {
+            setQrMessage('Note that the presentation data is too much for one QR code, so recipients must scan each of these.')
+          }
+          setPrezStrs(qrStrs)
+
+        } else {
+          setErrorMsg('Error: You have no identifier for signing. Go to Settings and create one.')
         }
 
-        const qrStr = (vpStr || vcStr)
-        if (qrStr.length > 2331) {
-          // It's larger than allowed for default error correction. https://www.npmjs.com/package/qrcode#qr-code-capacity
-          // (Trial and error shows that it can render if a little bigger but not too much.)
-          setErrorMsg('Error: The presentation data is too much for a QR code.')
-        } else {
-          setPrezStr(qrStr)
-        }
       }
 
       createPresentation().then(() => setLoading(false))
@@ -71,7 +87,32 @@ export function PresentCredentialScreen({ navigation, route }) {
               ? <ActivityIndicator color="#00FF00" />
               : errorMsg
                 ? <Text>{errorMsg}</Text>
-                : <QRCode value={prezStr} size={300} onError={ err => {setErrorMsg(err.toString()) /* Gives an 'update a component' complaint but cannot get around it. */} }/>
+                : <View>
+                    <Text>{ qrMessage }</Text>
+                    <View style={{ marginTop: 100 }} />
+                    {
+                      prezStrs.map((prez, index, array) =>
+                        <View key={ index }>
+                          <QRCode value={ prez } size={ 300 } onError={ err => {setErrorMsg(err.toString()) /* Gives an 'update a component' complaint but cannot get around it. */} }/>
+                          {
+                            index < array.length - 1
+                            ? <Text style={{ marginTop: 100, marginBottom: 100 }}>Scroll down for the next.</Text>
+                            : <Text />
+                          }
+                        </View>
+                      )
+                    }
+
+                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 100 }}>Full Text</Text>
+                    <TextInput
+                      editable={false}
+                      multiline={true}
+                      style={{ borderWidth: 1, height: 300 }}
+                    >
+                      { JSON.stringify(JSON.parse(fullPrezStr), null, 2) }
+                    </TextInput>
+
+                  </View>
             }
           </View>
         </View>
