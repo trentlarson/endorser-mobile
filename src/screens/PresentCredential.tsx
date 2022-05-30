@@ -62,7 +62,7 @@ export function PresentCredentialScreen({ navigation, route }) {
             index = nextIndex
           }
           if (qrStrs.length > 0) {
-            setQrMessage('Note that the presentation data is too much for one QR code, so recipients must scan each of these.')
+            setQrMessage('Note that the presentation data is too much for one QR code, so recipients must "Scan Multiple" to scan each of these.')
           }
           setPrezStrs(qrStrs)
 
