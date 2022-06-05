@@ -32,6 +32,7 @@ export function PresentCredentialScreen({ navigation, route }) {
         const vc = await agent.createVerifiableCredential({
           credential: {
             credentialSubject: fullClaim.claim,
+            iat: Math.round(new Date().valueOf() / 1000),
             id: appStore.getState().apiServer + '/api/claim/' + fullClaim.id,
             issuer: { id: identifiers[0].did },
           }
@@ -45,6 +46,7 @@ export function PresentCredentialScreen({ navigation, route }) {
           const vpArgs: ICreateVerifiablePresentationArgs = {
             presentation: {
               holder: identifiers[0].did,
+              iat: Math.round(new Date().valueOf() / 1000),
               verifiableCredential: [vc],
               //verifier: [...]
             }
