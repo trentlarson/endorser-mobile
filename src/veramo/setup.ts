@@ -42,9 +42,6 @@ import { EncryptedSeed1637856484788 }    from '../migration/1637856484788-Encryp
 import { HomeScreenConfig1639947962124 } from '../migration/1639947962124-HomeScreenConfig'
 import { HandlePublicKeys1652142819353 } from '../migration/1652142819353-HandlePublicKeys'
 
-// You will need to get a project ID from infura https://www.infura.io
-const INFURA_PROJECT_ID = '0f439b3b9237480ea8eb9da7b1f3965a'
-
 const ALL_ENTITIES = Entities.concat([Contact, Settings])
 
 
@@ -75,7 +72,7 @@ NETWORK_NAMES.forEach((networkName) => {
   providers[didProviderName(networkName)] = new EthrDIDProvider({
     defaultKms: 'local',
     network: networkName,
-    rpcUrl: 'https://' + networkName + '.infura.io/v3/' + INFURA_PROJECT_ID,
+    rpcUrl: 'https://' + networkName + '.infura.io/v3/INFURA_PROJECT_ID',
     gas: 1000001,
     ttl: 60 * 60 * 24 * 30 * 12 + 1,
   })
@@ -92,7 +89,7 @@ const basicDidResolvers = NETWORK_NAMES.map((networkName) =>
     networkName,
     new Resolver({
       ethr: ethrDidResolver({
-        networks: [{ name: networkName, rpcUrl: 'https://' + networkName + '.infura.io/v3/' + INFURA_PROJECT_ID }],
+        networks: [{ name: networkName, rpcUrl: 'https://' + networkName + '.infura.io/v3/INFURA_PROJECT_ID' }],
       }).ethr,
       web: webDidResolver().web,
     })
