@@ -95,7 +95,7 @@ export function ReportScreen({ navigation }) {
               :
                 <View>
                   <Button
-                    title="Search for Contents"
+                    title="Search"
                     onPress={() => searchEndorser({ searchTerm: searchTerm })}
                   />
                   {
@@ -131,7 +131,7 @@ export function ReportScreen({ navigation }) {
           { identifiers.length > 0
             ?
               <View style={{ padding: 20 }}>
-                <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Your Credentials</Text>
+                <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Yours</Text>
                 <Button
                   title="Search"
                   onPress={() => navigation.navigate('Your Credentials')}

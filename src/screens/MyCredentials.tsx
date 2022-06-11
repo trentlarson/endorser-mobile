@@ -159,6 +159,7 @@ export function MyCredentialsScreen({ navigation }) {
             </View>
           :
             <View>
+
               <Text>Filter (optional) <Icon name="info-circle" onPress={() => setShowSearchInfoModal(true)} />
               </Text>
               <Modal
@@ -193,9 +194,10 @@ export function MyCredentialsScreen({ navigation }) {
 
               <View style={{ padding: 5 }} />
               <Button
-                title="Search For Transactional Claims"
+                title="Retrieve Your Transactional Claims"
                 onPress={searchEndorserForTransactions}
               />
+
               <FlatList
                 data={searchResults}
                 keyExtractor={item => item.id.toString()}
