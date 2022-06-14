@@ -4,6 +4,7 @@ import 'react-native-gesture-handler'
 import 'reflect-metadata'
 
 import { classToPlain } from 'class-transformer'
+import notifee from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -48,6 +49,27 @@ import { BVCButton } from './utility/utility.tsx'
 const Stack = createStackNavigator();
 
 export default function App() {
+
+  (async () => {
+    // Create a channel
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+    });
+
+    // Display a notification
+    const display = await notifee.displayNotification({
+      title: 'Notification Title',
+      body: 'Main body content of the notification',
+      android: {
+        channelId,
+        //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
+      },
+    });
+
+    console.log('display', display)
+  })()
+
   return (
     <Provider store={ appStore }>
       <SafeAreaProvider>
@@ -127,6 +149,27 @@ function HomeScreen({ navigation }) {
     getIdentifiers()
   }, [])
 
+  const notify = async () => {
+    // Create a channel
+    const channelId = await notifee.createChannel({
+      id: 'default 2',
+      name: 'Default Channel 2',
+    });
+
+    // Display a notification
+    const display = await notifee.displayNotification({
+      title: 'Notification Title 2',
+      body: 'Main body content of the notification 2',
+      android: {
+        channelId,
+        //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
+      },
+    });
+
+    console.log('display 2', display)
+
+  }
+
   return (
     <SafeAreaView>
       <ScrollView>
@@ -140,6 +183,10 @@ function HomeScreen({ navigation }) {
           allIdentifiers != null && allIdentifiers.length > 0
           ? (
             <View>
+                  <Button
+                    title={'Notify'}
+                    onPress={() => notify()}
+                  />
               {settings != null && settings.homeScreen === 'BVC'
               ? (
                 <View>
