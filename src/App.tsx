@@ -6,6 +6,7 @@ import 'reflect-metadata'
 import { classToPlain } from 'class-transformer'
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { Notifications } from 'react-native-notifications';
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer } from '@react-navigation/native'
@@ -48,6 +49,18 @@ import { BVCButton } from './utility/utility.tsx'
 const Stack = createStackNavigator();
 
 export default function App() {
+
+  const localNote = Notifications.postLocalNotification({
+    body: "Local notification!",
+    title: "Local Notification Title",
+    //sound: "chime.aiff",
+    silent: true,
+    category: "SOME_CATEGORY",
+    //userInfo: { },
+    //fireDate: new Date().toISOString(),
+  })
+  //console.log('localNote', localNote) // it's an integer
+
   return (
     <Provider store={ appStore }>
       <SafeAreaProvider>
