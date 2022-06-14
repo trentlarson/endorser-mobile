@@ -31,9 +31,24 @@ export function PresentCredentialScreen({ navigation, route }) {
         let identifiers = appStore.getState().identifiers
         const vc = await agent.createVerifiableCredential({
           credential: {
+
+            // Many of the following notes may be particular to Veramo.
+
             credentialSubject: fullClaim.claim,
+
+            // 'exp' is not found in the full VP
+            // this adds 'expirationDate' ISO string to full VP
+            // 'exp' is added to proof jwt as 'exp' epoch number
+            exp: Math.round(new Date().valueOf() / 1000 + (100 * 365 * 24 * 60 * 60)),
+
+            // this adds 'issuanceDate' ISO string to full VP (along with iat)
+            // 'iat' is added to proof jwt as 'iat' epoch number
             iat: Math.round(new Date().valueOf() / 1000),
+
+            // 'id' is found in the full VP but only 'jti' is found in the final proof
+            // this is added as 'jti' in each VC
             id: appStore.getState().apiServer + '/api/claim/' + fullClaim.id,
+
             issuer: { id: identifiers[0].did },
           }
         })
@@ -41,14 +56,25 @@ export function PresentCredentialScreen({ navigation, route }) {
 
         if (identifiers.length > 0) {
           // Verifiable types found here: https://github.com/uport-project/veramo/blob/next/packages/core/src/types/IMessage.ts
-          // These will be automatically filled in: @context, type, issuanceDate
+          // These will be automatically filled in: @context, type, nbf (as current time)
           // ... according to https://github.com/uport-project/veramo/blob/next/packages/credential-w3c/src/action-handler.ts#L50
           const vpArgs: ICreateVerifiablePresentationArgs = {
             presentation: {
+
+              // 'holder' is added to proof jwt as 'iss'
               holder: identifiers[0].did,
+
+              // 'exp' is not found in full VP
+              // this adds 'expirationDate' ISO string to full VP
+              // 'exp' is added to proof jwt as 'exp' epoch number
+              exp: Math.round(new Date().valueOf() / 1000 + (100 * 365 * 24 * 60 * 60)),
+
+              // this adds 'issuanceDate' ISO string to full VP (along with iat)
+              // 'iat' is added to proof jwt as 'iat' epoch number
               iat: Math.round(new Date().valueOf() / 1000),
+
+              // included in signed content under vp.verifiableCredential with each VC represented as a JWT string
               verifiableCredential: [vc],
-              //verifier: [...]
             }
           }
           const vp = await agent.createVerifiablePresentation(vpArgs)

@@ -194,7 +194,7 @@ export function MyCredentialsScreen({ navigation }) {
 
               <View style={{ padding: 5 }} />
               <Button
-                title="Retrieve Your Transactional Claims"
+                title="Retrieve All Your Transactional Claims"
                 onPress={searchEndorserForTransactions}
               />
 
