@@ -59,7 +59,7 @@ export default function App() {
     //userInfo: { },
     //fireDate: new Date().toISOString(),
   })
-  //console.log('localNote', localNote) // it's an integer
+  console.log('localNote', localNote) // it's an integer
 
   return (
     <Provider store={ appStore }>
@@ -140,6 +140,20 @@ function HomeScreen({ navigation }) {
     getIdentifiers()
   }, [])
 
+  const localNote = () => {
+    const note = Notifications.postLocalNotification({
+      body: "Local notification!",
+      title: "Local Notification Title",
+      //sound: "chime.aiff",
+      silent: true,
+      category: "SOME_CATEGORY",
+      //userInfo: { },
+      fireDate: '2022-06-15T12:26:00.000Z',//new Date().toISOString(),
+    })
+    console.log('localNote two', note) // it's an integer
+  }
+
+
   return (
     <SafeAreaView>
       <ScrollView>
@@ -153,6 +167,10 @@ function HomeScreen({ navigation }) {
           allIdentifiers != null && allIdentifiers.length > 0
           ? (
             <View>
+                  <Button
+                    title={'Notify'}
+                    onPress={() => localNote()}
+                  />
               {settings != null && settings.homeScreen === 'BVC'
               ? (
                 <View>
