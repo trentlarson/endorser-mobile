@@ -192,7 +192,7 @@ function HomeScreen({ navigation }) {
 
     const triggerNote = await notifee.createTriggerNotification(noteArg, triggerTime);
 
-    console.log('trigger', triggerNote)
+    console.log('trigger for', date, triggerNote)
     console.log('all trigger notifications', await notifee.getTriggerNotifications())
   }
 
