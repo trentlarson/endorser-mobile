@@ -4,7 +4,7 @@ import 'react-native-gesture-handler'
 import 'reflect-metadata'
 
 import { classToPlain } from 'class-transformer'
-import notifee from '@notifee/react-native';
+import notifee, { AuthorizationStatus, TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -49,26 +49,6 @@ import { BVCButton } from './utility/utility.tsx'
 const Stack = createStackNavigator();
 
 export default function App() {
-
-  (async () => {
-    // Create a channel
-    const channelId = await notifee.createChannel({
-      id: 'default',
-      name: 'Default Channel',
-    });
-
-    // Display a notification
-    const display = await notifee.displayNotification({
-      title: 'Notification Title',
-      body: 'Main body content of the notification',
-      android: {
-        channelId,
-        //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
-      },
-    });
-
-    console.log('display', display)
-  })()
 
   return (
     <Provider store={ appStore }>
@@ -144,10 +124,32 @@ function HomeScreen({ navigation }) {
       .catch((err) => {
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got an error: " + err}))
       })
-
     }
     getIdentifiers()
   }, [])
+
+  const requestNotifyPerms = async () => {
+    console.log('starting requestNotifyPerms')
+    const permSettings = await notifee.requestPermission({ alert: false, badge: false, carPlay: false, sound: false });
+    if (permSettings.authorizationStatus === AuthorizationStatus.DENIED) {
+     console.log('User denied permissions request');
+    } else if (permSettings.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
+      console.log('User granted permissions request');
+    } else if (permSettings.authorizationStatus === AuthorizationStatus.PROVISIONAL) {
+      console.log('User provisionally granted permissions request');
+    }
+    console.log('done with requestNotifyPerms', permSettings)
+
+    const storedSettings = await notifee.getNotificationSettings({})
+    if (storedSettings.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
+      console.log('Notification permissions have been authorized.');
+    } else if (storedSettings.authorizationStatus === AuthorizationStatus.DENIED) {
+      console.log('Notification permissions have been denied.');
+    } else {
+      console.log('Notification permissions are some weird value: ' + storedSettings.authorizationStatus)
+    }
+    console.log('Done getting notification storedSettings')
+  }
 
   const notify = async () => {
     // Create a channel
@@ -168,6 +170,30 @@ function HomeScreen({ navigation }) {
 
     console.log('display 2', display)
 
+
+
+    // Create a time-based trigger
+
+    const date = new Date(Date.now());
+    date.setMinutes(date.getMinutes() + 1);
+    date.setSeconds(0);
+    const triggerTime: TimestampTrigger = {
+      type: TriggerType.TIMESTAMP,
+      timestamp: date.getTime(),
+    };
+
+    const noteArg = {
+      title: 'Meeting with Jane',
+      body: 'Today at ' + date,
+      android: {
+        channelId: channelId,
+      },
+    }
+
+    const triggerNote = await notifee.createTriggerNotification(noteArg, triggerTime);
+
+    console.log('trigger', triggerNote)
+    console.log('all trigger notifications', await notifee.getTriggerNotifications())
   }
 
   return (
@@ -183,6 +209,10 @@ function HomeScreen({ navigation }) {
           allIdentifiers != null && allIdentifiers.length > 0
           ? (
             <View>
+                  <Button
+                    title={'Request Notify Perms'}
+                    onPress={() => requestNotifyPerms()}
+                  />
                   <Button
                     title={'Notify'}
                     onPress={() => notify()}
