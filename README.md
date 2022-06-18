@@ -121,11 +121,14 @@ Manually
   - Create an Offer, show total outstanding, mark as given, see adjustment of totals.
 
 - On an actual device (remember the table-name fiasco!)
-  - Android - must use Play Store to release to internal testing (because fiasco wasn't caught when connected)
+  - Android
+    - Must use Play Store to release to internal testing (because migrations fiasco wasn't caught when connected)
     - To work with different versions, increment versionCode in different clones of the repo (built from scratch), and test in Internal Testing with alternating builds & uploads.
-  - iOS - TestFlight is recommended (though potentially OK to use Xcode, since it would have caught the fiasco)
+  - iOS
+    - TestFlight is recommended (though potentially OK to use Xcode, since it would have caught the migrations fiasco)
 
-
+  - Install then create or import
+  - Notification permissions: new install messaging, accepted, declined then accepted, turned off in settings then accepted, ensure user knows when off
 
 
 

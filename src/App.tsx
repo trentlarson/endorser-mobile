@@ -4,14 +4,14 @@ import 'react-native-gesture-handler'
 import 'reflect-metadata'
 
 import { classToPlain } from 'class-transformer'
-import notifee, { AuthorizationStatus, TriggerType } from '@notifee/react-native';
+import notifee, { TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { Provider, useSelector } from 'react-redux';
+import { Provider, useSelector } from 'react-redux'
 
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
@@ -24,6 +24,7 @@ import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./sc
 import { MyCredentialsScreen } from './screens/MyCredentials'
 import { MyGivenScreen } from './screens/MyGiven'
 import { MyOffersScreen } from './screens/MyOffers'
+import { NotificationPermissionsScreen } from './screens/NotificationPermissions'
 import { PresentCredentialScreen } from './screens/PresentCredential'
 import { ReportScreen } from './screens/ReportFromEndorser'
 import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
@@ -64,9 +65,7 @@ export default function App() {
             <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
-            <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
-            <Stack.Screen name="Your Given" component={MyGivenScreen} />
-            <Stack.Screen name="Your Offers" component={MyOffersScreen} />
+            <Stack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
             <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
             <Stack.Screen name="Review to Sign Credential" component={ReviewToSignCredentialScreen} />
@@ -74,6 +73,9 @@ export default function App() {
             <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
+            <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
+            <Stack.Screen name="Your Given" component={MyGivenScreen} />
+            <Stack.Screen name="Your Offers" component={MyOffersScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
@@ -128,47 +130,24 @@ function HomeScreen({ navigation }) {
     getIdentifiers()
   }, [])
 
-  const requestNotifyPerms = async () => {
-    console.log('starting requestNotifyPerms')
-    const permSettings = await notifee.requestPermission({ alert: false, badge: false, carPlay: false, sound: false });
-    if (permSettings.authorizationStatus === AuthorizationStatus.DENIED) {
-     console.log('User denied permissions request');
-    } else if (permSettings.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
-      console.log('User granted permissions request');
-    } else if (permSettings.authorizationStatus === AuthorizationStatus.PROVISIONAL) {
-      console.log('User provisionally granted permissions request');
-    }
-    console.log('done with requestNotifyPerms', permSettings)
-
-    const storedSettings = await notifee.getNotificationSettings()
-    if (storedSettings.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
-      console.log('Notification permissions have been authorized.');
-    } else if (storedSettings.authorizationStatus === AuthorizationStatus.DENIED) {
-      console.log('Notification permissions have been denied.');
-    } else {
-      console.log('Notification permissions are some weird value: ' + storedSettings.authorizationStatus)
-    }
-    console.log('Done getting notification storedSettings')
-  }
-
   const notify = async () => {
     // Create a channel
     const channelId = await notifee.createChannel({
-      id: 'default 2',
-      name: 'Default Channel 2',
+      id: 'default-channel',
+      name: 'Default Channel',
     });
 
     // Display a notification
-    const display = await notifee.displayNotification({
-      title: 'Notification Title 2',
-      body: 'Main body content of the notification 2',
+    const displayNote = await notifee.displayNotification({
+      title: 'Notification Title',
+      body: 'Main body content of the notification',
       android: {
         channelId,
         //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
       },
     });
 
-    console.log('display 2', display)
+    console.log('display', displayNote)
 
 
 
@@ -183,7 +162,7 @@ function HomeScreen({ navigation }) {
     };
 
     const noteArg = {
-      title: 'Meeting with Jane',
+      title: 'Triggered notification',
       body: 'Today at ' + date,
       android: {
         channelId: channelId,
@@ -193,7 +172,11 @@ function HomeScreen({ navigation }) {
     const triggerNote = await notifee.createTriggerNotification(noteArg, triggerTime);
 
     console.log('trigger for', date, triggerNote)
-    console.log('all trigger notifications', await notifee.getTriggerNotifications())
+  }
+
+  const getNotifications = async () => {
+    console.log('all display notifications', await notifee.getDisplayedNotifications())
+    console.log('all trigger notifications', await notifee.getTriggerNotifications()) // only those scheduled for the future
   }
 
   return (
@@ -210,12 +193,12 @@ function HomeScreen({ navigation }) {
           ? (
             <View>
                   <Button
-                    title={'Request Notify Perms'}
-                    onPress={() => requestNotifyPerms()}
-                  />
-                  <Button
                     title={'Notify'}
                     onPress={() => notify()}
+                  />
+                  <Button
+                    title={'Get Notifications'}
+                    onPress={() => getNotifications()}
                   />
               {settings != null && settings.homeScreen === 'BVC'
               ? (
