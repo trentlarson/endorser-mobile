@@ -140,7 +140,7 @@ function HomeScreen({ navigation }) {
     }
     console.log('done with requestNotifyPerms', permSettings)
 
-    const storedSettings = await notifee.getNotificationSettings({})
+    const storedSettings = await notifee.getNotificationSettings()
     if (storedSettings.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
       console.log('Notification permissions have been authorized.');
     } else if (storedSettings.authorizationStatus === AuthorizationStatus.DENIED) {
