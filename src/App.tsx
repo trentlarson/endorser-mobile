@@ -80,6 +80,7 @@ export default function App() {
 }
 
 function HomeScreen({ navigation }) {
+  const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
 
@@ -89,40 +90,42 @@ function HomeScreen({ navigation }) {
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "About to load DIDs..."}))
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "About to load DIDs..."}))
 
-      agent.didManagerFind()
-      .then((_ids) => {
-        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... found DIDs, about to store..."}))
+      try {
+        const _ids = await agent.didManagerFind()
+
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... found DIDs, about to store..."}))
         appStore.dispatch(appSlice.actions.setIdentifiers(_ids.map(classToPlain)))
-        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... stored DIDs, about to load settings ..."}))
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... stored DIDs, about to load settings ..."}))
 
-        return dbConnection
-      })
-      .then((conn) => {
-        return conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-      })
-      .then((settings) => {
+        const conn = await dbConnection
+
+        let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+
+        if (!settings) {
+          const initSettings = { id: MASTER_COLUMN_VALUE }
+          settings = await conn.manager.save(Settings, initSettings)
+        }
+
         appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
-
-        setLoading(false)
 
         if (settings != null && settings.mnemonic != null) {
           setOldMnemonic(true)
         }
 
-        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... loaded settings, about to load contacts..."}))
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded settings, about to load contacts..."}))
 
-        return utility.loadContacts(appSlice, appStore, dbConnection)
-      })
-      .then(() => {
-        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished loading contacts."}))
+        await utility.loadContacts(appSlice, appStore, dbConnection)
 
-      })
-      .catch((err) => {
-        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got an error: " + err}))
-      })
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
 
+      } catch (err) {
+        console.log('Got error on initial App useEffect:', err)
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
+        setInitError('Something went wrong during initialization. Kindly send us the logs (under Settings -> Advanced Mode).')
+      }
+      setLoading(false)
     }
     getIdentifiers()
   }, [])
@@ -132,11 +135,25 @@ function HomeScreen({ navigation }) {
       <ScrollView>
         {
         loading
-        ? (
-          <View style={{ marginLeft: '45%', marginTop: '50%' }}>
+        ?
+          <View style={{ marginTop: '50%', marginLeft: '45%'}}>
             <Text>Loading...</Text>
           </View>
-        ) : ( // not loading
+        :
+          <View />
+        }
+
+        {
+        initError
+        ?
+          <View style={{ marginTop: '50%', marginLeft: '10%', marginRight: '10%' }}>
+            <Text style={{ color: 'red' }}>{initError}</Text>
+          </View>
+        :
+          <View />
+        }
+
+        {
           allIdentifiers != null && allIdentifiers.length > 0
           ? (
             <View>
@@ -218,7 +235,6 @@ function HomeScreen({ navigation }) {
               />
             </View>
           )
-        )
         }
         <View style={{ marginTop: 5 }}/>
         <Button
