@@ -50,17 +50,6 @@ const Stack = createStackNavigator();
 
 export default function App() {
 
-  const localNote = Notifications.postLocalNotification({
-    body: "Local notification!",
-    title: "Local Notification Title",
-    //sound: "chime.aiff",
-    silent: true,
-    category: "SOME_CATEGORY",
-    //userInfo: { },
-    //fireDate: new Date().toISOString(),
-  })
-  console.log('localNote', localNote) // it's an integer
-
   return (
     <Provider store={ appStore }>
       <SafeAreaProvider>
@@ -141,6 +130,14 @@ function HomeScreen({ navigation }) {
   }, [])
 
   const localNote = () => {
+    const date = new Date()
+    const oldSeconds = date.getSeconds()
+    date.setSeconds((oldSeconds + 5) % 60)
+    if (oldSeconds > date.getSeconds()) {
+      date.setMinutes(date.getMinutes() + 1)
+    }
+    // This only fires when the app is in the background.
+    // (return value is an integer, monotonically increasing from 1)
     const note = Notifications.postLocalNotification({
       body: "Local notification!",
       title: "Local Notification Title",
@@ -148,15 +145,35 @@ function HomeScreen({ navigation }) {
       silent: true,
       category: "SOME_CATEGORY",
       //userInfo: { },
-      fireDate: '2022-06-15T12:26:00.000Z',//new Date().toISOString(),
+      fireDate: date.toISOString(),
     })
-    console.log('localNote two', note) // it's an integer
+    console.log('Scheduling note for', date)
   }
 
+  const checkNotes = async () => {
+    const perms = await Notifications.ios.checkPermissions()
+    console.log('perms',perms)
+  }
+
+  const registerNotes = async () => {
+    Notifications.ios.registerRemoteNotifications({}) // returns undefined; turning lockScreen & sound to false doesn't affect perms
+  }
 
   return (
     <SafeAreaView>
       <ScrollView>
+                  <Button
+                    title={'Notify'}
+                    onPress={() => localNote()}
+                  />
+                  <Button
+                    title={'Check Notifys'}
+                    onPress={() => checkNotes()}
+                  />
+                  <Button
+                    title={'Register Notifys'}
+                    onPress={() => registerNotes()}
+                  />
         {
         loading
         ? (
@@ -167,10 +184,6 @@ function HomeScreen({ navigation }) {
           allIdentifiers != null && allIdentifiers.length > 0
           ? (
             <View>
-                  <Button
-                    title={'Notify'}
-                    onPress={() => localNote()}
-                  />
               {settings != null && settings.homeScreen === 'BVC'
               ? (
                 <View>
