@@ -620,6 +620,15 @@ export function SettingsScreen({navigation}) {
             </View>
 
             <View style={{ marginTop: 20, padding: 10 }}>
+              <Text
+                style={{ color: 'blue' }}
+                onPress={() => navigation.navigate('Notification Permissions')}
+              >
+                Check Permissions
+              </Text>
+            </View>
+
+            <View style={{ marginTop: 20, padding: 10 }}>
               <Text>Home Screen</Text>
               <CheckBox
                 title='Bountiful Voluntaryist Community'

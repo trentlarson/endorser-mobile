@@ -4,13 +4,14 @@ import 'react-native-gesture-handler'
 import 'reflect-metadata'
 
 import { classToPlain } from 'class-transformer'
+import notifee, { TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { Provider, useSelector } from 'react-redux';
+import { Provider, useSelector } from 'react-redux'
 
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
@@ -23,6 +24,7 @@ import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./sc
 import { MyCredentialsScreen } from './screens/MyCredentials'
 import { MyGivenScreen } from './screens/MyGiven'
 import { MyOffersScreen } from './screens/MyOffers'
+import { NotificationPermissionsScreen } from './screens/NotificationPermissions'
 import { PresentCredentialScreen } from './screens/PresentCredential'
 import { ReportScreen } from './screens/ReportFromEndorser'
 import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
@@ -48,6 +50,7 @@ import { BVCButton } from './utility/utility.tsx'
 const Stack = createStackNavigator();
 
 export default function App() {
+
   return (
     <Provider store={ appStore }>
       <SafeAreaProvider>
@@ -62,9 +65,7 @@ export default function App() {
             <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
-            <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
-            <Stack.Screen name="Your Given" component={MyGivenScreen} />
-            <Stack.Screen name="Your Offers" component={MyOffersScreen} />
+            <Stack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
             <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
             <Stack.Screen name="Review to Sign Credential" component={ReviewToSignCredentialScreen} />
@@ -72,6 +73,9 @@ export default function App() {
             <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
+            <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
+            <Stack.Screen name="Your Given" component={MyGivenScreen} />
+            <Stack.Screen name="Your Offers" component={MyOffersScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
@@ -130,9 +134,66 @@ function HomeScreen({ navigation }) {
     getIdentifiers()
   }, [])
 
+  const notify = async () => {
+    // Create a channel
+    const channelId = await notifee.createChannel({
+      id: 'default-channel',
+      name: 'Default Channel',
+    });
+
+    // Display a notification
+    const displayNote = await notifee.displayNotification({
+      title: 'Notification Title',
+      body: 'Main body content of the notification',
+      android: {
+        channelId,
+        //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
+      },
+    });
+
+    console.log('display', displayNote)
+
+
+
+    // Create a time-based trigger
+
+    const date = new Date(Date.now());
+    date.setMinutes(date.getMinutes() + 1);
+    date.setSeconds(0);
+    const triggerTime: TimestampTrigger = {
+      type: TriggerType.TIMESTAMP,
+      timestamp: date.getTime(),
+    };
+
+    const noteArg = {
+      title: 'Triggered notification',
+      body: 'Today at ' + date,
+      android: {
+        channelId: channelId,
+      },
+    }
+
+    const triggerNote = await notifee.createTriggerNotification(noteArg, triggerTime);
+
+    console.log('trigger for', date, triggerNote)
+  }
+
+  const getNotifications = async () => {
+    console.log('all display notifications', await notifee.getDisplayedNotifications())
+    console.log('all trigger notifications', await notifee.getTriggerNotifications()) // only those scheduled for the future
+  }
+
   return (
     <SafeAreaView>
       <ScrollView>
+                  <Button
+                    title={'Notify'}
+                    onPress={() => notify()}
+                  />
+                  <Button
+                    title={'Get Notifications'}
+                    onPress={() => getNotifications()}
+                  />
         {
         loading
         ?

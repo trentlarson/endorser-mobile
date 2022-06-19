@@ -31,9 +31,11 @@ Clean:
 
 ... but note that answering "Y" to install pods sometimes doesn't actually install pods (?!) and you may have to `pod install` that by hand.
 
-Troubleshooting:
 
-- A "CompileC" error can happen after removing a dependency. You may have to manually remove node_modules and pods (both `ios/Pods` and `~/Library/Caches/CocoaPods`) and reinstall them... but even that may not work and sometimes I just clone a new copy and installe anew.
+
+Troubleshoot:
+
+- A "CompileC" error can happen after removing a dependency. You may have to manually remove node_modules and pods (both `ios/Pods` and `~/Library/Caches/CocoaPods`) and reinstall them... but even that may not work and sometimes I just clone a new copy and installe anew. (I've also seen it work to just rerun the app.
 
 
 ```
@@ -68,6 +70,9 @@ The following build commands failed:
 ```
 
 We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it still doesn't work you might remove all those flipper references in Podfile, remove Podfile.lock and Pods, and `pod install` again.
+
+- Got "Notifications permission pod is missing"? Try this: `rm -rf ~/Library/Developer/Xcode/DerivedData~/Library/Developer/Xcode/DerivedData`
+
 
 
 ## Create a New DB Migration
@@ -121,11 +126,14 @@ Manually
   - Create an Offer, show total outstanding, mark as given, see adjustment of totals.
 
 - On an actual device (remember the table-name fiasco!)
-  - Android - must use Play Store to release to internal testing (because fiasco wasn't caught when connected)
+  - Android
+    - Must use Play Store to release to internal testing (because migrations fiasco wasn't caught when connected)
     - To work with different versions, increment versionCode in different clones of the repo (built from scratch), and test in Internal Testing with alternating builds & uploads.
-  - iOS - TestFlight is recommended (though potentially OK to use Xcode, since it would have caught the fiasco)
+  - iOS
+    - TestFlight is recommended (though potentially OK to use Xcode, since it would have caught the migrations fiasco)
 
-
+  - Install then create or import
+  - Notification permissions: new install messaging, accepted, declined then accepted, turned off in settings then accepted, ensure user knows when off
 
 
 
