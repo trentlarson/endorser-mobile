@@ -2,7 +2,7 @@
 import notifee, { AuthorizationStatus, TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, ScrollView, Text, View } from "react-native"
-import { openSettings } from 'react-native-permissions'
+import { openSettings, requestNotifications } from 'react-native-permissions'
 
 import { appSlice, appStore } from "../veramo/appSlice"
 
@@ -34,8 +34,14 @@ export function NotificationPermissionsScreen() {
   }, [])
 
   const enableNotifications = async () => {
-    // not making high-priority notification... there's no need to display things urgently
+
+    /**
+    // Doesn't always work (ie. after reinstall); see https://github.com/invertase/notifee/issues/432
+    // (not making high-priority notification... there's no need to display things urgently)
     const permSettings = await notifee.requestPermission({ alert: false, badge: false, carPlay: false, sound: false });
+    **/
+
+    const permSettings = await requestNotifications([])
     return checkSettings()
   }
 
@@ -59,55 +65,48 @@ export function NotificationPermissionsScreen() {
             <Text>You may turn them off at any time.</Text>
           </View>
 
-          <Text style={{ marginTop: 20 }}>Status</Text>
-
+          <Text style={{ marginTop: 20 }}>Status:&nbsp;
           {
             canNotify == null
             ?
-              <View>
-                <Text>Unsure whether you will get notifications.</Text>
-              </View>
-            : canNotify == false
+              <Text>Unsure whether you will get notifications.</Text>
+            :
+              canNotify == false
               ? 
                 isBlocked
                 ?
-                  <View>
-                    <Text>Notifications are blocked. To be notified of new activity, you must enable them in your phone settings.&nbsp;
-                      <Text style={{ color: 'blue' }} onPress={ openPhoneSettings }
-                      >
-                        Click here to enable Notifications in your phone settings.
-                      </Text>
+                  <Text>Notifications are blocked. To be notified of new activity, you must enable them in your phone settings.&nbsp;
+                    <Text style={{ color: 'blue' }} onPress={ openPhoneSettings }
+                    >
+                      Click here to enable Notifications in your phone settings.
                     </Text>
-                  </View>
+                  </Text>
                 :
                   // canNotify == false && !isBlocked
-                  <View>
-                    <Text>You will not get notifications.</Text>
-                  </View>
+                  <Text>You will not get notifications.</Text>
               :
                 // canNotify must be true
-                <View>
-                  <Text>You will get notifications.</Text>
-                </View>
+                <Text>You will get notifications.</Text>
           }
+          </Text>
 
           <Text style={{ marginTop: 20 }}>Actions</Text>
 
           {
             !canNotify
             ?
-              <Text style={{ color: 'blue' }} onPress={ enableNotifications }>
+              <Text style={{ color: 'blue', marginTop: 20 }} onPress={ enableNotifications }>
                 Click here to allow this app to enable Notifications.
               </Text>
             :
               <View />
           }
 
-          <Text style={{ color: 'blue' }} onPress={ checkSettings }>
+          <Text style={{ color: 'blue', marginTop: 20 }} onPress={ checkSettings }>
             Click here to double-check your settings in this app.
           </Text>
 
-          <Text style={{ color: 'blue' }} onPress={ openPhoneSettings }
+          <Text style={{ color: 'blue', marginTop: 20 }} onPress={ openPhoneSettings }
           >
             Click here to enable or disable Notifications in your phone settings.
           </Text>

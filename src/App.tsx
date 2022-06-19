@@ -182,6 +182,14 @@ function HomeScreen({ navigation }) {
   return (
     <SafeAreaView>
       <ScrollView>
+                  <Button
+                    title={'Notify'}
+                    onPress={() => notify()}
+                  />
+                  <Button
+                    title={'Get Notifications'}
+                    onPress={() => getNotifications()}
+                  />
         {
         loading
         ? (
@@ -192,14 +200,6 @@ function HomeScreen({ navigation }) {
           allIdentifiers != null && allIdentifiers.length > 0
           ? (
             <View>
-                  <Button
-                    title={'Notify'}
-                    onPress={() => notify()}
-                  />
-                  <Button
-                    title={'Get Notifications'}
-                    onPress={() => getNotifications()}
-                  />
               {settings != null && settings.homeScreen === 'BVC'
               ? (
                 <View>
