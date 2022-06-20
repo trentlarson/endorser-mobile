@@ -44,7 +44,7 @@ rm -rf /tmp/metro-*
 rm -rf ~/Library/Caches/CocoaPods ios/Pods
 cd ios; pod install; cd ..
 rm -rf node_modules
-yarn install
+yarn
 yarn start --reset-cache # which you'll have to kill because it doesn't stop
 ```
 
@@ -71,7 +71,7 @@ The following build commands failed:
 
 We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it still doesn't work you might remove all those flipper references in Podfile, remove Podfile.lock and Pods, and `pod install` again.
 
-- Got "Notifications permission pod is missing"? Try this: `rm -rf ~/Library/Developer/Xcode/DerivedData~/Library/Developer/Xcode/DerivedData`
+- Got "Notifications permission pod is missing"? Try this: `rm -rf ~/Library/Developer/Xcode/DerivedData`
 
 
 
