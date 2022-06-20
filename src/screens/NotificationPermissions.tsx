@@ -2,7 +2,9 @@
 import notifee, { AuthorizationStatus, TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, ScrollView, Text, View } from "react-native"
+import BackgroundFetch from "react-native-background-fetch"
 import { openSettings, requestNotifications } from 'react-native-permissions'
+import { useSelector } from 'react-redux'
 
 import { appSlice, appStore } from "../veramo/appSlice"
 
@@ -12,9 +14,13 @@ import { appSlice, appStore } from "../veramo/appSlice"
  **/
 export function NotificationPermissionsScreen() {
 
+  const [backgroundStatus, setBackgroundStatus] = useState<number>()
   const [canNotify, setCanNotify] = useState<boolean>()
   const [isBlocked, setIsBlocked] = useState<boolean>()
   const [openSettingsError, setOpenSettingsError] = useState<boolean>(false)
+
+  const startupTime = useSelector((state) => state.startupTime)
+  const lastBackgroundRunTime = useSelector((state) => state.lastBackgroundRunTime)
 
   const checkSettings = async () => {
     const storedSettings = await notifee.getNotificationSettings()
@@ -27,6 +33,8 @@ export function NotificationPermissionsScreen() {
     } else {
       setCanNotify(null)
     }
+
+    setBackgroundStatus(await BackgroundFetch.status())
   }
 
   useEffect(() => {
@@ -54,7 +62,7 @@ export function NotificationPermissionsScreen() {
     <SafeAreaView>
       <ScrollView>
         <View style={{padding: 20}}>
-          <Text style={{fontSize: 30, fontWeight: 'bold'}}>Notification Permissions</Text>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Notification Permissions</Text>
 
           <View style={{ marginTop: 50 }} />
 
@@ -116,6 +124,32 @@ export function NotificationPermissionsScreen() {
             ? <Text style={{ color: 'red' }}>Got an error opening your phone Settings. To enable notifications manually, go to your phone 'Settings' app and then select 'Notifications' and then choose this app and turn them on.</Text>
             : <View />
           }
+
+          <Text style={{ fontSize: 30, fontWeight: 'bold', marginTop: 50 }}>Background</Text>
+
+          <View style={{ marginTop: 50 }} />
+
+          <View>
+            <Text>App startup time: { startupTime }</Text>
+            <Text>Most recent background run: { lastBackgroundRunTime || "Never" }</Text>
+            <Text>Background status:&nbsp;
+            {
+              backgroundStatus === BackgroundFetch.STATUS_RESTRICTED
+              ?
+                "Restricted"
+              :
+                backgroundStatus === BackgroundFetch.STATUS_DENIED
+                ?
+                  "Denied by user"
+                :
+                  backgroundStatus === BackgroundFetch.STATUS_AVAILABLE
+                  ?
+                    "Available"
+                  :
+                    "Unknown (" + backgroundStatus + ")"
+            }
+            </Text>
+          </View>
 
         </View>
       </ScrollView>

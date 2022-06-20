@@ -159,6 +159,7 @@ To Release:
 - Test everything.
 - Update CHANGELOG.md
 - In package.json, update version
+- In App.tsx, ensure intervalMins is 60 * 24
 - Tag
 - (I recommend starting with ios since it takes longer to get approved.)
 - android

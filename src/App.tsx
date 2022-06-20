@@ -7,6 +7,7 @@ import { classToPlain } from 'class-transformer'
 import notifee, { TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import BackgroundFetch from "react-native-background-fetch"
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer } from '@react-navigation/native'
@@ -91,11 +92,35 @@ function HomeScreen({ navigation }) {
   const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
 
+  const initBackgroundFetch = async () => {
+    appStore.dispatch(appSlice.actions.setStartupTime(new Date().toISOString()))
+
+    const onEvent = async (taskId) => {
+      console.log('Background fetch called', taskId)
+      appStore.dispatch(appSlice.actions.setLastBackgroundRunTime(new Date().toISOString()))
+      BackgroundFetch.finish(taskId)
+    }
+    const onTimeout = async (taskId) => {
+      console.log('Background fetch killed', taskId)
+      BackgroundFetch.finish(taskId)
+    }
+    const intervalMins = 15//60 * 24
+    const status = await BackgroundFetch.configure({minimumFetchInterval: intervalMins}, onEvent, onTimeout);
+    if (status === BackgroundFetch.STATUS_AVAILABLE) {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Initiated background fetch successfully."}))
+    } else if (status === BackgroundFetch.STATUS_RESTRICTED) {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Cannot run background fetch on this device."}))
+    } else if (status === BackgroundFetch.STATUS_DENIED) {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "User has disabled background behavior."}))
+    } else {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Background setup got a very strange result of " + status}))
+    }
+  }
+
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "About to load DIDs..."}))
-
       try {
         const _ids = await agent.didManagerFind()
 
@@ -123,6 +148,8 @@ function HomeScreen({ navigation }) {
         await utility.loadContacts(appSlice, appStore, dbConnection)
 
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
+
+        initBackgroundFetch()
 
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)

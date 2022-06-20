@@ -49,6 +49,10 @@ export const appSlice = createSlice({
 
     advancedMode: false,
     testMode: false,
+
+    startupTime: null as string | null,
+    lastBackgroundRunTime: null as string | null,
+
   },
   reducers: {
     addIdentifier: (state, contents: Payload<IIdentifier>) => {
@@ -81,8 +85,14 @@ export const appSlice = createSlice({
     setIdentifiers: (state, contents: Payload<Array<IIdentifier>>) => {
       state.identifiers = contents.payload
     },
+    setLastBackgroundRunTime: (state, contents: Payload<string>) => {
+      state.lastBackgroundRunTime = contents.payload
+    },
     setSettings: (state, contents: Payload<Settings>) => {
       state.settings = contents.payload
+    },
+    setStartupTime: (state, contents: Payload<string>) => {
+      state.startupTime = contents.payload
     },
     setTestMode: (state, contents: Payload<boolean>) => {
       state.testMode = contents.payload
