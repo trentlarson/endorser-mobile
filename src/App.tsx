@@ -5,8 +5,10 @@ import 'reflect-metadata'
 
 import { classToPlain } from 'class-transformer'
 import notifee, { TriggerType } from '@notifee/react-native';
-import React, { useEffect, useState } from 'react'
-import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { AppState, Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import BackgroundTask from 'react-native-background-task'
+import BackgroundFetch from "react-native-background-fetch"
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer } from '@react-navigation/native'
@@ -83,19 +85,130 @@ export default function App() {
   )
 }
 
+BackgroundTask.define(async() => {
+  console.log('Hello from a background task', new Date().toISOString())
+  try {
+    // Create a channel
+    const channelId = await notifee.createChannel({
+      id: 'default-channel',
+      name: 'Default Channel',
+    });
+
+    // Display a notification
+    const displayNote = await notifee.displayNotification({
+      title: 'Background Task Notification',
+      body: 'Main body content of the background task notification',
+      android: {
+        channelId,
+      },
+    });
+  } catch (e) {
+    appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Failed to notify from background: " + e}))
+  }
+  BackgroundTask.finish()
+})
+
+async function checkStatus() {
+  const status = await BackgroundTask.statusAsync()
+  if (status.available) {
+    console.log('Everything is fine')
+    return
+  }
+  const reason = status.unavailableReason
+  if (reason === BackgroundTask.UNAVAILABLE_DENIED) {
+    console.log('Please enable background "Background App Refresh" for this app.')
+  } else if (reason === BackgroundTask.UNAVAILABLE_RESTRICTED) {
+    console.log('Background tasks are restricted on your device.')
+  } else {
+    console.log('Background tasks are unavailable for some reason.')
+  }
+}
+
 function HomeScreen({ navigation }) {
   const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
 
+  const appState = useRef(AppState.currentState)
+  const [appStateVisible, setAppStateVisible] = useState(appState.current)
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        console.log("App has come to the foreground!")
+      }
+
+      appState.current = nextAppState
+      setAppStateVisible(appState.current)
+      console.log("AppState", appState.current)
+      if (appState.current.match(/inactive|background/)) {
+        console.log('Scheduling background task')
+        const intervalMins = 900//60*24
+        BackgroundTask.schedule({period: 900})
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [])
+
   const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
+
+  const initBackgroundFetch = async () => {
+    //appStore.dispatch(appSlice.actions.setStartupTime(new Date().toISOString()))
+
+    checkStatus()
+
+    const onEvent = async (taskId) => {
+      console.log('Background fetch called', taskId)
+      //appStore.dispatch(appSlice.actions.setLastBackgroundRunTime(new Date().toISOString()))
+
+      try {
+        // Create a channel
+        const channelId = await notifee.createChannel({
+          id: 'default-channel',
+          name: 'Default Channel',
+        });
+
+        // Display a notification
+        const displayNote = await notifee.displayNotification({
+          title: 'Background Fetch Notification',
+          body: 'Main body content of the background fetch notification',
+          android: {
+            channelId,
+          },
+        });
+      } catch (e) {
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Failed to notify from background: " + e}))
+      }
+
+      BackgroundFetch.finish(taskId)
+    }
+    const onTimeout = async (taskId) => {
+      console.log('Background fetch killed', taskId)
+      BackgroundFetch.finish(taskId)
+    }
+    const intervalMins = 15//60 * 24
+    const status = await BackgroundFetch.configure({minimumFetchInterval: intervalMins}, onEvent, onTimeout);
+    if (status === BackgroundFetch.STATUS_AVAILABLE) {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Initiated background fetch successfully."}))
+    } else if (status === BackgroundFetch.STATUS_RESTRICTED) {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Cannot run background fetch on this device."}))
+    } else if (status === BackgroundFetch.STATUS_DENIED) {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "User has disabled background behavior."}))
+    } else {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Background setup got a very strange result of " + status}))
+    }
+  }
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "About to load DIDs..."}))
-
       try {
         const _ids = await agent.didManagerFind()
 
@@ -123,6 +236,8 @@ function HomeScreen({ navigation }) {
         await utility.loadContacts(appSlice, appStore, dbConnection)
 
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
+
+        initBackgroundFetch()
 
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
@@ -194,6 +309,7 @@ function HomeScreen({ navigation }) {
                     title={'Get Notifications'}
                     onPress={() => getNotifications()}
                   />
+                  <Text>Current state is: {appStateVisible}</Text>
         {
         loading
         ?
