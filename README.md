@@ -156,16 +156,18 @@ To Do First Release:
 
 To Release:
 
+- Next release:
+  - check time interval for background tasks (intervalMinsin App.tsx)
+
 - Test everything.
 - Update CHANGELOG.md
 - In package.json, update version
-- In App.tsx, ensure intervalMins is 60 * 24
 - Tag
 - (I recommend starting with ios since it takes longer to get approved.)
 - android
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number to match ios)
     - Always increment the versionCode (and ensure you don't already have a larger release in ios, just for consistency's sake).  It is possible to reuse the versionName.
-  - `cd android; bundle exec fastlane beta; cd ..`
+  - `cd android; bundle ls exec fastlane beta; cd ..`
     - It will prompt for credentials almost immediately.
     - For error: "Keystore file 'endorser-mobile/android/fastlane/../app/google...keystore' not found for signing config 'externalOverride'."
       - Put the google...keystore file in place.
@@ -184,6 +186,7 @@ To Release:
 
 - ios
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json, and CFBundleVersion to be the build number (same as in Android).
+    - The CFBundleShortVersionString must be "a period-separated list of at most three non-negative integers" according to https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleshortversionstring
     - Note that you cannot repeat an upload of a build number. (Version is OK.)
   - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION to be the build number (same as CFBundle Version. same as in android).
     - Alternatively, you could enable 'increment_build_number' in ios/fastlane/Fastfile.

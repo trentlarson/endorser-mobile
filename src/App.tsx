@@ -102,6 +102,7 @@ function HomeScreen({ navigation }) {
     }
     const onTimeout = async (taskId) => {
       console.log('Background fetch killed', taskId)
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Background fetch timed out."}))
       BackgroundFetch.finish(taskId)
     }
     const intervalMins = 15//60 * 24
@@ -213,14 +214,14 @@ function HomeScreen({ navigation }) {
   return (
     <SafeAreaView>
       <ScrollView>
-                  <Button
-                    title={'Notify'}
-                    onPress={() => notify()}
-                  />
-                  <Button
-                    title={'Get Notifications'}
-                    onPress={() => getNotifications()}
-                  />
+        <Button
+          title={'Notify'}
+          onPress={() => notify()}
+        />
+        <Button
+          title={'Get Notifications'}
+          onPress={() => getNotifications()}
+        />
         {
         loading
         ?
