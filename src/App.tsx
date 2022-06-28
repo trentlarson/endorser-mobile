@@ -93,6 +93,7 @@ function HomeScreen({ navigation }) {
   const settings = useSelector((state) => state.settings)
 
   const initBackgroundFetch = async () => {
+    console.log('Running initBackgroundFetch')
     appStore.dispatch(appSlice.actions.setStartupTime(new Date().toISOString()))
 
     const onEvent = async (taskId) => {
@@ -106,7 +107,17 @@ function HomeScreen({ navigation }) {
       BackgroundFetch.finish(taskId)
     }
     const intervalMins = 15//60 * 24
-    const status = await BackgroundFetch.configure({minimumFetchInterval: intervalMins}, onEvent, onTimeout);
+    const status = await BackgroundFetch.configure(
+      {
+        minimumFetchInterval: intervalMins,
+        stopOnTerminate: false,
+        enableHeadless: true,
+        startOnBoot: true,
+      },
+      onEvent,
+      onTimeout
+    )
+    console.log('BackgroundFetch status', status, BackgroundFetch.STATUS_AVAILABLE, BackgroundFetch.STATUS_RESTRICTED, BackgroundFetch.STATUS_DENIED)
     if (status === BackgroundFetch.STATUS_AVAILABLE) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Initiated background fetch successfully."}))
     } else if (status === BackgroundFetch.STATUS_RESTRICTED) {
@@ -150,13 +161,14 @@ function HomeScreen({ navigation }) {
 
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
 
-        initBackgroundFetch()
-
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
         setInitError('Something went wrong during initialization. Kindly send us the logs (under Settings -> Advanced Mode).')
       }
+
+      initBackgroundFetch()
+
       setLoading(false)
     }
     getIdentifiers()
