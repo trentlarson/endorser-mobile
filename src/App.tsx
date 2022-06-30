@@ -85,6 +85,7 @@ export default function App() {
 }
 
 function HomeScreen({ navigation }) {
+
   const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
@@ -98,6 +99,23 @@ function HomeScreen({ navigation }) {
     const onEvent = async (taskId) => {
       console.log('Background fetch called', taskId)
       appStore.dispatch(appSlice.actions.setLastBackgroundRunTime(new Date().toISOString()))
+
+      // Create a channel
+      const channelId = await notifee.createChannel({
+        id: 'background-channel',
+        name: 'Background Channel',
+      });
+
+      // Display a notification
+      const displayNote = await notifee.displayNotification({
+        title: 'Notification from Background',
+        body: 'Created the background at ' + new Date().toISOString(),
+        android: {
+          channelId,
+          //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
+        },
+      });
+
       BackgroundFetch.finish(taskId)
     }
     const onTimeout = async (taskId) => {
@@ -105,7 +123,7 @@ function HomeScreen({ navigation }) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Background fetch timed out."}))
       BackgroundFetch.finish(taskId)
     }
-    const intervalMins = 15//60 * 24
+    const intervalMins = 60// * 24
     const status = await BackgroundFetch.configure({minimumFetchInterval: intervalMins}, onEvent, onTimeout);
     if (status === BackgroundFetch.STATUS_AVAILABLE) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Initiated background fetch successfully."}))
@@ -163,13 +181,14 @@ function HomeScreen({ navigation }) {
   }, [])
 
   const notify = async () => {
-    // Create a channel
+
+    // Create a channel (returns Promise<string>)
     const channelId = await notifee.createChannel({
       id: 'default-channel',
       name: 'Default Channel',
     });
 
-    // Display a notification
+    // Display a notification (returns Promise<string>)
     const displayNote = await notifee.displayNotification({
       title: 'Notification Title',
       body: 'Main body content of the notification',
@@ -178,8 +197,6 @@ function HomeScreen({ navigation }) {
         //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
       },
     });
-
-    console.log('display', displayNote)
 
 
 
@@ -206,11 +223,6 @@ function HomeScreen({ navigation }) {
     console.log('trigger for', date, triggerNote)
   }
 
-  const getNotifications = async () => {
-    console.log('all display notifications', await notifee.getDisplayedNotifications())
-    console.log('all trigger notifications', await notifee.getTriggerNotifications()) // only those scheduled for the future
-  }
-
   return (
     <SafeAreaView>
       <ScrollView>
@@ -218,10 +230,7 @@ function HomeScreen({ navigation }) {
           title={'Notify'}
           onPress={() => notify()}
         />
-        <Button
-          title={'Get Notifications'}
-          onPress={() => getNotifications()}
-        />
+
         {
         loading
         ?
