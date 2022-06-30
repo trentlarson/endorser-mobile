@@ -110,7 +110,7 @@ function HomeScreen({ navigation }) {
       // Display a notification
       const displayNote = await notifee.displayNotification({
         title: 'Notification from Background',
-        body: 'Created the background at ' + new Date().toISOString(),
+        body: 'Created in the background at ' + new Date().toISOString(),
         android: {
           channelId,
           //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
