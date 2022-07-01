@@ -18,6 +18,8 @@ export function NotificationPermissionsScreen() {
 
   const checkSettings = async () => {
     const storedSettings = await notifee.getNotificationSettings()
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Notification settings: " + JSON.stringify(storedSettings)}))
+
     let isAuthorized = false
     if (storedSettings.authorizationStatus === AuthorizationStatus.DENIED) {
       setCanNotify(false)
