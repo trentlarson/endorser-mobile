@@ -1,3 +1,5 @@
 rootProject.name = 'EndorserMobile'
+include ':react-native-headless-work-manager'
+project(':react-native-headless-work-manager').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-headless-work-manager/android')
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 include ':app'
