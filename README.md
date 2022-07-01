@@ -25,6 +25,8 @@ Run android:
 
 `yarn run android`
 
+(Will have to use Android Studio and run the AVD Manager to configure an image.)
+
 Clean:
 
 `yarn run clean`

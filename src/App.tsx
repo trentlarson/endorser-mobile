@@ -6,7 +6,7 @@ import 'reflect-metadata'
 import { classToPlain } from 'class-transformer'
 import notifee, { TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
-import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { AppRegistry, Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import BackgroundFetch from "react-native-background-fetch"
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
@@ -93,61 +93,6 @@ function HomeScreen({ navigation }) {
   const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
 
-  const initBackgroundFetch = async () => {
-    console.log('Running initBackgroundFetch')
-    appStore.dispatch(appSlice.actions.setStartupTime(new Date().toISOString()))
-
-    const onEvent = async (taskId) => {
-      console.log('Background fetch called', taskId)
-      appStore.dispatch(appSlice.actions.setLastBackgroundRunTime(new Date().toISOString()))
-
-      // Create a channel
-      const channelId = await notifee.createChannel({
-        id: 'background-channel',
-        name: 'Background Channel',
-      });
-
-      // Display a notification
-      const displayNote = await notifee.displayNotification({
-        title: 'Notification from Background',
-        body: 'Created in the background at ' + new Date().toISOString(),
-        android: {
-          channelId,
-          //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
-        },
-      });
-
-      BackgroundFetch.finish(taskId)
-    }
-    const onTimeout = async (taskId) => {
-      console.log('Background fetch killed', taskId)
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Background fetch timed out."}))
-      BackgroundFetch.finish(taskId)
-    }
-    const intervalMins = 60// * 24
-    const status = await BackgroundFetch.configure(
-      {
-        minimumFetchInterval: intervalMins,
-        stopOnTerminate: false,
-        enableHeadless: true,
-        startOnBoot: true,
-      },
-      onEvent,
-      onTimeout
-    )
-    console.log('BackgroundFetch status', status, BackgroundFetch.STATUS_AVAILABLE, BackgroundFetch.STATUS_RESTRICTED, BackgroundFetch.STATUS_DENIED)
-
-    if (status === BackgroundFetch.STATUS_AVAILABLE) {
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Initiated background fetch successfully."}))
-    } else if (status === BackgroundFetch.STATUS_RESTRICTED) {
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Cannot run background fetch on this device."}))
-    } else if (status === BackgroundFetch.STATUS_DENIED) {
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "User has disabled background behavior."}))
-    } else {
-      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Background setup got a very strange result of " + status}))
-    }
-  }
-
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
@@ -186,20 +131,19 @@ function HomeScreen({ navigation }) {
         setInitError('Something went wrong during initialization. Kindly send us the logs (under Settings -> Advanced Mode).')
       }
 
-      initBackgroundFetch()
-
       setLoading(false)
     }
     getIdentifiers()
   }, [])
 
-  const notify = async () => {
+  // Create a channel (returns Promise<string>)
+  const channelCreation = notifee.createChannel({
+    id: 'default-channel',
+    name: 'Default Channel',
+  });
 
-    // Create a channel (returns Promise<string>)
-    const channelId = await notifee.createChannel({
-      id: 'default-channel',
-      name: 'Default Channel',
-    });
+  const notify = async () => {
+    const channelId = await channelCreation
 
     // Display a notification (returns Promise<string>)
     const displayNote = await notifee.displayNotification({
@@ -211,29 +155,7 @@ function HomeScreen({ navigation }) {
       },
     });
 
-
-
-    // Create a time-based trigger
-
-    const date = new Date(Date.now());
-    date.setMinutes(date.getMinutes() + 1);
-    date.setSeconds(0);
-    const triggerTime: TimestampTrigger = {
-      type: TriggerType.TIMESTAMP,
-      timestamp: date.getTime(),
-    };
-
-    const noteArg = {
-      title: 'Triggered notification',
-      body: 'Today at ' + date,
-      android: {
-        channelId: channelId,
-      },
-    }
-
-    const triggerNote = await notifee.createTriggerNotification(noteArg, triggerTime);
-
-    console.log('trigger for', date, triggerNote)
+    console.log('AppRegistry.getAppKeys()',AppRegistry.getAppKeys())
   }
 
   return (
