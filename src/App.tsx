@@ -7,6 +7,7 @@ import { classToPlain } from 'class-transformer'
 import notifee, { TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import HeadlessWorkManager from 'react-native-headless-work-manager'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer } from '@react-navigation/native'
@@ -83,6 +84,22 @@ export default function App() {
   )
 }
 
+async function initWorkTasks() {
+  const { workerId } = await HeadlessWorkManager.enqueue({
+    workRequestType: HeadlessWorkManager.PERIODIC_WORK_REQUEST,
+    taskKey: 'EndorserFireDaily',
+    isUnique: true,
+    existingWorkPolicy: HeadlessWorkManager.REPLACE,
+    timeout: 15000,
+    interval: 1,
+    timeUnit: HeadlessWorkManager.DAYS,
+    data: { task: 'RETRIEVE_LATEST_CLAIMS' },
+  });
+
+  const workInfo = await HeadlessWorkManager.getWorkInfosForUniqueWork('EndorserFireDaily');
+  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Initiated daily check: " + JSON.stringify(workInfo.map(x => x.state))}))
+}
+
 function HomeScreen({ navigation }) {
   const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
@@ -124,11 +141,14 @@ function HomeScreen({ navigation }) {
 
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
 
+        initWorkTasks()
+
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
         setInitError('Something went wrong during initialization. Kindly send us the logs (under Settings -> Advanced Mode).')
       }
+
       setLoading(false)
     }
     getIdentifiers()
