@@ -147,6 +147,9 @@ function HomeScreen({ navigation }) {
       body: 'Main body content of the notification',
       android: {
         channelId,
+        pressAction: {
+          id: 'default', // launch the application on press
+        }
         //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
       },
     });
