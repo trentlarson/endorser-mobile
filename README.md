@@ -155,6 +155,7 @@ To Do First Release:
 
 
 To Release:
+- Update time for notifications
 
 - Test everything.
 - Update CHANGELOG.md

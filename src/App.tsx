@@ -92,7 +92,7 @@ async function initWorkTasks() {
     existingWorkPolicy: HeadlessWorkManager.REPLACE,
     timeout: 15000,
     interval: 1,
-    timeUnit: HeadlessWorkManager.DAYS,
+    timeUnit: HeadlessWorkManager.HOURS,
     data: { task: 'RETRIEVE_LATEST_CLAIMS' },
   });
 
