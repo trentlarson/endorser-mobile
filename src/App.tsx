@@ -90,9 +90,9 @@ async function initWorkTasks() {
     taskKey: 'EndorserFireDaily',
     isUnique: true,
     existingWorkPolicy: HeadlessWorkManager.REPLACE,
-    timeout: 15000,
-    interval: 1,
-    timeUnit: HeadlessWorkManager.HOURS,
+    timeout: 900000, // from the logs, I'm guessing this is the minimum
+    interval: 5,
+    timeUnit: HeadlessWorkManager.MINUTES,
     data: { task: 'RETRIEVE_LATEST_CLAIMS' },
   });
 
@@ -105,7 +105,8 @@ function HomeScreen({ navigation }) {
   const [loading, setLoading] = useState<boolean>(true)
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
 
-  const allIdentifiers = useSelector((state) => state.identifiers)
+  const allIdentifiers = useSe
+  lector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
 
   // Check for existing identifers on load and set them to state
@@ -161,8 +162,8 @@ function HomeScreen({ navigation }) {
 
     // Display a notification
     const displayNote = await notifee.displayNotification({
-      title: 'Notification Title',
-      body: 'Main body content of the notification',
+      title: 'You hit the button',
+      body: 'Yep, that was you.',
       android: {
         channelId,
         pressAction: {
@@ -187,7 +188,7 @@ function HomeScreen({ navigation }) {
     };
 
     const noteArg = {
-      title: 'Triggered notification',
+      title: 'This is the next minute after you hit the button',
       body: 'Today at ' + date,
       android: {
         channelId: channelId,

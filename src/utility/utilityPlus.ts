@@ -11,14 +11,15 @@ const channelCreation = notifee.createChannel({
 
 // Check server & display a notification
 export const checkClaims = async (data) => {
+  console.log('Gonna check claims now.')
 
   const conn = await dbConnection
   await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { latestNotifiedClaimId: new Date().toISOString() })
 
   const channelId = await channelCreation
   await notifee.displayNotification({
-    title: 'New Claims',
-    body: 'Note body: ' + JSON.stringify(data),
+    title: 'Checking for new claims',
+    body: 'Note at ' + new Date().toISOString() + ' - ' + JSON.stringify(data),
     android: {
       channelId,
       pressAction: {
