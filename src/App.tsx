@@ -105,8 +105,7 @@ function HomeScreen({ navigation }) {
   const [loading, setLoading] = useState<boolean>(true)
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
 
-  const allIdentifiers = useSe
-  lector((state) => state.identifiers)
+  const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
 
   // Check for existing identifers on load and set them to state
