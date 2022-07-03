@@ -141,8 +141,6 @@ function HomeScreen({ navigation }) {
 
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
 
-        await initWorkTasks()
-
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
@@ -199,6 +197,9 @@ function HomeScreen({ navigation }) {
     const triggerNote = await notifee.createTriggerNotification(noteArg, triggerTime);
 
     console.log('trigger for', date, triggerNote)
+
+    await initWorkTasks()
+
   }
 
   const getNotifications = async () => {
