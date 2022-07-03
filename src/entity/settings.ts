@@ -19,6 +19,20 @@ export class Settings extends BaseEntity {
   id: string
 
   /**
+    ID of last claim checked by the background notify process
+   **/
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  latestNotifiedClaimId: string
+
+  /**
+    ID of last claim shown to user in the foreground application
+   **/
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  latestViewedClaimId: string
+
+  /**
     Plain text from early version; should be empty now.
    **/
   @Column('text', { nullable: true })
