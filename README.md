@@ -156,6 +156,7 @@ To Do First Release:
 
 To Release:
 - Update time for notifications
+- next deploy: check the "Please provide SecretBox, which I first noticed in 6.2.93
 
 - Test everything.
 - Update CHANGELOG.md
