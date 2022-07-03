@@ -141,7 +141,7 @@ function HomeScreen({ navigation }) {
 
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
 
-        initWorkTasks()
+        await initWorkTasks()
 
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
