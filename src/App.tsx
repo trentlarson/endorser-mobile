@@ -91,7 +91,7 @@ async function initWorkTasks() {
     isUnique: true,
     existingWorkPolicy: HeadlessWorkManager.REPLACE,
     timeout: 900000, // from the logs, I'm guessing this is the minimum
-    interval: 5,
+    interval: 1,
     timeUnit: HeadlessWorkManager.MINUTES,
     data: { task: 'RETRIEVE_LATEST_CLAIMS' },
   });
