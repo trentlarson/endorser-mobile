@@ -6,7 +6,7 @@ import 'reflect-metadata'
 import { classToPlain } from 'class-transformer'
 import notifee, { TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
-import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { Button, Linking, NativeModules, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer } from '@react-navigation/native'
@@ -179,6 +179,12 @@ function HomeScreen({ navigation }) {
     const triggerNote = await notifee.createTriggerNotification(noteArg, triggerTime);
 
     console.log('trigger for', date, triggerNote)
+
+
+
+    const { TimedCallbackManager } = NativeModules
+    TimedCallbackManager.schedule()
+    console.log('Done calling TimedCallbackManager.schedule')
   }
 
   const getNotifications = async () => {
