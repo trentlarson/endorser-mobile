@@ -6,7 +6,7 @@ import 'reflect-metadata'
 import { classToPlain } from 'class-transformer'
 import notifee, { TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
-import { Button, Linking, NativeModules, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { Button, Linking, NativeEventEmitter, NativeModules, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer } from '@react-navigation/native'
@@ -144,7 +144,7 @@ function HomeScreen({ navigation }) {
     // Display a notification
     const displayNote = await notifee.displayNotification({
       title: 'Notification Title',
-      body: 'Main body content of the notification',
+      body: 'Button pushed at ' + new Date().toISOString(),
       android: {
         channelId,
         pressAction: {
@@ -182,9 +182,14 @@ function HomeScreen({ navigation }) {
 
 
 
-    const { TimedCallbackManager } = NativeModules
-    TimedCallbackManager.schedule((data) => console.log('Running JavaScript code with data', data))
-    console.log('Done calling TimedCallbackManager.schedule')
+    NativeModules.TimedCallbackManager.schedule()
+
+    const eventEmitter = new NativeEventEmitter(NativeModules.TimedCallbackManager)
+    this.eventListener = eventEmitter.addListener('PeriodicTimer', (event) => {
+      console.log('Running JavaScript code in emitter with data', event)
+    });
+
+    console.log('Done calling TimedCallbackManager methods')
   }
 
   const getNotifications = async () => {
