@@ -183,7 +183,7 @@ function HomeScreen({ navigation }) {
 
 
     const { TimedCallbackManager } = NativeModules
-    TimedCallbackManager.schedule()
+    TimedCallbackManager.schedule((data) => console.log('Running JavaScript code with data', data))
     console.log('Done calling TimedCallbackManager.schedule')
   }
 

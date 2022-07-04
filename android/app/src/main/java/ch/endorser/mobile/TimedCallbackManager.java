@@ -1,28 +1,17 @@
 package ch.endorser.mobile;
 
 import android.util.Log;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import java.util.concurrent.TimeUnit;
 import java.util.Map;
 import java.util.HashMap;
-
-/**
-public class UploadWorker extends Worker {
-  public UploadWorker(@NonNull Context context, @NonNull WorkerParameters params) {
-    super(context, params);
-  }
-  @Override
-  public Result doWork() {
-    System.out.println("Doing work for background task.");
-    return Result.success();
-  }
-}
-**/
 
 public class TimedCallbackManager extends ReactContextBaseJavaModule {
   TimedCallbackManager(ReactApplicationContext context) {
@@ -32,7 +21,12 @@ public class TimedCallbackManager extends ReactContextBaseJavaModule {
     return "TimedCallbackManager";
   }
   @ReactMethod
-  public void schedule() {
+  public void schedule(Callback callback) {
     Log.d("TimedCallbackManager", "OK, custom java is scheduled.");
+    CallbackWorker.callback = callback;
+    PeriodicWorkRequest saveWorkerRequest =
+      new PeriodicWorkRequest.Builder(CallbackWorker.class, 5, TimeUnit.MINUTES)
+      .build();
+    WorkManager.getInstance(getReactApplicationContext()).enqueue(saveWorkerRequest);
   }
 }
