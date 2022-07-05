@@ -5,12 +5,10 @@ import android.util.Log;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.WritableMap;
 
 public class CallbackWorker extends Worker {
 
-  public static TimedCallbackManager callbackModule;
+  public static Callback callback;
 
   public CallbackWorker(Context context, WorkerParameters params) {
     super(context, params);
@@ -19,12 +17,11 @@ public class CallbackWorker extends Worker {
   // from https://developer.android.com/topic/libraries/architecture/workmanager/basics
   @Override
   public Result doWork() {
-    Log.d("CallbackWorker", "Doing work for background task.");
+    Log.d("CallbackWorker", "Starting background task.");
 
-    WritableMap params = Arguments.createMap();
-    params.putString("eventProperty", "someValue");
-    callbackModule.sendEvent(params);
+    callback.invoke("PERIODIC_TIMER");
 
+    Log.d("CallbackWorker", "Finished background task.");
     return Result.success();
   }
 }

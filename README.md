@@ -73,6 +73,7 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 - Got "Notifications permission pod is missing"? Try this: `rm -rf ~/Library/Developer/Xcode/DerivedData`
 
+- Emulator won't start? Go to your SDK directory (eg. ~/Library/Android/sdk or %HOME%\USERNAME\AppData\Local\Android\Sdk\emulator) and `emulator -list-avds` and then `emulator -avd NAME` with the name of the AVD you want to run.
 
 
 ## Create a New DB Migration
@@ -155,7 +156,6 @@ To Do First Release:
 
 
 To Release:
-- next deploy: check the "Please provide SecretBox, which I first noticed in 6.2.93
 
 - Test everything.
 - Update CHANGELOG.md

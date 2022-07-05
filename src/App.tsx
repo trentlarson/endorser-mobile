@@ -182,12 +182,7 @@ function HomeScreen({ navigation }) {
 
 
 
-    NativeModules.TimedCallbackManager.schedule()
-
-    const eventEmitter = new NativeEventEmitter(NativeModules.TimedCallbackManager)
-    this.eventListener = eventEmitter.addListener('PeriodicTimer', (event) => {
-      console.log('Running JavaScript code in emitter with data', event)
-    });
+    NativeModules.TimedCallbackManager.schedule((data) => console.log('Running JavaScript code with data', data))
 
     console.log('Done calling TimedCallbackManager methods')
   }
