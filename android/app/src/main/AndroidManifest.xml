@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="ch.endorser.mobile">
+  package="ch.endorser.mobile"
+  xmlns:tools="http://schemas.android.com/tools"
+>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -22,6 +24,14 @@
         </intent-filter>
       </activity>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
+
+      <!-- disable WorkManager (since we'll start our own in MainApplication.onCreate) -->
+      <provider
+        android:name="androidx.work.impl.WorkManagerInitializer"
+        android:authorities="${applicationId}.workmanager-init"
+        tools:node="remove"
+      />
+
     </application>
 
 </manifest>

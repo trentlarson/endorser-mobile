@@ -2,6 +2,8 @@ package ch.endorser.mobile;
 
 import android.app.Application;
 import android.content.Context;
+import androidx.work.Configuration;
+import androidx.work.WorkManager;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
@@ -11,7 +13,7 @@ import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-public class MainApplication extends Application implements ReactApplication {
+public class MainApplication extends Application implements ReactApplication, Configuration.Provider {
 
   private final ReactNativeHost mReactNativeHost =
       new ReactNativeHost(this) {
@@ -44,9 +46,12 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+
+    // custom WorkManager (ie. for debugging); see getWorkManagerConfiguration below
+    WorkManager.getInstance(getApplicationContext());
   }
 
-  /**
+   /**
    * Loads Flipper in React Native templates. Call this in the onCreate method with something like
    * initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
    *
@@ -76,4 +81,12 @@ public class MainApplication extends Application implements ReactApplication {
       }
     }
   }
+
+  @Override
+  public Configuration getWorkManagerConfiguration() {
+    return new Configuration.Builder()
+      .setMinimumLoggingLevel(android.util.Log.DEBUG)
+      .build();
+  }
+
 }
