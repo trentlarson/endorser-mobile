@@ -6,11 +6,13 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 public class CallbackWorker extends Worker {
 
-  public static TimedCallbackManager callbackModule;
+  //public static TimedCallbackManager callbackModule;
 
   public CallbackWorker(Context context, WorkerParameters params) {
     super(context, params);
@@ -23,8 +25,16 @@ public class CallbackWorker extends Worker {
 
     WritableMap params = Arguments.createMap();
     params.putString("eventProperty", "someValue");
-    callbackModule.sendEvent(params);
+    //callbackModule.sendEvent(params);
 
+    ((MainApplication)getApplicationContext())
+      .getReactNativeHost()
+      .getReactInstanceManager()
+      .getCurrentReactContext()
+      .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+      .emit("PeriodicTimer", params);
+
+    Log.d("CallbackWorker", "Emitted 'PeriodicTimer' for background task.");
     return Result.success();
   }
 }
