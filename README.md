@@ -73,6 +73,8 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 - Got "Notifications permission pod is missing"? Try this: `rm -rf ~/Library/Developer/Xcode/DerivedData`
 
+- Got "The emulator process for avd ... was killed"? Try this (in ~/Library/Android/sdk or %HOME%\AppData\Local\Android\Sdk\emulator): `emulator -list-avds` and then `emulator -avd Pixel_XL_API_30`
+
 
 
 ## Create a New DB Migration
