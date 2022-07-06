@@ -27,7 +27,7 @@ public class TimedCallbackManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void schedule(Callback callback) {
     Log.d("TimedCallbackManager", "OK, custom java is scheduled.");
-    CallbackWorker.callback = callback;
+    //CallbackWorker.callback = callback;
 
     PeriodicWorkRequest saveWorkerRequest =
       new PeriodicWorkRequest.Builder(CallbackWorker.class, 1, TimeUnit.MINUTES)

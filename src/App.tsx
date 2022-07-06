@@ -124,6 +124,12 @@ function HomeScreen({ navigation }) {
 
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
 
+
+
+        // Start the background process to watch for remote transactions.
+        NativeModules.TimedCallbackManager.schedule((data) => console.log('Running JavaScript code with data', data))
+        console.log('Done calling TimedCallbackManager methods')
+
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
@@ -179,12 +185,6 @@ function HomeScreen({ navigation }) {
     const triggerNote = await notifee.createTriggerNotification(noteArg, triggerTime);
 
     console.log('trigger for', date, triggerNote)
-
-
-
-    NativeModules.TimedCallbackManager.schedule((data) => console.log('Running JavaScript code with data', data))
-
-    console.log('Done calling TimedCallbackManager methods')
   }
 
   const getNotifications = async () => {
