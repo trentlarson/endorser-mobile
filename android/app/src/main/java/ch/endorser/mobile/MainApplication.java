@@ -2,12 +2,17 @@ package ch.endorser.mobile;
 
 import android.app.Application;
 import android.content.Context;
+import androidx.work.Data;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
+import java.util.concurrent.TimeUnit;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -45,6 +50,18 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+
+    // for WorkManager
+    Data inputData = new Data.Builder()
+      .putString("message", "Task has executed")
+      .build();
+    WorkRequest headlessJsTaskWorkRequest =
+      new PeriodicWorkRequest.Builder(DailyTaskWorker.class, 1L, TimeUnit.MINUTES)
+      .setInputData(inputData)
+      .build();
+    WorkManager
+      .getInstance(this)
+      .enqueue(headlessJsTaskWorkRequest);
   }
 
   /**
