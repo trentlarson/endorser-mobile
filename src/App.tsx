@@ -91,10 +91,6 @@ function HomeScreen({ navigation }) {
   const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
 
-  const initWorkTasks = async () => {
-    console.log('No background tasks yet.')
-  }
-
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
@@ -125,9 +121,6 @@ function HomeScreen({ navigation }) {
 
 
 
-        await initWorkTasks()
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Finished initializing background claim checks."}))
-
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
@@ -141,7 +134,7 @@ function HomeScreen({ navigation }) {
   const notify = async () => {
     // Create a channel
     const channelId = await notifee.createChannel({
-      id: 'default-channel',
+      id: utility.DEFAULT_ANDROID_CHANNEL_ID,
       name: 'Default Channel',
     });
 

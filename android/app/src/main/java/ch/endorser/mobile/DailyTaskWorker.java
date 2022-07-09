@@ -9,7 +9,11 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.jstasks.HeadlessJsTaskConfig;
 import io.github.wjaykim.rnheadlesstaskworker.HeadlessJsTaskWorker;
 
-// extends https://github.com/wjaykim/react-native-headless-task-worker/blob/master/android/src/main/java/io/github/wjaykim/rnheadlesstaskworker/HeadlessJsTaskWorker.java
+/**
+   See MainApplication for initialization of this task.
+
+   Extends https://github.com/wjaykim/react-native-headless-task-worker/blob/master/android/src/main/java/io/github/wjaykim/rnheadlesstaskworker/HeadlessJsTaskWorker.java
+ **/
 public class DailyTaskWorker extends HeadlessJsTaskWorker {
     public DailyTaskWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
@@ -21,9 +25,9 @@ public class DailyTaskWorker extends HeadlessJsTaskWorker {
     protected HeadlessJsTaskConfig getTaskConfig(Data data) {
         if (data != null) {
             return new HeadlessJsTaskConfig(
-                "EndorserDailyTask",
+                "EndorserDailyTask", // also referenced in App.tsx
                 Arguments.makeNativeMap(data.getKeyValueMap()),
-                5000, // timeout for the task, in ms
+                30000, // timeout for the task, in ms
                 false // optional: defines whether or not the task is allowed in foreground. Default is false
             );
         }

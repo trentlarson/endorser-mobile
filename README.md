@@ -75,6 +75,9 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 - Got "The emulator process for avd ... was killed"? Try this (in ~/Library/Android/sdk or %HOME%\AppData\Local\Android\Sdk\emulator): `emulator -list-avds` and then `emulator -avd Pixel_XL_API_30` (or restart)
 
+- Got "InstallException: Unknown failure: cmd: Can't find service: package"? Try running the command again (in case the emulator wasn't fully started).
+
+
 
 
 ## Create a New DB Migration

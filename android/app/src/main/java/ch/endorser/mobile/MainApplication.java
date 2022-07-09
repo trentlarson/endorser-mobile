@@ -2,10 +2,12 @@ package ch.endorser.mobile;
 
 import android.app.Application;
 import android.content.Context;
+import androidx.work.Constraints;
 import androidx.work.Data;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
@@ -52,16 +54,17 @@ public class MainApplication extends Application implements ReactApplication {
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
 
     // for WorkManager
-    Data inputData = new Data.Builder()
-      .putString("message", "Task has executed")
-      .build();
-    WorkRequest headlessJsTaskWorkRequest =
+    Constraints constraints = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
+    PeriodicWorkRequest headlessJsTaskWorkRequest =
       new PeriodicWorkRequest.Builder(DailyTaskWorker.class, 1L, TimeUnit.MINUTES)
-      .setInputData(inputData)
+      .setConstraints(constraints)
+      .setInputData(new Data.Builder()
+                    //.putString("message", "Daily task has been initiated.")
+                    .build())
       .build();
     WorkManager
       .getInstance(this)
-      .enqueue(headlessJsTaskWorkRequest);
+      .enqueueUniquePeriodicWork("EndorserDailyTaskWork", ExistingPeriodicWorkPolicy.REPLACE, headlessJsTaskWorkRequest);
   }
 
   /**
