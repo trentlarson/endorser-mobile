@@ -13,4 +13,4 @@ import { checkClaims } from './src/utility/utilityPlus'
 
 AppRegistry.registerComponent(appName, () => App);
 
-AppRegistry.registerHeadlessTask('EndorserFireDaily', () => async (data) => checkClaims(data));
+AppRegistry.registerHeadlessTask('EndorserFireDaily', () => async (data) => console.log('Inside your Javascript with data', data))//async (data) => checkClaims(data));

@@ -17,6 +17,39 @@ Run ios:
 
 `cd ios; pod install; cd ..`
 
+- Here are some manual files to edit in the react-native-headless-work-manager in android/src/main/java/com/infuse/headlessworkmanager :
+
+  - In Worker.java, change `startService` to `startForegroundService`
+
+```
+        // because startService cuts short with exception
+        // Error "Not allowed to start service Intent { cmp=ch.endorser.mobile/com.infuse.headlessworkmanager.HeadlessService (has extras) }: app is in background"
+```
+
+
+  - In HeadlessService.java, add this:
+
+```
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        startForeground(
+
+            // notification ID https://developer.android.com/reference/android/app/Service#startForeground(int,%20android.app.Notification)
+            1,
+
+            // https://developer.android.com/reference/android/app/Notification.Builder
+            // ... but note that I've omitted the smallIcon & largeIcon so the notification fails with this message:
+            // ActivityManager: Attempted to start a foreground service (ch.endorser.mobile/com.infuse.headlessworkmanager.HeadlessService) with a broken notification (no icon: Notification(channel=default-channel shortcut=null contentView=null vibrate=null sound=null defaults=0x0 flags=0x40 color=0x00000000 vis=PRIVATE))
+            new android.app.Notification.Builder(getReactNativeHost().getReactInstanceManager().getCurrentReactContext())
+                .setChannelId("default-channel") // must match ID from previously-created channel
+                .setContentTitle("Endorser Mobile checking")
+                .setContentText("Checking for new claims of interest.")
+                .build()
+        );
+    }
+```
+
 `yarn run ios`
 
 (If there's a complaint about Metro, `yarn start` before that, maybe with the `--reset-cache` flag.)
