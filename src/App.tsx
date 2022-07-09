@@ -91,6 +91,10 @@ function HomeScreen({ navigation }) {
   const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
 
+  const initWorkTasks = async () => {
+    console.log('No background tasks yet.')
+  }
+
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifiers = async () => {
