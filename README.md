@@ -11,11 +11,11 @@ For the reporting facility, we use the [endorser-ch APIs](https://github.com/tre
 
 `yarn install`
 
-Note that there are also some other mobile dependencies, eg. iOS CocoaPods and Android Studio. The tools will prompt you along the way.
+- Note that there are also some other mobile dependencies, eg. iOS CocoaPods and Android Studio. The tools will prompt you along the way.
+
+- For ios: `cd ios; pod install; cd ..`
 
 Run ios:
-
-`cd ios; pod install; cd ..`
 
 `yarn run ios`
 
@@ -73,7 +73,7 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 - Got "Notifications permission pod is missing"? Try this: `rm -rf ~/Library/Developer/Xcode/DerivedData`
 
-- Got "The emulator process for avd ... was killed"? Try this (in ~/Library/Android/sdk or %HOME%\AppData\Local\Android\Sdk\emulator): `emulator -list-avds` and then `emulator -avd Pixel_XL_API_30`
+- Got "The emulator process for avd ... was killed"? Try this (in ~/Library/Android/sdk or %HOME%\AppData\Local\Android\Sdk\emulator): `emulator -list-avds` and then `emulator -avd Pixel_XL_API_30` (or restart)
 
 
 

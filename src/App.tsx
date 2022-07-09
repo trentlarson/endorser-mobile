@@ -104,25 +104,25 @@ function HomeScreen({ navigation }) {
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... stored DIDs, about to load settings ..."}))
 
         const conn = await dbConnection
-
         let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-
         if (!settings) {
           const initSettings = { id: MASTER_COLUMN_VALUE }
           settings = await conn.manager.save(Settings, initSettings)
         }
-
         appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
 
         if (settings != null && settings.mnemonic != null) {
           setOldMnemonic(true)
         }
-
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded settings, about to load contacts..."}))
 
         await utility.loadContacts(appSlice, appStore, dbConnection)
-
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
+
+
+
+        await initWorkTasks()
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Finished initializing background claim checks."}))
 
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
@@ -154,31 +154,7 @@ function HomeScreen({ navigation }) {
       },
     });
 
-    console.log('display', displayNote)
-
-
-
-    // Create a time-based trigger
-
-    const date = new Date(Date.now());
-    date.setMinutes(date.getMinutes() + 1);
-    date.setSeconds(0);
-    const triggerTime: TimestampTrigger = {
-      type: TriggerType.TIMESTAMP,
-      timestamp: date.getTime(),
-    };
-
-    const noteArg = {
-      title: 'Triggered notification',
-      body: 'Today at ' + date,
-      android: {
-        channelId: channelId,
-      },
-    }
-
-    const triggerNote = await notifee.createTriggerNotification(noteArg, triggerTime);
-
-    console.log('trigger for', date, triggerNote)
+    console.log('channelId & displayNote', channelId, displayNote)
   }
 
   const getNotifications = async () => {
