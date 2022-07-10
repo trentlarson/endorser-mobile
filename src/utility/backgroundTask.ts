@@ -43,6 +43,11 @@ module.exports = async (taskData) => {
 
     if (settings) {
 
+      // first, record that we've started this process
+      //settings.lastDailyTaskTime = new Date().toISOString()
+      //await conn.manager.save(Settings, settings)
+
+      // load any new items from the sersver
       const endorserApiServer = DEFAULT_ENDORSER_API_SERVER
 
       const agentIdentifiers = await agent.didManagerFind()
@@ -58,23 +63,26 @@ module.exports = async (taskData) => {
         }
       } while (maybeMoreAfter)
 
-      const latestClaimId = allResults[allResults.length - 1].id
-      if (latestClaimId !== settings.latestNotifiedClaimId) {
+      // notify the user if there's anything new
+      if (allResults.length > 0) {
+        const latestClaimId = allResults[allResults.length - 1].id
+        if (latestClaimId !== settings.latestNotifiedClaimId) {
 
-        await notifee.displayNotification({
-          title: 'New Endorser Claims',
-          body: 'There are ' + allResults.length + ' new claims.',
-          android: {
-            channelId: utility.DEFAULT_ANDROID_CHANNEL_ID,
-            pressAction: {
-              id: 'default', // launch the application on press
-            }
-            //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
-          },
-        });
+          await notifee.displayNotification({
+            title: 'New Endorser Claims',
+            body: 'There are ' + allResults.length + ' new claims.',
+            android: {
+              channelId: utility.DEFAULT_ANDROID_CHANNEL_ID,
+              pressAction: {
+                id: 'default', // launch the application on press
+              }
+              //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
+            },
+          });
 
-        settings.latestNotifiedClaimId = latestClaimId
-        await conn.manager.save(Settings, settings)
+          settings.latestNotifiedClaimId = latestClaimId
+          await conn.manager.save(Settings, settings)
+        }
       }
     }
 

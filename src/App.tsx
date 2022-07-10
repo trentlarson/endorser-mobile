@@ -97,6 +97,9 @@ function HomeScreen({ navigation }) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "About to load DIDs..."}))
 
       try {
+
+        // Initialize storage.
+
         const _ids = await agent.didManagerFind()
 
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... found DIDs, about to store..."}))
@@ -121,10 +124,19 @@ function HomeScreen({ navigation }) {
 
 
 
+        // Initialize notification channel for Android.
+
+        if (Platform.OS === 'android') {
+          const channelCreation = await notifee.createChannel({
+            id: 'default-channel',
+            name: 'Endorser Channel',
+          });
+        }
+
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
-        setInitError('Something went wrong during initialization. Kindly send us the logs (under Settings -> Advanced Mode).')
+        setInitError('Something went wrong during initialization. Kindly send us the logs (near the bottom of Help).')
       }
       setLoading(false)
     }
