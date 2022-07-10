@@ -28,7 +28,7 @@ public class DailyTaskWorker extends HeadlessJsTaskWorker {
                 "EndorserDailyTask", // also referenced in App.tsx
                 Arguments.makeNativeMap(data.getKeyValueMap()),
                 30000, // timeout for the task, in ms
-                false // optional: defines whether or not the task is allowed in foreground. Default is false
+                true // allowedInForeground is optional (defaults to false), but when false it crashes the app; see https://stackoverflow.com/questions/72929861/how-do-i-set-headlessjstaskconfig-to-not-run-if-the-app-is-running-in-the-foregr
             );
         }
         return null;
