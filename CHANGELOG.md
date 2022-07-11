@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.3.97] - 2022-05-10
+## [6.3.97] - 2022-05-10 - 509bebb07642488e97c0aad1f450376bdc245bea
 
 ### Added
 - Run daily background task to detect new claims and alert user. (Still in testing. Android only.)
@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.2.87] - 2022-05-10
+## [6.2.87] - 2022-05-10 - 03f167e3d7c43e93e2e1da2ef7b83218633c7a5b
 
 ### Added
 - Allow display of private key.
