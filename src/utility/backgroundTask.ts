@@ -71,6 +71,8 @@ module.exports = async (taskData) => {
       if (newClaimCount > 0) {
         if (lastClaimId !== settings.lastNotifiedClaimId) {
 
+          notifee.onBackgroundEvent(async () => {}) // without this explicit setting it complains that "no background event handler has been set"... stupid
+
           await notifee.displayNotification({
             title: 'New Endorser Claims',
             body: 'There are ' + newClaimCount + ' new claims.',
