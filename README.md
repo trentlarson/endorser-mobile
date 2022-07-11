@@ -101,15 +101,23 @@ Automatically with: `yarn test`
 Manually
 
 - Without an Endorser.ch server
+
   - Create IDs, export, and import.
   - Create contacts.
+
 - With an Endorser.ch server
+
+  - Start with no app installed. Change PeriodicWorkRequest time increment in MainApplication.java to 1 MINUTES (then back to DAYS when finished testing).
+
   - On a public test server
     - Run in Test Mode (under Settings & Advanced Mode) and click the button to choose the test server.
   - On your machine
     - Run endorser-ch test/test.sh, then copy the endorser-ch-test-local.sqlite3 to endorser-ch-dev.sqlite3, then run the server.
 
   - Create an identifier & add name.
+
+  - Close app & see notification of new claims after 15 minutes. (On android, that's the minimum time to start a background task.)
+
   - As a second user, import via the mnemonic, eg. #3 from endorser-ch test/util.js
 
   - Submit a claim. Run search for this individual's claims, and then for all claims.
