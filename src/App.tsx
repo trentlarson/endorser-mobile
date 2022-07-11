@@ -98,7 +98,7 @@ function HomeScreen({ navigation }) {
 
       try {
 
-        // Initialize storage.
+        // Initialize DB, eg. settings.
 
         const _ids = await agent.didManagerFind()
 

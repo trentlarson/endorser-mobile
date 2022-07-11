@@ -19,18 +19,33 @@ export class Settings extends BaseEntity {
   id: string
 
   /**
-    ID of last claim checked by the background notify process
+    Endorser server to use for storing claims
    **/
   @Column('text', { nullable: true })
   //@ts-ignore
-  latestNotifiedClaimId: string
+  apiServer: string
+
+  /**
+    Date of last attempted run of the daily background process, in ISO date-time format
+    (We're using react-native libraries to serialize, so the Date object will not work.)
+   **/
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  lastDailyTaskTime: string
+
+  /**
+    ID of last claim checked by the background process
+   **/
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  lastNotifiedClaimId: string
 
   /**
     ID of last claim shown to user in the foreground application
    **/
   @Column('text', { nullable: true })
   //@ts-ignore
-  latestViewedClaimId: string
+  lastViewedClaimId: string
 
   /**
     Plain text from early version; should be empty now.

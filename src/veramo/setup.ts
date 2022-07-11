@@ -41,7 +41,7 @@ import { SettingsContacts1616967972293 } from '../migration/1616967972293-settin
 import { EncryptedSeed1637856484788 }    from '../migration/1637856484788-EncryptedSeed'
 import { HomeScreenConfig1639947962124 } from '../migration/1639947962124-HomeScreenConfig'
 import { HandlePublicKeys1652142819353 } from '../migration/1652142819353-HandlePublicKeys'
-import { LatestClaimsSeen1656811846836 } from '../migration/1656811846836-LatestClaimsSeen'
+import { LastClaimsSeen1656811846836 }   from '../migration/1656811846836-LastClaimsSeen'
 
 const ALL_ENTITIES = Entities.concat([Contact, Settings])
 
@@ -53,7 +53,7 @@ export const dbConnection = createConnection({
   entities: ALL_ENTITIES,
   location: 'default',
   logging: ['error', 'info', 'warn'],
-  migrations: [ Initial1616938713828, SettingsContacts1616967972293, EncryptedSeed1637856484788, HomeScreenConfig1639947962124, HandlePublicKeys1652142819353, LatestClaimsSeen1656811846836 ],
+  migrations: [ Initial1616938713828, SettingsContacts1616967972293, EncryptedSeed1637856484788, HomeScreenConfig1639947962124, HandlePublicKeys1652142819353, LastClaimsSeen1656811846836 ],
   migrationsRun: true,
   type: 'react-native',
 })

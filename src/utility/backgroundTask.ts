@@ -44,8 +44,8 @@ module.exports = async (taskData) => {
     if (settings) {
 
       // first, record that we've started this process
-      //settings.lastDailyTaskTime = new Date().toISOString()
-      //await conn.manager.save(Settings, settings)
+      settings.lastDailyTaskTime = new Date().toISOString()
+      await conn.manager.save(Settings, settings)
 
       // load any new items from the sersver
       const endorserApiServer = DEFAULT_ENDORSER_API_SERVER
@@ -53,24 +53,27 @@ module.exports = async (taskData) => {
       const agentIdentifiers = await agent.didManagerFind()
       const id0 = agentIdentifiers[0] // type is @veramo/core IIdentifier
 
-      let allResults: Array<utility.EndorserRecord> = []
-      let maybeMoreAfter = settings.latestNotifiedClaimId
+      let newClaimCount = 0
+      let lastClaimId = null
+      let maybeMoreAfter = settings.lastNotifiedClaimId
       do {
         let nextResults = await moreTransactions(endorserApiServer, id0, maybeMoreAfter)
         if (nextResults.data) {
-          allResults = allResults.concat(nextResults.data)
+          newClaimCount += nextResults.data.length
+          if (nextResults.data.length > 0) {
+            lastClaimId = nextResults.data[nextResults.data.length - 1].id
+          }
           maybeMoreAfter = nextResults.maybeMoreAfter
         }
       } while (maybeMoreAfter)
 
       // notify the user if there's anything new
-      if (allResults.length > 0) {
-        const latestClaimId = allResults[allResults.length - 1].id
-        if (latestClaimId !== settings.latestNotifiedClaimId) {
+      if (newClaimCount > 0) {
+        if (lastClaimId !== settings.lastNotifiedClaimId) {
 
           await notifee.displayNotification({
             title: 'New Endorser Claims',
-            body: 'There are ' + allResults.length + ' new claims.',
+            body: 'There are ' + newClaimCount + ' new claims.',
             android: {
               channelId: utility.DEFAULT_ANDROID_CHANNEL_ID,
               pressAction: {
@@ -80,10 +83,12 @@ module.exports = async (taskData) => {
             },
           });
 
-          settings.latestNotifiedClaimId = latestClaimId
+          settings.lastNotifiedClaimId = lastClaimId
           await conn.manager.save(Settings, settings)
         }
       }
+    } else {
+      // There are no settings yet, so we'll just wait until next time, when the DB initialization should be finished.
     }
 
     console.log('Finished background JavaScript.')
