@@ -12,6 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [6.3.97] - 2022-05-10
+
+### Added
+- Run daily background task to detect new claims and alert user. (Still in testing. Android only.)
+
+### Changed
+- Improvments to credential presentation, including multiple QR codes to share.
+
+
+
+
 ## [6.2.87] - 2022-05-10
 
 ### Added
