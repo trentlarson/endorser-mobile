@@ -113,6 +113,9 @@ function HomeScreen({ navigation }) {
           settings = await conn.manager.save(Settings, initSettings)
         }
         appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
+        if (settings.apiServer) {
+          appStore.dispatch(appSlice.actions.setApiServer(settings.apiServer))
+        }
 
         if (settings != null && settings.mnemonic != null) {
           setOldMnemonic(true)
@@ -143,45 +146,9 @@ function HomeScreen({ navigation }) {
     getIdentifiers()
   }, [])
 
-  const notify = async () => {
-    // Create a channel
-    const channelId = await notifee.createChannel({
-      id: utility.DEFAULT_ANDROID_CHANNEL_ID,
-      name: 'Default Channel',
-    });
-
-    // Display a notification
-    const displayNote = await notifee.displayNotification({
-      title: 'Notification Title',
-      body: 'Main body content of the notification',
-      android: {
-        channelId,
-        pressAction: {
-          id: 'default', // launch the application on press
-        }
-        //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
-      },
-    });
-
-    console.log('channelId & displayNote', channelId, displayNote)
-  }
-
-  const getNotifications = async () => {
-    console.log('all display notifications', await notifee.getDisplayedNotifications())
-    console.log('all trigger notifications', await notifee.getTriggerNotifications()) // only those scheduled for the future
-  }
-
   return (
     <SafeAreaView>
       <ScrollView>
-                  <Button
-                    title={'Notify'}
-                    onPress={() => notify()}
-                  />
-                  <Button
-                    title={'Get Notifications'}
-                    onPress={() => getNotifications()}
-                  />
         {
         loading
         ?

@@ -248,24 +248,26 @@ export function SettingsScreen({navigation}) {
     }
   }
 
-  // from https://reactnative.dev/docs/direct-manipulation#setnativeprops-to-clear-textinput-value
   const inputApiRef = useRef()
   const inputViewRef = useRef()
   const setToLocalServers = useCallback(() => {
     inputApiRef.current.setNativeProps({ text: LOCAL_ENDORSER_API_SERVER })
     inputViewRef.current.setNativeProps({ text: LOCAL_ENDORSER_VIEW_SERVER })
+    // even with onChangeText on the useRef instance, the appStore setting isn't changed so we need these
     appStore.dispatch(appSlice.actions.setApiServer(LOCAL_ENDORSER_API_SERVER))
     appStore.dispatch(appSlice.actions.setViewServer(LOCAL_ENDORSER_VIEW_SERVER))
   })
   const setToTestServers = useCallback(() => {
     inputApiRef.current.setNativeProps({ text: TEST_ENDORSER_API_SERVER })
     inputViewRef.current.setNativeProps({ text: TEST_ENDORSER_VIEW_SERVER })
+    // even with onChangeText on the useRef instance, the appStore setting isn't changed so we need these
     appStore.dispatch(appSlice.actions.setApiServer(TEST_ENDORSER_API_SERVER))
     appStore.dispatch(appSlice.actions.setViewServer(TEST_ENDORSER_VIEW_SERVER))
   })
   const setToProdServers = useCallback(() => {
     inputApiRef.current.setNativeProps({ text: DEFAULT_ENDORSER_API_SERVER })
     inputViewRef.current.setNativeProps({ text: DEFAULT_ENDORSER_VIEW_SERVER })
+    // even with onChangeText on the useRef instance, the appStore setting isn't changed so we need these
     appStore.dispatch(appSlice.actions.setApiServer(DEFAULT_ENDORSER_API_SERVER))
     appStore.dispatch(appSlice.actions.setViewServer(DEFAULT_ENDORSER_VIEW_SERVER))
   })
@@ -329,6 +331,20 @@ export function SettingsScreen({navigation}) {
   const copyToClipboard = (value) => {
     Clipboard.setString(value)
     setQuickMessage('Copied')
+    setTimeout(() => { setQuickMessage(null) }, 1000)
+  }
+
+  const persistApiServer = async () => {
+    const conn = await dbConnection
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: appStore.getState().apiServer })
+    setQuickMessage('Saved')
+    setTimeout(() => { setQuickMessage(null) }, 1000)
+  }
+
+  const erasePersistedApiServer = async () => {
+    const conn = await dbConnection
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: null })
+    setQuickMessage('Erased')
     setTimeout(() => { setQuickMessage(null) }, 1000)
   }
 
@@ -647,24 +663,35 @@ export function SettingsScreen({navigation}) {
             isInAdvancedMode
             ? (
               <View>
+
+                <Text>Endorser API Server</Text>
+                <TextInput
+                  defaultValue={ appStore.getState().apiServer }
+                  onChangeText={(text) => {
+                    appStore.dispatch(appSlice.actions.setApiServer(text))
+                  }}
+                  ref={inputApiRef}
+                  style={{borderWidth: 1}}
+                />
+                <Button
+                  title='Persist (beyond restarts & background)'
+                  onPress={persistApiServer}
+                />
+                <Button
+                  title='Erase Persisted API Server'
+                  onPress={erasePersistedApiServer}
+                />
+
                 <CheckBox
                   title='Test Mode'
                   checked={isInTestMode}
                   onPress={() => {setIsInTestMode(!isInTestMode)}}
                 />
+
                 {
                 isInTestMode
                 ? (
                   <View style={{ padding: 10 }}>
-                    <Text>Endorser API Server</Text>
-                    <TextInput
-                      defaultValue={ appStore.getState().apiServer }
-                      onChangeText={(text) => {
-                        appStore.dispatch(appSlice.actions.setApiServer(text))
-                      }}
-                      ref={inputApiRef}
-                      style={{borderWidth: 1}}
-                    />
                     <Text>Endorser View Server</Text>
                     <TextInput
                       defaultValue={ appStore.getState().viewServer }
@@ -676,6 +703,7 @@ export function SettingsScreen({navigation}) {
                     >
                     </TextInput>
 
+                    <View style={{ padding: 5 }} />
                     <Button
                       title='Use public prod servers'
                       onPress={setToProdServers}
