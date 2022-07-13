@@ -6,7 +6,7 @@ import 'reflect-metadata'
 import { classToPlain } from 'class-transformer'
 import notifee, { TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
-import { Button, Linking, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { Button, Linking, NativeModules, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer } from '@react-navigation/native'
@@ -146,9 +146,19 @@ function HomeScreen({ navigation }) {
     getIdentifiers()
   }, [])
 
+  const { BackgroundProcessor } = NativeModules;
+  const logNative = () => {
+    console.log('NativeModules',NativeModules)
+    BackgroundProcessor.initializeBgTasks('stuff')
+  }
+
   return (
     <SafeAreaView>
       <ScrollView>
+                  <Button
+                    title={'Log Native'}
+                    onPress={logNative}
+                  />
         {
         loading
         ?

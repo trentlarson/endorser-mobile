@@ -16,6 +16,7 @@
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* EndorserMobileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* EndorserMobileTests.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		84C08441287E68BB00CD5BC6 /* RCTBackgroundProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C08440287E68BB00CD5BC6 /* RCTBackgroundProcessor.m */; };
 		95440F7A958128F5780E2D5F /* libPods-EndorserMobile-EndorserMobileTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F18B72C876EA5D4E5DC181C /* libPods-EndorserMobile-EndorserMobileTests.a */; };
 		99CA50A4BAFF9C374147E554 /* libPods-EndorserMobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2925078E3BC76DA1077E93D6 /* libPods-EndorserMobile.a */; };
 		D7421FA47DED0583D0AB4B07 /* libPods-EndorserMobile-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD4B144BD2C652723DE0C7EA /* libPods-EndorserMobile-tvOS.a */; };
@@ -59,6 +60,8 @@
 		63CAC5B88BE7E1D572CEA870 /* Pods-EndorserMobile-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-EndorserMobile-tvOSTests/Pods-EndorserMobile-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
 		72AD35E17BC15A1FBD0D083F /* libPods-EndorserMobile-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-EndorserMobile-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = EndorserMobile/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		84C0843F287E67E900CD5BC6 /* RCTBackgroundProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RCTBackgroundProcessor.h; path = EndorserMobile/RCTBackgroundProcessor.h; sourceTree = "<group>"; };
+		84C08440287E68BB00CD5BC6 /* RCTBackgroundProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = RCTBackgroundProcessor.m; path = EndorserMobile/RCTBackgroundProcessor.m; sourceTree = "<group>"; };
 		88C8665653F87B6A197584E4 /* Pods-EndorserMobile-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-EndorserMobile-tvOSTests/Pods-EndorserMobile-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
 		8FFB77272E33077418E40F73 /* Pods-EndorserMobile-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile-tvOS.release.xcconfig"; path = "Target Support Files/Pods-EndorserMobile-tvOS/Pods-EndorserMobile-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		A509EBE1951A794FDCD0CF00 /* Pods-EndorserMobile-EndorserMobileTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EndorserMobile-EndorserMobileTests.debug.xcconfig"; path = "Target Support Files/Pods-EndorserMobile-EndorserMobileTests/Pods-EndorserMobile-EndorserMobileTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -132,6 +135,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				84C0843F287E67E900CD5BC6 /* RCTBackgroundProcessor.h */,
+				84C08440287E68BB00CD5BC6 /* RCTBackgroundProcessor.m */,
 			);
 			name = EndorserMobile;
 			sourceTree = "<group>";
@@ -672,6 +677,7 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				84C08441287E68BB00CD5BC6 /* RCTBackgroundProcessor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
