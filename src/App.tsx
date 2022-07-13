@@ -148,8 +148,7 @@ function HomeScreen({ navigation }) {
 
   const { BackgroundProcessor } = NativeModules;
   const logNative = () => {
-    console.log('NativeModules',NativeModules)
-    BackgroundProcessor.initializeBgTasks('stuff')
+    BackgroundProcessor.initializeBgTasks('stuff', () => { console.log('In yer JavaScript') })
   }
 
   return (

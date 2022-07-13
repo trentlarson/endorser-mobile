@@ -13,9 +13,11 @@
 
 RCT_EXPORT_MODULE();
 
-RCT_EXPORT_METHOD(initializeBgTasks:(NSString *)name)
+RCT_EXPORT_METHOD(initializeBgTasks:(NSString *)name callback:(RCTResponseSenderBlock)callback)
 {
   RCTLogInfo(@"Pretending to create an event %@", name);
+
+  callback(@[]);
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getName)
