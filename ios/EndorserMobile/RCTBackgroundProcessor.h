@@ -9,6 +9,7 @@
 #define RCTBackgroundProcessor_h
 
 #import <React/RCTBridgeModule.h>
+
 @interface RCTBackgroundProcessor : NSObject <RCTBridgeModule>
 @end
 

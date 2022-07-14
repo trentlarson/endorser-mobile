@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 
+#import <BackgroundTasks/BackgroundTasks.h>
 #import <React/RCTBridge.h>
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
@@ -11,6 +12,8 @@
 #import <FlipperKitNetworkPlugin/FlipperKitNetworkPlugin.h>
 #import <SKIOSNetworkPlugin/SKIOSNetworkAdapter.h>
 #import <FlipperKitReactPlugin/FlipperKitReactPlugin.h>
+
+static NSString* uploadTask = @"ch.endorser.mobile.daily_task";
 
 static void InitializeFlipper(UIApplication *application) {
   FlipperClient *client = [FlipperClient sharedClient];
@@ -24,6 +27,15 @@ static void InitializeFlipper(UIApplication *application) {
 #endif
 
 @implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application willFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  if (@available(iOS 13.0, *)) {
+    NSLog(@"configureProcessingTask");
+    [self configureProcessingTask];
+  }
+  return YES;
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -43,6 +55,12 @@ static void InitializeFlipper(UIApplication *application) {
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
+
+  if (@available(iOS 13.0, *)) {
+      NSLog(@"scheduleProcessingTask");
+      [self scheduleProcessingTask];
+  }
+
   return YES;
 }
 
@@ -53,6 +71,52 @@ static void InitializeFlipper(UIApplication *application) {
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
+}
+
+-(void)configureProcessingTask {
+  NSLog(@"Doing things in configureProcessingTask");
+  if (@available(iOS 13.0, *)) {
+    [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:uploadTask
+                                                          usingQueue:nil
+                                                       launchHandler:^(BGTask *task) {
+      [self scheduleLocalNotifications];
+      [self handleProcessingTask:task];
+    }];
+    NSLog(@"Finished things in configureProcessingTask");
+  } else {
+    // No fallback
+  }
+}
+
+-(void)scheduleLocalNotifications {
+    NSLog(@"Doing things in scheduleLocalNotifications");
+}
+
+-(void)handleProcessingTask:(BGTask *)task API_AVAILABLE(ios(13.0)){
+    //do things with task
+    NSLog(@"Doing things in handleProcessingTask");
+}
+
+-(void)scheduleProcessingTask {
+  NSLog(@"Doing things in scheduleProcessingTask");
+  if (@available(iOS 13.0, *)) {
+    NSError *error = NULL;
+    // cancel existing task (if any)
+    [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:uploadTask];
+    // new task
+    BGProcessingTaskRequest *request = [[BGProcessingTaskRequest alloc] initWithIdentifier:uploadTask];
+    request.requiresNetworkConnectivity = YES;
+    request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow: 60 * 15];
+    BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
+    if (!success) {
+      // Errorcodes https://stackoverflow.com/a/58224050/872051
+      NSLog(@"Failed to submit request: %@", error);
+    } else {
+      NSLog(@"Success submit request %@", request);
+    }
+  } else {
+    // No fallback
+  }
 }
 
 @end

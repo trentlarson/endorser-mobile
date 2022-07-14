@@ -13,16 +13,16 @@
 
 RCT_EXPORT_MODULE();
 
-RCT_EXPORT_METHOD(initializeBgTasks:(NSString *)name callback:(RCTResponseSenderBlock)callback)
+// Attempts to make this a Promise
+//   following https://reactnative.dev/docs/native-modules-ios#promises
+//   resulted in this error:
+//   Malformed calls from JS: field sizes are different.
+RCT_EXPORT_METHOD(initializeBgTasks:(NSString *)name
+                  callback:(RCTResponseSenderBlock)callback
+                 )
 {
-  RCTLogInfo(@"Pretending to create an event %@", name);
-
+  //RCTLogInfo(@"Pretending to create an event %@", name);
   callback(@[]);
-}
-
-RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getName)
-{
-  return [[UIDevice currentDevice] name];
 }
 
 @end
