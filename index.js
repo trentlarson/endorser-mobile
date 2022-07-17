@@ -36,6 +36,8 @@ try {
       switch (taskId) {
       case TASK_ID:
         console.log("[BackgroundFetch] Received custom task")
+        const task = require('./src/utility/backgroundTask')
+        await task({})
         break
       default:
         console.log("[BackgroundFetch] Received unknown task", taskId)
