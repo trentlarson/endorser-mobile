@@ -20,6 +20,16 @@ RCT_EXPORT_METHOD(initializeBgTasks:(NSString *)name callback:(RCTResponseSender
   callback(@[]);
 }
 
+/**
+// only for testing -- disable before releasing, a la https://developer.apple.com/forums/thread/14855
+// but doesn't actually exit
+ RCT_EXPORT_METHOD(exit)
+{
+  RCTLogInfo(@"Exiting on demand");
+  exit;
+}
+ **/
+
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getName)
 {
   return [[UIDevice currentDevice] name];

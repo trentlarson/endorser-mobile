@@ -29,31 +29,32 @@ try {
 
   } else if (Platform.OS === 'ios') {
 
-    const TASK_ID = 'com.transistorsoft.ch.endorser.mobile.daily_task'
-    BackgroundFetch.configure({
-      minimumFetchInterval: 15,
-    }, async (taskId) => {  // <-- Event callback
-      switch (taskId) {
-      case TASK_ID:
-        console.log("[BackgroundFetch] Received custom task")
-        const task = require('./src/utility/backgroundTask')
-        await task({})
-        break
-      default:
-        console.log("[BackgroundFetch] Received unknown task", taskId)
-      }
+    const PROC_TASK_ID = 'com.transistorsoft.ch.endorser.mobile.daily_task'
+    const onEvent = async (taskId) => {  // <-- Event callback
+      console.log("[BackgroundFetch] Received custom task", taskId)
+      const task = require('./src/utility/backgroundTask')
+      const type = taskId === PROC_TASK_ID ? 'proc' : taskId
+      await task({ type: type })
       BackgroundFetch.finish(taskId)
-    }, async (taskId) => {  // <-- Task timeout callback
+    }
+    const onTimeout = async (taskId) => {  // <-- Task timeout callback
       // This task has exceeded its allowed running-time.
       // You must stop what you're doing and immediately .finish(taskId)
       BackgroundFetch.finish(taskId)
-    })
+    }
+    BackgroundFetch.configure(
+      {
+        minimumFetchInterval: 15,
+      },
+      onEvent,
+      onTimeout
+    )
       .then((status) => {
         console.log('[BackgroundFetch] status', status, BackgroundFetch.STATUS_AVAILABLE, BackgroundFetch.STATUS_RESTRICTED, BackgroundFetch.STATUS_DENIED)
       })
       .then(() => {
         BackgroundFetch.scheduleTask({
-          taskId: TASK_ID,
+          taskId: PROC_TASK_ID,
           delay: 1000 * 60 * 15,  // <-- milliseconds
           periodic: true,
           requiresNetworkConnectivity: true,

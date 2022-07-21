@@ -83,6 +83,13 @@ export default function App() {
   )
 }
 
+/** unused
+const { BackgroundProcessor } = NativeModules;
+const logNative = () => {
+  BackgroundProcessor.initializeBgTasks('stuff', () => { console.log('In yer JavaScript') })
+}
+**/
+
 function HomeScreen({ navigation }) {
   const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
@@ -146,18 +153,9 @@ function HomeScreen({ navigation }) {
     getIdentifiers()
   }, [])
 
-  const { BackgroundProcessor } = NativeModules;
-  const logNative = () => {
-    BackgroundProcessor.initializeBgTasks('stuff', () => { console.log('In yer JavaScript') })
-  }
-
   return (
     <SafeAreaView>
       <ScrollView>
-                  <Button
-                    title={'Log Native'}
-                    onPress={logNative}
-                  />
         {
         loading
         ?

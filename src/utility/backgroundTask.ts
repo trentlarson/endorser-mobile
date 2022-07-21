@@ -33,7 +33,7 @@ const moreTransactions = async (endorserApiServer, identifier, prevId) => {
   })
 }
 
-module.exports = async (taskData) => {
+const checkServer = async (taskData) => {
   console.log('Starting background JavaScript with data', taskData)
   try {
 
@@ -74,7 +74,7 @@ module.exports = async (taskData) => {
 
           await notifee.displayNotification({
             title: 'New Endorser Claims',
-            body: 'There are ' + newClaimCount + ' new claims.',
+            body: 'There are ' + newClaimCount + ' new claims. ' + JSON.stringify(taskData),
             android: {
               channelId: utility.DEFAULT_ANDROID_CHANNEL_ID,
               pressAction: {
@@ -98,3 +98,5 @@ module.exports = async (taskData) => {
   }
 
 }
+
+module.exports = checkServer
