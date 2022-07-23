@@ -77,6 +77,8 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 - Got "InstallException: Unknown failure: cmd: Can't find service: package"? Try running the command again (in case the emulator wasn't fully started).
 
+- Got "BGTaskSchedulerErrorDomain error 1"? If you're running in a simulator, that's expected.
+
 
 
 

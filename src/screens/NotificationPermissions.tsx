@@ -1,10 +1,11 @@
 
 import notifee, { AuthorizationStatus, TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, ScrollView, Text, View } from "react-native"
+import { Modal, SafeAreaView, ScrollView, Text, View } from "react-native"
 import { openSettings, requestNotifications } from 'react-native-permissions'
 
 import { appSlice, appStore } from "../veramo/appSlice"
+import { styles } from './style'
 
 /**
   See test scenarios in README.md
@@ -15,6 +16,7 @@ export function NotificationPermissionsScreen() {
   const [canNotify, setCanNotify] = useState<boolean>()
   const [isBlocked, setIsBlocked] = useState<boolean>()
   const [openSettingsError, setOpenSettingsError] = useState<boolean>(false)
+  const [quickMessage, setQuickMessage] = useState<string>(null)
 
   const checkSettings = async () => {
     const storedSettings = await notifee.getNotificationSettings()
@@ -34,6 +36,12 @@ export function NotificationPermissionsScreen() {
     appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Notifications are" + (isAuthorized ? "" : " not") + " authorized."}))
   }
 
+  const checkSettingsAndReport = async () => {
+    await checkSettings()
+    setQuickMessage('Updated')
+    setTimeout(() => { setQuickMessage(null) }, 1000)
+  }
+
   useEffect(() => {
     checkSettings()
   }, [])
@@ -47,7 +55,7 @@ export function NotificationPermissionsScreen() {
     **/
 
     const permSettings = await requestNotifications([])
-    return checkSettings()
+    return checkSettingsAndReport()
   }
 
   const openPhoneSettings = () => {
@@ -65,9 +73,7 @@ export function NotificationPermissionsScreen() {
 
           <View>
             <Text>
-              If you have contacts who will make commitments and build connections, or if you are interested in seeing what other people are announcing, this app can notify you. If you turn on notifications, you will get notified -- only when there is relevant information, and at most once per day.
-            </Text>
-            <Text>You may turn them off at any time.</Text>
+              This app can notify you if you have contacts who will make commitments and build connections, or if you are interested in seeing what other people are announcing. If you turn on notifications, you will get notified -- only when there is relevant information, and at most once per day. You may turn them off at any time.</Text>
           </View>
 
           <Text style={{ marginTop: 20 }}>Status:&nbsp;
@@ -96,31 +102,45 @@ export function NotificationPermissionsScreen() {
           </Text>
 
           <Text style={{ marginTop: 20 }}>Actions</Text>
+          <View style={{ marginLeft: 10}}>
 
-          {
-            !canNotify
-            ?
-              <Text style={{ color: 'blue', marginTop: 20 }} onPress={ enableNotifications }>
-                Click here to allow this app to enable Notifications.
-              </Text>
-            :
-              <View />
-          }
+            {
+              !canNotify
+              ?
+                <Text style={{ color: 'blue', marginTop: 20 }} onPress={ enableNotifications }>
+                  Click here to allow this app to enable Notifications.
+                </Text>
+              :
+                <View />
+            }
 
-          <Text style={{ color: 'blue', marginTop: 20 }} onPress={ checkSettings }>
-            Click here to double-check your settings in this app.
-          </Text>
+            <Text style={{ color: 'blue', marginTop: 20 }} onPress={ checkSettingsAndReport }>
+              Click here to double-check your settings in this app.
+            </Text>
 
-          <Text style={{ color: 'blue', marginTop: 20 }} onPress={ openPhoneSettings }
-          >
-            Click here to enable or disable Notifications in your phone settings.
-          </Text>
+            <Text style={{ color: 'blue', marginTop: 20 }} onPress={ openPhoneSettings }
+            >
+              Click here to enable or disable Notifications in your phone settings.
+            </Text>
+          </View>
 
           {
             openSettingsError
             ? <Text style={{ color: 'red' }}>Got an error opening your phone Settings. To enable notifications manually, go to your phone 'Settings' app and then select 'Notifications' and then choose this app and turn them on.</Text>
             : <View />
           }
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!quickMessage}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text>{ quickMessage }</Text>
+              </View>
+            </View>
+          </Modal>
 
         </View>
       </ScrollView>
