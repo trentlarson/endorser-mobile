@@ -1,7 +1,7 @@
 
 import notifee, { AuthorizationStatus, TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
-import { Modal, SafeAreaView, ScrollView, Text, View } from "react-native"
+import { Button, Modal, SafeAreaView, ScrollView, Text, View } from "react-native"
 import { openSettings, requestNotifications } from 'react-native-permissions'
 
 import { appSlice, appStore } from "../veramo/appSlice"
@@ -61,6 +61,11 @@ export function NotificationPermissionsScreen() {
   const openPhoneSettings = () => {
     openSettings()
     .catch(() => setOpenSettingsError(true))
+  }
+
+  const runDailyCheck = async () => {
+    const task = require('../utility/backgroundTask')
+    await task()
   }
 
   return (
@@ -127,6 +132,17 @@ export function NotificationPermissionsScreen() {
           {
             openSettingsError
             ? <Text style={{ color: 'red' }}>Got an error opening your phone Settings. To enable notifications manually, go to your phone 'Settings' app and then select 'Notifications' and then choose this app and turn them on.</Text>
+            : <View />
+          }
+
+          {
+            appStore.getState().testMode
+            ? <View style={{ marginTop: 20 }}>
+                <Button
+                  title="Run daily background check."
+                  onPress={ runDailyCheck }
+                />
+              </View>
             : <View />
           }
 

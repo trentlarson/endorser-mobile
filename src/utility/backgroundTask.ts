@@ -3,6 +3,7 @@ import notifee from '@notifee/react-native';
 
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
+import { DEFAULT_ENDORSER_API_SERVER } from '../veramo/appSlice'
 import { agent, dbConnection } from '../veramo/setup'
 
 /**
@@ -47,7 +48,7 @@ const checkServer = async (taskData) => {
       await conn.manager.save(Settings, settings)
 
       // load any new items from the sersver
-      const endorserApiServer = settings.apiServer
+      const endorserApiServer = settings.apiServer || DEFAULT_ENDORSER_API_SERVER
 
       const agentIdentifiers = await agent.didManagerFind()
       const id0 = agentIdentifiers[0] // type is @veramo/core IIdentifier
@@ -74,7 +75,7 @@ const checkServer = async (taskData) => {
 
           await notifee.displayNotification({
             title: 'New Endorser Claims',
-            body: 'There are ' + newClaimCount + ' new claims. ' + JSON.stringify(taskData),
+            body: 'There are ' + newClaimCount + ' new claims.',
             android: {
               channelId: utility.DEFAULT_ANDROID_CHANNEL_ID,
               pressAction: {

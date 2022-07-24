@@ -118,7 +118,10 @@ Manually
 
   - Create an identifier & add name.
 
-  - Close app & see notification of new claims after 15 minutes. (On android, that's the minimum time to start a background task.)
+  - After a claim:
+
+    - On Notification screen, run the daily background check.
+    - Close app (android) or background app (iOS) & see notification of new claims after 15 minutes. (On android, that's the minimum time to start a background task.)
 
   - As a second user, import via the mnemonic, eg. #3 from endorser-ch test/util.js
 

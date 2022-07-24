@@ -5,7 +5,6 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.transistorsoft.ch.endorser.mobile.daily_task</string>
-		<string>com.transistorsoft.fetch</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>

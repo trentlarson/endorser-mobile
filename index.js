@@ -30,14 +30,19 @@ try {
   } else if (Platform.OS === 'ios') {
 
     const PROC_TASK_ID = 'com.transistorsoft.ch.endorser.mobile.daily_task'
+    // To trigger a 'react-native-background-fetch' task ID (presumably for a BGAppRefreshTask)
+    // add a 'com.transistorsoft.fetch' entry in "Permitted background task scheduler identifiers" in ios/EndorserMobile/Info.plist
+    // I've taken it out because it's sometimes triggered at exactly the same time as the BGProcessingTask
+    // and we can get duplicate notifications.
     const onEvent = async (taskId) => {  // <-- Event callback
       console.log("[BackgroundFetch] Received custom task", taskId)
       const task = require('./src/utility/backgroundTask')
-      const type = taskId === PROC_TASK_ID ? 'proc' : taskId
-      await task({ type: type })
+      if (taskId === PROC_TASK_ID) {
+        await task()
+      }
       BackgroundFetch.finish(taskId)
     }
-    const onTimeout = async (taskId) => {  // <-- Task timeout callback
+    const onTimeout = async (taskId) => {  // Task timeout callback
       // This task has exceeded its allowed running-time.
       // You must stop what you're doing and immediately .finish(taskId)
       BackgroundFetch.finish(taskId)
@@ -53,9 +58,10 @@ try {
         console.log('[BackgroundFetch] status', status, BackgroundFetch.STATUS_AVAILABLE, BackgroundFetch.STATUS_RESTRICTED, BackgroundFetch.STATUS_DENIED)
       })
       .then(() => {
+        // This schedules a BGProcessingTask in iOS.
         BackgroundFetch.scheduleTask({
           taskId: PROC_TASK_ID,
-          delay: 1000 * 60 * 15,  // <-- milliseconds
+          delay: 1000 * 60 * 15,  // milliseconds
           periodic: true,
           requiresNetworkConnectivity: true,
         })
