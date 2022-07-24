@@ -207,6 +207,9 @@ const createAndStoreIdentifier = async (mnemonicPassword) => {
 const logDatabaseTable = (tableName) => async () => {
   const conn = await dbConnection
   const data = await conn.manager.query('SELECT * FROM ' + tableName)
+  if (tableName === 'settings') {
+    delete data[0]['mnemEncrBase64']
+  }
   appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Contents of table \"" + tableName + "\":\n" + JSON.stringify(data)}))
 }
 
