@@ -30,7 +30,7 @@ import { ReportScreen } from './screens/ReportFromEndorser'
 import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
-import { appSlice, appStore } from './veramo/appSlice'
+import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER } from './veramo/appSlice'
 import { agent, dbConnection } from './veramo/setup'
 import * as utility from './utility/utility.ts'
 import { BVCButton } from './utility/utility.tsx'
@@ -116,7 +116,7 @@ function HomeScreen({ navigation }) {
         const conn = await dbConnection
         let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
         if (!settings) {
-          const initSettings = { id: MASTER_COLUMN_VALUE }
+          const initSettings = { id: MASTER_COLUMN_VALUE, apiServer: DEFAULT_ENDORSER_API_SERVER }
           settings = await conn.manager.save(Settings, initSettings)
         }
         appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))

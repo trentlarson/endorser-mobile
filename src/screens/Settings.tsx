@@ -208,7 +208,7 @@ const logDatabaseTable = (tableName) => async () => {
   const conn = await dbConnection
   const data = await conn.manager.query('SELECT * FROM ' + tableName)
   if (tableName === 'settings') {
-    delete data[0]['mnemEncrBase64']
+    data[0]['mnemEncrBase64'] = 'HIDDEN'
   }
   appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Contents of table \"" + tableName + "\":\n" + JSON.stringify(data)}))
 }
@@ -223,11 +223,13 @@ export function SettingsScreen({navigation}) {
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [isInAdvancedMode, setIsInAdvancedMode] = useState<boolean>(appStore.getState().advancedMode)
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
+  const [inputApiServer, setInputApiServer] = useState<string>(appStore.getState().apiServer)
   const [inputName, setInputName] = useState<string>('')
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [showPrivateKey, setShowPrivateKey] = useState<boolean>(false)
+  const [storedApiServer, setStoredApiServer] = useState<string>(appStore.getState().apiServer)
   const [storedName, setStoredName] = useState<string>('')
 
   const identifiersSelector = useSelector((state) => state.identifiers || [])
@@ -251,29 +253,46 @@ export function SettingsScreen({navigation}) {
     }
   }
 
-  const inputApiRef = useRef()
   const inputViewRef = useRef()
-  const setToLocalServers = useCallback(() => {
-    inputApiRef.current.setNativeProps({ text: LOCAL_ENDORSER_API_SERVER })
+  const setToLocalServers = useCallback(async () => {
     inputViewRef.current.setNativeProps({ text: LOCAL_ENDORSER_VIEW_SERVER })
     // even with onChangeText on the useRef instance, the appStore setting isn't changed so we need these
+    const conn = await dbConnection
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: LOCAL_ENDORSER_API_SERVER })
     appStore.dispatch(appSlice.actions.setApiServer(LOCAL_ENDORSER_API_SERVER))
     appStore.dispatch(appSlice.actions.setViewServer(LOCAL_ENDORSER_VIEW_SERVER))
+    setInputApiServer(LOCAL_ENDORSER_API_SERVER)
+    setStoredApiServer(LOCAL_ENDORSER_API_SERVER)
   })
-  const setToTestServers = useCallback(() => {
-    inputApiRef.current.setNativeProps({ text: TEST_ENDORSER_API_SERVER })
+  const setToTestServers = useCallback(async () => {
     inputViewRef.current.setNativeProps({ text: TEST_ENDORSER_VIEW_SERVER })
     // even with onChangeText on the useRef instance, the appStore setting isn't changed so we need these
+    const conn = await dbConnection
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: TEST_ENDORSER_API_SERVER })
     appStore.dispatch(appSlice.actions.setApiServer(TEST_ENDORSER_API_SERVER))
     appStore.dispatch(appSlice.actions.setViewServer(TEST_ENDORSER_VIEW_SERVER))
+    setInputApiServer(TEST_ENDORSER_API_SERVER)
+    setStoredApiServer(TEST_ENDORSER_API_SERVER)
   })
-  const setToProdServers = useCallback(() => {
-    inputApiRef.current.setNativeProps({ text: DEFAULT_ENDORSER_API_SERVER })
+  const setToProdServers = useCallback(async () => {
     inputViewRef.current.setNativeProps({ text: DEFAULT_ENDORSER_VIEW_SERVER })
     // even with onChangeText on the useRef instance, the appStore setting isn't changed so we need these
+    const conn = await dbConnection
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: DEFAULT_ENDORSER_API_SERVER })
     appStore.dispatch(appSlice.actions.setApiServer(DEFAULT_ENDORSER_API_SERVER))
     appStore.dispatch(appSlice.actions.setViewServer(DEFAULT_ENDORSER_VIEW_SERVER))
+    setInputApiServer(DEFAULT_ENDORSER_API_SERVER)
+    setStoredApiServer(DEFAULT_ENDORSER_API_SERVER)
   })
+
+  const persistApiServer = async () => {
+    const conn = await dbConnection
+    // may be empty string, but we don't want that in the DB
+    const valueToSave = inputApiServer || null
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: valueToSave })
+    appStore.dispatch(appSlice.actions.setApiServer(inputApiServer))
+    setStoredApiServer(inputApiServer)
+  }
 
   const deleteLastIdentifier = async () => {
     if (identifiersSelector.length > 0) {
@@ -334,20 +353,6 @@ export function SettingsScreen({navigation}) {
   const copyToClipboard = (value) => {
     Clipboard.setString(value)
     setQuickMessage('Copied')
-    setTimeout(() => { setQuickMessage(null) }, 1000)
-  }
-
-  const persistApiServer = async () => {
-    const conn = await dbConnection
-    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: appStore.getState().apiServer })
-    setQuickMessage('Saved')
-    setTimeout(() => { setQuickMessage(null) }, 1000)
-  }
-
-  const erasePersistedApiServer = async () => {
-    const conn = await dbConnection
-    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: null })
-    setQuickMessage('Erased')
     setTimeout(() => { setQuickMessage(null) }, 1000)
   }
 
@@ -428,7 +433,7 @@ export function SettingsScreen({navigation}) {
             { inputName === storedName
               ? <View/>
               : <View>
-                <Button title="Save" onPress={storeNewName} />
+                <Button title="Save (currently not saved)" onPress={storeNewName} />
                 <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', marginBottom: 20 }}/>
               </View>
             }
@@ -669,21 +674,22 @@ export function SettingsScreen({navigation}) {
 
                 <Text>Endorser API Server</Text>
                 <TextInput
-                  defaultValue={ appStore.getState().apiServer }
-                  onChangeText={(text) => {
-                    appStore.dispatch(appSlice.actions.setApiServer(text))
-                  }}
-                  ref={inputApiRef}
+                  value={inputApiServer ? inputApiServer : ''}
+                  onChangeText={setInputApiServer}
                   style={{borderWidth: 1}}
                 />
-                <Button
-                  title='Persist (beyond restarts & background)'
-                  onPress={persistApiServer}
-                />
-                <Button
-                  title='Erase Persisted API Server'
-                  onPress={erasePersistedApiServer}
-                />
+                {
+                  inputApiServer !== storedApiServer
+                  ? (
+                    () => {
+                    return <Button
+                      title='Save (currently not saved)'
+                      onPress={persistApiServer}
+                    />
+                    }
+                  )() :
+                    <View />
+                }
 
                 <CheckBox
                   title='Test Mode'
