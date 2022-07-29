@@ -63,8 +63,8 @@ export function MyCredentialsScreen({ navigation }) {
   const moreTransactions = async (prevId) => {
     const endorserApiServer = appStore.getState().apiServer
     const token = await utility.accessToken(identifiers[0])
-    let maybeMoreAfterQuery = prevId == null ? '' : '&afterId=' + prevId
-    return fetch(endorserApiServer + '/api/reportAll/claimsForIssuerWithTypes?claimTypes=' + encodeURIComponent(JSON.stringify(["GiveAction","Offer"])) + maybeMoreAfterQuery, {
+    let maybeMoreBeforeQuery = prevId == null ? '' : '&beforeId=' + prevId
+    return fetch(endorserApiServer + '/api/reportAll/claimsForIssuerWithTypes?claimTypes=' + encodeURIComponent(JSON.stringify(["GiveAction","Offer"])) + maybeMoreBeforeQuery, {
       method: 'GET',
       headers: {
         "Content-Type": "application/json",
@@ -89,15 +89,15 @@ export function MyCredentialsScreen({ navigation }) {
     setLoading(true)
     setLoadedNumber(0)
     let allResults: Array<utility.EndorserRecord> = []
-    let nextAfter
+    let nextBefore
     do {
-      let nextResults = await moreTransactions(nextAfter)
+      let nextResults = await moreTransactions(nextBefore)
       if (nextResults.data) {
         allResults = allResults.concat(nextResults.data)
         setLoadedNumber(allResults.length)
-        nextAfter = nextResults.hitLimit ? nextResults.data[nextResults.data.length - 1].id : undefined
+        nextBefore = nextResults.hitLimit ? nextResults.data[nextResults.data.length - 1].id : undefined
       }
-    } while (nextAfter)
+    } while (nextBefore)
 
     setLoading(false)
     const displayResults = R.reverse(allResults) // we will keep the convention of reverse chronological order

@@ -8,12 +8,13 @@ import { agent, dbConnection } from '../veramo/setup'
 /**
  * return Promise of
  *   jwts: array of JWT objects
- *   maybeMore: boolean telling whether there may be more
+ *   hitLimit: boolean telling whether there may be more
  */
-const moreTransactions = async (endorserApiServer, identifier, prevId) => {
+const moreTransactions = async (endorserApiServer, identifier, afterId, beforeId) => {
   const token = await utility.accessToken(identifier)
-  let maybeMoreAfterQuery = prevId == null ? '' : '?afterId=' + prevId
-  return fetch(endorserApiServer + '/api/reportAll/claims' + maybeMoreAfterQuery, {
+  const afterQuery = afterId == null ? '' : '&afterId=' + afterId
+  const beforeQuery = beforeId == null ? '' : '&beforeId=' + beforeId
+  return fetch(endorserApiServer + '/api/reportAll/claims?' + afterQuery + beforeQuery, {
     method: 'GET',
     headers: {
       "Content-Type": "application/json",
@@ -52,19 +53,25 @@ const checkServer = async (taskData) => {
       const agentIdentifiers = await agent.didManagerFind()
       const id0 = agentIdentifiers[0] // type is @veramo/core IIdentifier
 
+      const afterId = settings.lastNotifiedClaimId
       let newClaimCount = 0
       let lastClaimId = null
-      let maybeMoreAfter = settings.lastNotifiedClaimId
+      let beforeId = null
       do {
-        let nextResults = await moreTransactions(endorserApiServer, id0, maybeMoreAfter)
+        const nextResults = await moreTransactions(endorserApiServer, id0, afterId, beforeId)
         if (nextResults.data) {
           newClaimCount += nextResults.data.length
-          if (nextResults.data.length > 0) {
-            lastClaimId = nextResults.data[nextResults.data.length - 1].id
+          // only set lastClaimId the first time through the loop, only if we get results.
+          if (lastClaimId == null
+              && nextResults.data.length > 0) {
+            lastClaimId = nextResults.data[0].id
           }
-          maybeMoreAfter = nextResults.maybeMoreAfter
+          beforeId = nextResults.hitLimit ? nextResults.data[nextResults.data.length - 1] : null
+        } else {
+          // there was probably some error, since we'd expect at least []; anyway, stop
+          beforeId = null
         }
-      } while (maybeMoreAfter)
+      } while (beforeId)
 
       // notify the user if there's anything new
       if (newClaimCount > 0) {
