@@ -58,7 +58,7 @@ export function MyCredentialsScreen({ navigation }) {
   /**
    * return Promise of
    *   jwts: array of JWT objects
-   *   maybeMore: boolean telling whether there may be more
+   *   hitLimit: boolean telling whether there may be more
    */
   const moreTransactions = async (prevId) => {
     const endorserApiServer = appStore.getState().apiServer
@@ -89,15 +89,15 @@ export function MyCredentialsScreen({ navigation }) {
     setLoading(true)
     setLoadedNumber(0)
     let allResults: Array<utility.EndorserRecord> = []
-    let maybeMoreAfter
+    let nextAfter
     do {
-      let nextResults = await moreTransactions(maybeMoreAfter)
+      let nextResults = await moreTransactions(nextAfter)
       if (nextResults.data) {
         allResults = allResults.concat(nextResults.data)
         setLoadedNumber(allResults.length)
-        maybeMoreAfter = nextResults.maybeMoreAfter
+        nextAfter = nextResults.hitLimit ? nextResults.data[nextResults.data.length - 1].id : undefined
       }
-    } while (maybeMoreAfter)
+    } while (nextAfter)
 
     setLoading(false)
     const displayResults = R.reverse(allResults) // we will keep the convention of reverse chronological order
