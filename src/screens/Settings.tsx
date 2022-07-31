@@ -225,6 +225,7 @@ export function SettingsScreen({navigation}) {
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
   const [inputApiServer, setInputApiServer] = useState<string>(appStore.getState().apiServer)
   const [inputName, setInputName] = useState<string>('')
+  const [lastViewedClaimId, setLastViewedClaimId] = useState<string>(appStore.getState().settings.lastViewedClaimId)
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
@@ -354,6 +355,18 @@ export function SettingsScreen({navigation}) {
     Clipboard.setString(value)
     setQuickMessage('Copied')
     setTimeout(() => { setQuickMessage(null) }, 1000)
+  }
+
+  const storeLastViewedClaimId = async (value) => {
+    const conn = await dbConnection
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { lastNotifiedClaimId: value, lastViewedClaimId: value })
+
+    const settings = classToPlain(appStore.getState().settings)
+    settings.lastNotifiedClaimId = value
+    settings.lastViewedClaimId = value
+    appStore.dispatch(appSlice.actions.setSettings(settings))
+
+    setLastViewedClaimId(value)
   }
 
   // Check for existing identifers on load and set them to state
@@ -726,6 +739,13 @@ export function SettingsScreen({navigation}) {
                     <Button
                       title='Use local test servers'
                       onPress={setToLocalServers}
+                    />
+
+                    <Text>Last Viewed Claim ID</Text>
+                    <TextInput
+                      value={lastViewedClaimId || ''}
+                      onChangeText={storeLastViewedClaimId}
+                      style={{borderWidth: 1}}
                     />
 
                   </View>

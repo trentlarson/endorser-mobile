@@ -470,3 +470,32 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
   return { allPaid, allPromised, idsOfStranges, idsOfUnknowns, outstandingCurrencyTotals, outstandingInvoiceTotals, totalCurrencyPaid, totalCurrencyPromised }
 
 }
+
+/**
+ * return Promise of
+ *   jwts: array of EndorserRecord objects
+ *   hitLimit: boolean telling whether there may be more
+ */
+export const retrieveClaims = async (endorserApiServer, identifier, afterId, beforeId) => {
+  const token = await accessToken(identifier)
+  const afterQuery = afterId == null ? '' : '&afterId=' + afterId
+  const beforeQuery = beforeId == null ? '' : '&beforeId=' + beforeId
+  return fetch(endorserApiServer + '/api/reportAll/claims?' + afterQuery + beforeQuery, {
+    method: 'GET',
+    headers: {
+      "Content-Type": "application/json",
+      "Uport-Push-Token": token,
+    }
+  }).then(response => {
+    if (response.status !== 200) {
+      throw Error('There was a low-level error from the server.')
+    }
+    return response.json()
+  }).then(results => {
+    if (results.data) {
+      return results
+    } else {
+      throw Error(results.error || 'The server got an error. (For details, see the log on the Settings page.)')
+    }
+  })
+}

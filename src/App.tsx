@@ -210,7 +210,7 @@ function HomeScreen({ navigation }) {
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Search"
+                title="Browse"
                 onPress={() => navigation.navigate('Reports from Endorser server')}
               />
               <View style={{ marginTop: 5 }}/>

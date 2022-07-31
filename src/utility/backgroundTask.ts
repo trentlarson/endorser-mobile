@@ -5,35 +5,6 @@ import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 import { agent, dbConnection } from '../veramo/setup'
 
-/**
- * return Promise of
- *   jwts: array of JWT objects
- *   hitLimit: boolean telling whether there may be more
- */
-const moreTransactions = async (endorserApiServer, identifier, afterId, beforeId) => {
-  const token = await utility.accessToken(identifier)
-  const afterQuery = afterId == null ? '' : '&afterId=' + afterId
-  const beforeQuery = beforeId == null ? '' : '&beforeId=' + beforeId
-  return fetch(endorserApiServer + '/api/reportAll/claims?' + afterQuery + beforeQuery, {
-    method: 'GET',
-    headers: {
-      "Content-Type": "application/json",
-      "Uport-Push-Token": token,
-    }
-  }).then(response => {
-    if (response.status !== 200) {
-      throw Error('There was a low-level error from the server.')
-    }
-    return response.json()
-  }).then(results => {
-    if (results.data) {
-      return results
-    } else {
-      throw Error(results.error || 'The server got an error. (For details, see the log on the Settings page.)')
-    }
-  })
-}
-
 const checkServer = async (taskData) => {
   console.log('Starting background JavaScript with data', taskData)
   try {
@@ -58,7 +29,7 @@ const checkServer = async (taskData) => {
       let lastClaimId = null
       let beforeId = null
       do {
-        const nextResults = await moreTransactions(endorserApiServer, id0, afterId, beforeId)
+        const nextResults = await utility.retrieveClaims(endorserApiServer, id0, afterId, beforeId)
         if (nextResults.data) {
           newClaimCount += nextResults.data.length
           // only set lastClaimId the first time through the loop, only if we get results.
