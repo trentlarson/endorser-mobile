@@ -129,7 +129,7 @@ export function ReportScreen({ navigation }) {
           renderItem={ data => (
             <YamlFormat source={ data.item } />
           )}
-          style={{ borderWidth: 1, height: 300 }}
+          style={{ borderWidth: 1, height: feedData.length > 0 ? 300 : 60 }}
           ListFooterComponent={(
             <View>
               <ActivityIndicator color="#00ff00" animating={ loadingRecent }/>
