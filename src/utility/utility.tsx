@@ -251,12 +251,13 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
             </Text>
             <Text style={{ padding: 10 }} selectable={true}>{ claimIdForLinkedModal }</Text>
 
+            <Text>It's visible to these in network:</Text>
             {
               didsForLinkedModal != null
               ? didsForLinkedModal.map((did) => {
                   const contact = R.find(con => con.did === did, allContacts)
                   return (
-                    <Text key={ did } style={{ padding: 10 }}>
+                    <Text key={ did } style={{ padding: 10 }} selectable={true}>
                       { utility.didInContext(did, identifiers, allContacts) }
                     </Text>
                   )
