@@ -177,6 +177,7 @@ To Release:
 
 - Test everything.
 - Update CHANGELOG.md
+- Set INFURA_PROJECT_ID in src/veramo/setup.ts (useful for checking claims)
 - In package.json, update version
 - Tag
 - (I recommend starting with ios since it takes longer to get approved.)

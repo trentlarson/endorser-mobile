@@ -68,12 +68,14 @@ const DEFAULT_DID_PROVIDER_NETWORK_NAME = 'mainnet'
 
 export const DEFAULT_DID_PROVIDER_NAME = didProviderName(DEFAULT_DID_PROVIDER_NETWORK_NAME)
 
+const INFURA_PROJECT_ID = 'INFURA_PROJECT_ID'
+
 const providers = {}
 NETWORK_NAMES.forEach((networkName) => {
   providers[didProviderName(networkName)] = new EthrDIDProvider({
     defaultKms: 'local',
     network: networkName,
-    rpcUrl: 'https://' + networkName + '.infura.io/v3/INFURA_PROJECT_ID',
+    rpcUrl: 'https://' + networkName + '.infura.io/v3/' + INFURA_PROJECT_ID,
     gas: 1000001,
     ttl: 60 * 60 * 24 * 30 * 12 + 1,
   })
@@ -90,7 +92,7 @@ const basicDidResolvers = NETWORK_NAMES.map((networkName) =>
     networkName,
     new Resolver({
       ethr: ethrDidResolver({
-        networks: [{ name: networkName, rpcUrl: 'https://' + networkName + '.infura.io/v3/INFURA_PROJECT_ID' }],
+        networks: [{ name: networkName, rpcUrl: 'https://' + networkName + '.infura.io/v3/' + INFURA_PROJECT_ID }],
       }).ethr,
       web: webDidResolver().web,
     })
