@@ -17,7 +17,9 @@ export function ReportScreen({ navigation }) {
 
   const [feedData, setFeedData] = useState<utility.EndorserRecord>([])
   const [feedError, setFeedError] = useState<string>()
-  const [hitLimit, setHitLimit] = useState<boolean>(false)
+  const [feedHitLimit, setFeedHitLimit] = useState<boolean>(false)
+  const [feedPreviousLastId, setFeedPreviousLastId] = useState<string>(appStore.getState().settings.lastViewedClaimId)
+  const [todaysOldestFeedId, setTodaysOldestFeedId] = useState<string>()
   const [loadingRecent, setLoadingRecent] = useState<boolean>(true)
   const [loadingSearch, setLoadingSearch] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>('')
@@ -73,16 +75,17 @@ export function ReportScreen({ navigation }) {
   const updateFeed = async () => {
     setLoadingRecent(true)
 
-    await utility.retrieveClaims(appStore.getState().apiServer, identifiers[0], appStore.getState().settings.lastViewedClaimId)
+    await utility.retrieveClaims(appStore.getState().apiServer, identifiers[0], feedPreviousLastId, todaysOldestFeedId)
     .then(async results => {
       if (results.data.length > 0) {
+        setFeedData(previousData => previousData.concat(results.data))
+        setFeedHitLimit(results.hitLimit)
+        setTodaysOldestFeedId(results.data[results.data.length - 1].id)
+
         newLastViewedId = results.data[0].id
         const settings = classToPlain(appStore.getState().settings)
         if (!settings.lastViewedClaimId
             || newLastViewedId > settings.lastViewedClaimId) {
-          setFeedData(results.data)
-          setHitLimit(results.hitLimit)
-
           const conn = await dbConnection
           await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { lastNotifiedClaimId: newLastViewedId, lastViewedClaimId: newLastViewedId })
 
@@ -90,6 +93,7 @@ export function ReportScreen({ navigation }) {
           settings.lastViewedClaimId = newLastViewedId
           appStore.dispatch(appSlice.actions.setSettings(settings))
         }
+
       }
     })
     .catch(e => {
@@ -121,18 +125,28 @@ export function ReportScreen({ navigation }) {
         <FlatList
           data={ feedData }
           keyExtractor={ item => item.id }
+          initialNumToRender={ 10 }
           renderItem={ data => (
-            <View>
-              <Text>{ data.item.id }</Text>
-            </View>
+            <YamlFormat source={ data.item } />
           )}
           style={{ borderWidth: 1, height: 300 }}
-          ListEmptyComponent={(
-            loadingRecent
-            ?
-              <ActivityIndicator color="#00ff00" />
-            :
-              <Text>Nothing New</Text>
+          ListFooterComponent={(
+            <View>
+              <ActivityIndicator color="#00ff00" animating={ loadingRecent }/>
+              <View style={{ display: (loadingRecent ? "none" : "flex")}}>
+                <View style={{ display: (feedHitLimit ? "flex" : "none")}}>
+                  <Button
+                    title="Load More"
+                    onPress={ updateFeed }
+                  />
+                </View>
+                <View style={{ display: (feedHitLimit ? "none" : "flex")}}>
+                  <Text>
+                    You're all caught up.
+                  </Text>
+                </View>
+              </View>
+            </View>
           )}
         />
       </View>
