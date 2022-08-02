@@ -50,13 +50,17 @@ const checkServer = async (taskData) => {
 
           notifee.onBackgroundEvent(async () => {}) // without this explicit setting it complains that "no background event handler has been set"... stupid
 
+          const message =
+            newClaimCount === 1
+            ? 'There is 1 new claim.'
+            : 'There are ' + newClaimCount + ' new claims.'
           await notifee.displayNotification({
             title: 'New Endorser Claims',
-            body: 'There are ' + newClaimCount + ' new claims.',
+            body: message,
             android: {
               channelId: utility.DEFAULT_ANDROID_CHANNEL_ID,
               pressAction: {
-                id: 'default', // launch the application on press
+                id: 'feed', // launch the application on press
               }
               //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
             },
