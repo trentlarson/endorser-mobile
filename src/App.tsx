@@ -26,6 +26,7 @@ import { MyGivenScreen } from './screens/MyGiven'
 import { MyOffersScreen } from './screens/MyOffers'
 import { NotificationPermissionsScreen } from './screens/NotificationPermissions'
 import { PresentCredentialScreen } from './screens/PresentCredential'
+import { ReportFeedScreen } from './screens/ReportFeed'
 import { ReportScreen } from './screens/ReportFromEndorser'
 import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
@@ -67,6 +68,7 @@ export default function App() {
             <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
             <Stack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
+            <Stack.Screen name="Report Claims Feed" component={ReportFeedScreen} />
             <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
             <Stack.Screen name="Review to Sign Credential" component={ReviewToSignCredentialScreen} />
             <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
@@ -210,7 +212,12 @@ function HomeScreen({ navigation }) {
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Browse"
+                title="See Recent"
+                onPress={() => navigation.navigate('Report Claims Feed')}
+              />
+              <View style={{ marginTop: 5 }}/>
+              <Button
+                title="Search"
                 onPress={() => navigation.navigate('Reports from Endorser server')}
               />
               <View style={{ marginTop: 5 }}/>
