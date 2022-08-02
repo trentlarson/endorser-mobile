@@ -225,6 +225,7 @@ export function SettingsScreen({navigation}) {
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
   const [inputApiServer, setInputApiServer] = useState<string>(appStore.getState().apiServer)
   const [inputName, setInputName] = useState<string>('')
+  const [lastNotifiedClaimId, setLastNotifiedClaimId] = useState<string>(appStore.getState().settings.lastNotifiedClaimId)
   const [lastViewedClaimId, setLastViewedClaimId] = useState<string>(appStore.getState().settings.lastViewedClaimId)
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
@@ -357,6 +358,17 @@ export function SettingsScreen({navigation}) {
     setTimeout(() => { setQuickMessage(null) }, 1000)
   }
 
+  const storeLastNotifiedClaimId = async (value) => {
+    const conn = await dbConnection
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { lastNotifiedClaimId: value })
+
+    const settings = classToPlain(appStore.getState().settings)
+    settings.lastNotifiedClaimId = value
+    appStore.dispatch(appSlice.actions.setSettings(settings))
+
+    setLastNotifiedClaimId(value)
+  }
+
   const storeLastViewedClaimId = async (value) => {
     const conn = await dbConnection
     await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { lastNotifiedClaimId: value, lastViewedClaimId: value })
@@ -366,6 +378,7 @@ export function SettingsScreen({navigation}) {
     settings.lastViewedClaimId = value
     appStore.dispatch(appSlice.actions.setSettings(settings))
 
+    setLastNotifiedClaimId(value)
     setLastViewedClaimId(value)
   }
 
@@ -739,6 +752,13 @@ export function SettingsScreen({navigation}) {
                     <Button
                       title='Use local test servers'
                       onPress={setToLocalServers}
+                    />
+
+                    <Text>Last Notified Claim ID</Text>
+                    <TextInput
+                      value={lastNotifiedClaimId || ''}
+                      onChangeText={storeLastNotifiedClaimId}
+                      style={{borderWidth: 1}}
                     />
 
                     <Text>Last Viewed Claim ID</Text>
