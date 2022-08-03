@@ -60,7 +60,7 @@ const checkServer = async (taskData) => {
             android: {
               channelId: utility.DEFAULT_ANDROID_CHANNEL_ID,
               pressAction: {
-                id: 'feed', // launch the application on press
+                id: utility.FEED_ACTION, // launch the application on press
               }
               //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
             },

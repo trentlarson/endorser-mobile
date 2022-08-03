@@ -4,12 +4,12 @@ import 'react-native-gesture-handler'
 import 'reflect-metadata'
 
 import { classToPlain } from 'class-transformer'
-import notifee, { TriggerType } from '@notifee/react-native';
+import notifee, { EventType, TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
 import { Button, Linking, NativeModules, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import VersionNumber from 'react-native-version-number'
-import { NavigationContainer } from '@react-navigation/native'
+import { NavigationContainer, StackActions } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { Provider, useSelector } from 'react-redux'
 
@@ -93,6 +93,7 @@ const logNative = () => {
 **/
 
 function HomeScreen({ navigation }) {
+
   const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
@@ -141,7 +142,7 @@ function HomeScreen({ navigation }) {
         if (Platform.OS === 'android') {
           const channelCreation = await notifee.createChannel({
             id: 'default-channel',
-            name: 'Endorser Channel',
+            name: 'Endorser Feed',
           });
         }
 
@@ -151,6 +152,19 @@ function HomeScreen({ navigation }) {
         setInitError('Something went wrong during initialization. Kindly send us the logs (near the bottom of Help).')
       }
       setLoading(false)
+
+      if (Platform.OS === 'android') { // since getInitialNotification is deprecated in iOS
+        const initNotify = await notifee.getInitialNotification()
+        if (initNotify && initNotify.pressAction == utility.FEED_ACTION) {
+          navigation.dispatch(StackActions.push("Report Claims Feed"))
+        }
+      }
+      notifee.onForegroundEvent(({ type, detail }) => {
+        if (type === EventType.PRESS) {
+          navigation.dispatch(StackActions.push("Report Claims Feed"))
+        }
+      });
+
     }
     getIdentifiers()
   }, [])
