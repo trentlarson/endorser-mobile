@@ -64,7 +64,7 @@ const checkServer = async (taskData) => {
               }
               //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
             },
-          });
+          })
 
           settings.lastNotifiedClaimId = lastClaimId
           await conn.manager.save(Settings, settings)
@@ -77,6 +77,7 @@ const checkServer = async (taskData) => {
     console.log('Finished background JavaScript.')
   } catch (e) {
     console.log('Got error in background JavaScript', e)
+    return 'Got error running a background check.'
   }
 
 }

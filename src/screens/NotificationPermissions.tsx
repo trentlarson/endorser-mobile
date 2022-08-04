@@ -1,10 +1,11 @@
 
 import notifee, { AuthorizationStatus, TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
-import { Button, Modal, SafeAreaView, ScrollView, Text, View } from "react-native"
+import { Button, Modal, Platform, SafeAreaView, ScrollView, Text, View } from "react-native"
 import { openSettings, requestNotifications } from 'react-native-permissions'
 
 import { appSlice, appStore } from "../veramo/appSlice"
+import * as utility from "../utility/utility"
 import { styles } from './style'
 
 /**
@@ -15,7 +16,7 @@ export function NotificationPermissionsScreen() {
 
   const [canNotify, setCanNotify] = useState<boolean>()
   const [isBlocked, setIsBlocked] = useState<boolean>()
-  const [openSettingsError, setOpenSettingsError] = useState<boolean>(false)
+  const [someError, setSomeError] = useState<string>()
   const [quickMessage, setQuickMessage] = useState<string>(null)
 
   const checkSettings = async () => {
@@ -38,13 +39,9 @@ export function NotificationPermissionsScreen() {
 
   const checkSettingsAndReport = async () => {
     await checkSettings()
-    setQuickMessage('Updated')
+    setQuickMessage('Checked')
     setTimeout(() => { setQuickMessage(null) }, 1000)
   }
-
-  useEffect(() => {
-    checkSettings()
-  }, [])
 
   const enableNotifications = async () => {
 
@@ -60,13 +57,39 @@ export function NotificationPermissionsScreen() {
 
   const openPhoneSettings = () => {
     openSettings()
-    .catch(() => setOpenSettingsError(true))
+    .then(() => setSomeError(null))
+    .catch(() => setSomeError("Got an error opening your phone Settings. To enable notifications manually, go to your phone 'Settings' app and then select 'Notifications' and then choose this app and turn them on."))
   }
 
   const runDailyCheck = async () => {
     const task = require('../utility/backgroundTask')
-    await task()
+    const result = await task()
+    setQuickMessage('Finished')
+    setTimeout(() => { setQuickMessage(null) }, 1000)
+    if (result) {
+      setSomeError(result)
+    } else {
+      setSomeError(null)
+    }
   }
+
+  const createTestNotification = async () => {
+    await notifee.displayNotification({
+      title: 'Test Succeeded',
+      body: 'This shows that Endorser notifications work.',
+      android: {
+        channelId: utility.DEFAULT_ANDROID_CHANNEL_ID,
+        pressAction: {
+          id: utility.FEED_ACTION, // launch the application on press
+        }
+        //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
+      },
+    })
+  }
+
+  useEffect(() => {
+    checkSettings()
+  }, [])
 
   return (
     <SafeAreaView>
@@ -74,11 +97,22 @@ export function NotificationPermissionsScreen() {
         <View style={{padding: 20}}>
           <Text style={{fontSize: 30, fontWeight: 'bold'}}>Notification Permissions</Text>
 
-          <View style={{ marginTop: 50 }} />
+          <View style={{ marginTop: 20 }} />
 
           <View>
-            <Text>
-              This app can notify you if you have contacts who will make commitments and build connections, or if you are interested in seeing what other people are announcing. If you turn on notifications, you will get notified -- only when there is relevant information, and at most once per day. You may turn them off at any time.</Text>
+            <Text>This app can notify you if people make commitments or confirmations of interest.</Text>
+            <View style={{ marginTop: 10 }} />
+            <Text>If you're not getting notifications:</Text>
+            <View style={{ padding: 10 }}>
+              {
+                Platform.OS === 'ios'
+                ?
+                  <Text style={{ marginBottom: 10 }}>- Do not quit the app, but rather push it to the background (eg. by going to the home screen, or by opening another app). iOS notifications only work when the app stays in the background; they do not work when the app is closed.</Text>
+                :
+                  <Text />
+              }
+              <Text style={{ marginBottom: 10 }}>- Try some of the actions below, and see Help to report problems.</Text>
+            </View>
           </View>
 
           <Text style={{ marginTop: 20 }}>Status:&nbsp;
@@ -113,36 +147,34 @@ export function NotificationPermissionsScreen() {
               !canNotify
               ?
                 <Text style={{ color: 'blue', marginTop: 20 }} onPress={ enableNotifications }>
-                  Click here to allow this app to enable Notifications.
+                  Allow this app to enable Notifications.
                 </Text>
               :
                 <View />
             }
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ checkSettingsAndReport }>
-              Click here to double-check your settings in this app.
+              Double-check your settings in this app.
             </Text>
 
-            <Text style={{ color: 'blue', marginTop: 20 }} onPress={ openPhoneSettings }
-            >
-              Click here to enable or disable Notifications in your phone settings.
+            <Text style={{ color: 'blue', marginTop: 20 }} onPress={ openPhoneSettings }>
+              Enable or disable Notifications in your phone settings.
             </Text>
+
+            <Text style={{ color: 'blue', marginTop: 20 }} onPress={ createTestNotification }>
+              Create a test notification.
+            </Text>
+
+            <Text style={{ color: 'blue', marginTop: 20 }} onPress={ runDailyCheck }>
+              Run daily background check.
+            </Text>
+            <Text>(Note that you can force a check by decrementing the Last Notified Claim ID in Advanced Test Mode in Settings.)</Text>
+
           </View>
 
           {
-            openSettingsError
-            ? <Text style={{ color: 'red' }}>Got an error opening your phone Settings. To enable notifications manually, go to your phone 'Settings' app and then select 'Notifications' and then choose this app and turn them on.</Text>
-            : <View />
-          }
-
-          {
-            appStore.getState().testMode
-            ? <View style={{ marginTop: 20 }}>
-                <Button
-                  title="Run daily background check."
-                  onPress={ runDailyCheck }
-                />
-              </View>
+            someError
+            ? <Text style={{ color: 'red' }}>{ someError }</Text>
             : <View />
           }
 

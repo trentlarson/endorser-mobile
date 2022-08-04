@@ -221,12 +221,12 @@ function HomeScreen({ navigation }) {
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title={'Agree / Certify / Confirm'}
+                title={"Agree / Certify / Confirm"}
                 onPress={() => navigation.navigate('Confirm Others')}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="See Recent"
+                title="View Feed"
                 onPress={() => navigation.navigate('Report Claims Feed')}
               />
               <View style={{ marginTop: 5 }}/>
