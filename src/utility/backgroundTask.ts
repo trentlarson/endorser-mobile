@@ -37,7 +37,7 @@ const checkServer = async (taskData) => {
               && nextResults.data.length > 0) {
             lastClaimId = nextResults.data[0].id
           }
-          beforeId = nextResults.hitLimit ? nextResults.data[nextResults.data.length - 1] : null
+          beforeId = nextResults.hitLimit ? nextResults.data[nextResults.data.length - 1].id : null
         } else {
           // there was probably some error, since we'd expect at least []; anyway, stop
           beforeId = null
