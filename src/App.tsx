@@ -121,6 +121,9 @@ function HomeScreen({ navigation }) {
         if (!settings) {
           const initSettings = { id: MASTER_COLUMN_VALUE, apiServer: DEFAULT_ENDORSER_API_SERVER }
           settings = await conn.manager.save(Settings, initSettings)
+        } else if (!settings.apiServer) {
+          settings.apiServer = DEFAULT_ENDORSER_API_SERVER
+          settings = await conn.manager.save(Settings, settings)
         }
         appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
         if (settings.apiServer) {
