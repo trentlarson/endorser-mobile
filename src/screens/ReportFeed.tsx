@@ -16,7 +16,7 @@ export function ReportFeedScreen({ navigation }) {
   const [feedError, setFeedError] = useState<string>()
   const [feedHitLimit, setFeedHitLimit] = useState<boolean>(false)
   const [feedPreviousLastId, setFeedPreviousLastId] = useState<string>(appStore.getState().settings.lastViewedClaimId)
-  const [todaysOldestFeedId, setTodaysOldestFeedId] = useState<string>()
+  const [thisSessionsOldestFeedId, setThisSessionsOldestFeedId] = useState<string>()
   const [loadingRecent, setLoadingRecent] = useState<boolean>(true)
 
   const identifiers = useSelector((state) => state.identifiers || [])
@@ -24,12 +24,12 @@ export function ReportFeedScreen({ navigation }) {
   const updateFeed = async () => {
     setLoadingRecent(true)
 
-    await utility.retrieveClaims(appStore.getState().apiServer, identifiers[0], feedPreviousLastId, todaysOldestFeedId)
+    await utility.retrieveClaims(appStore.getState().apiServer, identifiers[0], feedPreviousLastId, thisSessionsOldestFeedId)
     .then(async results => {
       if (results.data.length > 0) {
         setFeedData(previousData => previousData.concat(results.data))
         setFeedHitLimit(results.hitLimit)
-        setTodaysOldestFeedId(results.data[results.data.length - 1].id)
+        setThisSessionsOldestFeedId(results.data[results.data.length - 1].id)
 
         newLastViewedId = results.data[0].id
         const settings = classToPlain(appStore.getState().settings)
