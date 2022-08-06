@@ -139,9 +139,6 @@ function HomeScreen({ navigation }) {
           settings = await conn.manager.save(Settings, settings)
         }
         appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
-        if (settings.apiServer) {
-          appStore.dispatch(appSlice.actions.setApiServer(settings.apiServer))
-        }
 
         if (settings != null && settings.mnemonic != null) {
           setOldMnemonic(true)

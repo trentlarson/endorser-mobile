@@ -24,7 +24,7 @@ export function ReportFeedScreen({ navigation }) {
   const updateFeed = async () => {
     setLoadingRecent(true)
 
-    await utility.retrieveClaims(appStore.getState().apiServer, identifiers[0], feedPreviousLastId, thisSessionsOldestFeedId)
+    await utility.retrieveClaims(appStore.getState().settings.apiServer, identifiers[0], feedPreviousLastId, thisSessionsOldestFeedId)
     .then(async results => {
       if (results.data.length > 0) {
         setFeedData(previousData => previousData.concat(results.data))
@@ -64,7 +64,7 @@ export function ReportFeedScreen({ navigation }) {
       <View style={{ padding: 20 }}>
         <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Recent
           {
-            (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
+            (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
              || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
              ? " - Custom Servers"
              : ""

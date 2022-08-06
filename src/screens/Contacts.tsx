@@ -275,7 +275,7 @@ export function ContactsScreen({ navigation, route }) {
    */
   const checkVisibility = async (contact: Contact) => {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
-    const endorserApiServer = appStore.getState().apiServer
+    const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(id0)
     return fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + encodeURIComponent(contact.did), {
       headers: {
@@ -304,7 +304,7 @@ export function ContactsScreen({ navigation, route }) {
    */
   const allowToSeeMe = async (contact: Contact) => {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
-    const endorserApiServer = appStore.getState().apiServer
+    const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(id0)
     return fetch(endorserApiServer + '/api/report/canSeeMe', {
       method: 'POST',
@@ -333,7 +333,7 @@ export function ContactsScreen({ navigation, route }) {
    */
   const disallowToSeeMe = async (contact: Contact) => {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
-    const endorserApiServer = appStore.getState().apiServer
+    const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(id0)
     return fetch(endorserApiServer + '/api/report/cannotSeeMe', {
       method: 'POST',
@@ -402,7 +402,7 @@ export function ContactsScreen({ navigation, route }) {
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>
             Contacts
             {
-              (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
+              (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
                || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
                ? " - Custom Servers"
                : ""

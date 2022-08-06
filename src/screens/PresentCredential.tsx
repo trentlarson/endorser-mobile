@@ -47,7 +47,7 @@ export function PresentCredentialScreen({ navigation, route }) {
 
             // 'id' is found in the full VP but only 'jti' is found in the final proof
             // this is added as 'jti' in each VC
-            id: appStore.getState().apiServer + '/api/claim/' + fullClaim.id,
+            id: appStore.getState().settings.apiServer + '/api/claim/' + fullClaim.id,
 
             issuer: { id: identifiers[0].did },
           }

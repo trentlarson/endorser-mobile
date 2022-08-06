@@ -29,7 +29,7 @@ export function MyCredentialsScreen({ navigation }) {
 
   const searchEndorserForString = async () => {
     setLoading(true)
-    const endorserApiServer = appStore.getState().apiServer
+    const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(identifiers[0])
     const searchParam = searchTerm ? '&claimContents=' + encodeURIComponent(searchTerm) : ''
     fetch(endorserApiServer + '/api/claim?subject=' + identifiers[0].did + searchParam, {
@@ -61,7 +61,7 @@ export function MyCredentialsScreen({ navigation }) {
    *   hitLimit: boolean telling whether there may be more
    */
   const moreTransactions = async (prevId) => {
-    const endorserApiServer = appStore.getState().apiServer
+    const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(identifiers[0])
     let maybeMoreBeforeQuery = prevId == null ? '' : '&beforeId=' + prevId
     return fetch(endorserApiServer + '/api/reportAll/claimsForIssuerWithTypes?claimTypes=' + encodeURIComponent(JSON.stringify(["GiveAction","Offer"])) + maybeMoreBeforeQuery, {

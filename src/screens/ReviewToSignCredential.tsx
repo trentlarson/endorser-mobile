@@ -92,7 +92,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
               <Text style={{ fontSize: 30, fontWeight: 'bold', marginBottom: 10 }}>
                 Review
                 {
-                  (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
+                  (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
                    || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
                    ? " - Custom Servers"
                    : ""

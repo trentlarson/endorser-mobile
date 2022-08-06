@@ -41,7 +41,7 @@ export function ReportScreen({ navigation }) {
     if (urlSuffix) {
       setLoadingSearch(true)
       const token = await utility.accessToken(identifiers[0])
-      fetch(appStore.getState().apiServer + '/api/claim' + urlSuffix, {
+      fetch(appStore.getState().settings.apiServer + '/api/claim' + urlSuffix, {
         method: 'GET',
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +70,7 @@ export function ReportScreen({ navigation }) {
             <View style={{ marginTop: 20 }} />
             <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search All
               {
-                (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
+                (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
                  || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
                  ? " - Custom Servers"
                  : ""

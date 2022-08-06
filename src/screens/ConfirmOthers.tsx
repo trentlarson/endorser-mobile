@@ -36,7 +36,7 @@ export function ConfirmOthersScreen({ navigation }) {
       let loadMoreEndingStr = loadMoreEnding.toISO()
       let loadMoreStartingStr = loadMoreStarting.toISO()
 
-      const endorserApiServer = appStore.getState().apiServer
+      const endorserApiServer = appStore.getState().settings.apiServer
       const token = await utility.accessToken(ids[0])
       return fetch(endorserApiServer + '/api/claim/?issuedAt_greaterThanOrEqualTo=' + encodeURIComponent(loadMoreStartingStr) + "&issuedAt_lessThan=" + encodeURIComponent(loadMoreEndingStr) + "&excludeConfirmations=true", {
         headers: {

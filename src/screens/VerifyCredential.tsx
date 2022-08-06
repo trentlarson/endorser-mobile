@@ -140,7 +140,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
         if (!vcObj && wrappedClaim) {
           // try to retrive a full VC
 
-          const url = appStore.getState().apiServer + '/api/claim/full/' + encodeURIComponent(wrappedClaim.id)
+          const url = appStore.getState().settings.apiServer + '/api/claim/full/' + encodeURIComponent(wrappedClaim.id)
           const userToken = await utility.accessToken(identifiers[0])
           await fetch(url, {
             headers: {
@@ -160,7 +160,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
                 vcObj = {
                   "@context": [ "https://www.w3.org/2018/credentials/v1" ],
                   credentialSubject: JSON.parse(result.claim),
-                  id: appStore.getState().apiServer + '/api/claim/' + result.id,
+                  id: appStore.getState().settings.apiServer + '/api/claim/' + result.id,
                   issuer: { id: result.issuer },
                   issuanceDate: result.issuedAt,
                   type: [ "VerifiableCredential" ],
@@ -247,7 +247,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
             setEndorserId(foundEndorserId)
 
-            const url = appStore.getState().apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + encodeURIComponent(foundEndorserId)
+            const url = appStore.getState().settings.apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + encodeURIComponent(foundEndorserId)
             const userToken = await utility.accessToken(identifiers[0])
             await fetch(url, {
               headers: {

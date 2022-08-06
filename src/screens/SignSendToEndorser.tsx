@@ -41,7 +41,7 @@ export function SignCredentialScreen({ navigation, route }) {
   async function sendToEndorserSite(jwt: string, index: number): Promise<string> {
     setFetching(R.update(index, true))
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the send to Endorser server..."}))
-    const endorserApiServer = appStore.getState().apiServer
+    const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(identifier)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... sending to server..."}))
     fetch(endorserApiServer + '/api/claim', {
@@ -147,7 +147,7 @@ export function SignCredentialScreen({ navigation, route }) {
               <Text style={{ fontSize: 30, fontWeight: 'bold', marginBottom: 10 }}>
                 Sign
                 {
-                  (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
+                  (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
                    || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
                    ? " - Custom Servers"
                    : ""

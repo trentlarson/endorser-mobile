@@ -42,7 +42,6 @@ export const appSlice = createSlice({
     // it'll be null if we haven't even loaded from the DB yet.
     contacts: null as Array<Contact> | null,
 
-    apiServer: DEFAULT_ENDORSER_API_SERVER,
     viewServer: DEFAULT_ENDORSER_VIEW_SERVER,
 
     logMessage: '',
@@ -64,9 +63,6 @@ export const appSlice = createSlice({
     },
     setAdvancedMode: (state, contents: Payload<boolean>) => {
       state.advancedMode = contents.payload
-    },
-    setApiServer: (state, contents: Payload<string>) => {
-      state.apiServer = contents.payload
     },
     setContacts: (state, contents: Payload<Array<Contact>>) => {
       state.contacts = contents.payload

@@ -223,7 +223,7 @@ export function SettingsScreen({navigation}) {
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [isInAdvancedMode, setIsInAdvancedMode] = useState<boolean>(appStore.getState().advancedMode)
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
-  const [inputApiServer, setInputApiServer] = useState<string>(appStore.getState().apiServer)
+  const [inputApiServer, setInputApiServer] = useState<string>(appStore.getState().settings.apiServer)
   const [inputName, setInputName] = useState<string>('')
   const [lastNotifiedClaimId, setLastNotifiedClaimId] = useState<string>(appStore.getState().settings.lastNotifiedClaimId)
   const [lastViewedClaimId, setLastViewedClaimId] = useState<string>(appStore.getState().settings.lastViewedClaimId)
@@ -231,7 +231,7 @@ export function SettingsScreen({navigation}) {
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [showPrivateKey, setShowPrivateKey] = useState<boolean>(false)
-  const [storedApiServer, setStoredApiServer] = useState<string>(appStore.getState().apiServer)
+  const [storedApiServer, setStoredApiServer] = useState<string>(appStore.getState().settings.apiServer)
   const [storedName, setStoredName] = useState<string>('')
 
   const identifiersSelector = useSelector((state) => state.identifiers || [])
@@ -241,7 +241,7 @@ export function SettingsScreen({navigation}) {
   const toggleStateForHomeIsBVC = async () => {
     const newValue = homeScreenSelector == null ? 'BVC' : null
     const conn = await dbConnection
-    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { homeScreen: newValue })
+    await conn.manager.save(Settings, { id: MASTER_COLUMN_VALUE, homeScreen: newValue })
     appStore.dispatch(appSlice.actions.setHomeScreen(newValue))
   }
 
@@ -261,7 +261,9 @@ export function SettingsScreen({navigation}) {
     // even with onChangeText on the useRef instance, the appStore setting isn't changed so we need these
     const conn = await dbConnection
     await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: LOCAL_ENDORSER_API_SERVER })
-    appStore.dispatch(appSlice.actions.setApiServer(LOCAL_ENDORSER_API_SERVER))
+    const settings = classToPlain(appStore.getState().settings)
+    settings.apiServer = LOCAL_ENDORSER_API_SERVER
+    appStore.dispatch(appSlice.actions.setSettings(settings))
     appStore.dispatch(appSlice.actions.setViewServer(LOCAL_ENDORSER_VIEW_SERVER))
     setInputApiServer(LOCAL_ENDORSER_API_SERVER)
     setStoredApiServer(LOCAL_ENDORSER_API_SERVER)
@@ -271,7 +273,9 @@ export function SettingsScreen({navigation}) {
     // even with onChangeText on the useRef instance, the appStore setting isn't changed so we need these
     const conn = await dbConnection
     await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: TEST_ENDORSER_API_SERVER })
-    appStore.dispatch(appSlice.actions.setApiServer(TEST_ENDORSER_API_SERVER))
+    const settings = classToPlain(appStore.getState().settings)
+    settings.apiServer = TEST_ENDORSER_API_SERVER
+    appStore.dispatch(appSlice.actions.setSettings(settings))
     appStore.dispatch(appSlice.actions.setViewServer(TEST_ENDORSER_VIEW_SERVER))
     setInputApiServer(TEST_ENDORSER_API_SERVER)
     setStoredApiServer(TEST_ENDORSER_API_SERVER)
@@ -281,7 +285,9 @@ export function SettingsScreen({navigation}) {
     // even with onChangeText on the useRef instance, the appStore setting isn't changed so we need these
     const conn = await dbConnection
     await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: DEFAULT_ENDORSER_API_SERVER })
-    appStore.dispatch(appSlice.actions.setApiServer(DEFAULT_ENDORSER_API_SERVER))
+    const settings = classToPlain(appStore.getState().settings)
+    settings.apiServer = DEFAULT_ENDORSER_API_SERVER
+    appStore.dispatch(appSlice.actions.setSettings(settings))
     appStore.dispatch(appSlice.actions.setViewServer(DEFAULT_ENDORSER_VIEW_SERVER))
     setInputApiServer(DEFAULT_ENDORSER_API_SERVER)
     setStoredApiServer(DEFAULT_ENDORSER_API_SERVER)
@@ -291,8 +297,8 @@ export function SettingsScreen({navigation}) {
     const conn = await dbConnection
     // may be empty string, but we don't want that in the DB
     const valueToSave = inputApiServer || null
-    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: valueToSave })
-    appStore.dispatch(appSlice.actions.setApiServer(inputApiServer))
+    const settings = await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: valueToSave })
+    appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
     setStoredApiServer(inputApiServer)
   }
 
@@ -438,7 +444,7 @@ export function SettingsScreen({navigation}) {
         Alert.alert('You can lose data in Test Mode. If unsure: exit, or restart the app.')
       } else {
         // now going into real mode, but if the servers were switched then warn
-        if (appStore.getState().apiServer !== DEFAULT_ENDORSER_API_SERVER
+        if (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
             || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER) {
           Alert.alert('Beware! Your servers are not set to the default production servers.')
         }
