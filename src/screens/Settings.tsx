@@ -367,6 +367,10 @@ export function SettingsScreen({navigation}) {
     appStore.dispatch(appSlice.actions.setSettings(settings))
 
     setLastNotifiedClaimId(value)
+
+    if (value < lastViewedClaimId) {
+      Alert.alert('Last Notified < Last Viewed. Confusing... make them equal.')
+    }
   }
 
   const storeLastViewedClaimId = async (value) => {

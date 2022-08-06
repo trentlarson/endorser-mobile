@@ -173,7 +173,8 @@ To Do First Release:
 
 
 To Release:
-- next deploy: check the "Please provide SecretBox, which I first noticed in 6.2.93
+- next deploy:
+  - check the "Please provide SecretBox, which I first noticed in 6.2.93"
 
 - Test everything.
 - Update CHANGELOG.md
@@ -181,6 +182,7 @@ To Release:
 - In package.json, update version
 - Tag
 - (I recommend starting with ios since it takes longer to get approved.)
+- To install on a local iPhone, you can edit the scheme in the product to have a build configuration of "Release".
 - android
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number to match ios)
     - Always increment the versionCode (and ensure you don't already have a larger release in ios, just for consistency's sake).  It is possible to reuse the versionName.

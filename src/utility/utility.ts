@@ -29,7 +29,7 @@ export const ENDORSER_JWT_URL_LOCATION = '/contact?jwt='
 export const REPLACE_USER_DID_STRING = 'PUT_USER_DID'
 export const UPORT_JWT_PREFIX = 'https://id.uport.me/req/'
 
-export const FEED_ACTION = 'feed'
+export const ANDROID_FEED_ACTION = 'default' // only 'default' will launch the app if background / terminated on android
 
 export function isDid(value) {
   return value && value.startsWith("did:") && (value.substring(5).indexOf(":") > -1)

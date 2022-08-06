@@ -14,6 +14,8 @@ import { styles } from './style'
  **/
 export function NotificationPermissionsScreen() {
 
+  const FINISHED_MESSAGE = 'Finished'
+
   const [canNotify, setCanNotify] = useState<boolean>()
   const [isBlocked, setIsBlocked] = useState<boolean>()
   const [someError, setSomeError] = useState<string>()
@@ -64,7 +66,7 @@ export function NotificationPermissionsScreen() {
   const runDailyCheck = async () => {
     const task = require('../utility/backgroundTask')
     const result = await task()
-    setQuickMessage('Finished')
+    setQuickMessage(FINISHED_MESSAGE)
     setTimeout(() => { setQuickMessage(null) }, 1000)
     if (result) {
       setSomeError(result)
@@ -80,7 +82,7 @@ export function NotificationPermissionsScreen() {
       android: {
         channelId: utility.DEFAULT_ANDROID_CHANNEL_ID,
         pressAction: {
-          id: utility.FEED_ACTION, // launch the application on press
+          id: utility.ANDROID_FEED_ACTION, // launch the application on press
         }
         //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
       },
@@ -154,7 +156,7 @@ export function NotificationPermissionsScreen() {
             }
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ checkSettingsAndReport }>
-              Double-check your settings in this app.
+              Double-check your settings in this app. (This may change the Status above.)
             </Text>
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ openPhoneSettings }>
@@ -162,13 +164,13 @@ export function NotificationPermissionsScreen() {
             </Text>
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ createTestNotification }>
-              Create a test notification.
+              Create a test notification. (You should see a notification appear.)
             </Text>
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ runDailyCheck }>
-              Run daily background check.
+              Run daily background check. (This should show '{FINISHED_MESSAGE}', then -- only if you have items in your feed -- it should create a notification.)
             </Text>
-            <Text>(Note that you can force a check by decrementing the Last Notified Claim ID in Advanced Test Mode in Settings.)</Text>
+            <Text>(Note that you can force an item in your feed by decrementing the Last Notified Claim ID in Advanced Test Mode in Settings.)</Text>
 
           </View>
 

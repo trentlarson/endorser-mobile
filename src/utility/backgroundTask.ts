@@ -52,15 +52,15 @@ const checkServer = async (taskData) => {
 
           const message =
             newClaimCount === 1
-            ? 'There is 1 new claim.'
-            : 'There are ' + newClaimCount + ' new claims.'
+            ? 'There is 1 new claim in your feed.'
+            : 'There are ' + newClaimCount + ' new claims in your feed.'
           await notifee.displayNotification({
             title: 'New Endorser Claims',
             body: message,
             android: {
               channelId: utility.DEFAULT_ANDROID_CHANNEL_ID,
               pressAction: {
-                id: utility.FEED_ACTION, // launch the application on press
+                id: utility.ANDROID_FEED_ACTION, // launch the application on press
               }
               //smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
             },

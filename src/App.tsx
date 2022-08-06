@@ -144,7 +144,7 @@ function HomeScreen({ navigation }) {
 
         if (Platform.OS === 'android') {
           const channelCreation = await notifee.createChannel({
-            id: 'default-channel',
+            id: utility.DEFAULT_ANDROID_CHANNEL_ID,
             name: 'Endorser Feed',
           });
         }
@@ -156,17 +156,32 @@ function HomeScreen({ navigation }) {
       }
       setLoading(false)
 
-      if (Platform.OS === 'android') { // since getInitialNotification is deprecated in iOS
-        const initNotify = await notifee.getInitialNotification()
-        if (initNotify && initNotify.pressAction == utility.FEED_ACTION) {
-          navigation.dispatch(StackActions.push("Report Claims Feed"))
-        }
+      const REPORT_CLAIMS_FEED_PAGE = 'Report Claims Feed'
+
+      // on android: I get nothing from notifee when my app is in the background and a notification press brings it back.
+
+      // on android: fires when opening app from terminated state
+      // on ios: getInitialNotification
+      const initNotify = await notifee.getInitialNotification()
+      // on android: this fires and opens feed when terminated
+      // note that the pressAction inside initNotify.android is typically undefined
+      if (initNotify
+          && initNotify.pressAction.id === utility.ANDROID_FEED_ACTION) {
+
+        // tried customizing initNotify.pressAction.launchActivity but it always comes back as 'default'
+        // might use initNotify data or id or body or title
+        navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
       }
+      // on android: why does notifee complain about no background handler even with this here?
+      notifee.onBackgroundEvent(async ({ type, detail}) => {
+      })
+      // on android: usually fires when we're in the foreground (sometimes not on notifications screen)
       notifee.onForegroundEvent(({ type, detail }) => {
-        if (type === EventType.PRESS) {
-          navigation.dispatch(StackActions.push("Report Claims Feed"))
+        // on ios: works
+        if (type === EventType.PRESS) { // iOS hits this, even when in background
+          navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
         }
-      });
+      })
 
     }
     getIdentifiers()
