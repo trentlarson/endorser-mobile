@@ -140,6 +140,12 @@ function HomeScreen({ navigation }) {
 
 
 
+        setLoading(false)
+
+
+
+        //// Now for notification setup.
+
         // Initialize notification channel for Android.
 
         if (Platform.OS === 'android') {
@@ -149,39 +155,45 @@ function HomeScreen({ navigation }) {
           });
         }
 
+
+
+        // Set up responses after clicking on notifications.
+        // Note that Android opens but doesn't jump to the right screen when in background. See taskyaml:endorser.ch,2020/tasks#android-feed-screen-from-background
+
+        const REPORT_CLAIMS_FEED_PAGE = 'Report Claims Feed'
+
+        // on android: Note that I get nothing from notifee when my app is in the background and a notification press brings it back.
+
+        // on android: handles from terminated state (not from foreground or background)
+        // on ios: handles from terminated state (even though docs say that getInitialNotification does nothing) so we'll skip and let the onForegroundEvent handle it 
+        if (Platform.OS === 'android') {
+          const initNotify = await notifee.getInitialNotification()
+          // note that the pressAction inside initNotify.android is typically undefined
+          if (initNotify
+              && initNotify.pressAction.id === utility.ANDROID_FEED_ACTION) {
+
+            // tried customizing initNotify.pressAction.launchActivity but it always comes back as 'default'
+            // might use initNotify data or id or body or title
+            navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
+          }
+        }
+        // on android: does nothing, but notifee complains about no background handler even with this here - ug
+        notifee.onBackgroundEvent(async ({ type, detail}) => {
+        })
+        // on android: handles when we're in the foreground -- usually (sometimes not on notifications screen)
+        // on ios: handles when in the foreground or background
+        notifee.onForegroundEvent(({ type, detail }) => {
+          if (type === EventType.PRESS) { // iOS hits this, even when in background
+            navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
+          }
+        })
+
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
         setInitError('Something went wrong during initialization. Kindly send us the logs (near the bottom of Help).')
       }
-      setLoading(false)
 
-      const REPORT_CLAIMS_FEED_PAGE = 'Report Claims Feed'
-
-      // on android: I get nothing from notifee when my app is in the background and a notification press brings it back.
-
-      // on android: fires when opening app from terminated state
-      // on ios: getInitialNotification
-      const initNotify = await notifee.getInitialNotification()
-      // on android: this fires and opens feed when terminated
-      // note that the pressAction inside initNotify.android is typically undefined
-      if (initNotify
-          && initNotify.pressAction.id === utility.ANDROID_FEED_ACTION) {
-
-        // tried customizing initNotify.pressAction.launchActivity but it always comes back as 'default'
-        // might use initNotify data or id or body or title
-        navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
-      }
-      // on android: why does notifee complain about no background handler even with this here?
-      notifee.onBackgroundEvent(async ({ type, detail}) => {
-      })
-      // on android: usually fires when we're in the foreground (sometimes not on notifications screen)
-      notifee.onForegroundEvent(({ type, detail }) => {
-        // on ios: works
-        if (type === EventType.PRESS) { // iOS hits this, even when in background
-          navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
-        }
-      })
 
     }
     getIdentifiers()

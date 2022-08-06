@@ -107,11 +107,18 @@ export function NotificationPermissionsScreen() {
             <Text>If you're not getting notifications:</Text>
             <View style={{ padding: 10 }}>
               {
+                Platform.OS === 'android'
+                ?
+                  <Text style={{ marginBottom: 10 }}>- Note that the notification will not take you to the feed screen if the app is in the background. You can quit this app and it will notify you and take you to your feed.</Text>
+                :
+                  <View />
+              }
+              {
                 Platform.OS === 'ios'
                 ?
                   <Text style={{ marginBottom: 10 }}>- Do not quit the app, but rather push it to the background (eg. by going to the home screen, or by opening another app). iOS notifications only work when the app stays in the background; they do not work when the app is closed.</Text>
                 :
-                  <Text />
+                  <View />
               }
               <Text style={{ marginBottom: 10 }}>- Try some of the actions below, and see Help to report problems.</Text>
             </View>
@@ -156,21 +163,24 @@ export function NotificationPermissionsScreen() {
             }
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ checkSettingsAndReport }>
-              Double-check your settings in this app. (This may change the Status above.)
+              Double-check your settings in this app.
             </Text>
+            <Text style={{ marginLeft: 10 }}>This may change the Status above.</Text>
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ openPhoneSettings }>
               Enable or disable Notifications in your phone settings.
             </Text>
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ createTestNotification }>
-              Create a test notification. (You should see a notification appear.)
+              Create a test notification.
             </Text>
+            <Text style={{ marginLeft: 10 }}>You should see a notification appear.</Text>
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ runDailyCheck }>
-              Run daily background check. (This should show '{FINISHED_MESSAGE}', then -- only if you have items in your feed -- it should create a notification.)
+              Run daily background check.
             </Text>
-            <Text>(Note that you can force an item in your feed by decrementing the Last Notified Claim ID in Advanced Test Mode in Settings.)</Text>
+            <Text style={{ marginLeft: 10 }}>This should show '{FINISHED_MESSAGE}', then -- only if you have items in your feed -- it should create a notification.</Text>
+            <Text style={{ marginLeft: 20, padding: 10 }}>Note that you can force an item in your feed by decrementing the Last Notified Claim ID in Advanced Test Mode in Settings.</Text>
 
           </View>
 
