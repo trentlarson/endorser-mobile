@@ -94,12 +94,25 @@ const logNative = () => {
 
 function HomeScreen({ navigation }) {
 
+  const REPORT_CLAIMS_FEED_PAGE = 'Report Claims Feed'
+
   const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
 
   const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
+
+  /** see pressedInBackground usage below
+  let pressedInBackground = false;
+  const handleChange = (newState: any) => {
+    if (newState === 'active' && pressedInBackground) {
+        pressedInBackground = false
+        navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
+      }
+    }
+  };
+  **/
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
@@ -155,12 +168,8 @@ function HomeScreen({ navigation }) {
           });
         }
 
-
-
         // Set up responses after clicking on notifications.
         // Note that Android opens but doesn't jump to the right screen when in background. See taskyaml:endorser.ch,2020/tasks#android-feed-screen-from-background
-
-        const REPORT_CLAIMS_FEED_PAGE = 'Report Claims Feed'
 
         // on android: Note that I get nothing from notifee when my app is in the background and a notification press brings it back.
 
@@ -177,9 +186,17 @@ function HomeScreen({ navigation }) {
             navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
           }
         }
-        // on android: does nothing, but notifee complains about no background handler even with this here - ug
-        notifee.onBackgroundEvent(async ({ type, detail}) => {
+        /**
+        // here's my proposed functionality if we get this to work, along with code above & AppState import from react-native
+        // on android: does nothing (but notifee complains about no background handler even with this here)
+        // see https://github.com/invertase/notifee/issues/404
+        notifee.onBackgroundEvent(async ({ type, detail }) => {
+          if (type === EventType.PRESS) {
+            pressedInBackground = true
+          }
         })
+        AppState.addEventListener('change', handleChange)
+        **/
         // on android: handles when we're in the foreground -- usually (sometimes not on notifications screen)
         // on ios: handles when in the foreground or background
         notifee.onForegroundEvent(({ type, detail }) => {
