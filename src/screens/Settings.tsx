@@ -536,6 +536,17 @@ export function SettingsScreen({navigation}) {
                       ) : (
 
                         <View>
+
+                          <QRCode value={qrJwts[ident.did]} size={300}/>
+
+                          <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => Linking.openURL(qrJwts[ident.did])}>
+                            View Online
+                          </Text>
+
+                          <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => copyToClipboard(qrJwts[ident.did])}>
+                            Copy to Clipboard
+                          </Text>
+
                           <Text>Public Key (base64)</Text>
                           <Text style={{ marginBottom: 20 }} selectable={true}>
                             { Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64') }
@@ -571,15 +582,6 @@ export function SettingsScreen({navigation}) {
                               <View/>
                           }
 
-                          <QRCode value={qrJwts[ident.did]} size={300}/>
-
-                          <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => Linking.openURL(qrJwts[ident.did])}>
-                            View Online
-                          </Text>
-
-                          <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => copyToClipboard(qrJwts[ident.did])}>
-                            Copy to Clipboard
-                          </Text>
                         </View>
 
                       )
