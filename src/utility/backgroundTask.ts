@@ -9,13 +9,15 @@ const checkServer = async (taskData) => {
   console.log('Starting background JavaScript with data', taskData)
   try {
 
+    const startDate = new Date()
+
     const conn = await dbConnection
     let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
 
     if (settings) {
 
       // first, record that we've started this process
-      settings.lastDailyTaskTime = new Date().toISOString()
+      settings.lastDailyTaskTime = startDate.toISOString()
       await conn.manager.save(Settings, settings)
 
       // load any new items from the sersver
@@ -28,6 +30,7 @@ const checkServer = async (taskData) => {
       let newClaimCount = 0
       let lastClaimId = null
       let beforeId = null
+      const mustStopTime = startDate.valueOf() + (25 * 1000) // iOS is strict about their 30-second limit
       do {
         const nextResults = await utility.retrieveClaims(endorserApiServer, id0, afterId, beforeId)
         if (nextResults.data) {
@@ -42,7 +45,7 @@ const checkServer = async (taskData) => {
           // there was probably some error, since we'd expect at least []; anyway, stop
           beforeId = null
         }
-      } while (beforeId)
+      } while (beforeId && Date.now() < mustStopTime)
 
       // notify the user if there's anything new
       if (newClaimCount > 0) {
