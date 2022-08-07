@@ -501,3 +501,14 @@ export const retrieveClaims = async (endorserApiServer, identifier, afterId, bef
     }
   })
 }
+
+/**
+  Here's a little shared variable, eg. so that iOS can kill our background process when it wants.
+ **/
+export const Toggle = () => {
+  let toggle = false
+  return {
+    setToggle: (value) => toggle = value,
+    getToggle: () => toggle,
+  }
+}

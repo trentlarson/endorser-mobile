@@ -23,7 +23,7 @@ try {
 
     AppRegistry.registerHeadlessTask(
       'EndorserDailyTask', // also referenced in DailyTaskWorker.java
-      () => require('./src/utility/backgroundTask')
+      () => require('./src/utility/backgroundTask')()
     );
     console.log('Daily background task is set up.')
 
@@ -34,9 +34,10 @@ try {
     // add a 'com.transistorsoft.fetch' entry in "Permitted background task scheduler identifiers" in ios/EndorserMobile/Info.plist
     // I've taken it out because it's sometimes triggered at exactly the same time as the BGProcessingTask
     // and we can get duplicate notifications.
+    const killToggle = utility.Toggle()
     const onEvent = async (taskId) => {  // <-- Event callback
       console.log("[BackgroundFetch] Received custom task", taskId)
-      const task = require('./src/utility/backgroundTask')
+      const task = require('./src/utility/backgroundTask')(killToggle)
       if (taskId === PROC_TASK_ID) {
         await task()
       }
@@ -44,8 +45,10 @@ try {
     }
     const onTimeout = async (taskId) => {  // Task timeout callback
       // This task has exceeded its allowed running-time.
-      // You must stop what you're doing and immediately .finish(taskId)
-      BackgroundFetch.finish(taskId)
+      // You must stop what you're doing and .finish(taskId) ASAP.
+      killToggle.setToggle(true)
+      // Hopefully this works to wait a second for work to finish.
+      setTimeout(() => BackgroundFetch.finish(taskId), 1000)
     }
     BackgroundFetch.configure(
       {

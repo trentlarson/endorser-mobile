@@ -5,7 +5,7 @@ import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 import { agent, dbConnection } from '../veramo/setup'
 
-const checkServer = async (taskData) => {
+const checkServer = (killToggle) => async (taskData) => {
   console.log('Starting background JavaScript with data', taskData)
   try {
 
@@ -41,11 +41,35 @@ const checkServer = async (taskData) => {
             lastClaimId = nextResults.data[0].id
           }
           beforeId = nextResults.hitLimit ? nextResults.data[nextResults.data.length - 1].id : null
+
+          /**
+           // This is my way of running forever and printing output to show that we're running.
+           // Yes, it's complicated. But it was fun to write as one self-contained piece inside the loop.
+           // To test this, trigger a background check and then terminate it in NotificationPermissions.
+
+          if (beforeId == null) {
+            beforeId = 'ZZZZZZZZZZZZZZZZZZZZZZZZZ0' // keep it going, with almost-infinite endpoint
+          }
+          const secMultiplier = 5 // number of seconds before next log message; be sure it's > total/10 (since you've only got 10 increments)
+          const lastNumber = Number(beforeId.charAt(25))
+          const numSeconds = (lastNumber + 1) * secMultiplier
+          if (Date.now() > startDate.valueOf() + numSeconds * 1000) {
+            // it's been a few seconds, so report and then bump it up
+            console.log('It has been ' + numSeconds + ' seconds.')
+            beforeId = 'ZZZZZZZZZZZZZZZZZZZZZZZZZ' + (lastNumber + 1)
+          }
+          **/
+
         } else {
           // there was probably some error, since we'd expect at least []; anyway, stop
           beforeId = null
         }
-      } while (beforeId && Date.now() < mustStopTime)
+      } while (beforeId && Date.now() < mustStopTime && !killToggle.getToggle())
+
+      if (killToggle) {
+        // reset now that it's done the job of killing our loop
+        killToggle.setToggle(false)
+      }
 
       // notify the user if there's anything new
       if (newClaimCount > 0) {

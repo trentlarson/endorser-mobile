@@ -14,7 +14,7 @@ import { styles } from './style'
  **/
 export function NotificationPermissionsScreen() {
 
-  const FINISHED_MESSAGE = 'Finished'
+  const FINISHED_MESSAGE = 'Finished.'
 
   const lastCheckText =
     appStore.getState().settings.lastDailyTaskTime
@@ -68,8 +68,10 @@ export function NotificationPermissionsScreen() {
     .catch(() => setSomeError("Got an error opening your phone Settings. To enable notifications manually, go to your phone 'Settings' app and then select 'Notifications' and then choose this app and turn them on."))
   }
 
+  const killToggle = utility.Toggle()
+
   const runDailyCheck = async () => {
-    const task = require('../utility/backgroundTask')
+    const task = require('../utility/backgroundTask')(killToggle)
     const result = await task()
     setQuickMessage(FINISHED_MESSAGE)
     setTimeout(() => { setQuickMessage(null) }, 1000)
@@ -78,6 +80,10 @@ export function NotificationPermissionsScreen() {
     } else {
       setSomeError(null)
     }
+  }
+
+  const toggleToKill = async () => {
+    killToggle.setToggle(true)
   }
 
   const createTestNotification = async () => {
@@ -155,6 +161,12 @@ export function NotificationPermissionsScreen() {
           </Text>
           <Text>Last Check: { lastCheckText }</Text>
 
+          {
+            someError
+            ? <Text style={{ color: 'red' }}>{ someError }</Text>
+            : <View />
+          }
+
           <Text style={{ marginTop: 20 }}>Actions</Text>
           <View style={{ marginLeft: 10}}>
 
@@ -188,13 +200,12 @@ export function NotificationPermissionsScreen() {
             <Text style={{ marginLeft: 10 }}>This should show '{FINISHED_MESSAGE}', then -- only if you have items in your feed -- it should create a notification.</Text>
             <Text style={{ marginLeft: 20, padding: 10 }}>Note that you can force an item in your feed by decrementing the Last Notified Claim ID in Advanced Test Mode in Settings.</Text>
 
-          </View>
+            <Text style={{ color: 'blue', marginTop: 20 }} onPress={ toggleToKill }>
+              Terminate background check.
+            </Text>
+            <Text style={{ marginLeft: 20, padding: 10 }}>To test this, enable the "run forever" background code (which is only possible in development).</Text>
 
-          {
-            someError
-            ? <Text style={{ color: 'red' }}>{ someError }</Text>
-            : <View />
-          }
+          </View>
 
           <Modal
             animationType="slide"
