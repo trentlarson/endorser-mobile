@@ -16,6 +16,11 @@ export function NotificationPermissionsScreen() {
 
   const FINISHED_MESSAGE = 'Finished'
 
+  const lastCheckText =
+    appStore.getState().settings.lastDailyTaskTime
+    ? appStore.getState().settings.lastDailyTaskTime.replace("T", " ").replace("Z", " UTC")
+    : 'not run yet'
+
   const [canNotify, setCanNotify] = useState<boolean>()
   const [isBlocked, setIsBlocked] = useState<boolean>()
   const [someError, setSomeError] = useState<string>()
@@ -148,6 +153,7 @@ export function NotificationPermissionsScreen() {
                 <Text>You will get notifications.</Text>
           }
           </Text>
+          <Text>Last Check: { lastCheckText }</Text>
 
           <Text style={{ marginTop: 20 }}>Actions</Text>
           <View style={{ marginLeft: 10}}>
