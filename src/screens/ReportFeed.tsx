@@ -4,6 +4,7 @@ import { ActivityIndicator, Button, FlatList, Item, SafeAreaView, ScrollView, Te
 import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
+import { styles } from './style'
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from '../utility/utility'
 import { YamlFormat } from '../utility/utility.tsx'
@@ -76,7 +77,7 @@ export function ReportFeedScreen({ navigation }) {
           keyExtractor={ item => item.id }
           initialNumToRender={ 10 }
           renderItem={ data => (
-            <YamlFormat source={ data.item } />
+            <YamlFormat source={ [data.item] } navigation={navigation} afterItemCss={styles.line} />
           )}
           style={{ borderWidth: 1, height: feedData.length > 0 ? 500 : 60 }}
           ListFooterComponent={(
