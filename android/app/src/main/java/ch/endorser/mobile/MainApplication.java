@@ -56,7 +56,7 @@ public class MainApplication extends Application implements ReactApplication {
     // for WorkManager
     Constraints constraints = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
     PeriodicWorkRequest headlessJsTaskWorkRequest =
-      new PeriodicWorkRequest.Builder(DailyTaskWorker.class, 15L, TimeUnit.MINUTES)
+      new PeriodicWorkRequest.Builder(DailyTaskWorker.class, 24 * 60L, TimeUnit.MINUTES)
       .setConstraints(constraints)
       .setInputData(new Data.Builder()
                     //.putString("message", "Daily task has been initiated.")

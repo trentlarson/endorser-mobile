@@ -52,7 +52,7 @@ try {
     }
     BackgroundFetch.configure(
       {
-        minimumFetchInterval: 15,
+        minimumFetchInterval: 60 * 24, // minutes
       },
       onEvent,
       onTimeout
@@ -64,7 +64,7 @@ try {
         // This schedules a BGProcessingTask in iOS.
         BackgroundFetch.scheduleTask({
           taskId: PROC_TASK_ID,
-          delay: 1000 * 60 * 15,  // milliseconds
+          delay: 1000 * 60 * 60 * 24,  // milliseconds
           periodic: true,
           requiresNetworkConnectivity: true,
         })
