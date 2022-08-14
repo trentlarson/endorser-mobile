@@ -48,7 +48,7 @@ const checkServer = (killToggle) => async (taskData) => {
            // To test this, trigger a background check and then terminate it in NotificationPermissions.
 
           if (beforeId == null) {
-            beforeId = 'ZZZZZZZZZZZZZZZZZZZZZZZZZ0' // keep it going, with almost-infinite endpoint
+            beforeId = '7ZZZZZZZZZZZZZZZZZZZZZZZZ0' // keep it going, with almost-infinite endpoint
           }
           const secMultiplier = 5 // number of seconds before next log message; be sure it's > total/10 (since you've only got 10 increments)
           const lastNumber = Number(beforeId.charAt(25))
@@ -56,7 +56,7 @@ const checkServer = (killToggle) => async (taskData) => {
           if (Date.now() > startDate.valueOf() + numSeconds * 1000) {
             // it's been a few seconds, so report and then bump it up
             console.log('It has been ' + numSeconds + ' seconds.')
-            beforeId = 'ZZZZZZZZZZZZZZZZZZZZZZZZZ' + (lastNumber + 1)
+            beforeId = '7ZZZZZZZZZZZZZZZZZZZZZZZZ' + (lastNumber + 1)
           }
           **/
 
