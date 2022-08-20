@@ -25,6 +25,8 @@ Run android:
 
 `yarn run android`
 
+(If it cannot find emulators, see Troubleshooting below.)
+
 Clean:
 
 `yarn run clean`
@@ -73,7 +75,11 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 - Got "Notifications permission pod is missing"? Try this: `rm -rf ~/Library/Developer/Xcode/DerivedData`
 
-- Got "The emulator process for avd ... was killed"? Try this (in ~/Library/Android/sdk or %HOME%\AppData\Local\Android\Sdk\emulator): `emulator -list-avds` and then `emulator -avd Pixel_XL_API_30` (or restart)
+- Got "The emulator process for avd ... was killed"? Try this (in ~/Library/Android/sdk/emulator or %HOME%\AppData\Local\Android\Sdk\emulator): `./emulator -list-avds` and then `./emulator -avd Pixel_XL_API_30` (or whatever AVD you have)
+
+- Got "No emulators found as an output of `emulator -list-avds`". Follow previous step.
+
+- Got "SDK location not found. Define location with an ANDROID_SDK_ROOT environment variable or by setting the sdk.dir path in your project's local properties file at '???/android/local.properties'." Put the line "sdk.dir=" with that ANDROID_SDK_ROOT setting (because just setting the environment variable doesn't always work).
 
 - Got "InstallException: Unknown failure: cmd: Can't find service: package"? Try running the command again (in case the emulator wasn't fully started).
 
