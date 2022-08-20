@@ -4,10 +4,12 @@ import 'react-native-gesture-handler'
 import 'reflect-metadata'
 
 import { classToPlain } from 'class-transformer'
-import notifee, { EventType, TriggerType } from '@notifee/react-native';
+import notifee, { AuthorizationStatus, EventType, TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
-import { Button, Linking, NativeModules, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { Button, Linking, Modal, NativeModules, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { requestNotifications } from 'react-native-permissions'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import Icon from 'react-native-vector-icons/FontAwesome'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer, StackActions } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
@@ -15,6 +17,7 @@ import { Provider, useSelector } from 'react-redux'
 
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
+import { styles } from './screens/style'
 import { ConfirmOthersScreen } from './screens/ConfirmOthers.tsx'
 import { ConstructCredentialScreen } from './screens/ConstructCredential'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
@@ -35,7 +38,6 @@ import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER } from './veramo/appSli
 import { agent, dbConnection } from './veramo/setup'
 import * as utility from './utility/utility.ts'
 import { BVCButton } from './utility/utility.tsx'
-
 
 
 
@@ -98,7 +100,9 @@ function HomeScreen({ navigation }) {
 
   const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
+  const [needsNotificationsAuthorized, setNeedsNotificationsAuthorized] = useState<boolean>(false)
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
+  const [quickMessage, setQuickMessage] = useState<string>(null)
 
   const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
@@ -113,6 +117,27 @@ function HomeScreen({ navigation }) {
     }
   };
   **/
+
+  const checkNotify = async () => {
+    const notifySettings = await notifee.getNotificationSettings()
+    if (notifySettings && notifySettings.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
+      setNeedsNotificationsAuthorized(false)
+    } else {
+      setNeedsNotificationsAuthorized(true)
+    }
+  }
+
+  const requestAndCheckNotify = async () => {
+    requestNotifications([])
+    .then(() => {
+      checkNotify()
+    })
+    .catch(console.log)
+    .finally(() => {
+      setQuickMessage('Rechecked')
+      setTimeout(() => { setQuickMessage(null) }, 1000)
+    })
+  }
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
@@ -202,6 +227,12 @@ function HomeScreen({ navigation }) {
           }
         })
 
+
+
+
+        //// Let user know their status
+        await checkNotify()
+
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
@@ -259,6 +290,28 @@ function HomeScreen({ navigation }) {
               ) : ( // it's not the BVC home screen
                 <View />
               )}
+              {
+                needsNotificationsAuthorized
+                ?
+                  <View style={{ marginBottom: 20 }}>
+                    <Text style={{ textAlign: 'center' }}>
+                      Beware: you will not get notified of new claims.
+                      &nbsp;
+                      <Icon name="info-circle" onPress={() => navigation.navigate('Notification Permissions')} />
+                    </Text>
+                    <Text style={{ textAlign: 'center' }}>
+                      <Text
+                        style={{ color: 'blue' }}
+                        onPress={() => requestAndCheckNotify()}
+                      >
+                        Allow
+                      </Text>
+                    </Text>
+                  </View>
+                :
+                  <View />
+              }
+              <View style={{ marginTop: 5 }}/>
               <Button
                 title="Claim / Ask / Offer"
                 onPress={() => navigation.navigate('Create Credential')}
@@ -329,6 +382,19 @@ function HomeScreen({ navigation }) {
           title="Get Help"
           onPress={() => navigation.navigate('Help')}
         />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={!!quickMessage}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text>{ quickMessage }</Text>
+          </View>
+        </View>
+      </Modal>
+
       </ScrollView>
     </SafeAreaView>
   )

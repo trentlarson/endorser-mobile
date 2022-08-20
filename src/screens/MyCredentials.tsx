@@ -160,7 +160,10 @@ export function MyCredentialsScreen({ navigation }) {
           :
             <View>
 
-              <Text>Filter (optional) <Icon name="info-circle" onPress={() => setShowSearchInfoModal(true)} />
+              <Text>
+                Filter (optional)
+                &nbsp;
+                <Icon name="info-circle" onPress={() => setShowSearchInfoModal(true)} />
               </Text>
               <Modal
                 animationType="slide"
