@@ -21,15 +21,15 @@ test('account Offers & Gives', () => {
     outstandingInvoiceTotals: {},
     totalCurrencyPaid: {},
     totalCurrencyPromised: {},
-    numStranges: 0,
-    numUnknowns: 0
+    idsOfStranges: [],
+    idsOfUnknowns: []
   }
   let input = []
   let outputExp = R.clone(EMPTY_OUTPUT)
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[0] = { claim: { '@context': 'http://somewhere.else' }}
-  outputExp.numUnknowns = 1
+  outputExp.idsOfUnknowns = [undefined]
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[0] = {
@@ -39,8 +39,8 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[0].claim['@type'] = 'Offer'
-  outputExp.numStranges = 1
-  outputExp.numUnknowns = 0
+  outputExp.idsOfStranges = [undefined]
+  outputExp.idsOfUnknowns = []
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[0].claim.seller = { identifier: 'did:none:test-user-bad' }
@@ -53,6 +53,7 @@ test('account Offers & Gives', () => {
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({
+    id: 'abc123',
     issuedAt: '2022-02-15 18:58:33Z',
     claim: {
       '@context': 'https://schema.org',
@@ -61,13 +62,12 @@ test('account Offers & Gives', () => {
       offeredBy: { identifier: TEST_USER_DID },
     }
   })
-  outputExp.numStranges = 2
-  outputExp.numUnknowns = 0
+  outputExp.idsOfStranges = [undefined, 'abc123']
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[1].claim.itemOffered = { amountOfThisGood: 3, unitCode: 'HUR' }
   outputExp.allPromised = [input[1]]
-  outputExp.numStranges = 1
+  outputExp.idsOfStranges = [undefined]
   outputExp.outstandingCurrencyTotals = { "HUR": 3 }
   outputExp.totalCurrencyPromised = { "HUR": 3 }
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
@@ -149,8 +149,7 @@ test('account Offers & Gives', () => {
       object: { amountOfThisGood: 1, unitCode: 'bad-txn-no-agent' },
     }
   })
-  outputExp.numStranges = 2
-  outputExp.numUnknowns = 0
+  outputExp.idsOfStranges = [undefined, undefined]
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input = input.concat({
@@ -216,7 +215,7 @@ test('account Offers & Gives', () => {
   // Now for another user
 
   outputExp = R.clone(EMPTY_OUTPUT)
-  outputExp.numStranges = 11
+  outputExp.idsOfStranges = [undefined, 'abc123'].concat(Array(9).fill(undefined))
   expect(utility.countTransactions(input, TEST_USER1_DID)).toEqual(outputExp)
 
 })
