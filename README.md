@@ -215,7 +215,7 @@ To Release:
   - Create a release in App Store Connect
     - Have a test build?  IDK... maybe don't click 'Expire'
     - For a new one: in App Connect -> App Store next to iOS App, click the "+"
-    - For an existing one: under "Build" and all the way to the right of the number (which you have to mouse-over to see), click the red icon to remove that version, then add another version.  Also change the "Version" in the field below the icons.
+    - For an existing one: you can rename it, then under "Build" and all the way to the right of the number (which you have to mouse-over to see), click the red icon to remove that version, then add another version.  Also change the "Version" in the field below the icons.
 
   - Build & upload to App Store Connect
     - If you changed any UI:

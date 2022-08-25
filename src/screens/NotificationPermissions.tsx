@@ -28,10 +28,11 @@ export function NotificationPermissionsScreen() {
 
   const checkSettings = async () => {
     const storedSettings = await notifee.getNotificationSettings()
-    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Notification settings: " + JSON.stringify(storedSettings)}))
+    const channelBlocked = await notifee.isChannelBlocked(utility.DEFAULT_ANDROID_CHANNEL_ID)
+    appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Notification settings: " + JSON.stringify(storedSettings) + " && " + channelBlocked}))
 
     let isAuthorized = false
-    if (storedSettings.authorizationStatus === AuthorizationStatus.DENIED) {
+    if (storedSettings.authorizationStatus === AuthorizationStatus.DENIED || channelBlocked) {
       setCanNotify(false)
       setIsBlocked(true)
     } else if (storedSettings.authorizationStatus === AuthorizationStatus.AUTHORIZED) {

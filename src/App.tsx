@@ -120,7 +120,8 @@ function HomeScreen({ navigation }) {
 
   const checkNotify = async () => {
     const notifySettings = await notifee.getNotificationSettings()
-    if (notifySettings && notifySettings.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
+    const channelBlocked = await notifee.isChannelBlocked(utility.DEFAULT_ANDROID_CHANNEL_ID)
+    if (notifySettings && notifySettings.authorizationStatus === AuthorizationStatus.AUTHORIZED && !channelBlocked) {
       setNeedsNotificationsAuthorized(false)
     } else {
       setNeedsNotificationsAuthorized(true)
@@ -295,7 +296,7 @@ function HomeScreen({ navigation }) {
                 ?
                   <View style={{ marginBottom: 20 }}>
                     <Text style={{ textAlign: 'center' }}>
-                      Beware: you will not get notified of new claims.
+                      Note: you will not get notified of new claims.
                       &nbsp;
                       <Icon name="info-circle" onPress={() => navigation.navigate('Notification Permissions')} />
                     </Text>
