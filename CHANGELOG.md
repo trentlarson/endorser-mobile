@@ -12,6 +12,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [6.3.103] - 2022-08-25
+
+### Added
+- Message for notification permissions on front page.
+
+
+
+
+## [6.3.102] - 2022-08-07 - 476b67124bfdee7dd896ccc07d58010fc57d0945
+
+### Added
+- Feed, with notifications on new claims.
+- Persisted choice of endorser server.
+
+### Changed
+- API for paged query returns hitLimit boolean instead of maybeMoreAfter string.
+
+
+
+
 ## [6.3.97] - 2022-05-10 - 509bebb07642488e97c0aad1f450376bdc245bea
 
 ### Added

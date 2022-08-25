@@ -185,7 +185,6 @@ To Release:
 - In package.json, update version
 - Tag
 - (I recommend starting with ios since it takes longer to get approved.)
-- To install on a local iPhone, you can edit the scheme in the product to have a build configuration of "Release".
 - android
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number to match ios)
     - Always increment the versionCode (and ensure you don't already have a larger release in ios, just for consistency's sake).  It is possible to reuse the versionName.
@@ -207,6 +206,7 @@ To Release:
     - To release: Go to Internal Testing, then View Release Details, then "Promote release" and select "Production", add details and "Save", then "Start rollout to Production". It'll show as "In review" for a little while. (Old instructions: repeatedly check the "Production" track and the release details/track until it allows you to release to production; sometimes it doesn't show for a few minutes; maybe login/logout would help.)
 
 - ios
+  - To install on a local iPhone, you can edit the scheme in the product to have a build configuration of "Release".
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json, and CFBundleVersion to be the build number (same as in Android).
     - Note that you cannot repeat an upload of a build number. (Version is OK.)
   - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION to be the build number (same as CFBundle Version. same as in android).
