@@ -492,7 +492,7 @@ export function ContactsScreen({ navigation, route }) {
                     </TextInput>
 
                     <CheckBox
-                      title={ 'After saving, make my claims visible to all.' }
+                      title={ 'After saving, make my claims visible to all of them on the server.' }
                       checked={wantsToBeVisible}
                       onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                     />
@@ -550,7 +550,7 @@ export function ContactsScreen({ navigation, route }) {
                     </TextInput>
 
                     <CheckBox
-                      title={ 'After saving, make my claims visible to all.' }
+                      title={ 'After saving, make my claims visible to all of them on the server.' }
                       checked={wantsToBeVisible}
                       onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                     />
@@ -616,7 +616,7 @@ export function ContactsScreen({ navigation, route }) {
                 />
 
                 <CheckBox
-                  title={ 'After saving, make my claims visible to them.' }
+                  title={ 'After saving, make my claims visible to them on the server.' }
                   checked={wantsToBeVisible}
                   onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                 />
@@ -657,7 +657,7 @@ export function ContactsScreen({ navigation, route }) {
                 />
 
                 <CheckBox
-                  title={ 'After saving, make my claims visible to them.' }
+                  title={ 'After saving, make my claims visible to them on the server.' }
                   checked={wantsToBeVisible}
                   onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                 />
