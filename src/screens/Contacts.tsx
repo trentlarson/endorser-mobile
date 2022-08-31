@@ -1,4 +1,5 @@
 import { classToPlain } from 'class-transformer'
+import * as didJwt from 'did-jwt'
 import * as Papa from 'papaparse'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
@@ -30,9 +31,11 @@ export function ContactsScreen({ navigation, route }) {
   const [inputContactData, setInputContactData] = useState<boolean>(false)
   const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
+  const [loadingAction2, setLoadingAction2] = useState<Record<string,boolean>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [scannedImport, setScannedImport] = useState<string>(null)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
+  const [wantsToRegister, setWantsToRegister] = useState<boolean>(true)
   const [wantsCsvText, setWantsCsvText] = useState<boolean>(false)
   const [wantsCsvUrl, setWantsCsvUrl] = useState<boolean>(false)
 
@@ -131,6 +134,9 @@ export function ContactsScreen({ navigation, route }) {
         if (wantsToBeVisible) {
           allowToSeeMe(result)
         }
+        if (wantsToRegister) {
+          register(result)
+        }
       }
     })
     .finally(() => {
@@ -163,6 +169,9 @@ export function ContactsScreen({ navigation, route }) {
         utility.loadContacts(appSlice, appStore, dbConnection)
         if (wantsToBeVisible) {
           allowToSeeMe(result)
+        }
+        if (wantsToRegister) {
+          register(result)
         }
       } else {
         // not sure if contact was created, but spec isn't clear
@@ -228,8 +237,12 @@ export function ContactsScreen({ navigation, route }) {
     })
     .then(() => {
       if (wantsToBeVisible) {
-        // trigger each of the contacts to save visibility
+        // trigger each of the contacts to see me
         return Promise.all(contacts.map((contact) => allowToSeeMe(contact)))
+      }
+      if (wantsToRegister) {
+        // register each of the contacts
+        return Promise.all(contacts.map((contact) => register(contact)))
       }
     })
     .then(() => {
@@ -354,6 +367,37 @@ export function ContactsScreen({ navigation, route }) {
     })
     .then(() => {
       return utility.loadContacts(appSlice, appStore, dbConnection)
+    })
+  }
+
+  /**
+    Register them on the server
+   */
+  const register = async (contact: Contact) => {
+    setLoadingAction2(R.set(R.lensProp(contact.did), true, loadingAction2))
+    const endorserApiServer = appStore.getState().settings.apiServer
+    const token = await utility.accessToken(id0)
+    const signer = didJwt.SimpleSigner(id0.keys[0].privateKeyHex)
+    const claimRegister = {
+      "@context": "https://schema.org",
+      "@type": "RegisterAction",
+      agent: id0.did,
+      object: contact.did,
+    }
+    const vcJwt: string = await didJwt.createJWT(utility.vcPayload(id0.did, claimRegister), { issuer: id0.did, signer })
+
+    return fetch(endorserApiServer + '/api/claim', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        "Uport-Push-Token": token,
+      },
+      body: JSON.stringify({ jwtEncoded: vcJwt })
+    }).then(response => {
+      setLoadingAction2(R.set(R.lensProp(contact.did), false, loadingAction2))
+      if (response.status !== 201) {
+        throw Error('There was an error from the server trying to register ' + contact.did)
+      }
     })
   }
 
@@ -497,6 +541,12 @@ export function ContactsScreen({ navigation, route }) {
                       onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                     />
 
+                    <CheckBox
+                      title={ 'Register them on the server.' }
+                      checked={wantsToRegister}
+                      onPress={() => {setWantsToRegister(!wantsToRegister)}}
+                    />
+
                     <TouchableHighlight
                       style={styles.saveButton}
                       onPress={() => createContactsFromCsvTextInput()}
@@ -553,6 +603,12 @@ export function ContactsScreen({ navigation, route }) {
                       title={ 'After saving, make my claims visible to all of them on the server.' }
                       checked={wantsToBeVisible}
                       onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
+                    />
+
+                    <CheckBox
+                      title={ 'Register them on the server.' }
+                      checked={wantsToRegister}
+                      onPress={() => {setWantsToRegister(!wantsToRegister)}}
                     />
 
                     <TouchableHighlight
@@ -616,9 +672,15 @@ export function ContactsScreen({ navigation, route }) {
                 />
 
                 <CheckBox
-                  title={ 'After saving, make my claims visible to them on the server.' }
+                  title={ 'Make my claims visible to them on the server.' }
                   checked={wantsToBeVisible}
                   onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
+                />
+
+                <CheckBox
+                  title={ 'Register them on the server.' }
+                  checked={wantsToRegister}
+                  onPress={() => {setWantsToRegister(!wantsToRegister)}}
                 />
 
                 <TouchableHighlight
@@ -657,9 +719,15 @@ export function ContactsScreen({ navigation, route }) {
                 />
 
                 <CheckBox
-                  title={ 'After saving, make my claims visible to them on the server.' }
+                  title={ 'Make my claims visible to them on the server.' }
                   checked={wantsToBeVisible}
                   onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
+                />
+
+                <CheckBox
+                  title={ 'Register them on the server.' }
+                  checked={wantsToRegister}
+                  onPress={() => {setWantsToRegister(!wantsToRegister)}}
                 />
 
                 <TouchableHighlight
@@ -755,7 +823,7 @@ export function ContactsScreen({ navigation, route }) {
                   { (contact.pubKeyBase64 || '(no public key)')}
                 </Text>
                 {
-                  loadingAction[contact.did]
+                  loadingAction[contact.did] || loadingAction2[contact.did]
                   ? <ActivityIndicator color="#00ff00" />
                   : <View style={styles.centeredView}>
                     {
