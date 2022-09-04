@@ -18,6 +18,13 @@ import { Provider, useSelector } from 'react-redux'
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { styles } from './screens/style'
+
+import { HandyConstructCredentialScreen } from './screens/HandyConstructCredential'
+import { HandyContactsScreen } from './screens/HandyContacts'
+import { HandyInitializeScreen } from './screens/HandyInitialize'
+import { HandyExportIdentityScreen, HandyImportIdentityScreen, HandySettingsScreen } from "./screens/HandySettings";
+import { HandyScanPresentationScreen, HandyVerifyCredentialScreen } from './screens/HandyVerifyCredential'
+
 import { ConfirmOthersScreen } from './screens/ConfirmOthers.tsx'
 import { ConstructCredentialScreen } from './screens/ConstructCredential'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
@@ -60,13 +67,19 @@ export default function App() {
         <NavigationContainer>
           <Stack.Navigator>
             <Stack.Screen name="Community Endorser" component={HomeScreen} />
+            <Stack.Screen name="Contacts" component={HandyContactsScreen} />
+            <Stack.Screen name="Create Credential" component={HandyConstructCredentialScreen} />
+            <Stack.Screen name="Help" component={HandyHelpScreen} />
+            <Stack.Screen name="Initialize" component={HandyInitializeScreen} />
+            <Stack.Screen name="Scan Presentation" component={HandyScanPresentationScreen} />
+            <Stack.Screen name="Settings" component={HandySettingsScreen} />
+            <Stack.Screen name="Verify Credential" component={HandyVerifyCredentialScreen} />
+
+            {/**
             <Stack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
             <Stack.Screen name="Contact Import" component={ContactImportScreen} />
-            <Stack.Screen name="Contacts" component={ContactsScreen} />
             <Stack.Screen name="Signature Results" component={SignCredentialScreen} />
-            <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
             <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
-            <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
             <Stack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
@@ -74,12 +87,10 @@ export default function App() {
             <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
             <Stack.Screen name="Review to Sign Credential" component={ReviewToSignCredentialScreen} />
             <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
-            <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
-            <Stack.Screen name="Settings" component={SettingsScreen} />
-            <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
             <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
             <Stack.Screen name="Your Given" component={MyGivenScreen} />
             <Stack.Screen name="Your Offers" component={MyOffersScreen} />
+            **/}
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
@@ -87,58 +98,14 @@ export default function App() {
   )
 }
 
-/** unused
-const { BackgroundProcessor } = NativeModules;
-const logNative = () => {
-  BackgroundProcessor.initializeBgTasks('stuff', () => { console.log('In yer JavaScript') })
-}
-**/
-
 function HomeScreen({ navigation }) {
-
-  const REPORT_CLAIMS_FEED_PAGE = 'Report Claims Feed'
 
   const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
-  const [needsNotificationsAuthorized, setNeedsNotificationsAuthorized] = useState<boolean>(false)
-  const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
   const [quickMessage, setQuickMessage] = useState<string>(null)
 
   const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
-
-  /** see pressedInBackground usage below
-  let pressedInBackground = false;
-  const handleChange = (newState: any) => {
-    if (newState === 'active' && pressedInBackground) {
-        pressedInBackground = false
-        navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
-      }
-    }
-  };
-  **/
-
-  const checkNotify = async () => {
-    const notifySettings = await notifee.getNotificationSettings()
-    const channelBlocked = await notifee.isChannelBlocked(utility.DEFAULT_ANDROID_CHANNEL_ID)
-    if (notifySettings && notifySettings.authorizationStatus === AuthorizationStatus.AUTHORIZED && !channelBlocked) {
-      setNeedsNotificationsAuthorized(false)
-    } else {
-      setNeedsNotificationsAuthorized(true)
-    }
-  }
-
-  const requestAndCheckNotify = async () => {
-    requestNotifications([])
-    .then(() => {
-      checkNotify()
-    })
-    .catch(console.log)
-    .finally(() => {
-      setQuickMessage('Rechecked')
-      setTimeout(() => { setQuickMessage(null) }, 1000)
-    })
-  }
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
@@ -165,74 +132,12 @@ function HomeScreen({ navigation }) {
           settings = await conn.manager.save(Settings, settings)
         }
         appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
-
-        if (settings != null && settings.mnemonic != null) {
-          setOldMnemonic(true)
-        }
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded settings, about to load contacts..."}))
 
         await utility.loadContacts(appSlice, appStore, dbConnection)
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
 
-
-
         setLoading(false)
-
-
-
-        //// Now for notification setup.
-
-        // Initialize notification channel for Android.
-
-        if (Platform.OS === 'android') {
-          const channelCreation = await notifee.createChannel({
-            id: utility.DEFAULT_ANDROID_CHANNEL_ID,
-            name: 'Endorser Feed',
-          });
-        }
-
-        // Set up responses after clicking on notifications.
-        // Note that Android opens but doesn't jump to the right screen when in background. See taskyaml:endorser.ch,2020/tasks#android-feed-screen-from-background
-
-        // on android: Note that I get nothing from notifee when my app is in the background and a notification press brings it back.
-
-        // on android: handles from terminated state (not from foreground or background)
-        // on ios: handles from terminated state (even though docs say that getInitialNotification does nothing) so we'll skip and let the onForegroundEvent handle it 
-        if (Platform.OS === 'android') {
-          const initNotify = await notifee.getInitialNotification()
-          // note that the pressAction inside initNotify.android is typically undefined
-          if (initNotify
-              && initNotify.pressAction.id === utility.ANDROID_FEED_ACTION) {
-
-            // tried customizing initNotify.pressAction.launchActivity but it always comes back as 'default'
-            // might use initNotify data or id or body or title
-            navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
-          }
-        }
-        /**
-        // here's my proposed functionality if we get this to work, along with code above & AppState import from react-native
-        // on android: does nothing (but notifee complains about no background handler even with this here)
-        // see https://github.com/invertase/notifee/issues/404
-        notifee.onBackgroundEvent(async ({ type, detail }) => {
-          if (type === EventType.PRESS) {
-            pressedInBackground = true
-          }
-        })
-        AppState.addEventListener('change', handleChange)
-        **/
-        // on android: handles when we're in the foreground -- usually (sometimes not on notifications screen)
-        // on ios: handles when in the foreground or background
-        notifee.onForegroundEvent(({ type, detail }) => {
-          if (type === EventType.PRESS) { // iOS hits this, even when in background
-            navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
-          }
-        })
-
-
-
-
-        //// Let user know their status
-        await checkNotify()
 
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
@@ -272,107 +177,41 @@ function HomeScreen({ navigation }) {
           allIdentifiers != null && allIdentifiers.length > 0
           ? (
             <View>
-              {settings != null && settings.homeScreen === 'BVC'
-              ? (
-                <View>
-                  <Text style={{ textAlign: 'center' }}>Bountiful Voluntaryist Community Saturday Meeting</Text>
-                  <BVCButton
-                    description='Meeting'
-                    identifier={ allIdentifiers[0] }
-                    navigation={ navigation }
-                  />
-                  <View style={{ marginTop: 5 }}/>
-                  <Button
-                    title={'Confirm Others'}
-                    onPress={() => navigation.navigate('Confirm Others')}
-                  />
-                  <View style={{ marginBottom: 50 }}/>
-                </View>
-              ) : ( // it's not the BVC home screen
-                <View />
-              )}
-              {
-                needsNotificationsAuthorized
-                ?
-                  <View style={{ marginBottom: 20 }}>
-                    <Text style={{ textAlign: 'center' }}>
-                      Note: you will not get notified of new claims.
-                      &nbsp;
-                      <Icon name="info-circle" onPress={() => navigation.navigate('Notification Permissions')} />
-                    </Text>
-                    <Text style={{ textAlign: 'center' }}>
-                      <Text
-                        style={{ color: 'blue' }}
-                        onPress={() => requestAndCheckNotify()}
-                      >
-                        Allow
-                      </Text>
-                    </Text>
-                  </View>
-                :
-                  <View />
-              }
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Claim / Ask / Offer"
+                title="Sign Contract"
                 onPress={() => navigation.navigate('Create Credential')}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title={"Agree / Certify / Confirm"}
-                onPress={() => navigation.navigate('Confirm Others')}
-              />
-              <View style={{ marginTop: 5 }}/>
-              <Button
-                title="View Feed"
-                onPress={() => navigation.navigate('Report Claims Feed')}
-              />
-              <View style={{ marginTop: 5 }}/>
-              <Button
-                title="Search"
-                onPress={() => navigation.navigate('Reports from Endorser server')}
-              />
-              <View style={{ marginTop: 5 }}/>
-              <Button
-                title="Scan A Presented Claim"
+                title="Verify Someone Else's Signature"
                 onPress={() => navigation.navigate('Scan Presentation')}
               />
               <View style={{ marginTop: 50 }}/>
               <Button
-                title="See Contacts"
+                title="Contacts"
                 onPress={() => navigation.navigate('Contacts')}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="See Profile & Settings"
+                title="Settings"
                 onPress={() => navigation.navigate('Settings')}
               />
-              {oldMnemonic ? (
-                <View style={{ marginTop: 10, marginBottom: 10 }}>
-                  <Text style={{ color: 'red', textAlign: 'center' }}>Your identity is not encrypted.</Text>
-                  <Button
-                    title="Encrypt Your Identity"
-                    onPress={() => navigation.navigate('Import Seed Phrase')}
-                  />
-                </View>
-              ) : (
-                <View/>
-              )}
             </View>
           ) : ( // there are no identifiers
             <View>
               <Button
-                title="Create New Identifier"
-                onPress={() => navigation.navigate('Settings')}
+                title="Initialize New Wallet"
+                onPress={() => navigation.navigate('Initialize')}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Import Seed Phrase"
+                title="Import Previous Wallet"
                 onPress={() => navigation.navigate('Import Seed Phrase')}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Scan A Presented Claim"
+                title="Verify Someone Else's Signature"
                 onPress={() => navigation.navigate('Scan Presentation')}
               />
             </View>
@@ -380,7 +219,7 @@ function HomeScreen({ navigation }) {
         }
         <View style={{ marginTop: 5 }}/>
         <Button
-          title="Get Help"
+          title="Help"
           onPress={() => navigation.navigate('Help')}
         />
 
@@ -401,7 +240,7 @@ function HomeScreen({ navigation }) {
   )
 }
 
-function HelpScreen() {
+function HandyHelpScreen() {
 
   const logMessageSelector = useSelector((state) => state.logMessage)
 
@@ -409,7 +248,7 @@ function HelpScreen() {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>What is even the purpose of this thing?</Text>
+          <Text style={{ fontWeight: 'bold' }}>This allows you to create Verified Credentials that you can apply to your contracts.</Text>
           <Text style={{ padding: 5 }}>This uses the power of cryptography to build confidence: when you make claims and then your friends and family confirm those claims, you gain much more utility, control, and security in your online life.</Text>
           <Text style={{ padding: 5 }}>For an example, look at <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/reportBestAttendance')}>this report of meeting attendance on the Endorser server</Text>.  Attendees can see their own info and their contacts' info but you cannot see it... until someone brings you into their confidence. So make some claims, confirm others' claims, and build a network of trust -- with trustworthy communifcations, all verifiable cryptographically.</Text>
           <Text style={{ padding: 5, color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/docs')}>For more info, see the Docs section on the Endorser server.</Text>
