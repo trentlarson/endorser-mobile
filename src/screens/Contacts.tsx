@@ -915,6 +915,18 @@ export function ContactsScreen({ navigation, route }) {
                           </View>
                     }
                     <View style={{ marginTop: 5 }}/>
+                    <Text>{ contact.name } { contact.registered ? 'Is' : 'Might not be' } registered on the server.</Text>
+                    {
+                      !contact.registered
+                      ?
+                        <Button
+                          title={`Register`}
+                          onPress={() => { register(contact) }}
+                        />
+                      :
+                        <View />
+                    }
+                    <View style={{ marginTop: 20 }}/>
                     <View><Button title={'Delete'} onPress={() => setConfirmDeleteContact(contact.did)}/></View>
                   </View>
                 }
