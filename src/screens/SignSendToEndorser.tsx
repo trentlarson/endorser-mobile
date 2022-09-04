@@ -99,11 +99,11 @@ export function SignCredentialScreen({ navigation, route }) {
 
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the signing & sending..."}))
       const signer = didJwt.SimpleSigner(identifier.keys[0].privateKeyHex)
-      const did: string = identifier.did
       const vcClaim = credSubj
+      const did: string = identifier.did
 
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
-      const vcJwt: string = await didJwt.createJWT(utility.vcPayload(did, vcClaim),{ issuer: did, signer })
+      const vcJwt: string = await didJwt.createJWT(utility.vcPayload(vcClaim),{ issuer: did, signer })
       setJwts(R.update(index, vcJwt))
       setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + "."))
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))

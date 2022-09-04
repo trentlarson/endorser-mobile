@@ -13,6 +13,8 @@ For the reporting facility, we use the [endorser-ch APIs](https://github.com/tre
 
 - Note that there are also some other mobile dependencies, eg. iOS CocoaPods and Android Studio. The tools will prompt you along the way.
 
+- There are some values to customize: SERVICE_ID, INFURA_PROJECT_ID, *_ENDORSER_*_SERVER
+
 - For ios: `cd ios; pod install; cd ..`
 
 Run ios:

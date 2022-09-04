@@ -13,7 +13,7 @@ import { styles } from './style'
 import { Contact } from '../entity/contact'
 import * as utility from '../utility/utility'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
-import { agent, dbConnection } from '../veramo/setup'
+import { agent, dbConnection, SERVICE_ID } from '../veramo/setup'
 
 export function ContactsScreen({ navigation, route }) {
 
@@ -40,7 +40,7 @@ export function ContactsScreen({ navigation, route }) {
   const [wantsCsvUrl, setWantsCsvUrl] = useState<boolean>(false)
 
   // these are tracking progress when saving data
-  const [csvErrors, setCsvErrors] = useState<Array<string>>([])
+  const [actionErrors, setActionErrors] = useState<Array<string>>([])
   const [csvMessages, setCsvMessages] = useState<Array<string>>([])
   const [doneSavingStoring, setDoneSavingStoring] = useState<boolean>()
   const [saving, setSaving] = useState<boolean>(false)
@@ -232,7 +232,7 @@ export function ContactsScreen({ navigation, route }) {
     return saveContacts(contacts)
     .then((savedContacts) => {
       setSaving(false)
-      setCsvErrors(messages)
+      setActionErrors(messages)
       setCsvMessages(['Saved ' + savedContacts.length + ' contacts.'])
     })
     .then(() => {
@@ -249,7 +249,7 @@ export function ContactsScreen({ navigation, route }) {
       return utility.loadContacts(appSlice, appStore, dbConnection)
     })
     .catch((err) => {
-      setCsvErrors(R.concat(messages, ['Got an error saving contacts: ' + err]))
+      setActionErrors(R.concat(messages, ['Got an error saving contacts: ' + err]))
     })
   }
 
@@ -272,7 +272,7 @@ export function ContactsScreen({ navigation, route }) {
       return createContactsFromThisCsvText(result)
     })
     .catch((err) => {
-      setCsvErrors(['Got an error retrieving contacts: ' + err])
+      setActionErrors(['Got an error retrieving contacts: ' + err])
     })
 
   }
@@ -296,10 +296,11 @@ export function ContactsScreen({ navigation, route }) {
         "Uport-Push-Token": token,
       }
     }).then(response => {
-      if (response.status !== 200) {
+      if (response.status === 200) {
+        return response.json()
+      } else {
         throw Error('There was an error from the server trying to check visibility.')
       }
-      return response.json()
     }).then(result => {
       setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
 
@@ -326,14 +327,24 @@ export function ContactsScreen({ navigation, route }) {
         "Uport-Push-Token": token,
       },
       body: JSON.stringify({ did: contact.did })
-    }).then(response => {
+    }).then(async response => {
       setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
-      if (response.status !== 200) {
-        throw Error('There was an error from the server trying to set you as visible to ' + contact.name)
-      } else {
+      if (response.status === 200) {
         // contact.seesMe = ... silently fails
         const newContact = R.set(R.lensProp('seesMe'), true, contact)
         return saveContact(newContact)
+      } else {
+        await response
+        .json()
+        .then(result => {
+          let message = 'There was an error from the server trying to set you visible to ' + contact.name + '. See log for more info.'
+          if (result && result.error && result.error.message) {
+            message = result.error.message
+          } else {
+            appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Error setting visible to " + contact.did + " " + JSON.stringify(result)}))
+          }
+          setActionErrors(errors => R.concat(errors, [message]))
+        })
       }
     })
     .then(() => {
@@ -355,14 +366,24 @@ export function ContactsScreen({ navigation, route }) {
         "Uport-Push-Token": token,
       },
       body: JSON.stringify({ did: contact.did })
-    }).then(response => {
+    }).then(async response => {
       setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
-      if (response.status !== 200) {
-        throw Error('There was an error from the server trying to hide you from ' + contact.name)
-      } else {
+      if (response.status === 200) {
         // contact.seesMe = ... silently fails
         const newContact = R.set(R.lensProp('seesMe'), false, contact)
         return saveContact(newContact)
+      } else {
+        await response
+        .json()
+        .then(result => {
+          let message = 'There was an error from the server trying to hide you from ' + contact.name + '. See log for more info.'
+          if (result && result.error && result.error.message) {
+            message = result.error.message
+          } else {
+            appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Error hiding from " + contact.did + " " + JSON.stringify(result)}))
+          }
+          setActionErrors(errors => R.concat(errors, [message]))
+        })
       }
     })
     .then(() => {
@@ -381,10 +402,11 @@ export function ContactsScreen({ navigation, route }) {
     const claimRegister = {
       "@context": "https://schema.org",
       "@type": "RegisterAction",
-      agent: id0.did,
-      object: contact.did,
+      agent: { did: id0.did },
+      object: SERVICE_ID,
+      participant: { did: contact.did },
     }
-    const vcJwt: string = await didJwt.createJWT(utility.vcPayload(id0.did, claimRegister), { issuer: id0.did, signer })
+    const vcJwt: string = await didJwt.createJWT(utility.vcPayload(claimRegister), { issuer: id0.did, signer })
 
     return fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
@@ -393,10 +415,28 @@ export function ContactsScreen({ navigation, route }) {
         "Uport-Push-Token": token,
       },
       body: JSON.stringify({ jwtEncoded: vcJwt })
-    }).then(response => {
+    }).then(async response => {
       setLoadingAction2(R.set(R.lensProp(contact.did), false, loadingAction2))
       if (response.status !== 201) {
-        throw Error('There was an error from the server trying to register ' + contact.did)
+        await response
+        .json()
+        .then(result => {
+          let message = 'There was an error from the server trying to register ' + contact.did + ' See log for more info.'
+          if (result.error) {
+            if (result.error.code === 'OVER_CLAIM_LIMIT') {
+              message = 'You have hit your limit of claims this week. Contact an administrator for a higher weekly limit.'
+            } else if (result.error.code === 'OVER_REGISTRATION_LIMIT') {
+              message = 'You have hit your limit of registrations this week. Contact an administrator for a higher weekly limit.'
+            } else if (result.error.message) {
+              message = result.error.message
+            } else {
+              appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Error registering " + contact.did + " " + JSON.stringify(result)}))
+            }
+          } else {
+            appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Error registering " + contact.did + " " + JSON.stringify(result)}))
+          }
+          setActionErrors(errors => R.concat(errors, [message]))
+        })
       }
     })
   }
@@ -494,10 +534,11 @@ export function ContactsScreen({ navigation, route }) {
           ) : (
             <View />
           )}
-          {csvErrors.length > 0 ? (
+
+          {actionErrors.length > 0 ? (
             <View style={{ marginBottom: 20 }}>
-              <Text style={{ color: 'red' }}>Here are potential issues with the input:</Text>
-              <Text>{ "- " + csvErrors.join("\n- ") }</Text>
+              <Text style={{ color: 'red' }}>Errors and Warnings:</Text>
+              <Text>{ "- " + actionErrors.join("\n- ") }</Text>
             </View>
           ) : (
             <View />

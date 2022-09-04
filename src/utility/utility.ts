@@ -258,9 +258,45 @@ export function decryptFromBase64(
   return decrypted;
 }
 
-export const vcPayload = (did: string, claim: any): JwtCredentialPayload => {
+/**
+ return subject of the claim if known; otherwise, null
+ **/
+const claimSubject = (claim) => {
+  if (claim.claim) {
+    // probably a Verified Credential
+    claim = claim.claim
+  }
+  if (claim['@type'] === "AcceptAction") {
+    return claim.agent && claim.agent.identifier
+  } else if (claim['@type'] === "DonateAction") {
+    return claim.agent && claim.agent.identifier
+  } else if (claim['@type'] === "Event") {
+    return claim.agent && claim.agent.identifier
+  } else if (claim['@type'] === "GiveAction") {
+    return claim.agent && claim.agent.identifier
+  } else if (claim['@type'] === "JoinAction") {
+    return claim.agent && claim.agent.did
+  } else if (claim['@type'] === "LoanOrCredit") {
+    return claim.recipient && claim.recipient.identifier
+  } else if (claim['@type'] === "Offer") {
+    return claim.offeredBy && claim.offeredBy.identifier
+  } else if (claim['@type'] === "Organization") {
+    return claim.member && claim.member.member && claim.member.member.identifier
+  } else if (claim['@type'] === "Person") {
+    return claim.identifier
+  } else if (claim['@type'] === "PlanAction") {
+    return claim.agent && claim.agent.identifier
+  } else if (claim['@type'] === "RegisterAction") {
+    return claim.participant && claim.participant.did
+  } else if (claim['@type'] === "Tenure") {
+    return claim.party && claim.party.did
+  }
+  return null
+}
+
+export const vcPayload = (claim: any): JwtCredentialPayload => {
   return {
-    sub: did,
+    sub: claimSubject(claim),
     vc: {
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       type: ['VerifiableCredential'],

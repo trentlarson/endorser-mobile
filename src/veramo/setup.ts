@@ -68,6 +68,9 @@ const DEFAULT_DID_PROVIDER_NETWORK_NAME = 'mainnet'
 
 export const DEFAULT_DID_PROVIDER_NAME = didProviderName(DEFAULT_DID_PROVIDER_NETWORK_NAME)
 
+// this is used as the object in RegisterAction claims
+export const SERVICE_ID = 'endorser.ch'
+
 const INFURA_PROJECT_ID = 'INFURA_PROJECT_ID'
 
 const providers = {}
