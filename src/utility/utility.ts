@@ -262,12 +262,17 @@ export function decryptFromBase64(
  return subject of the claim if known; otherwise, null
  **/
 const claimSubject = (claim) => {
+  if (!claim) {
+    return null
+  }
   if (claim.claim) {
     // probably a Verified Credential
     claim = claim.claim
   }
   if (claim['@type'] === "AcceptAction") {
     return claim.agent && claim.agent.identifier
+  } else if (claim['@type'] === "AgreeAction") {
+    return claimSubject(claim.object)
   } else if (claim['@type'] === "DonateAction") {
     return claim.agent && claim.agent.identifier
   } else if (claim['@type'] === "Event") {
