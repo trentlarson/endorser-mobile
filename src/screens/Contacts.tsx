@@ -915,7 +915,11 @@ export function ContactsScreen({ navigation, route }) {
                           </View>
                     }
                     <View style={{ marginTop: 5 }}/>
-                    <Text>{ contact.name } { contact.registered ? 'Is' : 'Might not be' } registered on the server.</Text>
+                    <Text>
+                      { id0 && contact.did === id0.did ? 'You' : contact.name }
+                      &nbsp;
+                      { contact.registered ? (id0 && contact.did === id0.did ? 'are' : 'is') : 'might not be' } registered on the server.
+                    </Text>
                     {
                       !contact.registered
                       ?
