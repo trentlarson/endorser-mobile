@@ -417,7 +417,13 @@ export function ContactsScreen({ navigation, route }) {
       body: JSON.stringify({ jwtEncoded: vcJwt })
     }).then(async response => {
       setLoadingAction2(R.set(R.lensProp(contact.did), false, loadingAction2))
-      if (response.status !== 201) {
+      if (response.status === 201) {
+        if (!contact.registered) {
+          const conn = await dbConnection
+          conn.manager.update(Contact, contact.did, { registered: true })
+          utility.loadContacts(appSlice, appStore, dbConnection)
+        }
+      } else {
         await response
         .json()
         .then(result => {

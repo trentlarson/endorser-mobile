@@ -97,6 +97,7 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 ... and edit it to include a field: 'public name = "ClassName...789"'
 ... and edit src/veramo/setup.js and add import for that file and add to `migrations` (and add to ALL_ENTITIES if there's a new table)
+... and edit the src/entity entry if you modified an existing table
 
 
 

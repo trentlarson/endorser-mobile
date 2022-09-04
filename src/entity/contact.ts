@@ -24,4 +24,11 @@ export class Contact extends BaseEntity {
   //@ts-ignore
   seesMe: boolean
 
+  /**
+   * Cache of whether they are registered on the server (and able to create claims).
+   */
+  @Column('boolean', { nullable: true })
+  //@ts-ignore
+  registered: boolean
+
 }
