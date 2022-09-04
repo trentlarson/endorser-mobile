@@ -23,14 +23,13 @@ import { HandyConstructCredentialScreen } from './screens/HandyConstructCredenti
 import { HandyContactsScreen } from './screens/HandyContacts'
 import { HandyInitializeScreen } from './screens/HandyInitialize'
 import { HandyExportIdentityScreen, HandyImportIdentityScreen, HandySettingsScreen } from "./screens/HandySettings";
+import { HandyReviewToSignCredentialScreen } from './screens/HandyReviewToSignCredential'
 import { HandyScanPresentationScreen, HandyVerifyCredentialScreen } from './screens/HandyVerifyCredential'
+import { HandySignCredentialScreen } from './screens/HandySignSendToEndorser'
 
+/**
 import { ConfirmOthersScreen } from './screens/ConfirmOthers.tsx'
-import { ConstructCredentialScreen } from './screens/ConstructCredential'
-import { SignCredentialScreen } from './screens/SignSendToEndorser'
 import { ContactImportScreen } from './screens/ContactImportScan.tsx'
-import { ContactsScreen } from './screens/Contacts'
-import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./screens/Settings";
 import { MyCredentialsScreen } from './screens/MyCredentials'
 import { MyGivenScreen } from './screens/MyGiven'
 import { MyOffersScreen } from './screens/MyOffers'
@@ -38,9 +37,9 @@ import { NotificationPermissionsScreen } from './screens/NotificationPermissions
 import { PresentCredentialScreen } from './screens/PresentCredential'
 import { ReportFeedScreen } from './screens/ReportFeed'
 import { ReportScreen } from './screens/ReportFromEndorser'
-import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
-import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
+**/
+
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER } from './veramo/appSlice'
 import { agent, dbConnection } from './veramo/setup'
 import * as utility from './utility/utility.ts'
@@ -70,22 +69,22 @@ export default function App() {
             <Stack.Screen name="Contacts" component={HandyContactsScreen} />
             <Stack.Screen name="Create Credential" component={HandyConstructCredentialScreen} />
             <Stack.Screen name="Help" component={HandyHelpScreen} />
+            <Stack.Screen name="Export Seed Phrase" component={HandyExportIdentityScreen} />
+            <Stack.Screen name="Import Seed Phrase" component={HandyImportIdentityScreen} />
             <Stack.Screen name="Initialize" component={HandyInitializeScreen} />
             <Stack.Screen name="Scan Presentation" component={HandyScanPresentationScreen} />
             <Stack.Screen name="Settings" component={HandySettingsScreen} />
             <Stack.Screen name="Verify Credential" component={HandyVerifyCredentialScreen} />
+            <Stack.Screen name="Review & Sign" component={HandyReviewToSignCredentialScreen} />
+            <Stack.Screen name="Signature Results" component={HandySignCredentialScreen} />
 
             {/**
             <Stack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
             <Stack.Screen name="Contact Import" component={ContactImportScreen} />
-            <Stack.Screen name="Signature Results" component={SignCredentialScreen} />
-            <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
-            <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
             <Stack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
             <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
             <Stack.Screen name="Report Claims Feed" component={ReportFeedScreen} />
             <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
-            <Stack.Screen name="Review to Sign Credential" component={ReviewToSignCredentialScreen} />
             <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
             <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
             <Stack.Screen name="Your Given" component={MyGivenScreen} />

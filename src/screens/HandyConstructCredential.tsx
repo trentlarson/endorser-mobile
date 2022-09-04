@@ -69,7 +69,7 @@ export function HandyConstructCredentialScreen({ navigation }) {
         <View style={{ padding: 20 }}>
           { identifiers && identifiers[0] ? (
             <View>
-              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Create</Text>
+              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Select Contract or Pledge</Text>
               { !hasMnemonic ? (
                 <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
               ) : (
@@ -82,45 +82,9 @@ export function HandyConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForGaveInfo(false) }
                       proceed={ claim => {
                         setAskForGaveInfo(false)
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review & Sign', { credentialSubject: claim })
                       }}
                       userId={ identifiers[0].did }
-                    />
-                  : <View/>
-                }
-                {
-                  askForOfferInfo
-                  ? <OfferModal
-                      cancel={ () => setAskForOfferInfo(false) }
-                      proceed={ claim => {
-                        setAskForOfferInfo(false)
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
-                      }}
-                      userId={ identifiers[0].did }
-                    />
-                  : <View/>
-                }
-                {
-                  askForPlanInfo
-                  ? <PlanModal
-                      userId={ identifiers[0].did }
-                      cancel={ () => setAskForPlanInfo(false) }
-                      proceed={ claim => {
-                        setAskForPlanInfo(false)
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
-                      }}
-                    />
-                  : <View/>
-                }
-                {
-                  askForPersonInfo
-                  ? <PersonModal
-                      identifier={ identifiers[0].did }
-                      cancel={ () => setAskForPersonInfo(false) }
-                      proceed={ claim => {
-                        setAskForPersonInfo(false)
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
-                      }}
                     />
                   : <View/>
                 }
@@ -134,68 +98,25 @@ export function HandyConstructCredentialScreen({ navigation }) {
                       proceed={ claim => {
                         setAskForPledgeAbout('')
                         setAskForPledgeInfo('')
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
-                      }}
-                    />
-                  : <View/>
-                }
-                {
-                  askForWitnessInfo
-                  ? <WitnessModal
-                      text={ askForWitnessInfo }
-                      cancel={ () => setAskForWitnessInfo('') }
-                      proceed={ claim => {
-                        setAskForWitnessInfo('')
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review & Sign', { credentialSubject: claim })
                       }}
                     />
                   : <View/>
                 }
                 <View>
-                  <Text>What do you want to assert?</Text>
 
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Advertise or Seek Skills or Services'}
-                    onPress={() => setAskForPersonInfo(true)}
-                  />
-
-                  <View style={{ padding: 5 }} />
-                  <BVCButton
-                    description='BVC Meeting'
-                    identifier={ identifiers[0] }
-                    navigation={ navigation }
-                  />
-
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Witness To Something Remarkable'}
-                    onPress={() => setAskForWitnessInfo("They ")}
-                  />
-
-                  <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
-                  <Text>Transactions</Text>
-                  <Button
-                    title={'Plan'}
-                    onPress={() => setAskForPlanInfo(true)}
-                  />
+                  <Text>Contracts</Text>
 
-                  <View style={{ padding: 5 }} />
                   <Button
-                    title={'Offer'}
-                    onPress={() => setAskForOfferInfo(true)}
-                  />
-
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Gave'}
+                    title={'Contract'}
                     onPress={() => setAskForGaveInfo(true)}
                   />
 
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Pledges</Text>
+
                   <Button
                     title={'Pledge To Mutual Integrity'}
                     onPress={() => {
@@ -204,42 +125,7 @@ export function HandyConstructCredentialScreen({ navigation }) {
                     }}
                   />
 
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Pledge To Thick Red Line'}
-                    onPress={() => {
-                      setAskForPledgeAbout("See ThickRedLine.org")
-                      setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate. I pledge only to act to protect lives, liberty, and property. I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")
-                    }}
-                  />
-
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Pledge Honesty As An Officer'}
-                    onPress={() => {
-                      setAskForPledgeAbout("This gives citizens confidence to interact.")
-                      setAskForPledgeInfo("I commit to tell only the truth when identifying as a government representative.")
-                    }}
-                  />
-
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Pledge Liberty'}
-                    onPress={() => {
-                      setAskForPledgeAbout("h/t Stewart Brand, Buddha, & Ayn Rand")
-                      setAskForPledgeInfo("We are as gods. I dedicate myself to reach my full potential. I will never ask another person to live for my sake.")
-                    }}
-                  />
-
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Pledge A Life Of Gifts'}
-                    onPress={() => {
-                      setAskForPledgeAbout("See LivesOfGifts.org")
-                      setAskForPledgeInfo("I am building a society based on giving, in ways that fulfill me.")
-                    }}
-                  />
-
+                  {/**
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Other</Text>
@@ -250,17 +136,15 @@ export function HandyConstructCredentialScreen({ navigation }) {
                         'Scan Content',
                         {
                           nextData: { substitute: true },
-                          nextScreen: 'Review to Sign Credential',
+                          nextScreen: 'Review & Sign',
                           title: 'Scan Claim Template',
                         }
                       )
                     }
                   />
+                  **/}
 
                 </View>
-                <View style={{ padding: 5 }} />
-                <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%' }}/>
-                <Text>Note that you can use any of those as a template and then edit before signing the final record.</Text>
               </View>
             </View>
           ) : (
@@ -270,396 +154,6 @@ export function HandyConstructCredentialScreen({ navigation }) {
       </ScrollView>
     </SafeAreaView>
   )
-
-  /**
-    props has:
-    - providerId string for the identifier of the provider
-    - proceed function that takes the claim
-    - cancel function
-   **/
-  /** unused
-  function CreditModal(props) {
-
-    const [amountStr, setAmountStr] = useState<string>('')
-    const [currency, setCurrency] = useState<string>('')
-    const [description, setDescription] = useState<string>('')
-    const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
-    const [recipientId, setRecipientId] = useState<string>('')
-    const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
-    const [termsOfService, setTermsOfService] = useState<string>("Recipient may acknowledge receipt of terms (with AcceptAction). Recipient will log final payment (with GiveAction) and provider will agree (with AgreeAction).")
-    const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
-    const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
-
-    const allContacts = useSelector((state) => state.contacts || [])
-
-    function loanOrCreditClaim(txnId: string, providerId: string, recipientId: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
-      return {
-        "@context": "https://schema.org",
-        "@type": "LoanOrCredit",
-        "amount": amount,
-        "currency": currency,
-        // recommend adding non-standard properties as key:value pairs in descriptions until they evolve into standard properties
-        "description": description,
-        "recipient": {
-          "identifier": recipientId,
-        },
-        "provider": {
-          "identifier": providerId
-        },
-        "numberOfTransfersAllowed": transfersAllowed,
-        "termsOfService": termsOfService,
-        "identifier": txnId,
-      }
-    }
-
-    function loanOrCreditClaimFromInputs() {
-      return loanOrCreditClaim(
-        crypto.randomBytes(16).toString('hex'), // 128 bits seems OK
-        props.providerId,
-        recipientId,
-        Number(amountStr),
-        currency,
-        description,
-        termsOfService,
-        multipleTransfersAllowed ? Number.MAX_SAFE_INTEGER : transferAllowed ? 1 : 0
-      )
-    }
-
-    return (
-      <Modal
-        animationType="slide"
-        transparent={true}
-        onRequestClose={props.cancel}
-      >
-        <ScrollView>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-
-              {
-                selectFromContacts
-                ? <ContactSelectModal
-                    cancel={ () => { setSelectFromContacts(false) } }
-                    proceed={ (did) => { setRecipientId(did); setSelectFromContacts(false) }}
-                  />
-                : <View/>
-              }
-
-              <View>
-                <Text style={styles.modalText}>Grant or Loan Money</Text>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Recipient</Text>
-                  <TextInput
-                    value={recipientId}
-                    onChangeText={setRecipientId}
-                    editable
-                    style={{ borderWidth: 1 }}
-                    autoCapitalize={'none'}
-                    autoCorrect={false}
-                  />
-                  {
-                    allContacts.length > 0
-                    ? <TouchableHighlight
-                        style={styles.moreButton}
-                        onPress={() => setSelectFromContacts(true)}
-                      >
-                        <Text>Pick</Text>
-                      </TouchableHighlight>
-                    : <View />
-                  }
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Amount</Text>
-                  <TextInput
-                    value={amountStr}
-                    onChangeText={setAmountStr}
-                    editable
-                    length={ 5 }
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Kind of Currency (eg. USD, BTC)</Text>
-                  <TextInput
-                    value={currency}
-                    onChangeText={setCurrency}
-                    editable
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Description</Text>
-                  <TextInput
-                    value={description}
-                    onChangeText={setDescription}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Terms</Text>
-                  <TextInput
-                    value={termsOfService}
-                    onChangeText={setTermsOfService}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <CheckBox
-                    title='Transfer Allowed'
-                    checked={transferAllowed}
-                    onPress={() => {setTransferAllowed(!transferAllowed)}}
-                  />
-                  <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
-                    <CheckBox
-                      title='Multiple Transfers Allowed?'
-                      checked={multipleTransfersAllowed}
-                      onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
-                      visible={transferAllowed}
-                    />
-                  </View>
-                </View>
-
-                <View style={{ padding: 10 }} />
-                <TouchableHighlight
-                  style={styles.saveButton}
-                  onPress={() => props.proceed(loanOrCreditClaimFromInputs())}
-                >
-                  <Text>Finish...</Text>
-                </TouchableHighlight>
-                <View style={{ padding: 5 }} />
-                <TouchableHighlight
-                  style={styles.cancelButton}
-                  onPress={props.cancel}
-                >
-                  <Text>Cancel</Text>
-                </TouchableHighlight>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-      </Modal>
-    )
-  }
-  **/
-
-  /**
-    props has:
-    - funderId string for the identifier of the sponsor
-    - kind string is "money" or "time"
-    - proceed function that takes the claim
-    - cancel function
-   **/
-  /** unused
-  function DonationModal(props) {
-
-    const [comment, setComment] = useState<string>('')
-    const [amountStr, setAmountStr] = useState<string>('1')
-    const [currency, setCurrency] = useState<string>(props.kind === 'time' ? 'HUR' : '')
-    const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
-    const [fundedId, setFundedId] = useState<string>('')
-    const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
-    const [termsOfService, setTermsOfService] = useState<string>("We talk beforehand about reasonable terms such as location, advance notice, amount of exertion, etc. Recipient will record delivery with a confirming AcceptAction.")
-    const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
-    const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
-
-    const allContacts = useSelector((state) => state.contacts || [])
-
-    function donateClaim(grantId: string, funderId: string, fundedId: string, price: number, priceCurrency: string, comments: string, expiration: string, termsOfService: string, transfersAllowed: number) {
-      return {
-        "@context": "https://schema.org",
-
-        "@type": "DonateAction",
-
-        "description": comments,
-        "agent": {
-          "identifier": funderId,
-        },
-        "recipient": {
-          "identifier": fundedId,
-        },
-        "identifier": grantId,
-
-        "price": price,
-
-        // eg. ISO 4217 or UN/CEFACT Common Codes; see https://schema.org/price
-        "priceCurrency": priceCurrency,
-
-        //-- The rest are not in the schema.org spec for DonateAction.
-
-        "expires": expiration,
-        "termsOfService": termsOfService,
-
-        //-- The rest are new, not in the schema.org spec anywhere.
-
-        "numberOfTransfersAllowed": transfersAllowed,
-      }
-    }
-
-    function donateClaimFromInputs() {
-      return donateClaim(
-        crypto.randomBytes(16).toString('hex'), // 128 bits seems OK; might consider ULIDs
-        props.sponsorId,
-        fundedId,
-        Number(amountStr),
-        currency,
-        comment,
-        expiration,
-        termsOfService,
-        multipleTransfersAllowed ? Number.MAX_SAFE_INTEGER : transferAllowed ? 1 : 0
-      )
-    }
-
-    return (
-      <Modal
-        animationType="slide"
-        transparent={true}
-        onRequestClose={props.cancel}
-      >
-        <ScrollView>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-
-              {
-                selectFromContacts
-                ? <ContactSelectModal
-                    cancel={ () => { setSelectFromContacts(false) } }
-                    proceed={ (did) => { setFundedId(did); setSelectFromContacts(false) }}
-                  />
-                : <View/>
-              }
-
-              <View>
-                <Text style={styles.modalText}>Offer Donation</Text>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Recipient</Text>
-                  <TextInput
-                    value={fundedId}
-                    onChangeText={setFundedId}
-                    editable
-                    style={{ borderWidth: 1 }}
-                    autoCapitalize={'none'}
-                    autoCorrect={false}
-                  />
-                  {
-                    allContacts.length > 0
-                    ? <TouchableHighlight
-                        style={styles.moreButton}
-                        onPress={() => setSelectFromContacts(true)}
-                      >
-                        <Text>Pick</Text>
-                      </TouchableHighlight>
-                    : <View />
-                  }
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>{ props.kind === 'money' ? 'Amount of Currency' : 'Number of Hours' }</Text>
-                  <TextInput
-                    value={amountStr}
-                    onChangeText={setAmountStr}
-                    editable
-                    length={ 5 }
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                {
-                  props.kind === 'money' ? (
-                    <View style={{ padding: 5 }}>
-                      <Text>Kind of Currency (eg. USD, BTC)</Text>
-                      <TextInput
-                        value={currency}
-                        onChangeText={setCurrency}
-                        editable
-                        length={ 5 }
-                        style={{ borderWidth: 1 }}
-                      />
-                    </View>
-                  ) : (
-                    <View/>
-                  )
-                }
-
-                <View style={{ padding: 5 }}>
-                  <Text>Expiration</Text>
-                  <TextInput
-                    value={expiration}
-                    onChangeText={setExpiration}
-                    editable
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Comment</Text>
-                  <TextInput
-                    value={comment}
-                    onChangeText={setComment}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Terms</Text>
-                  <TextInput
-                    value={termsOfService}
-                    onChangeText={setTermsOfService}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <CheckBox
-                    title='Transfer Allowed'
-                    checked={transferAllowed}
-                    onPress={() => {setTransferAllowed(!transferAllowed)}}
-                  />
-                  <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
-                    <CheckBox
-                      title='Multiple Transfers Allowed'
-                      checked={multipleTransfersAllowed}
-                      onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
-                      visible={transferAllowed}
-                    />
-                  </View>
-                </View>
-
-                <View style={{ padding: 10 }} />
-                <TouchableHighlight
-                  style={styles.saveButton}
-                  onPress={() => props.proceed(donateClaimFromInputs())}
-                >
-                  <Text>Finish...</Text>
-                </TouchableHighlight>
-                <View style={{ padding: 5 }} />
-                <TouchableHighlight
-                  style={styles.cancelButton}
-                  onPress={props.cancel}
-                >
-                  <Text>Cancel</Text>
-                </TouchableHighlight>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-      </Modal>
-    )
-  }
-  **/
 
   /**
     props has:
