@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux'
 
 import { ContactSelectModal } from './ContactSelect'
 import { styles } from './style'
+import { onboarding } from '../data/onboarding'
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 import { BVCButton } from '../utility/utility.tsx'
@@ -115,7 +116,7 @@ export function HandyConstructCredentialScreen({ navigation }) {
 
                   <Button
                     title={'Contract2'}
-                    onPress={() => navigation.navigate('Contract Form')}
+                    onPress={() => navigation.navigate('Contract Form', { onboardingChoice: onboarding.c30_mca })}
                   />
 
                   <View style={{ padding: 5 }} />

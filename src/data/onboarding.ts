@@ -47,7 +47,7 @@ Date of Agreement
 
 
 
-THIS MASTER COLLABORATION AGREEMENT (MCA) the ("Agreement"), effective {{Effective_Date}}, is entered into by and between {{Contracting_Company}} ("Company") and a team of consultant ("Consultants", or collectively with Company "Parties") to seek a collaborative relationship that benefits both Parties and provides fair rewards for each Party, based on the risk and investment in labor, expertise, intellectual property, and capital undertaken by each.
+THIS MASTER COLLABORATION AGREEMENT (MCA) the ("Agreement"), effective {{Effective_Date}}, is entered into by and between {{C30_Contracting_Company}} ("Company") and a team of consultant ("Consultants", or collectively with Company "Parties") to seek a collaborative relationship that benefits both Parties and provides fair rewards for each Party, based on the risk and investment in labor, expertise, intellectual property, and capital undertaken by each.
 
 The Parties intend that their collaboration accomplish the goals defined by mutually agreed statements of work.
 
@@ -128,7 +128,7 @@ Any notice required or permitted hereunder shall be in writing and shall be deem
 (b) received by Registered or Certified Mail, postage prepaid, return receipt requested; or
 (c) received by electronic mail or message, with acknowledgement of receipt by the recipient.
 
-If to Company, then {{Notice_Address}}
+If to Company, then {{Your_Notice_Address}}
 If to Consultants, then c3o@zebrata.org
 
 14. TERMINATION
