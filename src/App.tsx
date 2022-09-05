@@ -20,6 +20,7 @@ import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { styles } from './screens/style'
 
 import { HandyConstructCredentialScreen } from './screens/HandyConstructCredential'
+import { HandyContractFormScreen } from './screens/HandyContractForm'
 import { HandyContactsScreen } from './screens/HandyContacts'
 import { HandyInitializeScreen } from './screens/HandyInitialize'
 import { HandyExportIdentityScreen, HandyImportIdentityScreen, HandySettingsScreen } from "./screens/HandySettings";
@@ -65,8 +66,9 @@ export default function App() {
       <SafeAreaProvider>
         <NavigationContainer>
           <Stack.Navigator>
-            <Stack.Screen name="Community Endorser" component={HomeScreen} />
+            <Stack.Screen name="Goodlaw Signatures" component={HomeScreen} />
             <Stack.Screen name="Contacts" component={HandyContactsScreen} />
+            <Stack.Screen name="Contract Form" component={HandyContractFormScreen} />
             <Stack.Screen name="Create Credential" component={HandyConstructCredentialScreen} />
             <Stack.Screen name="Help" component={HandyHelpScreen} />
             <Stack.Screen name="Export Seed Phrase" component={HandyExportIdentityScreen} />

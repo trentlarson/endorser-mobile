@@ -113,6 +113,11 @@ export function HandyConstructCredentialScreen({ navigation }) {
                     onPress={() => setAskForGaveInfo(true)}
                   />
 
+                  <Button
+                    title={'Contract2'}
+                    onPress={() => navigation.navigate('Contract Form')}
+                  />
+
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Pledges</Text>
