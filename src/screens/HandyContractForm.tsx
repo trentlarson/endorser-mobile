@@ -22,7 +22,7 @@ export function HandyContractFormScreen({ navigation, route }) {
           {
             finalFields.map(field =>
               <View>
-                <Text>{field.replace('_', ' ')}</Text>
+                <Text>{field.replace(/_/g, ' ')}</Text>
                 <TextInput
                     key={field}
                     onChangeText={text => setData(R.set(R.lensProp(field), text, data))}
