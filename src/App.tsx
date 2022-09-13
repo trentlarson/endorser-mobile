@@ -18,6 +18,25 @@ import { Provider, useSelector } from 'react-redux'
 import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { styles } from './screens/style'
+import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER } from './veramo/appSlice'
+import { agent, dbConnection } from './veramo/setup'
+import * as utility from './utility/utility.ts'
+import { BVCButton } from './utility/utility.tsx'
+
+/** screens for the app Handy Contracts
+import { AppHandyConstructCredentialScreen } from './screens/AppHandyConstructCredential'
+import { AppHandyContractFormScreen } from './screens/AppHandyContractForm'
+import { AppHandyContactsScreen } from './screens/AppHandyContacts'
+import { AppHandyInitializeScreen } from './screens/AppHandyInitialize'
+import { AppHandyExportIdentityScreen, AppHandyImportIdentityScreen, AppHandySettingsScreen } from "./screens/AppHandySettings";
+import { AppHandyReviewToSignCredentialScreen } from './screens/AppHandyReviewToSignCredential'
+import { AppHandyScanPresentationScreen, AppHandyVerifyCredentialScreen } from './screens/AppHandyVerifyCredential'
+import { AppHandySignCredentialScreen } from './screens/AppHandySignSendToEndorser'
+const HANDY_APP = true
+**/
+
+/** screens for the advanced app
+**/
 import { ConfirmOthersScreen } from './screens/ConfirmOthers.tsx'
 import { ConstructCredentialScreen } from './screens/ConstructCredential'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
@@ -34,11 +53,7 @@ import { ReportScreen } from './screens/ReportFromEndorser'
 import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
-import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER } from './veramo/appSlice'
-import { agent, dbConnection } from './veramo/setup'
-import * as utility from './utility/utility.ts'
-import { BVCButton } from './utility/utility.tsx'
-
+const HANDY_APP = false
 
 
 
@@ -58,33 +73,80 @@ export default function App() {
     <Provider store={ appStore }>
       <SafeAreaProvider>
         <NavigationContainer>
-          <Stack.Navigator>
-            <Stack.Screen name="Community Endorser" component={HomeScreen} />
-            <Stack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
-            <Stack.Screen name="Contact Import" component={ContactImportScreen} />
-            <Stack.Screen name="Contacts" component={ContactsScreen} />
-            <Stack.Screen name="Signature Results" component={SignCredentialScreen} />
-            <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
-            <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
-            <Stack.Screen name="Help" component={HelpScreen} />
-            <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
-            <Stack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
-            <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
-            <Stack.Screen name="Report Claims Feed" component={ReportFeedScreen} />
-            <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
-            <Stack.Screen name="Review to Sign Credential" component={ReviewToSignCredentialScreen} />
-            <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
-            <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
-            <Stack.Screen name="Settings" component={SettingsScreen} />
-            <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
-            <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
-            <Stack.Screen name="Your Given" component={MyGivenScreen} />
-            <Stack.Screen name="Your Offers" component={MyOffersScreen} />
-          </Stack.Navigator>
+          {
+            HANDY_APP
+            ?
+              <Stack.Navigator>
+                <Stack.Screen name="Goodlaw Signatures" component={AppHandyHomeScreen} />
+                <Stack.Screen name="Contacts" component={AppHandyContactsScreen} />
+                <Stack.Screen name="Contract Form" component={AppHandyContractFormScreen} />
+                <Stack.Screen name="Create Credential" component={AppHandyConstructCredentialScreen} />
+                <Stack.Screen name="Help" component={HelpScreen} />
+                <Stack.Screen name="Export Seed Phrase" component={AppHandyExportIdentityScreen} />
+                <Stack.Screen name="Import Seed Phrase" component={AppHandyImportIdentityScreen} />
+                <Stack.Screen name="Initialize" component={AppHandyInitializeScreen} />
+                <Stack.Screen name="Scan Presentation" component={AppHandyScanPresentationScreen} />
+                <Stack.Screen name="Settings" component={AppHandySettingsScreen} />
+                <Stack.Screen name="Verify Credential" component={AppHandyVerifyCredentialScreen} />
+                <Stack.Screen name="Review & Sign" component={AppHandyReviewToSignCredentialScreen} />
+                <Stack.Screen name="Signature Results" component={AppHandySignCredentialScreen} />
+              </Stack.Navigator>
+            :
+              <Stack.Navigator>
+                <Stack.Screen name="Community Endorser" component={HomeScreen} />
+                <Stack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
+                <Stack.Screen name="Contact Import" component={ContactImportScreen} />
+                <Stack.Screen name="Contacts" component={ContactsScreen} />
+                <Stack.Screen name="Signature Results" component={SignCredentialScreen} />
+                <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
+                <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
+                <Stack.Screen name="Help" component={HelpScreen} />
+                <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
+                <Stack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
+                <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
+                <Stack.Screen name="Report Claims Feed" component={ReportFeedScreen} />
+                <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
+                <Stack.Screen name="Review to Sign Credential" component={ReviewToSignCredentialScreen} />
+                <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
+                <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
+                <Stack.Screen name="Settings" component={SettingsScreen} />
+                <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
+                <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
+                <Stack.Screen name="Your Given" component={MyGivenScreen} />
+                <Stack.Screen name="Your Offers" component={MyOffersScreen} />
+              </Stack.Navigator>
+          }
         </NavigationContainer>
       </SafeAreaProvider>
     </Provider>
   )
+}
+
+const initializeSettings = async () => {
+  // Initialize DB, eg. settings.
+
+  const _ids = await agent.didManagerFind()
+
+  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... found DIDs, about to store..."}))
+  appStore.dispatch(appSlice.actions.setIdentifiers(_ids.map(classToPlain)))
+  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... stored DIDs, about to load settings ..."}))
+
+  const conn = await dbConnection
+  let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
+  if (!settings) {
+    const initSettings = { id: MASTER_COLUMN_VALUE, apiServer: DEFAULT_ENDORSER_API_SERVER }
+    settings = await conn.manager.save(Settings, initSettings)
+  } else if (!settings.apiServer) {
+    settings.apiServer = DEFAULT_ENDORSER_API_SERVER
+    settings = await conn.manager.save(Settings, settings)
+  }
+  appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
+  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded settings, about to load contacts..."}))
+
+  await utility.loadContacts(appSlice, appStore, dbConnection)
+  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
+
+  return settings
 }
 
 /** unused
@@ -147,36 +209,13 @@ function HomeScreen({ navigation }) {
 
       try {
 
-        // Initialize DB, eg. settings.
-
-        const _ids = await agent.didManagerFind()
-
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... found DIDs, about to store..."}))
-        appStore.dispatch(appSlice.actions.setIdentifiers(_ids.map(classToPlain)))
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... stored DIDs, about to load settings ..."}))
-
-        const conn = await dbConnection
-        let settings = await conn.manager.findOne(Settings, MASTER_COLUMN_VALUE)
-        if (!settings) {
-          const initSettings = { id: MASTER_COLUMN_VALUE, apiServer: DEFAULT_ENDORSER_API_SERVER }
-          settings = await conn.manager.save(Settings, initSettings)
-        } else if (!settings.apiServer) {
-          settings.apiServer = DEFAULT_ENDORSER_API_SERVER
-          settings = await conn.manager.save(Settings, settings)
-        }
-        appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
-
-        if (settings != null && settings.mnemonic != null) {
+        const setupSettings = await initializeSettings()
+        if (setupSettings != null && setupSettings.mnemonic != null) {
           setOldMnemonic(true)
         }
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded settings, about to load contacts..."}))
-
-        await utility.loadContacts(appSlice, appStore, dbConnection)
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished loading contacts."}))
-
-
 
         setLoading(false)
+
 
 
 
@@ -337,14 +376,14 @@ function HomeScreen({ navigation }) {
                 title="Scan A Presented Claim"
                 onPress={() => navigation.navigate('Scan Presentation')}
               />
-              <View style={{ marginTop: 50 }}/>
+              <View style={{ marginTop: 100 }}/>
               <Button
-                title="See Contacts"
+                title="Contacts"
                 onPress={() => navigation.navigate('Contacts')}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="See Profile & Settings"
+                title="Settings"
                 onPress={() => navigation.navigate('Settings')}
               />
               {oldMnemonic ? (
@@ -380,7 +419,128 @@ function HomeScreen({ navigation }) {
         }
         <View style={{ marginTop: 5 }}/>
         <Button
-          title="Get Help"
+          title="Help"
+          onPress={() => navigation.navigate('Help')}
+        />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={!!quickMessage}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text>{ quickMessage }</Text>
+          </View>
+        </View>
+      </Modal>
+
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
+
+function AppHandyHomeScreen({ navigation }) {
+
+  const [initError, setInitError] = useState<string>()
+  const [loading, setLoading] = useState<boolean>(true)
+  const [quickMessage, setQuickMessage] = useState<string>(null)
+
+  const allIdentifiers = useSelector((state) => state.identifiers)
+  const settings = useSelector((state) => state.settings)
+
+  // Check for existing identifers on load and set them to state
+  useEffect(() => {
+    const getIdentifiers = async () => {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "About to load DIDs..."}))
+
+      try {
+
+        await initializeSettings()
+
+        setLoading(false)
+
+      } catch (err) {
+        console.log('Got error on initial App useEffect:', err)
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
+        setInitError('Something went wrong during initialization. Kindly send us the logs (near the bottom of Help).')
+      }
+
+
+    }
+    getIdentifiers()
+  }, [])
+
+  return (
+    <SafeAreaView>
+      <ScrollView>
+        {
+        loading
+        ?
+          <View style={{ marginTop: '50%', marginLeft: '45%'}}>
+            <Text>Loading...</Text>
+          </View>
+        :
+          <View />
+        }
+
+        {
+        initError
+        ?
+          <View style={{ marginTop: '50%', marginLeft: '10%', marginRight: '10%' }}>
+            <Text style={{ color: 'red' }}>{initError}</Text>
+          </View>
+        :
+          <View />
+        }
+
+        {
+          allIdentifiers != null && allIdentifiers.length > 0
+          ? (
+            <View>
+              <View style={{ marginTop: 5 }}/>
+              <Button
+                title="Sign Contract"
+                onPress={() => navigation.navigate('Create Credential')}
+              />
+              <View style={{ marginTop: 5 }}/>
+              <Button
+                title="Verify Someone Else's Signature"
+                onPress={() => navigation.navigate('Scan Presentation')}
+              />
+              <View style={{ marginTop: 100 }}/>
+              <Button
+                title="Contacts"
+                onPress={() => navigation.navigate('Contacts')}
+              />
+              <View style={{ marginTop: 5 }}/>
+              <Button
+                title="Settings"
+                onPress={() => navigation.navigate('Settings')}
+              />
+            </View>
+          ) : ( // there are no identifiers
+            <View>
+              <Button
+                title="Initialize New Wallet"
+                onPress={() => navigation.navigate('Initialize')}
+              />
+              <View style={{ marginTop: 5 }}/>
+              <Button
+                title="Import Previous Wallet"
+                onPress={() => navigation.navigate('Import Seed Phrase')}
+              />
+              <View style={{ marginTop: 5 }}/>
+              <Button
+                title="Verify Someone Else's Signature"
+                onPress={() => navigation.navigate('Scan Presentation')}
+              />
+            </View>
+          )
+        }
+        <View style={{ marginTop: 5 }}/>
+        <Button
+          title="Help"
           onPress={() => navigation.navigate('Help')}
         />
 

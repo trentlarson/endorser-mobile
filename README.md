@@ -183,7 +183,8 @@ To Do First Release:
 
 To Release:
 - Change configuration if you want the minimal Contract app.
-  - Set utility.ENABLE_NOTIFICATIONS to false
+  - Set src/utility/utility.ENABLE_NOTIFICATIONS to false
+  - Comment correct import section in src/App.tsx
 - Test everything.
 - Update CHANGELOG.md
 - Set INFURA_PROJECT_ID in src/veramo/setup.ts (useful for checking claims)
