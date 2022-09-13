@@ -7,13 +7,12 @@ import '@zxing/text-encoding'
 
 import { AppRegistry, Platform } from 'react-native';
 import BackgroundFetch from 'react-native-background-fetch'
+
 import App from './src/App';
 import { name as appName } from './app.json';
 import * as utility from './src/utility/utility'
 
-AppRegistry.registerComponent(appName, () => App);
-
-try {
+const setupBackgroundTasks = () => {
 
   // Initialize daily checks for data.
 
@@ -59,9 +58,7 @@ try {
       onTimeout
     )
       .then((status) => {
-        console.log('[BackgroundFetch] status', status, BackgroundFetch.STATUS_AVAILABLE, BackgroundFetch.STATUS_RESTRICTED, BackgroundFetch.STATUS_DENIED)
-      })
-      .then(() => {
+
         // This schedules a BGProcessingTask in iOS.
         BackgroundFetch.scheduleTask({
           taskId: PROC_TASK_ID,
@@ -69,14 +66,26 @@ try {
           periodic: true,
           requiresNetworkConnectivity: true,
         })
+
+        console.log('Daily background task is set up. Status is available:', status === BackgroundFetch.STATUS_AVAILABLE)
       })
 
   } else {
     console.log('Unrecognized Platform of ' + Platform.OS + ' -- daily background task will not work.')
   }
 
-} catch (e) {
+}
 
-  // If we've failed, we'll want to let the user know. This will be the responsibility of our WorkManager status checks. See taskyaml:endorser.ch,2020/tasks#mobile-android-workmanager-status
-  console.log('Got error while initializing daily checks.', e)
+
+
+
+AppRegistry.registerComponent(appName, () => App);
+
+if (utility.ENABLE_NOTIFICATIONS) {
+  try {
+    setupBackgroundTasks()
+  } catch (e) {
+    // If we've failed, we'll want to let the user know. This will be the responsibility of our WorkManager status checks. See taskyaml:endorser.ch,2020/tasks#mobile-android-workmanager-status
+    console.log('Got error while initializing daily checks.', e)
+  }
 }
