@@ -21,10 +21,9 @@ export function AppHandyContractFormScreen({ navigation, route }) {
           <View style={{ padding: 20 }} />
           {
             finalFields.map(field =>
-              <View>
+              <View key={field}>
                 <Text>{field.replace(/_/g, ' ')}</Text>
                 <TextInput
-                    key={field}
                     onChangeText={text => setData(R.set(R.lensProp(field), text, data))}
                     style={{ borderWidth: 1, marginTop: 5}}
                   />

@@ -182,8 +182,8 @@ To Do First Release:
 
 
 To Release:
-- Change configuration if you want the minimal Contract app.
-  - Set src/utility/utility.ENABLE_NOTIFICATIONS to false
+- For minimal Contract app, change configuration
+  - Set src/utility/utility.tsx ENABLE_NOTIFICATIONS to false
   - Comment correct import section in src/App.tsx
 - Test everything.
 - Update CHANGELOG.md
