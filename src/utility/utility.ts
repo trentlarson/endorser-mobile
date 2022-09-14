@@ -24,8 +24,6 @@ export class EndorserRecord {
 // See https://github.com/trentlarson/endorser-ch/blob/0cb626f803028e7d9c67f095858a9fc8542e3dbd/server/api/services/util.js#L6
 const HIDDEN_DID = 'did:none:HIDDEN'
 
-export const ENABLE_NOTIFICATIONS = true
-
 export const DEFAULT_ANDROID_CHANNEL_ID = 'default-channel'
 export const ENDORSER_JWT_URL_LOCATION = '/contact?jwt='
 export const REPLACE_USER_DID_STRING = 'PUT_USER_DID'

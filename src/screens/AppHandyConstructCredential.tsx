@@ -116,12 +116,18 @@ export function AppHandyConstructCredentialScreen({ navigation }) {
 
                   <Button
                     title={'Contract 2'}
-                    onPress={() => navigation.navigate('Contract Form', { onboardingChoice: onboarding.c30_mca })}
+                    onPress={() => navigation.navigate(
+                      'Contract Form',
+                      { nextScreen: 'Review & Sign', onboardingChoice: onboarding.c30_mca }
+                    )}
                   />
 
                   <Button
                     title={'Contract 3'}
-                    onPress={() => navigation.navigate('Contract Form', { onboardingChoice: onboarding.common_paper_mnda })}
+                    onPress={() => navigation.navigate(
+                      'Contract Form',
+                      { nextScreen: 'Review & Sign', onboardingChoice: onboarding.common_paper_mnda }
+                    )}
                   />
 
                   <View style={{ padding: 5 }} />

@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux'
 
 import { ContactSelectModal } from './ContactSelect'
 import { styles } from './style'
+import { onboarding } from '../data/onboarding'
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 import { BVCButton } from '../utility/utility.tsx'
@@ -176,6 +177,7 @@ export function ConstructCredentialScreen({ navigation }) {
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Transactions</Text>
+
                   <Button
                     title={'Plan'}
                     onPress={() => setAskForPlanInfo(true)}
@@ -196,6 +198,7 @@ export function ConstructCredentialScreen({ navigation }) {
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Pledges</Text>
+
                   <Button
                     title={'Pledge To Mutual Integrity'}
                     onPress={() => {
@@ -242,7 +245,31 @@ export function ConstructCredentialScreen({ navigation }) {
 
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
+                  <Text>Contracts</Text>
+
+                  <Button
+                    title={'Common Paper Mutual NDA'}
+                    onPress={() => navigation.navigate(
+                      'Contract Form',
+                      {
+                        nextScreen: 'Review to Sign Credential',
+                        onboardingChoice: onboarding.common_paper_mnda,
+                      }
+                    )}
+                  />
+
+                  <Button
+                    title={'C30 Master Collaboration Agreement'}
+                    onPress={() => navigation.navigate(
+                      'Contract Form',
+                      { nextScreen: 'Review to Sign Credential', onboardingChoice: onboarding.c30_mca }
+                    )}
+                  />
+
+                  <View style={{ padding: 5 }} />
+                  <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Other</Text>
+
                   <Button
                     title={'Scan For Claim'}
                     onPress={() =>

@@ -25,13 +25,15 @@ import { BVCButton } from './utility/utility.tsx'
 
 /** screens for the app Handy Contracts
 import { AppHandyConstructCredentialScreen } from './screens/AppHandyConstructCredential'
-import { AppHandyContractFormScreen } from './screens/AppHandyContractForm'
 import { AppHandyContactsScreen } from './screens/AppHandyContacts'
 import { AppHandyInitializeScreen } from './screens/AppHandyInitialize'
 import { AppHandyExportIdentityScreen, AppHandyImportIdentityScreen, AppHandySettingsScreen } from "./screens/AppHandySettings";
 import { AppHandyReviewToSignCredentialScreen } from './screens/AppHandyReviewToSignCredential'
 import { AppHandyScanPresentationScreen, AppHandyVerifyCredentialScreen } from './screens/AppHandyVerifyCredential'
 import { AppHandySignCredentialScreen } from './screens/AppHandySignSendToEndorser'
+
+import { ContractFormScreen } from './screens/ContractForm'
+export const ENABLE_NOTIFICATIONS = false
 const HANDY_APP = true
 **/
 
@@ -42,6 +44,7 @@ import { ConstructCredentialScreen } from './screens/ConstructCredential'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
 import { ContactImportScreen } from './screens/ContactImportScan.tsx'
 import { ContactsScreen } from './screens/Contacts'
+import { ContractFormScreen } from './screens/ContractForm'
 import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./screens/Settings";
 import { MyCredentialsScreen } from './screens/MyCredentials'
 import { MyGivenScreen } from './screens/MyGiven'
@@ -53,8 +56,8 @@ import { ReportScreen } from './screens/ReportFromEndorser'
 import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
+export const ENABLE_NOTIFICATIONS = true
 const HANDY_APP = false
-
 
 
 
@@ -67,7 +70,7 @@ const HANDY_APP = false
 
 const Stack = createStackNavigator();
 
-export default function App() {
+export function App() {
 
   return (
     <Provider store={ appStore }>
@@ -79,17 +82,18 @@ export default function App() {
               <Stack.Navigator>
                 <Stack.Screen name="Goodlaw Signatures" component={AppHandyHomeScreen} />
                 <Stack.Screen name="Contacts" component={AppHandyContactsScreen} />
-                <Stack.Screen name="Contract Form" component={AppHandyContractFormScreen} />
                 <Stack.Screen name="Create Credential" component={AppHandyConstructCredentialScreen} />
-                <Stack.Screen name="Help" component={HelpScreen} />
                 <Stack.Screen name="Export Seed Phrase" component={AppHandyExportIdentityScreen} />
                 <Stack.Screen name="Import Seed Phrase" component={AppHandyImportIdentityScreen} />
                 <Stack.Screen name="Initialize" component={AppHandyInitializeScreen} />
+                <Stack.Screen name="Review & Sign" component={AppHandyReviewToSignCredentialScreen} />
                 <Stack.Screen name="Scan Presentation" component={AppHandyScanPresentationScreen} />
                 <Stack.Screen name="Settings" component={AppHandySettingsScreen} />
-                <Stack.Screen name="Verify Credential" component={AppHandyVerifyCredentialScreen} />
-                <Stack.Screen name="Review & Sign" component={AppHandyReviewToSignCredentialScreen} />
                 <Stack.Screen name="Signature Results" component={AppHandySignCredentialScreen} />
+                <Stack.Screen name="Verify Credential" component={AppHandyVerifyCredentialScreen} />
+
+                <Stack.Screen name="Contract Form" component={ContractFormScreen} />
+                <Stack.Screen name="Help" component={HelpScreen} />
               </Stack.Navigator>
             :
               <Stack.Navigator>
@@ -97,7 +101,7 @@ export default function App() {
                 <Stack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
                 <Stack.Screen name="Contact Import" component={ContactImportScreen} />
                 <Stack.Screen name="Contacts" component={ContactsScreen} />
-                <Stack.Screen name="Signature Results" component={SignCredentialScreen} />
+                <Stack.Screen name="Contract Form" component={ContractFormScreen} />
                 <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
                 <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
                 <Stack.Screen name="Help" component={HelpScreen} />
@@ -109,6 +113,7 @@ export default function App() {
                 <Stack.Screen name="Review to Sign Credential" component={ReviewToSignCredentialScreen} />
                 <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
                 <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
+                <Stack.Screen name="Signature Results" component={SignCredentialScreen} />
                 <Stack.Screen name="Settings" component={SettingsScreen} />
                 <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
                 <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
@@ -569,7 +574,7 @@ function HelpScreen() {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>What is even the purpose of this thing?</Text>
+          <Text style={{ fontWeight: 'bold' }}>How does this help me?</Text>
           <Text style={{ padding: 5 }}>This uses the power of cryptography to build confidence: when you make claims and then your friends and family confirm those claims, you gain much more utility, control, and security in your online life.</Text>
           <Text style={{ padding: 5 }}>For an example, look at <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/reportBestAttendance')}>this report of meeting attendance on the Endorser server</Text>.  Attendees can see their own info and their contacts' info but you cannot see it... until someone brings you into their confidence. So make some claims, confirm others' claims, and build a network of trust -- with trustworthy communifcations, all verifiable cryptographically.</Text>
           <Text style={{ padding: 5, color: 'blue' }} onPress={() => Linking.openURL('https://endorser.ch/docs')}>For more info, see the Docs section on the Endorser server.</Text>

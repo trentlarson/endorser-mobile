@@ -8,7 +8,7 @@ import '@zxing/text-encoding'
 import { AppRegistry, Platform } from 'react-native';
 import BackgroundFetch from 'react-native-background-fetch'
 
-import App from './src/App';
+import { App, ENABLE_NOTIFICATIONS } from './src/App';
 import { name as appName } from './app.json';
 import * as utility from './src/utility/utility'
 
@@ -81,7 +81,7 @@ const setupBackgroundTasks = () => {
 
 AppRegistry.registerComponent(appName, () => App);
 
-if (utility.ENABLE_NOTIFICATIONS) {
+if (ENABLE_NOTIFICATIONS) {
   try {
     setupBackgroundTasks()
   } catch (e) {
