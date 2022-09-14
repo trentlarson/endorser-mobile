@@ -35,6 +35,7 @@ import * as R from 'ramda'
 
 import { Contact } from '../entity/contact'
 import { Settings } from '../entity/settings'
+import { PrivateData } from '../entity/privateData'
 
 import { Initial1616938713828 }          from '../migration/1616938713828-initial'
 import { SettingsContacts1616967972293 } from '../migration/1616967972293-settings-contacts'
@@ -43,8 +44,9 @@ import { HomeScreenConfig1639947962124 } from '../migration/1639947962124-HomeSc
 import { HandlePublicKeys1652142819353 } from '../migration/1652142819353-HandlePublicKeys'
 import { LastClaimsSeen1656811846836 }   from '../migration/1656811846836-LastClaimsSeen'
 import { ContactRegistered1662256903367 }from '../migration/1662256903367-ContactRegistered'
+import { PrivateData1663080623479 }      from '../migration/1663080623479-PrivateData'
 
-const ALL_ENTITIES = Entities.concat([Contact, Settings])
+const ALL_ENTITIES = Entities.concat([Contact, Settings, PrivateData])
 
 
 
@@ -54,7 +56,7 @@ export const dbConnection = createConnection({
   entities: ALL_ENTITIES,
   location: 'default',
   logging: ['error', 'info', 'warn'],
-  migrations: [ Initial1616938713828, SettingsContacts1616967972293, EncryptedSeed1637856484788, HomeScreenConfig1639947962124, HandlePublicKeys1652142819353, LastClaimsSeen1656811846836, ContactRegistered1662256903367 ],
+  migrations: [ Initial1616938713828, SettingsContacts1616967972293, EncryptedSeed1637856484788, HomeScreenConfig1639947962124, HandlePublicKeys1652142819353, LastClaimsSeen1656811846836, ContactRegistered1662256903367, PrivateData1663080623479 ],
   migrationsRun: true,
   type: 'react-native',
 })

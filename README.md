@@ -182,6 +182,7 @@ To Do First Release:
 
 
 To Release:
+- Release endorser.ch (for registration)
 - For minimal Contract app, change configuration
   - Set src/utility/utility.tsx ENABLE_NOTIFICATIONS to false
   - Comment correct import section in src/App.tsx
