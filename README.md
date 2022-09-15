@@ -256,21 +256,31 @@ To Release:
 
 To create the fieldsMerkle:
 
-- Take all non-blank fields in the contract, in the order they appear in the contract.
+- Take all non-blank fields in the contract, in the order they appear in the contract. There should be no whitespace at the beginning or end of any value.
 
-- Merkle the first two, then add the next, and so on until finished.
+- Construct the merkle tree from those values.
 
 To create the legalMdHash, we follow [Legal Markdown](https://github.com/compleatang/legal-markdown) with some additional restrictions to ensure reproducibility and ease of generation:
 
 - Start the document with: `---` and a newline
 
-- Insert the map of all non-blank key/value pairs, formatted as: `KEY: "VALUE"` (with double-quotes and special characters escaped with `\`)
+- Insert the map of all non-blank key/value pairs. Special characters are in unicode with `\u` prefix, and there is no whitespace at the beginning or the end.
 
-  - Use `|` for multiline strings (with a single newline at the end), with standard 2-space indentation.
+  - Values without newlines are formatted as: `KEY: "VALUE"` (Double quotes are escaped with `\`.)
+
+  - Use `|-` for multiline strings, not surrounded by quotation marks, with 2-space indentation. (Double-quotes need no escaping.)
+
+    - Whitespace is not allowed on the front of the first line. Spaces define the indent level. Newlines can affect the output, but that formatting serves no functional purpose so will be avoided for simplicity.
+
+    - Whitespace in the middle is respected. The 2-space indentation is all that is ignored.
+
+    - Whitespace is not allowed on the end of the last line. There is a final newline in the YAML but it is not part of the value. Spaces are valid in YAML but will be avoided in this spec for simplicity.
 
 - Insert: `---` and a newline
 
 - Insert the contract template.
+
+- [The YAML Multiline page](https://yaml-multiline.info/) is a good summary of multiline behavior, and [the Online YAML Parser](http://www.yaml-online-parser.appspot.com/) is a good place for testing.
 
 Note: the hash algorithm (for legalMdHash and fieldsMerkle) is sha256. (Future implementations may use others, in which case I recommend explicit fields like "legalMdHash512".)
 

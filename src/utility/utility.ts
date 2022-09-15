@@ -570,34 +570,34 @@ export const Toggle = () => {
  **/
 export const valuesMerkleRootHex = (dataObj) => {
   const merkler = new MerkleTools({ hashType: 'sha256' })
-  merkler.addLeaves(R.values(dataObj), true)
+
+  // strip whitespace just to be doubly sure
+  const values = R.values(dataObj).map(R.trim)
+
+  merkler.addLeaves(values, true)
   merkler.makeTree(false)
   return merkler.getMerkleRoot().toString('hex')
 }
 
 /**
   Create the YAML prefix from the fields.
+  Note that whitespace around each value will be stripped.
  **/
 export const contractPrefix = (fields) => {
   let prefix = '---\n'
   for (key of R.keys(fields)) {
     let value = fields[key]
-    value = value.replace(/"/g, '\"')
+    value = value.trim()
     if (value.match('\n')) {
-      value = '|\n' + value
+      value = '|-\n' + value
       value = value.replace(/\n/g, '\n  ')
-      // if it ended with a newline or whitespace, trim it all (and add one newline later)
-      value = value.trimEnd()
     } else {
-      value = value.replace(/"/g, '\"')
+      value = value.replace(/"/g, '\\"')
       value = '"' + value + '"'
     }
-    if (!value.endsWith('\n')) {
-      value = value + '\n'
-    }
+    value = value + '\n'
     prefix += key + ': ' + value
   }
-  prefix += '---\n'
   return prefix
 }
 
@@ -605,5 +605,5 @@ export const contractPrefix = (fields) => {
   Create the hash hex from contract values & template.
  **/
 export const contractHashHex = (fields, templateText) => {
-  return sha256HexOfString(contractPrefix(fields) + templateText)
+  return sha256HexOfString(contractPrefix(fields) + '---\n' + templateText)
 }

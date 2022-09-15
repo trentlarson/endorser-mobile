@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import { DateTime, Duration } from 'luxon'
 import MerkleTools from 'merkle-tools'
 import * as R from 'ramda'
+import YAML from 'yaml'
 import * as utility from '../src/utility/utility'
 
 test('first and last 3', () => {
@@ -252,7 +253,19 @@ test('merkle hashes are correct', () => {
   const merkle01 = sha256Hex(Buffer.concat([fieldHashBufs[0], fieldHashBufs[1]]))
   expect(utility.valuesMerkleRootHex(fields2)).toEqual(merkle01)
 
-  /** tests of merkle-tree
+  const fullHashes =
+        sha256HexBuf(Buffer.concat([
+          sha256HexBuf(Buffer.concat([
+            sha256HexBuf(Buffer.concat([fieldHashBufs[0], fieldHashBufs[1]])),
+            sha256HexBuf(Buffer.concat([fieldHashBufs[2], fieldHashBufs[3]])),
+          ])),
+          sha256HexBuf(fields5['Xtra_Field_5'])
+        ]))
+        .toString('hex')
+  expect(utility.valuesMerkleRootHex(fields5)).toEqual(fullHashes)
+
+
+  /** These actually just test merkle-tools.
 
   merkler.resetTree()
   merkler.addLeaf(fields5["Party_1_Details"], true)
@@ -273,45 +286,41 @@ test('merkle hashes are correct', () => {
   merkler.makeTree(false)
   expect(merkler.getMerkleRoot().toString('hex')).toEqual(merkle01Again2)
 
-  **/
+  merkler.resetTree()
+  merkler.addLeaves(fieldValues, true)
+  merkler.makeTree(false)
+  expect(merkler.getMerkleRoot().toString('hex')).toEqual(fullHashes)
 
-  const fullHashes =
-        sha256HexBuf(Buffer.concat([
-          sha256HexBuf(Buffer.concat([
-            sha256HexBuf(Buffer.concat([fieldHashBufs[0], fieldHashBufs[1]])),
-            sha256HexBuf(Buffer.concat([fieldHashBufs[2], fieldHashBufs[3]])),
-          ])),
-          sha256HexBuf(fields5['Xtra_Field_5'])
-        ]))
-        .toString('hex')
-  expect(utility.valuesMerkleRootHex(fields5)).toEqual(fullHashes)
+  **/
 
 })
 
 test('legal MD construction & hashes are correct', () => {
-  expect(utility.contractPrefix({})).toEqual('---\n---\n')
-  expect(utility.contractPrefix({'a': '1'})).toEqual('---\na: "1"\n---\n')
+  expect(utility.contractPrefix({})).toEqual('---\n')
+  expect(utility.contractPrefix({'a': '1'})).toEqual('---\na: "1"\n')
   const fields5 = {
-    Party_1_Details: 'Me, Myself, and I\nElsewhere, UT',
-    Party_2_Details: 'You, Yourself, and... You\nWaaaay Over There\nBy The Deep Blue Sea',
-    Another_Field: 'Nother',
-    Field_4: 'Tally Forth\n',
-    Xtra_Field_5: 'Xtra! Xtra!',
+    Party_1_Details: 'Me, Myself, and I\n  Elsewhere, UT',
+    Party_2_Details: 'You, Yourself, and... "You"\nWaaaay Over There\nBy The Deep Blue Sea',
+    Another_Field: '\'Nother',
+    Field_4: 'Tally Forth',
+    Xtra_Field_5: '¡Xtra! "\u00a1Xtra!"',
   }
   const fields5Yaml =
 `---
-Party_1_Details: |
+Party_1_Details: |-
   Me, Myself, and I
-  Elsewhere, UT
-Party_2_Details: |
-  You, Yourself, and... You
+    Elsewhere, UT
+Party_2_Details: |-
+  You, Yourself, and... "You"
   Waaaay Over There
   By The Deep Blue Sea
-Another_Field: "Nother"
-Field_4: |
-  Tally Forth
-Xtra_Field_5: "Xtra! Xtra!"
----
+Another_Field: "'Nother"
+Field_4: "Tally Forth"
+Xtra_Field_5: "\u00a1Xtra! \\\"¡Xtra!\\\""
 `
-  expect(utility.contractPrefix(fields5)).toEqual(fields5Yaml)
+
+  const prefix = utility.contractPrefix(fields5)
+  expect(prefix).toEqual(fields5Yaml)
+  expect(YAML.parse(prefix)).toEqual(fields5)
+
 })

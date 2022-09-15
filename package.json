@@ -83,7 +83,8 @@
     "react-native-clean-project": "^3.4.0",
     "react-test-renderer": "16.13.1",
     "rn-nodeify": "^10.2.0",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "yaml": "^2.1.1"
   },
   "jest": {
     "preset": "react-native",
