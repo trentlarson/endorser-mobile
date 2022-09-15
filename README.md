@@ -37,7 +37,8 @@ Clean:
 
 
 
-Troubleshoot:
+
+#### Troubleshoot:
 
 - A "CompileC" error can happen after removing a dependency. You may have to manually remove node_modules and pods (both `ios/Pods` and `~/Library/Caches/CocoaPods`) and reinstall them... but even that may not work and sometimes I just clone a new copy and installe anew. (I've also seen it work to just rerun the app.
 
@@ -247,3 +248,40 @@ To Release:
 
 - ... and if it's a final release:
   - Bump the version (eg to "-rc") in: package.json, android/app/build.gradle, ios/EndorserMobile/Info.plist
+
+
+
+
+## Specifications for Contract Hashes
+
+To create the fieldsMerkle:
+
+- Take all non-blank fields in the contract, in the order they appear in the contract.
+
+- Merkle the first two, then add the next, and so on until finished.
+
+To create the legalMdHash, we follow [Legal Markdown](https://github.com/compleatang/legal-markdown) with some additional restrictions to ensure reproducibility and ease of generation:
+
+- Start the document with: `---` and a newline
+
+- Insert the map of all non-blank key/value pairs, formatted as: `KEY: "VALUE"` (with double-quotes and special characters escaped with `\`)
+
+  - Use `|` for multiline strings (with a single newline at the end), with standard 2-space indentation.
+
+- Insert: `---` and a newline
+
+- Insert the contract template.
+
+Note: the hash algorithm (for legalMdHash and fieldsMerkle) is sha256. (Future implementations may use others, in which case I recommend explicit fields like "legalMdHash512".)
+
+Note: skip empty fields because:
+
+- JSON does not have 'undefined' value and we don't want to explicitly set 'null' values (and most tools unset fields when not explicitly set).
+
+- YAML parsing does strange things with blank content on a map value.
+
+Note: order fields by the order in the contract, by insertion AKA field creation (and not lexicographicslly, for example) because:
+
+- This order is preserved in [many toolsets](https://duckduckgo.com/?q=programming+insertion+order+preservation&t=ffab&ia=web), and it is the standard in recent specifications, eg [SAID](https://www.ietf.org/archive/id/draft-ssmith-said-01.html).
+
+- The ordering in the self-contained Legal Markdown document is more helpful to humans if it's in the order in the contract. For example, parties are usually listed first. Also, the contracts can be structured such that the elements are in a particular desired order.

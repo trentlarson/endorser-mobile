@@ -3,6 +3,7 @@ import { classToPlain } from 'class-transformer'
 import crypto from 'crypto';
 import * as didJwt from 'did-jwt'
 import { DateTime } from 'luxon'
+import MerkleTools from 'merkle-tools'
 import * as R from 'ramda'
 
 import { Contact } from '../entity/contact'
@@ -203,6 +204,7 @@ export const loadContacts = async (appSlice, appStore, dbConnection, useCached) 
   }
 }
 
+// improvement: taskyaml:endorser.ch,2020/tasks#migrate-pass-from-sha1
 function sha1(input: Buffer): Buffer {
   return crypto.createHash('sha1').update(input).digest();
 }
@@ -552,4 +554,14 @@ export const Toggle = () => {
     setToggle: (value) => toggle = value,
     getToggle: () => toggle,
   }
+}
+
+/**
+  Create the merkle tree from a contract-value object.
+ **/
+export const valuesMerkleRootHex = (dataObj) => {
+  const merkler = new MerkleTools({ hashType: 'sha256' })
+  merkler.addLeaves(R.values(dataObj), true)
+  merkler.makeTree(false)
+  return merkler.getMerkleRoot().toString('hex')
 }

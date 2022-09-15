@@ -1,4 +1,6 @@
+import crypto from 'crypto'
 import { DateTime, Duration } from 'luxon'
+import MerkleTools from 'merkle-tools'
 import * as R from 'ramda'
 import * as utility from '../src/utility/utility'
 
@@ -217,5 +219,71 @@ test('account Offers & Gives', () => {
   outputExp = R.clone(EMPTY_OUTPUT)
   outputExp.idsOfStranges = [undefined, 'abc123'].concat(Array(9).fill(undefined))
   expect(utility.countTransactions(input, TEST_USER1_DID)).toEqual(outputExp)
+
+})
+
+test('hashes are correct', () => {
+
+  const sha256Hex = (value) => crypto.createHash('sha256').update(value).digest('hex')
+  const sha256HexBuf = (value) => Buffer.from(sha256Hex(value), 'hex')
+
+  const fields1 = {
+    Party_1_Details: 'Me, Myself, and I\nElsewhere, UT',
+  }
+  const fields2 = {
+      ...fields1,
+    Party_2_Details: 'You, Yourself, and... You\nWaaaay Over There\nBy The Deep Blue Sea',
+  }
+  const fields5 = {
+    ...fields2,
+    Another_Field: 'Nother',
+    Field_4: 'Tally Forth',
+    Xtra_Field_5: 'Xtra! Xtra!',
+  }
+  const fieldValues = R.values(fields5)
+  const fieldHashHexs = fieldValues.map(sha256Hex)
+  const fieldHashBufs = fieldValues.map(sha256HexBuf)
+
+  const merkler = new MerkleTools({ hashType: 'sha256' })
+  // merkler.getMerkleRoot() == null right after constructor
+
+  expect(utility.valuesMerkleRootHex(fields1)).toEqual(fieldHashHexs[0])
+
+  const merkle01 = sha256Hex(Buffer.concat([fieldHashBufs[0], fieldHashBufs[1]]))
+  expect(utility.valuesMerkleRootHex(fields2)).toEqual(merkle01)
+
+  /** tests of merkle-tree
+
+  merkler.resetTree()
+  merkler.addLeaf(fields5["Party_1_Details"], true)
+  merkler.makeTree(false)
+  expect(merkler.getMerkleRoot().toString('hex')).toEqual(fieldHashHexs[0])
+
+  const merkle01Again = sha256Hex(Buffer.concat([fieldHashBufs[0], fieldHashBufs[1]]))
+  merkler.resetTree()
+  merkler.addLeaf(fieldValues[0], true)
+  merkler.addLeaf(fieldValues[1], true)
+  merkler.makeTree(false)
+  expect(merkler.getMerkleRoot().toString('hex')).toEqual(merkle01Again)
+
+  const merkle01Again2 = sha256Hex(Buffer.concat([sha256HexBuf(fieldValues[0]), sha256HexBuf(fieldValues[1])]))
+  merkler.resetTree()
+  merkler.addLeaf(fieldValues[0], true)
+  merkler.addLeaf(fieldValues[1], true)
+  merkler.makeTree(false)
+  expect(merkler.getMerkleRoot().toString('hex')).toEqual(merkle01Again2)
+
+  **/
+
+  const fullHashes =
+        sha256HexBuf(Buffer.concat([
+          sha256HexBuf(Buffer.concat([
+            sha256HexBuf(Buffer.concat([fieldHashBufs[0], fieldHashBufs[1]])),
+            sha256HexBuf(Buffer.concat([fieldHashBufs[2], fieldHashBufs[3]])),
+          ])),
+          sha256HexBuf(fields5['Xtra_Field_5'])
+        ]))
+        .toString('hex')
+  expect(utility.valuesMerkleRootHex(fields5)).toEqual(fullHashes)
 
 })

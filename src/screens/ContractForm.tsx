@@ -11,8 +11,25 @@ export function ContractFormScreen({ navigation, route }) {
   const contractText = onboardingChoice.templateText
   const titleLine = contractText.match(/.*?\n/)[0].slice(0, -1)
   const title = titleLine.replace(/#*/, '').replace(/ */, '')
+
+  // documentation implies that matches happen in order of appearance in the text
   const fields = [...contractText.matchAll(/{{.*?}}/g)].flat()
   const finalFields = R.uniq(fields).map(s => s.slice(2).slice(0, -2))
+
+
+  const makeContract = () => {
+
+    const fieldsMerkle = utility.valuesMerkleRootHex(data)
+
+    return {
+      '@context': 'http://purl.org/cerif/frapo',
+      '@type': 'Contract',
+      templateIpfsCid: onboardingChoice.templateIpfsCid,
+      legalMdHash: '',
+      fieldsMerkle: fieldsMerkle,
+      fields: data,
+    }
+  }
 
   return (
     <SafeAreaView>
@@ -33,7 +50,7 @@ export function ContractFormScreen({ navigation, route }) {
           }
           <Button
             title="Sign"
-            onPress={() => navigation.navigate(nextScreen, { credentialSubject: { '@type': 'AcceptAction', object: data } })}
+            onPress={() => navigation.navigate(nextScreen, { credentialSubject: makeContract })}
           />
           <View style={{ padding: 20 }} />
           <Text>{ contractText }</Text>

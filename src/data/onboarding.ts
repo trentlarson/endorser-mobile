@@ -1,7 +1,7 @@
 export const onboarding = {
   c30_mca: {
     name: 'C30 Master Collaboration Agreement',
-    templateCid: '',
+    templateIpfsCid: '',
     templateText:
 `C30 Master Collaboration Agreement
 
@@ -173,7 +173,7 @@ Witnesses
 
 common_paper_mnda: {
     name: 'Common Paper Mutual Non-Disclosure Agreement',
-    templateCid: 'QmVMcktCdhjXdwXmBEA19oTnxFSKxyx62giXdNd5JGVEuf',
+    templateIpfsCid: 'QmVMcktCdhjXdwXmBEA19oTnxFSKxyx62giXdNd5JGVEuf',
     templateText:
 `# Standard Terms
 
