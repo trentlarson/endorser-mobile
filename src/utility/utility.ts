@@ -204,6 +204,15 @@ export const loadContacts = async (appSlice, appStore, dbConnection, useCached) 
   }
 }
 
+// assumes UTF-8 encoding
+function sha256HexOfString(input: string): string {
+  return sha256(Buffer.from(input, 'utf8')).toString('hex')
+}
+
+function sha256(input: Buffer): Buffer {
+  return crypto.createHash('sha256').update(input).digest()
+}
+
 // improvement: taskyaml:endorser.ch,2020/tasks#migrate-pass-from-sha1
 function sha1(input: Buffer): Buffer {
   return crypto.createHash('sha1').update(input).digest();
@@ -564,4 +573,37 @@ export const valuesMerkleRootHex = (dataObj) => {
   merkler.addLeaves(R.values(dataObj), true)
   merkler.makeTree(false)
   return merkler.getMerkleRoot().toString('hex')
+}
+
+/**
+  Create the YAML prefix from the fields.
+ **/
+export const contractPrefix = (fields) => {
+  let prefix = '---\n'
+  for (key of R.keys(fields)) {
+    let value = fields[key]
+    value = value.replace(/"/g, '\"')
+    if (value.match('\n')) {
+      value = '|\n' + value
+      value = value.replace(/\n/g, '\n  ')
+      // if it ended with a newline or whitespace, trim it all (and add one newline later)
+      value = value.trimEnd()
+    } else {
+      value = value.replace(/"/g, '\"')
+      value = '"' + value + '"'
+    }
+    if (!value.endsWith('\n')) {
+      value = value + '\n'
+    }
+    prefix += key + ': ' + value
+  }
+  prefix += '---\n'
+  return prefix
+}
+
+/**
+  Create the hash hex from contract values & template.
+ **/
+export const contractHashHex = (fields, templateText) => {
+  return sha256HexOfString(contractPrefix(fields) + templateText)
 }

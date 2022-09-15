@@ -222,7 +222,7 @@ test('account Offers & Gives', () => {
 
 })
 
-test('hashes are correct', () => {
+test('merkle hashes are correct', () => {
 
   const sha256Hex = (value) => crypto.createHash('sha256').update(value).digest('hex')
   const sha256HexBuf = (value) => Buffer.from(sha256Hex(value), 'hex')
@@ -286,4 +286,32 @@ test('hashes are correct', () => {
         .toString('hex')
   expect(utility.valuesMerkleRootHex(fields5)).toEqual(fullHashes)
 
+})
+
+test('legal MD construction & hashes are correct', () => {
+  expect(utility.contractPrefix({})).toEqual('---\n---\n')
+  expect(utility.contractPrefix({'a': '1'})).toEqual('---\na: "1"\n---\n')
+  const fields5 = {
+    Party_1_Details: 'Me, Myself, and I\nElsewhere, UT',
+    Party_2_Details: 'You, Yourself, and... You\nWaaaay Over There\nBy The Deep Blue Sea',
+    Another_Field: 'Nother',
+    Field_4: 'Tally Forth\n',
+    Xtra_Field_5: 'Xtra! Xtra!',
+  }
+  const fields5Yaml =
+`---
+Party_1_Details: |
+  Me, Myself, and I
+  Elsewhere, UT
+Party_2_Details: |
+  You, Yourself, and... You
+  Waaaay Over There
+  By The Deep Blue Sea
+Another_Field: "Nother"
+Field_4: |
+  Tally Forth
+Xtra_Field_5: "Xtra! Xtra!"
+---
+`
+  expect(utility.contractPrefix(fields5)).toEqual(fields5Yaml)
 })

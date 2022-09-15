@@ -21,11 +21,13 @@ export function ContractFormScreen({ navigation, route }) {
 
     const fieldsMerkle = utility.valuesMerkleRootHex(data)
 
+    const legalMdHash = utility.contractHashHex(data, onboardingChoice.templateText)
+
     return {
       '@context': 'http://purl.org/cerif/frapo',
       '@type': 'Contract',
       templateIpfsCid: onboardingChoice.templateIpfsCid,
-      legalMdHash: '',
+      legalMdHash: legalMdHash,
       fieldsMerkle: fieldsMerkle,
       fields: data,
     }
