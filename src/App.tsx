@@ -25,13 +25,13 @@ import { BVCButton } from './utility/utility.tsx'
 
 /** screens for the app Handy Contracts
 import { AppHandyConstructCredentialScreen } from './screens/AppHandyConstructCredential'
-import { AppHandyContactsScreen } from './screens/AppHandyContacts'
 import { AppHandyInitializeScreen } from './screens/AppHandyInitialize'
 import { AppHandyExportIdentityScreen, AppHandyImportIdentityScreen, AppHandySettingsScreen } from "./screens/AppHandySettings";
 import { AppHandyReviewToSignCredentialScreen } from './screens/AppHandyReviewToSignCredential'
 import { AppHandyScanPresentationScreen, AppHandyVerifyCredentialScreen } from './screens/AppHandyVerifyCredential'
 import { AppHandySignCredentialScreen } from './screens/AppHandySignSendToEndorser'
 
+import { ContactsScreen } from './screens/Contacts'
 import { ContractFormScreen } from './screens/ContractForm'
 export const ENABLE_NOTIFICATIONS = false
 const HANDY_APP = true
@@ -81,7 +81,6 @@ export function App() {
             ?
               <Stack.Navigator>
                 <Stack.Screen name="Goodlaw Signatures" component={AppHandyHomeScreen} />
-                <Stack.Screen name="Contacts" component={AppHandyContactsScreen} />
                 <Stack.Screen name="Create Credential" component={AppHandyConstructCredentialScreen} />
                 <Stack.Screen name="Export Seed Phrase" component={AppHandyExportIdentityScreen} />
                 <Stack.Screen name="Import Seed Phrase" component={AppHandyImportIdentityScreen} />
@@ -92,6 +91,7 @@ export function App() {
                 <Stack.Screen name="Signature Results" component={AppHandySignCredentialScreen} />
                 <Stack.Screen name="Verify Credential" component={AppHandyVerifyCredentialScreen} />
 
+                <Stack.Screen name="Contacts" component={ContactsScreen} />
                 <Stack.Screen name="Contract Form" component={ContractFormScreen} />
                 <Stack.Screen name="Help" component={HelpScreen} />
               </Stack.Navigator>

@@ -6,7 +6,20 @@ export class PrivateData1663080623479 implements MigrationInterface {
   public name = "PrivateData1663080623479"
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    const settingsSql = 'CREATE TABLE "privateData" ("id" INTEGER PRIMARY KEY, "fields" TEXT, "fieldsMerkle" TEXT, "did" TEXT, "claimContext" TEXT, "claimType" TEXT, "serverId" TEXT, "serverUrl" TEXT, "templateIpfsCid" TEXT, "legalMdHash" TEXT)'
+    const settingsSql =
+`CREATE TABLE "privateData" (
+        "id" INTEGER PRIMARY KEY,
+        "did" TEXT,
+        "issuedAt" TEXT,
+        "claimContext" TEXT,
+        "claimType" TEXT,
+        "claim" TEXT,
+        "serverId" TEXT,
+        "serverHost" TEXT,
+        "serverUrl" TEXT,
+        "promiseFormIpfsCid" TEXT,
+        "promiseFullMdHash" TEXT
+)`
     const result = await queryRunner.query(settingsSql)
     console.log('Up Migration of PrivateData got', result)
   }

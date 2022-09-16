@@ -28,8 +28,8 @@ export function ContractFormScreen({ navigation, route }) {
     return {
       '@context': 'http://purl.org/cerif/frapo',
       '@type': 'Contract',
-      templateIpfsCid: onboardingChoice.templateIpfsCid,
-      legalMdHash: legalMdHash,
+      promiseFormIpfsCid: onboardingChoice.templateIpfsCid,
+      promiseFullMdHash: legalMdHash,
       fieldsMerkle: fieldsMerkle,
       fields: data,
     }

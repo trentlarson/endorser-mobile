@@ -575,9 +575,9 @@ export const valuesMerkleRootHex = (dataObj) => {
   // strip whitespace just to be doubly sure
   const values = R.values(dataObj).map(R.trim)
 
-  //merkler.addLeaves(values, true) // works when I run in the tests but not in emulator!?
+  //merkler.addLeaves(values, true) // works when I run in the tests but not in emulator!? "Error: Bad hex value"
   for (value of values) {
-    //merkler.addLeaf(value, true) // works when I run in the tests but not in emulator!?
+    //merkler.addLeaf(value, true) // works when I run in the tests but not in emulator!? "Error: Bad hex value"
     merkler.addLeaf(sha256HexOfString(value))
   }
   merkler.makeTree(false)

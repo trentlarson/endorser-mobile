@@ -238,11 +238,11 @@ export function ContactsScreen({ navigation, route }) {
     .then(() => {
       if (wantsToBeVisible) {
         // trigger each of the contacts to see me
-        return Promise.all(contacts.map((contact) => allowToSeeMe(contact)))
+        Promise.all(contacts.map((contact) => allowToSeeMe(contact)))
       }
       if (wantsToRegister) {
         // register each of the contacts
-        return Promise.all(contacts.map((contact) => register(contact)))
+        Promise.all(contacts.map((contact) => register(contact)))
       }
     })
     .then(() => {
