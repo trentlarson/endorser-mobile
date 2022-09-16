@@ -32,6 +32,8 @@ export const UPORT_JWT_PREFIX = 'https://id.uport.me/req/'
 
 export const ANDROID_FEED_ACTION = 'default' // only 'default' will launch the app if background / terminated on android
 
+const merkler = new MerkleTools({ hashType: 'sha256' })
+
 export function isDid(value) {
   return value && value.startsWith("did:") && (value.substring(5).indexOf(":") > -1)
 }
@@ -566,17 +568,22 @@ export const Toggle = () => {
 }
 
 /**
-  Create the merkle tree from a contract-value object.
+  Create the merkle tree root hex from a contract-value object, or null
  **/
 export const valuesMerkleRootHex = (dataObj) => {
-  const merkler = new MerkleTools({ hashType: 'sha256' })
-
+  merkler.resetTree()
   // strip whitespace just to be doubly sure
   const values = R.values(dataObj).map(R.trim)
 
-  merkler.addLeaves(values, true)
+  //merkler.addLeaves(values, true) // works when I run in the tests but not in emulator!?
+  for (value of values) {
+    //merkler.addLeaf(value, true) // works when I run in the tests but not in emulator!?
+    merkler.addLeaf(sha256HexOfString(value))
+  }
   merkler.makeTree(false)
-  return merkler.getMerkleRoot().toString('hex')
+  const root = merkler.getMerkleRoot()
+  const result = root ? root.toString('hex') : null
+  return result
 }
 
 /**

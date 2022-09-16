@@ -245,9 +245,6 @@ test('merkle hashes are correct', () => {
   const fieldHashHexs = fieldValues.map(sha256Hex)
   const fieldHashBufs = fieldValues.map(sha256HexBuf)
 
-  const merkler = new MerkleTools({ hashType: 'sha256' })
-  // merkler.getMerkleRoot() == null right after constructor
-
   expect(utility.valuesMerkleRootHex(fields1)).toEqual(fieldHashHexs[0])
 
   const merkle01 = sha256Hex(Buffer.concat([fieldHashBufs[0], fieldHashBufs[1]]))
@@ -264,8 +261,10 @@ test('merkle hashes are correct', () => {
         .toString('hex')
   expect(utility.valuesMerkleRootHex(fields5)).toEqual(fullHashes)
 
-
   /** These actually just test merkle-tools.
+
+  const merkler = new MerkleTools({ hashType: 'sha256' })
+  // merkler.getMerkleRoot() == null right after constructor
 
   merkler.resetTree()
   merkler.addLeaf(fields5["Party_1_Details"], true)

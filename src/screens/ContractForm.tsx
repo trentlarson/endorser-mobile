@@ -2,6 +2,8 @@ import * as R from 'ramda'
 import React from 'react'
 import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 
+import * as utility from '../utility/utility'
+
 export function ContractFormScreen({ navigation, route }) {
 
   const { nextScreen, onboardingChoice } = route.params
@@ -19,9 +21,9 @@ export function ContractFormScreen({ navigation, route }) {
 
   const makeContract = () => {
 
-    const fieldsMerkle = utility.valuesMerkleRootHex(data)
+    const fieldsMerkle: string = utility.valuesMerkleRootHex(data)
 
-    const legalMdHash = utility.contractHashHex(data, onboardingChoice.templateText)
+    const legalMdHash: string = utility.contractHashHex(data, onboardingChoice.templateText)
 
     return {
       '@context': 'http://purl.org/cerif/frapo',
@@ -52,7 +54,7 @@ export function ContractFormScreen({ navigation, route }) {
           }
           <Button
             title="Sign"
-            onPress={() => navigation.navigate(nextScreen, { credentialSubject: makeContract })}
+            onPress={() => navigation.navigate(nextScreen, { credentialSubject: makeContract() })}
           />
           <View style={{ padding: 20 }} />
           <Text>{ contractText }</Text>
