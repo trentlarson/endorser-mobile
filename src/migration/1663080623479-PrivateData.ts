@@ -9,16 +9,16 @@ export class PrivateData1663080623479 implements MigrationInterface {
     const settingsSql =
 `CREATE TABLE "privateData" (
         "id" INTEGER PRIMARY KEY,
-        "did" TEXT,
-        "issuedAt" TEXT,
         "claimContext" TEXT,
         "claimType" TEXT,
         "claim" TEXT,
-        "serverId" TEXT,
-        "serverHost" TEXT,
-        "serverUrl" TEXT,
+        "did" TEXT,
+        "issuedAt" INTEGER,
         "promiseFormIpfsCid" TEXT,
-        "promiseFullMdHash" TEXT
+        "promiseFullMdHash" TEXT,
+        "serverHost" TEXT,
+        "serverId" TEXT,
+        "serverUrl" TEXT
 )`
     const result = await queryRunner.query(settingsSql)
     console.log('Up Migration of PrivateData got', result)

@@ -196,6 +196,19 @@ export const accessToken = async (identifier) => {
   return jwt
 }
 
+export const isContract = (claim) => {
+  return claim['@context'] === 'http://purl.org/cerif/frapo' && claim['@type'] === 'Contract'
+}
+
+export const constructAccept = (agent, pledge) => {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AcceptAction",
+    "agent": { identifier: agent },
+    "object": pledge,
+  }
+}
+
 export const loadContacts = async (appSlice, appStore, dbConnection, useCached) => {
   if (!appStore.getState().contacts || !useCached) {
     const conn = await dbConnection

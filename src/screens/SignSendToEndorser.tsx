@@ -13,9 +13,10 @@ const debug = Debug('endorser-mobile:sign-send--credential')
 
 export function SignCredentialScreen({ navigation, route }) {
 
-  const { credentialSubjects, sendToEndorser, identifier } = route.params
+  const { credentialSubjects, identifier, sendToEndorser } = route.params
 
   const finalCredSubjs = Array.isArray(credentialSubjects) ? credentialSubjects : [ credentialSubjects ]
+
   const numCreds = finalCredSubjs.length
 
   // return a space & claim number (1-based) for the index (0-based), or '' if there's only one

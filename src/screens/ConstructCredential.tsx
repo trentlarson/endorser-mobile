@@ -1508,15 +1508,6 @@ export function ConstructCredentialScreen({ navigation }) {
 
     const [pledge, setPledge] = useState<string>(props.pledge)
 
-    function constructPledge() {
-      return {
-        "@context": "https://schema.org",
-        "@type": "AcceptAction",
-        "agent": { identifier: props.agent },
-        "object": pledge,
-      }
-    }
-
     return (
       <Modal
         animationType="slide"
@@ -1544,7 +1535,7 @@ export function ConstructCredentialScreen({ navigation }) {
                 <View style={{ padding: 10 }} />
                 <TouchableHighlight
                   style={styles.saveButton}
-                  onPress={() => props.proceed(constructPledge())}
+                  onPress={() => props.proceed(utility.constructAccept(props.agent, pledge))}
                 >
                   <Text>Finish...</Text>
                 </TouchableHighlight>

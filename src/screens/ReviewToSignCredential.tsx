@@ -1,4 +1,5 @@
 import Debug from 'debug'
+import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
@@ -11,7 +12,7 @@ const debug = Debug('endorser-mobile:review-credential')
 
 export function ReviewToSignCredentialScreen({ navigation, route }) {
 
-  let { credentialSubject, scanned, substitute } = route.params
+  let { acceptContract, credentialSubject, scanned, substitute } = route.params
 
   let credSubjArray = []
   if (credentialSubject != null) {
@@ -21,18 +22,33 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
     credSubjArray = Array.isArray(scannedCred) ? scannedCred : [ scannedCred ]
   }
 
+  const id0 = appStore.getState().identifiers && appStore.getState().identifiers[0]
+
+  const allFinalCredSubjs = []
+  for (subj of credSubjArray) {
+    if (utility.isContract(subj)) {
+      const strippedContract = R.clone(subj)
+      delete strippedContract.fields
+      allFinalCredSubjs.push(strippedContract)
+      if (acceptContract) {
+        allFinalCredSubjs.push(utility.constructAccept(id0.did, strippedContract))
+      }
+    } else {
+      allFinalCredSubjs.push(subj)
+    }
+  }
+
   const [claimJsonError, setClaimJsonError] = useState<string>(null)
-  const [claimStr, setClaimStr] = useState<string>(JSON.stringify(credSubjArray))
+  const [claimArrayStr, setClaimArrayStr] = useState<string>(JSON.stringify(allFinalCredSubjs))
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
-  const [id0, setId0] = useState<Identifier>()
   const [sendToEndorser, setSendToEndorser] = useState<boolean>(true)
 
-  function formatClaimJson(claimString) {
-    if (claimString) {
+  function formatClaimJson(claimArrayString) {
+    if (claimArrayString) {
       try {
-        return JSON.stringify(JSON.parse(claimString), null, 2)
+        return JSON.stringify(JSON.parse(claimArrayString), null, 2)
       } catch (err) {
-        return claimString
+        return claimArrayString
       }
     } else {
       return ''
@@ -40,18 +56,15 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
   }
 
   function changeCurlyQuotes() {
-    setClaimStr(claimStr.replace(/”/g, "\"").replace(/“/g, "\""))
+    setClaimArrayStr(claimArrayStr.replace(/”/g, "\"").replace(/“/g, "\""))
   }
   function hasCurlyQuotes() {
-    return claimStr && (claimStr.match(/”/) || claimStr.match(/“/))
+    return claimArrayStr && (claimArrayStr.match(/”/) || claimArrayStr.match(/“/))
   }
 
   // Check for existing identifers on load and set them to state
   useEffect(() => {
     const getIdentifier = async () => {
-      const defaultId = appStore.getState().identifiers && appStore.getState().identifiers[0]
-      setId0(defaultId)
-
       let settings = appStore.getState().settings
       if (settings && (settings.mnemEncrBase64 || settings.mnemonic)) {
         setHasMnemonic(true)
@@ -61,27 +74,27 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
   }, [])
 
   useEffect(() => {
-    if (claimStr == null || claimStr.trim() == '') {
+    if (claimArrayStr == null || claimArrayStr.trim() == '') {
       setClaimJsonError('The claim is empty.')
     } else {
 
       try {
-        JSON.stringify(JSON.parse(claimStr), null, 2)
+        JSON.stringify(JSON.parse(claimArrayStr), null, 2)
         setClaimJsonError('')
       } catch (err) {
         setClaimJsonError('The claim is not formatted correctly. ' + err)
       }
 
       if (substitute) {
-        let newClaimStr = claimStr
+        let newClaimStr = claimArrayStr
         if (id0) {
-          newClaimStr = claimStr.replace(utility.REPLACE_USER_DID_STRING, id0.did)
+          newClaimStr = claimArrayStr.replace(utility.REPLACE_USER_DID_STRING, id0.did)
         }
-        setClaimStr(newClaimStr)
+        setClaimArrayStr(newClaimStr)
       }
 
     }
-  }, [claimStr, id0])
+  }, [claimArrayStr, id0])
 
   return (
     <SafeAreaView>
@@ -100,11 +113,11 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
               </Text>
               <View>
                 {
-                  claimStr ? (
+                  claimArrayStr ? (
                     <View>
                       <Text>Hit 'sign' if the Details below are good.</Text>
                     </View>
-                  ) : ( /* !claimStr */
+                  ) : ( /* !claimArrayStr */
                     <Text>No claim found.  Go back and try again.</Text>
                   )
                 }
@@ -122,8 +135,9 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                           onPress={() => navigation.navigate(
                             'Signature Results',
                             {
+                              acceptContract,
                               identifier: id0,
-                              credentialSubjects: JSON.parse(claimStr),
+                              credentialSubjects: JSON.parse(claimArrayStr),
                               sendToEndorser,
                             }
                           )}
@@ -137,8 +151,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                   }
 
                   <Text style={{ marginTop: 75, marginBottom: 5, fontSize: 20, fontWeight: 'bold' }}>Details</Text>
-                  <YamlFormat source={ JSON.parse(claimStr) } />
-
+                  <YamlFormat source={ JSON.parse(claimArrayStr) } />
                   <Text style={{ marginTop: 200, marginBottom: 5, fontSize: 20, fontWeight: 'bold' }}>Technical Details</Text>
                   <Text style={{ fontSize: 11 }}>Signing As:</Text>
                   <Text style={{ fontSize: 11 }}>{id0.did}</Text>
@@ -151,10 +164,10 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                   <TextInput
                     multiline={true}
                     style={{ borderWidth: 1, height: 300 }}
-                    onChangeText={setClaimStr}
+                    onChangeText={setClaimArrayStr}
                     autoCorrect={false}
                   >
-                    { formatClaimJson(claimStr) }
+                    { formatClaimJson(claimArrayStr) }
                   </TextInput>
                   <Text style={{ color: 'red' }}>{ claimJsonError }</Text>
                   {

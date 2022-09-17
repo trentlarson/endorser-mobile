@@ -1,6 +1,7 @@
 import * as R from 'ramda'
 import React from 'react'
 import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import { CheckBox } from "react-native-elements"
 
 import * as utility from '../utility/utility'
 
@@ -9,6 +10,7 @@ export function ContractFormScreen({ navigation, route }) {
   const { nextScreen, onboardingChoice } = route.params
 
   const [data, setData] = React.useState({});
+  const [accept, setAccept] = React.useState<boolean>(true);
 
   const contractText = onboardingChoice.templateText
   const titleLine = contractText.match(/.*?\n/)[0].slice(0, -1)
@@ -52,9 +54,14 @@ export function ContractFormScreen({ navigation, route }) {
               </View>
             )
           }
+          <CheckBox
+            title='Accept Contract Terms'
+            checked={accept}
+            onPress={() => {setAccept(!accept)}}
+          />
           <Button
             title="Sign"
-            onPress={() => navigation.navigate(nextScreen, { credentialSubject: makeContract() })}
+            onPress={() => navigation.navigate(nextScreen, { credentialSubject: makeContract(), acceptContract: accept })}
           />
           <View style={{ padding: 20 }} />
           <Text>{ contractText }</Text>
