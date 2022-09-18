@@ -51,6 +51,27 @@ export const isHiddenDid = (did) => {
   return did === HIDDEN_DID
 }
 
+export const isContract = (claim) => {
+  return claim['@context'] === 'http://purl.org/cerif/frapo' && claim['@type'] === 'Contract'
+}
+
+export const isAccept = (claim) => {
+  return claim['@context'] === 'https://schema.org' && claim['@type'] === 'AcceptAction'
+}
+
+export const isContractAccept = (claim) => {
+  return isAccept(claim) && claim.object && isContract(claim.object)
+}
+
+export const constructAccept = (agent, pledge) => {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AcceptAction",
+    "agent": { identifier: agent },
+    "object": pledge,
+  }
+}
+
 // insert a space in front of any capital letters (and capitalize first letter, just in case)
 // return '' for null or undefined input
 export const capitalizeAndInsertSpacesBeforeCaps = (text) =>{
@@ -194,19 +215,6 @@ export const accessToken = async (identifier) => {
   const uportTokenPayload = { exp: endEpoch, iat: nowEpoch, iss: did }
   const jwt: string = await didJwt.createJWT(uportTokenPayload, { issuer: did, signer })
   return jwt
-}
-
-export const isContract = (claim) => {
-  return claim['@context'] === 'http://purl.org/cerif/frapo' && claim['@type'] === 'Contract'
-}
-
-export const constructAccept = (agent, pledge) => {
-  return {
-    "@context": "https://schema.org",
-    "@type": "AcceptAction",
-    "agent": { identifier: agent },
-    "object": pledge,
-  }
 }
 
 export const loadContacts = async (appSlice, appStore, dbConnection, useCached) => {

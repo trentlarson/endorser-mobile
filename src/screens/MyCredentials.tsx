@@ -191,7 +191,7 @@ export function MyCredentialsScreen({ navigation }) {
                 style={{ borderWidth: 1 }}
               />
               <Button
-                title="Search For Filter"
+                title="Search About Me"
                 onPress={searchEndorserForString}
               />
 

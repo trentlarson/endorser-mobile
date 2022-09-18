@@ -6,14 +6,18 @@ import { ActivityIndicator, Button, Linking, SafeAreaView, ScrollView, Text, Tex
 import { CheckBox } from "react-native-elements"
 import { useFocusEffect } from '@react-navigation/native';
 
+import { Contact } from '../entity/contact'
+import { PrivateData } from '../entity/privateData'
 import * as utility from '../utility/utility'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
+import { dbConnection } from '../veramo/setup'
 
 const debug = Debug('endorser-mobile:sign-send--credential')
 
 export function SignCredentialScreen({ navigation, route }) {
 
-  const { credentialSubjects, identifier, sendToEndorser } = route.params
+  const { credentialSubjects, identifier, privateFields, sendToEndorser } = route.params
+console.log('private fields', privateFields)
 
   const finalCredSubjs = Array.isArray(credentialSubjects) ? credentialSubjects : [ credentialSubjects ]
 
@@ -45,7 +49,7 @@ export function SignCredentialScreen({ navigation, route }) {
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(identifier)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... sending to server..."}))
-    fetch(endorserApiServer + '/api/claim', {
+    return fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -86,46 +90,96 @@ export function SignCredentialScreen({ navigation, route }) {
   /**
    * return claim ID from Endorser server, or nothing if they didn't choose to send it
    */
-  async function signAndSend(credSubj, index): string {
+  async function signAndSend(credSubj, index: number, dataId: number): string {
+    /**
+    // would like to use https://www.npmjs.com/package/did-jwt-vc
+    // but: "TypeError: Object is not a constructor (evaluating 'new EthrDID')"
+    const issuer: Issuer = new EthrDID({
+      address: '0xf1232f840f3ad7d23fcdaa84d6c66dac24efb198',
+      privateKey: 'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75'
+    })
+    const vcJwt: JWT = await createVerifiableCredentialJwt(vcPayload, issuer)
+    **/
+
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the signing & sending..."}))
+    const signer = didJwt.SimpleSigner(identifier.keys[0].privateKeyHex)
+    const vcClaim = credSubj
+    const did: string = identifier.did
+
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
+    const vcJwt: string = await didJwt.createJWT(utility.vcPayload(vcClaim),{ issuer: did, signer })
+    setJwts(R.update(index, vcJwt))
+    setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + "."))
+    appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
+    if (sendToEndorser) {
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... now sending JWT to server..."}))
+      const sentResult = await sendToEndorserSite(vcJwt, index)
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished the signing & sending with result: " + JSON.stringify(sentResult)} + " ..."))
+      return sentResult
+    } else {
+      setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + ", but failed to send it to the server."))
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... so we're done."}))
+    }
+  }
+
+  async function saveSignSend(cred, index) {
     try {
-      /**
-      // would like to use https://www.npmjs.com/package/did-jwt-vc
-      // but: "TypeError: Object is not a constructor (evaluating 'new EthrDID')"
-      const issuer: Issuer = new EthrDID({
-        address: '0xf1232f840f3ad7d23fcdaa84d6c66dac24efb198',
-        privateKey: 'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75'
-      })
-      const vcJwt: JWT = await createVerifiableCredentialJwt(vcPayload, issuer)
-      **/
-
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Starting the signing & sending..."}))
-      const signer = didJwt.SimpleSigner(identifier.keys[0].privateKeyHex)
-      const vcClaim = credSubj
-      const did: string = identifier.did
-
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
-      const vcJwt: string = await didJwt.createJWT(utility.vcPayload(vcClaim),{ issuer: did, signer })
-      setJwts(R.update(index, vcJwt))
-      setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + "."))
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
-      if (sendToEndorser) {
-        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... now sending JWT to server..."}))
-        let result = await sendToEndorserSite(vcJwt, index)
-        setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + " and sent it to the server."))
-        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the signing & sending with result: " + JSON.stringify(result)}))
-        return result
-      } else {
-        setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + ", but failed to send it to the server."))
-        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... so we're done."}))
+      const fullCred = R.clone(cred)
+      if (privateFields[index]) {
+        fullCred.fields = privateFields[index]
       }
+      const conn = await dbConnection
+      const data = new PrivateData()
+      data.claimContext = cred['@context']
+      data.claimType = cred['@type']
+      data.claim = JSON.stringify(fullCred)
+      data.did = identifier.did
+      data.issuedAt = Math.round(new Date().valueOf() / 1000)
+      if (utility.isContract(cred)) {
+        data.promiseFormIpfsCid = cred.promiseFormIpfsCid,
+        data.promiseFullMdHash = cred.promiseFullMdHash
+      } else if (utility.isContractAccept(cred)) {
+        data.promiseFormIpfsCid = cred.object.promiseFormIpfsCid,
+        data.promiseFullMdHash = cred.object.promiseFullMdHash
+      }
+      const saved = await conn.manager.insert(PrivateData, data)
+      const dataId = saved.raw
+
+      const sentResult = await signAndSend(cred, index, dataId)
+
+      if (sentResult) {
+        const conn = await dbConnection
+        let host = appStore.getState().settings.apiServer
+        if (host.startsWith('https://')) {
+          host = host.substring('https://'.length)
+        } else if (host.startsWith('http://')) {
+          host = host.substring('http://'.length)
+        }
+        const saveResult = await conn.manager.update(
+          PrivateData,
+          dataId,
+          {
+            serverHost: host,
+            serverId: sentResult,
+            serverUrl: appStore.getState().settings.apiServer + '/api/claim/' + sentResult,
+          }
+        )
+
+        setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + " and sent it to the server."))
+        appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished storing server data locally."}))
+        return sentResult
+      } else {
+        setResultMessages(R.update(index, "Successfully signed and sent claim" + claimNumber(index) + " but failed to record server result. You'll have to search to find that information."))
+      }
+
     } catch (e) {
       setResultMessages(R.update(index, resultMessages[index] + " Something failed in the signing or sending of claim" + claimNumber(index) + "."))
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
       // I have seen cases where each of these give different, helpful info.
-      console.log('Error signing & sending claim, 1:', e)
-      console.log('Error signing & sending claim, 2: ' + e)
-      console.log('Error signing & sending claim, 3:', e.toString())
+      console.log('Error storing / signing / sending claim, 1:', e)
+      console.log('Error storing / signing / sending claim, 2: ' + e)
+      console.log('Error storing / signing / sending claim, 3:', e.toString())
       throw e
     }
   }
@@ -133,7 +187,7 @@ export function SignCredentialScreen({ navigation, route }) {
   useFocusEffect(
     React.useCallback(() => {
       const doActions = async () => {
-        return finalCredSubjs.map((cred, index) => signAndSend(cred, index))
+        return finalCredSubjs.map((cred, index) => saveSignSend(cred, index))
       }
       doActions()
     }, [finalCredSubjs])
@@ -165,7 +219,7 @@ export function SignCredentialScreen({ navigation, route }) {
                         fetched[index] ? (
                           endorserIds[index] ? (
                             <View>
-                              <Text>Endorser ID { endorserIds[index] }</Text>
+                              <Text>Endorser ID <Text selectable={true}>{ endorserIds[index] }</Text></Text>
                               <Button
                                 title="Success!"
                                 onPress={() => {

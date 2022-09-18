@@ -9,9 +9,9 @@ export class PrivateData1663080623479 implements MigrationInterface {
     const settingsSql =
 `CREATE TABLE "privateData" (
         "id" INTEGER PRIMARY KEY,
+        "claim" TEXT,
         "claimContext" TEXT,
         "claimType" TEXT,
-        "claim" TEXT,
         "did" TEXT,
         "issuedAt" INTEGER,
         "promiseFormIpfsCid" TEXT,

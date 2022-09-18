@@ -58,6 +58,7 @@ export const appSlice = createSlice({
         state.logMessage = "<truncated>\n..." + state.logMessage.substring(state.logMessage.length - (MAX_LOG_LENGTH / 2))
       }
       if (contents.payload.log) {
+        console.log(contents.payload.msg)
         state.logMessage += "\n" + contents.payload.msg
       }
     },

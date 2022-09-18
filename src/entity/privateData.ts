@@ -7,23 +7,9 @@ export class PrivateData extends BaseEntity {
   /**
    * ID for this row (only for internal purposes)
    **/
-  @PrimaryColumn('text')
+  @PrimaryColumn('integer')
   //@ts-ignore
   id: number
-
-  /**
-   * JSON string of all private fields
-   **/
-  @Column('text')
-  //@ts-ignore
-  fields: string
-
-  /**
-   * Merkle root for the field values
-   **/
-  @Column('text')
-  //@ts-ignore
-  fieldsMerkle: string
 
   /**
    * DID that owns data
@@ -33,18 +19,11 @@ export class PrivateData extends BaseEntity {
   did: string
 
   /**
-   * ID on server
+   * full claim
    **/
-  @Column('text', { nullable: true })
+  @Column('text')
   //@ts-ignore
-  serverId: string
-
-  /**
-   * Full URL for this signed data by this issuer on server
-   **/
-  @Column('text', { nullable: true })
-  //@ts-ignore
-  serverUrl: string
+  claim: string
 
   /**
    * JSON-LD @context
@@ -61,17 +40,45 @@ export class PrivateData extends BaseEntity {
   claimType: string
 
   /**
+   * time when this record was created
+   **/
+  @Column('integer')
+  //@ts-ignore
+  issuedAt: number
+
+  /**
    * IPFS CID for the template for this contract
    **/
   @Column('text', { nullable: true })
   //@ts-ignore
-  templateIpfsCid: string
+  promiseFormIpfsCid: string
 
   /**
    * Hash of the Legal MD format for this contract
    **/
   @Column('text', { nullable: true })
   //@ts-ignore
-  legalMdHash: string
+  promiseFullMdHash: string
+
+  /**
+   * Host for the chain on the server where it's stored externally
+   **/
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  serverHost: string
+
+  /**
+   * ID on server
+   **/
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  serverId: string
+
+  /**
+   * Full URL for this signed data by this issuer on server
+   **/
+  @Column('text', { nullable: true })
+  //@ts-ignore
+  serverUrl: string
 
 }

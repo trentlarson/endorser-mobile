@@ -204,13 +204,17 @@ const createAndStoreIdentifier = async (mnemonicPassword) => {
   return importAndStoreIdentifier(mnemonic, mnemonicPassword, false, [])
 }
 
-const logDatabaseTable = (tableName) => async () => {
+const logDatabaseTable = (tableName, maxId) => async () => {
+  let query = 'SELECT * FROM ' + tableName
+  if (maxId) {
+    query += ' ORDER BY id DESC LIMIT 1'
+  }
   const conn = await dbConnection
-  const data = await conn.manager.query('SELECT * FROM ' + tableName)
+  const data = await conn.manager.query(query)
   if (tableName === 'settings') {
     data[0]['mnemEncrBase64'] = 'HIDDEN'
   }
-  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Contents of table \"" + tableName + "\":\n" + JSON.stringify(data)}))
+  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "\nContents of table \"" + tableName + "\":\n" + JSON.stringify(data)}))
 }
 
 export function SettingsScreen({navigation}) {
@@ -442,12 +446,6 @@ export function SettingsScreen({navigation}) {
       appStore.dispatch(appSlice.actions.setTestMode(setting))
       if (setting) {
         Alert.alert('You can lose data in Test Mode. If unsure: exit, or restart the app.')
-      } else {
-        // now going into real mode, but if the servers were switched then warn
-        if (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
-            || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER) {
-          Alert.alert('Beware! Your servers are not set to the default production servers.')
-        }
       }
     }
     setNewTestMode(isInTestMode)
@@ -798,6 +796,16 @@ export function SettingsScreen({navigation}) {
                 <Button
                   title='Log Key Table'
                   onPress={logDatabaseTable('key')}
+                />
+                <View style={{ marginTop: 5 }}/>
+                <Button
+                  title='Log All Private Data'
+                  onPress={logDatabaseTable('privateData')}
+                />
+                <View style={{ marginTop: 5 }}/>
+                <Button
+                  title='Log Latest Private Datum'
+                  onPress={logDatabaseTable('privateData', true)}
                 />
                 <View style={{ marginTop: 5 }}/>
                 <Button

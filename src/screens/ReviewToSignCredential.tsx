@@ -25,16 +25,22 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
   const id0 = appStore.getState().identifiers && appStore.getState().identifiers[0]
 
   const allFinalCredSubjs = []
+  const privateFields = []
   for (subj of credSubjArray) {
     if (utility.isContract(subj)) {
       const strippedContract = R.clone(subj)
+      const erasedPrivates = R.clone(subj.fields)
       delete strippedContract.fields
-      allFinalCredSubjs.push(strippedContract)
       if (acceptContract) {
         allFinalCredSubjs.push(utility.constructAccept(id0.did, strippedContract))
+        privateFields.push(erasedPrivates)
+      } else {
+        allFinalCredSubjs.push(strippedContract)
+        privateFields.push(erasedPrivates)
       }
     } else {
       allFinalCredSubjs.push(subj)
+      privateFields.push(null)
     }
   }
 
@@ -43,10 +49,14 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [sendToEndorser, setSendToEndorser] = useState<boolean>(true)
 
-  function formatClaimJson(claimArrayString) {
+  function formatClaimJson(claimArray): string {
+    return JSON.stringify(claimArray, null, 2)
+  }
+
+  function formatClaimJsonString(claimArrayString): string {
     if (claimArrayString) {
       try {
-        return JSON.stringify(JSON.parse(claimArrayString), null, 2)
+        return formatClaimJson(JSON.parse(claimArrayString))
       } catch (err) {
         return claimArrayString
       }
@@ -138,6 +148,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                               acceptContract,
                               identifier: id0,
                               credentialSubjects: JSON.parse(claimArrayStr),
+                              privateFields,
                               sendToEndorser,
                             }
                           )}
@@ -161,13 +172,14 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                      <Text/>
                   )}
 
+                  <Text>Shared Data</Text>
                   <TextInput
                     multiline={true}
                     style={{ borderWidth: 1, height: 300 }}
                     onChangeText={setClaimArrayStr}
                     autoCorrect={false}
                   >
-                    { formatClaimJson(claimArrayStr) }
+                    { formatClaimJsonString(claimArrayStr) }
                   </TextInput>
                   <Text style={{ color: 'red' }}>{ claimJsonError }</Text>
                   {
@@ -180,6 +192,15 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                     :
                       <View/>
                   }
+
+                  <Text>Private Fields (can't be edited, only stored locally)</Text>
+                  <TextInput
+                    multiline={true}
+                    style={{ borderWidth: 1, height: 300 }}
+                    editable={false}
+                  >
+                    { formatClaimJson(privateFields) }
+                  </TextInput>
                 </View>
               </View>
             </View>
