@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
 
+import { onboarding } from '../data/onboarding'
 import * as utility from '../utility/utility'
 import { YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
@@ -24,6 +25,43 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
 
   const id0 = appStore.getState().identifiers && appStore.getState().identifiers[0]
 
+  // add hashes for fields if they're missing
+  // note that they may have come through via a scan of a Contract or a Contract AcceptAction
+  for (subj of credSubjArray) {
+    const hasContractWithoutHashes =
+      utility.isContract(subj) && (!subj.fieldsMerkle || !subj.contractFullMdHash)
+    const hasContractAcceptWithoutHashes =
+      utility.isContractAccept(subj) && (!subj.object.fieldsMerkle || !subj.object.contractFullMdHash)
+    if (hasContractWithoutHashes || hasContractAcceptWithoutHashes) {
+      const fields = subj.fields || subj.object.fields
+      const fieldsMerkle: string = utility.valuesMerkleRootHex(fields)
+
+      let contractFullMdHash: string
+      const contractCid = subj.contractFormIpfsCid || subj.object.contractFormIpfsCid
+      const contractTemplate = R.filter(x => x.templateIpfsCid == contractCid, R.values(onboarding))
+      if (contractTemplate) {
+        contractFullMdHash = utility.contractHashHex(fields, contractTemplate.templateText)
+      }
+
+      if (utility.isContract(subj)) {
+        subj.fieldsMerkle = fieldsMerkle
+        subj.contractFullMdHash = contractFullMdHash
+      } else { // must be isContractAccept
+        subj.object.fieldsMerkle = fieldsMerkle
+        subj.object.contractFullMdHash = contractFullMdHash
+      }
+    }
+  }
+
+  // set agent for a Contract Accept if not this person already
+  for (subj of credSubjArray) {
+    if (utility.isAccept(subj)
+        && (!subj.agent || subj.agent.identifier !== id0.did)) {
+      subj.agent = { identifier: id0.did }
+    }
+  }
+
+  // now separate any private data from shared-ledger data
   const allFinalCredSubjs = []
   const privateFields = []
   for (subj of credSubjArray) {
@@ -38,6 +76,12 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
         allFinalCredSubjs.push(strippedContract)
         privateFields.push(erasedPrivates)
       }
+    } else if (utility.isContractAccept(subj)) {
+      const strippedContract = R.clone(subj)
+      const erasedPrivates = R.clone(subj.object.fields)
+      delete strippedContract.object.fields
+      allFinalCredSubjs.push(strippedContract)
+      privateFields.push(erasedPrivates)
     } else {
       allFinalCredSubjs.push(subj)
       privateFields.push(null)

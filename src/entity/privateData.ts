@@ -51,14 +51,14 @@ export class PrivateData extends BaseEntity {
    **/
   @Column('text', { nullable: true })
   //@ts-ignore
-  promiseFormIpfsCid: string
+  contractFormIpfsCid: string
 
   /**
    * Hash of the Legal MD format for this contract
    **/
   @Column('text', { nullable: true })
   //@ts-ignore
-  promiseFullMdHash: string
+  contractFullMdHash: string
 
   /**
    * Host for the chain on the server where it's stored externally

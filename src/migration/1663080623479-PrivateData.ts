@@ -14,8 +14,8 @@ export class PrivateData1663080623479 implements MigrationInterface {
         "claimType" TEXT,
         "did" TEXT,
         "issuedAt" INTEGER,
-        "promiseFormIpfsCid" TEXT,
-        "promiseFullMdHash" TEXT,
+        "contractFormIpfsCid" TEXT,
+        "contractFullMdHash" TEXT,
         "serverHost" TEXT,
         "serverId" TEXT,
         "serverUrl" TEXT

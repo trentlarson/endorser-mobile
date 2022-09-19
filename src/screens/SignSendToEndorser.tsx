@@ -17,7 +17,6 @@ const debug = Debug('endorser-mobile:sign-send--credential')
 export function SignCredentialScreen({ navigation, route }) {
 
   const { credentialSubjects, identifier, privateFields, sendToEndorser } = route.params
-console.log('private fields', privateFields)
 
   const finalCredSubjs = Array.isArray(credentialSubjects) ? credentialSubjects : [ credentialSubjects ]
 
@@ -136,11 +135,11 @@ console.log('private fields', privateFields)
       data.did = identifier.did
       data.issuedAt = Math.round(new Date().valueOf() / 1000)
       if (utility.isContract(cred)) {
-        data.promiseFormIpfsCid = cred.promiseFormIpfsCid,
-        data.promiseFullMdHash = cred.promiseFullMdHash
+        data.contractFormIpfsCid = cred.contractFormIpfsCid,
+        data.contractFullMdHash = cred.contractFullMdHash
       } else if (utility.isContractAccept(cred)) {
-        data.promiseFormIpfsCid = cred.object.promiseFormIpfsCid,
-        data.promiseFullMdHash = cred.object.promiseFullMdHash
+        data.contractFormIpfsCid = cred.object.contractFormIpfsCid,
+        data.contractFullMdHash = cred.object.contractFullMdHash
       }
       const saved = await conn.manager.insert(PrivateData, data)
       const dataId = saved.raw

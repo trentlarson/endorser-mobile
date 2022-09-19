@@ -3,8 +3,6 @@ import React from 'react'
 import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
 
-import * as utility from '../utility/utility'
-
 export function ContractFormScreen({ navigation, route }) {
 
   const { nextScreen, onboardingChoice } = route.params
@@ -22,17 +20,10 @@ export function ContractFormScreen({ navigation, route }) {
 
 
   const makeContract = () => {
-
-    const fieldsMerkle: string = utility.valuesMerkleRootHex(data)
-
-    const legalMdHash: string = utility.contractHashHex(data, onboardingChoice.templateText)
-
     return {
       '@context': 'http://purl.org/cerif/frapo',
       '@type': 'Contract',
-      promiseFormIpfsCid: onboardingChoice.templateIpfsCid,
-      promiseFullMdHash: legalMdHash,
-      fieldsMerkle: fieldsMerkle,
+      contractFormIpfsCid: onboardingChoice.templateIpfsCid,
       fields: data,
     }
   }

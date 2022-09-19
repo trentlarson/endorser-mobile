@@ -1,7 +1,7 @@
 export const onboarding = {
   c30_mca: {
     name: 'C30 Master Collaboration Agreement',
-    templateIpfsCid: '',
+    templateIpfsCid: 'QmRF76HcoC4xoAEZcbJoqgWqH9jJAK2zL8xzQqS7zkk43S',
     templateText:
 `C30 Master Collaboration Agreement
 
@@ -153,6 +153,8 @@ IN WITNESS WHEREOF, the Parties have indicated their acceptance of the terms of 
 
 Witnesses
 {{Witnesses}}
+
+2022 © Zebrata.org
 `},
 
 

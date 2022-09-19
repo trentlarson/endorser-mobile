@@ -42,6 +42,7 @@ const INITIAL_SELECTED_BUTTON = R.find(R.prop('selected'), INITIAL_UNIT_BUTTONS)
 
 export function ConstructCredentialScreen({ navigation }) {
 
+  const [askForClaimInfo, setAskForClaimInfo] = useState<boolean>(false)
   const [askForGaveInfo, setAskForGaveInfo] = useState<boolean>(false)
   const [askForOfferInfo, setAskForOfferInfo] = useState<boolean>(false)
   const [askForPersonInfo, setAskForPersonInfo] = useState<boolean>(false)
@@ -77,6 +78,17 @@ export function ConstructCredentialScreen({ navigation }) {
                  <Text/>
               )}
               <View style={{ padding: 10 }}>
+                {
+                  askForClaimInfo
+                  ? <ClaimModal
+                      cancel={ () => setAskForClaimInfo(false) }
+                      proceed={ claim => {
+                        setAskForClaimInfo(false)
+                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
+                      }}
+                    />
+                  : <View/>
+                }
                 {
                   askForGaveInfo
                   ? <GaveModal
@@ -283,6 +295,10 @@ export function ConstructCredentialScreen({ navigation }) {
                       )
                     }
                   />
+                  <Button
+                    title={'Paste Claim'}
+                    onPress={() => setAskForClaimInfo(true)}
+                  />
 
                 </View>
                 <View style={{ padding: 5 }} />
@@ -297,6 +313,60 @@ export function ConstructCredentialScreen({ navigation }) {
       </ScrollView>
     </SafeAreaView>
   )
+
+  /**
+    props has:
+    - proceed function that takes the claim
+    - cancel function
+   **/
+  function ClaimModal(props) {
+
+    const [json, setJson] = useState<string>('')
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={props.cancel}
+      >
+        <ScrollView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View>
+                <Text style={styles.modalText}>JSON Input</Text>
+
+                <View style={{ padding: 5 }}>
+                  <TextInput
+                    value={json}
+                    onChangeText={setJson}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    multiline={true}
+                  />
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => props.proceed(JSON.parse(json))}
+                >
+                  <Text>Finish...</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }} />
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={props.cancel}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </Modal>
+    )
+  }
 
   /**
     props has:
