@@ -9,7 +9,7 @@ import * as utility from '../utility/utility'
 import { YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 
-export function ReportScreen({ navigation }) {
+export function AppHandyReportScreen({ navigation }) {
 
   const [loadingSearch, setLoadingSearch] = useState<boolean>(false)
   const [searchError, setSearchError] = useState<string>('')
@@ -26,7 +26,7 @@ export function ReportScreen({ navigation }) {
       ? results
       : R.filter(utility.containsNonHiddenDid, results)
     if (results.length > 0 && filteredResults.length === 0) {
-      return <Text>There are results but they include IDs not visible to you.</Text>
+      return <Text>There are contracts but they include unknown entities.</Text>
     } else {
       return <YamlFormat source={ filteredResults } navigation={navigation} afterItemCss={styles.line} />
     }
@@ -37,7 +37,7 @@ export function ReportScreen({ navigation }) {
     let urlSuffix
     let oneResult = false
     if (param.searchTerm != null) {
-      urlSuffix = '?claimContents=' + encodeURIComponent(param.searchTerm)
+      urlSuffix = '?claimType=Contract&claimContents=' + encodeURIComponent(param.searchTerm)
     } else if (param.claimId != null) {
       urlSuffix = '/' + encodeURIComponent(param.claimId)
       oneResult = true
@@ -66,6 +66,7 @@ export function ReportScreen({ navigation }) {
         console.log(err)
         setSearchError('There was a problem searching.')
       })
+      
     } else {
       console.log('The call to searchEndorser needs searchTerm or claimId in param, but got', param)
     }
@@ -77,7 +78,7 @@ export function ReportScreen({ navigation }) {
         <ScrollView>{/* vertical scrolling */}
           <View style={{ padding: 20 }}>
             <View style={{ marginTop: 20 }} />
-            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search All
+            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search
               {
                 (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
                  || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
@@ -92,12 +93,6 @@ export function ReportScreen({ navigation }) {
               editable
               style={{ borderWidth: 1 }}
             />
-            <Text>
-              Examples:&nbsp;
-              <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('programming') }}>programming</Text>,&nbsp;
-              <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('Training') }}>Training</Text>,&nbsp;
-              <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('JoinAction') }}>JoinAction</Text>
-            </Text>
             {
               loadingSearch
               ?
@@ -120,7 +115,7 @@ export function ReportScreen({ navigation }) {
                   }
                   <Text style={{ color: 'red' }}>{searchError}</Text>
 
-                  <Text style={{ padding: 10 }}>(Only retrieves the 50 most recent matching claims.)</Text>
+                  <Text style={{ padding: 10 }}>(Only retrieves the 50 most recent matching contracts.)</Text>
 
                   {
                     searchResults == null
@@ -129,7 +124,7 @@ export function ReportScreen({ navigation }) {
                       ? <Text>No results.</Text>
                       : <View>
                           <CheckBox
-                            title='Show claims without visible IDs.'
+                            title='Show contracts without known entities.'
                             checked={showClaimsWithoutDids}
                             onPress={() => setShowClaimsWithoutDids(!showClaimsWithoutDids)}
                           />
@@ -140,18 +135,6 @@ export function ReportScreen({ navigation }) {
                 </View>
             }
           </View>
-          { identifiers.length > 0
-            ?
-              <View style={{ padding: 20 }}>
-                <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Yours</Text>
-                <Button
-                  title="Search"
-                  onPress={() => navigation.navigate('Your Credentials')}
-                />
-              </View>
-            :
-              <View/>
-          }
         </ScrollView>
       </ScrollView>
     </SafeAreaView>

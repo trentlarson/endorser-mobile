@@ -27,6 +27,7 @@ import { BVCButton } from './utility/utility.tsx'
 import { AppHandyConstructCredentialScreen } from './screens/AppHandyConstructCredential'
 import { AppHandyInitializeScreen } from './screens/AppHandyInitialize'
 import { AppHandyExportIdentityScreen, AppHandyImportIdentityScreen, AppHandySettingsScreen } from "./screens/AppHandySettings";
+import { AppHandyReportScreen } from './screens/AppHandyReportFromEndorser'
 import { AppHandyReviewToSignCredentialScreen } from './screens/AppHandyReviewToSignCredential'
 import { AppHandyScanPresentationScreen, AppHandyVerifyCredentialScreen } from './screens/AppHandyVerifyCredential'
 import { AppHandySignCredentialScreen } from './screens/AppHandySignSendToEndorser'
@@ -87,6 +88,7 @@ export function App() {
                 <Stack.Screen name="Initialize" component={AppHandyInitializeScreen} />
                 <Stack.Screen name="Review & Sign" component={AppHandyReviewToSignCredentialScreen} />
                 <Stack.Screen name="Scan Presentation" component={AppHandyScanPresentationScreen} />
+                <Stack.Screen name="Search Contracts" component={AppHandyReportScreen} />
                 <Stack.Screen name="Settings" component={AppHandySettingsScreen} />
                 <Stack.Screen name="Signature Results" component={AppHandySignCredentialScreen} />
                 <Stack.Screen name="Verify Credential" component={AppHandyVerifyCredentialScreen} />
@@ -512,6 +514,11 @@ function AppHandyHomeScreen({ navigation }) {
               <Button
                 title="Verify Someone Else's Signature"
                 onPress={() => navigation.navigate('Scan Presentation')}
+              />
+              <View style={{ marginTop: 5 }}/>
+              <Button
+                title="Search Contracts"
+                onPress={() => navigation.navigate('Search Contracts')}
               />
               <View style={{ marginTop: 100 }}/>
               <Button
