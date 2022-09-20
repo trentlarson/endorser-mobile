@@ -18,16 +18,6 @@ export function ContractFormScreen({ navigation, route }) {
   const fields = [...contractText.matchAll(/{{.*?}}/g)].flat()
   const finalFields = R.uniq(fields).map(s => s.slice(2).slice(0, -2))
 
-
-  const makeContract = () => {
-    return {
-      '@context': 'http://purl.org/cerif/frapo',
-      '@type': 'Contract',
-      contractFormIpfsCid: onboardingChoice.templateIpfsCid,
-      fields: data,
-    }
-  }
-
   return (
     <SafeAreaView>
       <ScrollView>
@@ -52,7 +42,13 @@ export function ContractFormScreen({ navigation, route }) {
           />
           <Button
             title="Sign"
-            onPress={() => navigation.navigate(nextScreen, { credentialSubject: makeContract(), acceptContract: accept })}
+            onPress={() => navigation.navigate(
+              nextScreen,
+              {
+                credentialSubject: utility.constructContract(onboardingChoice.templateIpfsCid, data),
+                acceptContract: accept
+              }
+            )}
           />
           <View style={{ padding: 20 }} />
           <Text>{ contractText }</Text>

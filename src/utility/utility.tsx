@@ -164,7 +164,7 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
   return (
     <View>
       {
-        finalSource.map((item, index) =>
+        finalSource.map((item: utility.EndorserRecord, index) =>
           <View key={ index } style={{ marginLeft: 5 }}>
             {
               hideActions
@@ -181,6 +181,25 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                   >
                     Check
                   </Text>
+                  {
+                    item.claimType === 'Contract'
+                    || item.claim && item.claim['@type'] === 'Contract'
+                    || (item.claimType === 'AcceptAction'
+                        && item.claim.object && item.claim.object['@type'] === 'Contract'
+                    )
+                    ?
+                      <Text
+                        style={{ color: 'blue' }}
+                        onPress={() => navigation.navigate(
+                          'Review to Sign Credential',
+                          { credentialSubject: utility.constructContract(item.claim.contractFormIpfsCid, item.claim.fields) }
+                        )}
+                      >
+                        Accept Contract
+                      </Text>
+                    :
+                      <View />
+                  }
                   {
                     item.claimType === 'DonateAction'
                     || item.claim && item.claim['@type'] === 'DonateAction'

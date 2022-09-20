@@ -63,6 +63,19 @@ export const isContractAccept = (claim) => {
   return isAccept(claim) && claim.object && isContract(claim.object)
 }
 
+/**
+  templateIpfsCid is the IPFS ID of the contract template
+  data is an object with all the private fields for the contract
+ **/
+export const constructContract = (templateIpfsCid, data) => {
+  return {
+    '@context': 'http://purl.org/cerif/frapo',
+    '@type': 'Contract',
+    contractFormIpfsCid: templateIpfsCid,
+    fields: data,
+  }
+}
+
 export const constructAccept = (agent, pledge) => {
   return {
     "@context": "https://schema.org",

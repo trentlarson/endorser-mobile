@@ -33,11 +33,11 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
     const hasContractAcceptWithoutHashes =
       utility.isContractAccept(subj) && (!subj.object.fieldsMerkle || !subj.object.contractFullMdHash)
     if (hasContractWithoutHashes || hasContractAcceptWithoutHashes) {
-      const fields = subj.fields || subj.object.fields
+      const fields = subj.fields || (subj.object && subj.object.fields)
       const fieldsMerkle: string = utility.valuesMerkleRootHex(fields)
 
       let contractFullMdHash: string
-      const contractCid = subj.contractFormIpfsCid || subj.object.contractFormIpfsCid
+      const contractCid = subj.contractFormIpfsCid || (subj.object && subj.object.contractFormIpfsCid)
       const contractTemplate = R.filter(x => x.templateIpfsCid == contractCid, R.values(onboarding))
       if (contractTemplate) {
         contractFullMdHash = utility.contractHashHex(fields, contractTemplate.templateText)
@@ -189,7 +189,6 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                           onPress={() => navigation.navigate(
                             'Signature Results',
                             {
-                              acceptContract,
                               identifier: id0,
                               credentialSubjects: JSON.parse(claimArrayStr),
                               privateFields,
