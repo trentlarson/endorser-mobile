@@ -89,6 +89,7 @@ export function App() {
                 <Stack.Screen name="Contract Form" component={ContractFormScreen} />
                 <Stack.Screen name="Help" component={HelpScreen} />
                 <Stack.Screen name="Review & Sign" component={ReviewToSignCredentialScreen} />
+                <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
               </Stack.Navigator>
             :
               <Stack.Navigator>
