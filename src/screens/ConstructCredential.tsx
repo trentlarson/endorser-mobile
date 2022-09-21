@@ -16,7 +16,7 @@ import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 import { BVCButton } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
-import { agent, dbConnection } from '../veramo/setup'
+import { agent, dbConnection, HANDY_APP } from '../veramo/setup'
 
 const debug = Debug('endorser-mobile:share-credential')
 
@@ -165,95 +165,103 @@ export function ConstructCredentialScreen({ navigation }) {
                   : <View/>
                 }
                 <View>
-                  <Text>What do you want to assert?</Text>
+                {
+                !HANDY_APP
+                ?
+                  <View>
+                    <Text>What do you want to assert?</Text>
 
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Advertise or Seek Skills or Services'}
-                    onPress={() => setAskForPersonInfo(true)}
-                  />
+                    <View style={{ padding: 5 }} />
+                    <Button
+                      title={'Advertise or Seek Skills or Services'}
+                      onPress={() => setAskForPersonInfo(true)}
+                    />
 
-                  <View style={{ padding: 5 }} />
-                  <BVCButton
-                    description='BVC Meeting'
-                    identifier={ identifiers[0] }
-                    navigation={ navigation }
-                  />
+                    <View style={{ padding: 5 }} />
+                    <BVCButton
+                      description='BVC Meeting'
+                      identifier={ identifiers[0] }
+                      navigation={ navigation }
+                    />
 
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Witness To Something Remarkable'}
-                    onPress={() => setAskForWitnessInfo("They ")}
-                  />
+                    <View style={{ padding: 5 }} />
+                    <Button
+                      title={'Witness To Something Remarkable'}
+                      onPress={() => setAskForWitnessInfo("They ")}
+                    />
 
-                  <View style={{ padding: 5 }} />
-                  <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
-                  <Text>Transactions</Text>
+                    <View style={{ padding: 5 }} />
+                    <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
+                    <Text>Transactions</Text>
 
-                  <Button
-                    title={'Plan'}
-                    onPress={() => setAskForPlanInfo(true)}
-                  />
+                    <Button
+                      title={'Plan'}
+                      onPress={() => setAskForPlanInfo(true)}
+                    />
 
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Offer'}
-                    onPress={() => setAskForOfferInfo(true)}
-                  />
+                    <View style={{ padding: 5 }} />
+                    <Button
+                      title={'Offer'}
+                      onPress={() => setAskForOfferInfo(true)}
+                    />
 
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Gave'}
-                    onPress={() => setAskForGaveInfo(true)}
-                  />
+                    <View style={{ padding: 5 }} />
+                    <Button
+                      title={'Gave'}
+                      onPress={() => setAskForGaveInfo(true)}
+                    />
 
-                  <View style={{ padding: 5 }} />
-                  <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
-                  <Text>Pledges</Text>
+                    <View style={{ padding: 5 }} />
+                    <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
+                    <Text>Pledges</Text>
 
-                  <Button
-                    title={'Pledge To Mutual Integrity'}
-                    onPress={() => {
-                      setAskForPledgeAbout("Copyright 2021 Mutual Integrity Foundation")
-                      setAskForPledgeInfo("I pledge to honor my word as my bond and support others as peers in acting with integrity. I accept that dishonoring my word and this pledge will result in a breach of integrity as recorded on my reputation slate until I measure the impact and make amends.")
-                    }}
-                  />
+                    <Button
+                      title={'Pledge To Mutual Integrity'}
+                      onPress={() => {
+                        setAskForPledgeAbout("Copyright 2021 Mutual Integrity Foundation")
+                        setAskForPledgeInfo("I pledge to honor my word as my bond and support others as peers in acting with integrity. I accept that dishonoring my word and this pledge will result in a breach of integrity as recorded on my reputation slate until I measure the impact and make amends.")
+                      }}
+                    />
 
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Pledge To Thick Red Line'}
-                    onPress={() => {
-                      setAskForPledgeAbout("See ThickRedLine.org")
-                      setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate. I pledge only to act to protect lives, liberty, and property. I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")
-                    }}
-                  />
+                    <View style={{ padding: 5 }} />
+                    <Button
+                      title={'Pledge To Thick Red Line'}
+                      onPress={() => {
+                        setAskForPledgeAbout("See ThickRedLine.org")
+                        setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate. I pledge only to act to protect lives, liberty, and property. I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")
+                      }}
+                    />
 
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Pledge Honesty As An Officer'}
-                    onPress={() => {
-                      setAskForPledgeAbout("This gives citizens confidence to interact.")
-                      setAskForPledgeInfo("I commit to tell only the truth when identifying as a government representative.")
-                    }}
-                  />
+                    <View style={{ padding: 5 }} />
+                    <Button
+                      title={'Pledge Honesty As An Officer'}
+                      onPress={() => {
+                        setAskForPledgeAbout("This gives citizens confidence to interact.")
+                        setAskForPledgeInfo("I commit to tell only the truth when identifying as a government representative.")
+                      }}
+                    />
 
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Pledge Liberty'}
-                    onPress={() => {
-                      setAskForPledgeAbout("h/t Stewart Brand, Buddha, & Ayn Rand")
-                      setAskForPledgeInfo("We are as gods. I dedicate myself to reach my full potential. I will never ask another person to live for my sake.")
-                    }}
-                  />
+                    <View style={{ padding: 5 }} />
+                    <Button
+                      title={'Pledge Liberty'}
+                      onPress={() => {
+                        setAskForPledgeAbout("h/t Stewart Brand, Buddha, & Ayn Rand")
+                        setAskForPledgeInfo("We are as gods. I dedicate myself to reach my full potential. I will never ask another person to live for my sake.")
+                      }}
+                    />
 
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title={'Pledge A Life Of Gifts'}
-                    onPress={() => {
-                      setAskForPledgeAbout("See LivesOfGifts.org")
-                      setAskForPledgeInfo("I am building a society based on giving, in ways that fulfill me.")
-                    }}
-                  />
+                    <View style={{ padding: 5 }} />
+                    <Button
+                      title={'Pledge A Life Of Gifts'}
+                      onPress={() => {
+                        setAskForPledgeAbout("See LivesOfGifts.org")
+                        setAskForPledgeInfo("I am building a society based on giving, in ways that fulfill me.")
+                      }}
+                    />
+                  </View>
+                :
+                  <View/>
+                }
 
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>

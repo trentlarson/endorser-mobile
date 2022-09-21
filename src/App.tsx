@@ -19,27 +19,22 @@ import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { styles } from './screens/style'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER } from './veramo/appSlice'
-import { agent, dbConnection } from './veramo/setup'
+import { agent, dbConnection, HANDY_APP } from './veramo/setup'
 import * as utility from './utility/utility.ts'
 import { BVCButton } from './utility/utility.tsx'
 
-/** screens for the app Handy Contracts
-import { AppHandyConstructCredentialScreen } from './screens/AppHandyConstructCredential'
+export const ENABLE_NOTIFICATIONS = !HANDY_APP
+
+/**
+  Screens for minimal app
+ **/
 import { AppHandyInitializeScreen } from './screens/AppHandyInitialize'
 import { AppHandyExportIdentityScreen, AppHandyImportIdentityScreen, AppHandySettingsScreen } from "./screens/AppHandySettings";
 import { AppHandyReportScreen } from './screens/AppHandyReportFromEndorser'
 import { AppHandyScanPresentationScreen, AppHandyVerifyCredentialScreen } from './screens/AppHandyVerifyCredential'
 import { AppHandySignCredentialScreen } from './screens/AppHandySignSendToEndorser'
 
-import { ContactsScreen } from './screens/Contacts'
-import { ContractFormScreen } from './screens/ContractForm'
-import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
-export const ENABLE_NOTIFICATIONS = false
-const HANDY_APP = true
-**/
 
-/** screens for the advanced app
-**/
 import { ConfirmOthersScreen } from './screens/ConfirmOthers.tsx'
 import { ConstructCredentialScreen } from './screens/ConstructCredential'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
@@ -57,8 +52,6 @@ import { ReportScreen } from './screens/ReportFromEndorser'
 import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
-export const ENABLE_NOTIFICATIONS = true
-const HANDY_APP = false
 
 
 
@@ -82,7 +75,6 @@ export function App() {
             ?
               <Stack.Navigator>
                 <Stack.Screen name="Goodlaw Signatures" component={AppHandyHomeScreen} />
-                <Stack.Screen name="Create Credential" component={AppHandyConstructCredentialScreen} />
                 <Stack.Screen name="Export Seed Phrase" component={AppHandyExportIdentityScreen} />
                 <Stack.Screen name="Import Seed Phrase" component={AppHandyImportIdentityScreen} />
                 <Stack.Screen name="Initialize" component={AppHandyInitializeScreen} />
@@ -92,6 +84,7 @@ export function App() {
                 <Stack.Screen name="Signature Results" component={AppHandySignCredentialScreen} />
                 <Stack.Screen name="Verify Credential" component={AppHandyVerifyCredentialScreen} />
 
+                <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
                 <Stack.Screen name="Contacts" component={ContactsScreen} />
                 <Stack.Screen name="Contract Form" component={ContractFormScreen} />
                 <Stack.Screen name="Help" component={HelpScreen} />
