@@ -3,6 +3,8 @@ import React from 'react'
 import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
 
+import * as utility from '../utility/utility'
+
 export function ContractFormScreen({ navigation, route }) {
 
   const { nextScreen, onboardingChoice } = route.params

@@ -28,12 +28,12 @@ import { AppHandyConstructCredentialScreen } from './screens/AppHandyConstructCr
 import { AppHandyInitializeScreen } from './screens/AppHandyInitialize'
 import { AppHandyExportIdentityScreen, AppHandyImportIdentityScreen, AppHandySettingsScreen } from "./screens/AppHandySettings";
 import { AppHandyReportScreen } from './screens/AppHandyReportFromEndorser'
-import { AppHandyReviewToSignCredentialScreen } from './screens/AppHandyReviewToSignCredential'
 import { AppHandyScanPresentationScreen, AppHandyVerifyCredentialScreen } from './screens/AppHandyVerifyCredential'
 import { AppHandySignCredentialScreen } from './screens/AppHandySignSendToEndorser'
 
 import { ContactsScreen } from './screens/Contacts'
 import { ContractFormScreen } from './screens/ContractForm'
+import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 export const ENABLE_NOTIFICATIONS = false
 const HANDY_APP = true
 **/
@@ -86,7 +86,6 @@ export function App() {
                 <Stack.Screen name="Export Seed Phrase" component={AppHandyExportIdentityScreen} />
                 <Stack.Screen name="Import Seed Phrase" component={AppHandyImportIdentityScreen} />
                 <Stack.Screen name="Initialize" component={AppHandyInitializeScreen} />
-                <Stack.Screen name="Review & Sign" component={AppHandyReviewToSignCredentialScreen} />
                 <Stack.Screen name="Scan Presentation" component={AppHandyScanPresentationScreen} />
                 <Stack.Screen name="Search Contracts" component={AppHandyReportScreen} />
                 <Stack.Screen name="Settings" component={AppHandySettingsScreen} />
@@ -96,6 +95,7 @@ export function App() {
                 <Stack.Screen name="Contacts" component={ContactsScreen} />
                 <Stack.Screen name="Contract Form" component={ContractFormScreen} />
                 <Stack.Screen name="Help" component={HelpScreen} />
+                <Stack.Screen name="Review & Sign" component={ReviewToSignCredentialScreen} />
               </Stack.Navigator>
             :
               <Stack.Navigator>
@@ -112,7 +112,7 @@ export function App() {
                 <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
                 <Stack.Screen name="Report Claims Feed" component={ReportFeedScreen} />
                 <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
-                <Stack.Screen name="Review to Sign Credential" component={ReviewToSignCredentialScreen} />
+                <Stack.Screen name="Review & Sign" component={ReviewToSignCredentialScreen} />
                 <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
                 <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
                 <Stack.Screen name="Signature Results" component={SignCredentialScreen} />

@@ -84,7 +84,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForClaimInfo(false) }
                       proceed={ claim => {
                         setAskForClaimInfo(false)
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review & Sign', { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -95,7 +95,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForGaveInfo(false) }
                       proceed={ claim => {
                         setAskForGaveInfo(false)
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review & Sign', { credentialSubject: claim })
                       }}
                       userId={ identifiers[0].did }
                     />
@@ -107,7 +107,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForOfferInfo(false) }
                       proceed={ claim => {
                         setAskForOfferInfo(false)
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review & Sign', { credentialSubject: claim })
                       }}
                       userId={ identifiers[0].did }
                     />
@@ -120,7 +120,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForPlanInfo(false) }
                       proceed={ claim => {
                         setAskForPlanInfo(false)
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review & Sign', { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -132,7 +132,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForPersonInfo(false) }
                       proceed={ claim => {
                         setAskForPersonInfo(false)
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review & Sign', { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -147,7 +147,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       proceed={ claim => {
                         setAskForPledgeAbout('')
                         setAskForPledgeInfo('')
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review & Sign', { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -159,7 +159,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForWitnessInfo('') }
                       proceed={ claim => {
                         setAskForWitnessInfo('')
-                        navigation.navigate('Review to Sign Credential', { credentialSubject: claim })
+                        navigation.navigate('Review & Sign', { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -264,7 +264,7 @@ export function ConstructCredentialScreen({ navigation }) {
                     onPress={() => navigation.navigate(
                       'Contract Form',
                       {
-                        nextScreen: 'Review to Sign Credential',
+                        nextScreen: 'Review & Sign',
                         onboardingChoice: onboarding.common_paper_mnda,
                       }
                     )}
@@ -274,7 +274,7 @@ export function ConstructCredentialScreen({ navigation }) {
                     title={'C30 Master Collaboration Agreement'}
                     onPress={() => navigation.navigate(
                       'Contract Form',
-                      { nextScreen: 'Review to Sign Credential', onboardingChoice: onboarding.c30_mca }
+                      { nextScreen: 'Review & Sign', onboardingChoice: onboarding.c30_mca }
                     )}
                   />
 
@@ -289,7 +289,7 @@ export function ConstructCredentialScreen({ navigation }) {
                         'Scan Content',
                         {
                           nextData: { substitute: true },
-                          nextScreen: 'Review to Sign Credential',
+                          nextScreen: 'Review & Sign',
                           title: 'Scan Claim Template',
                         }
                       )
