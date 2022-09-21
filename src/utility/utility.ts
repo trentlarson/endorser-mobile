@@ -363,6 +363,36 @@ export const createJwt = async (identifier: IIdentifier, payload: any): string =
   return didJwt.createJWT(payload,{ issuer: did, signer })
 }
 
+// uPort's QR code format
+function uportJwtPayload(did, name, publicKeyHex) {
+  const publicEncKey = Buffer.from(publicKeyHex, 'hex').toString('base64')
+  return {
+    iat: Date.now(),
+    iss: did,
+    own: {
+      name,
+      publicEncKey,
+    },
+  }
+}
+
+// returns null if the identifier doesn't have all necessary data
+export const contactJwtForPayload = async (appStore, identifier) => {
+  // The public key should always exist, but we've seen Veramo weirdness
+  // where an entry in the key table with a lowercase DID will be overwritten
+  // by one with mixed case but the associated entry in the identifier table
+  // will remain (so one identifier will not have an associated key). Ug.
+  if (identifier.keys[0] && identifier.keys[0].publicKeyHex && identifier.keys[0].privateKeyHex) {
+    const sharePayload = uportJwtPayload(identifier.did, appStore.getState().settings.name, identifier.keys[0].publicKeyHex)
+    const newJwt = await createJwt(identifier, sharePayload)
+    const viewPrefix =  appStore.getState().viewServer + ENDORSER_JWT_URL_LOCATION
+    const qrJwt: string = viewPrefix + newJwt
+    return qrJwt
+  } else {
+    return null
+  }
+}
+
 export const bvcClaim = (did: string, startTime: string) => {
   return {
     '@context': 'https://schema.org',

@@ -42,19 +42,6 @@ const newIdentifier = (address: string, publicHex: string, privateHex: string, d
   }
 }
 
-// uPort's QR code format
-function uportJwtPayload(did, name, publicKeyHex) {
-  const publicEncKey = Buffer.from(publicKeyHex, 'hex').toString('base64')
-  return {
-    iat: Date.now(),
-    iss: did,
-    own: {
-      name,
-      publicEncKey,
-    },
-  }
-}
-
 const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: string, mnemonicPassword: string) => {
 
   try {
@@ -344,21 +331,11 @@ export function SettingsScreen({navigation}) {
   }
 
   const setQrJwtForPayload = async (identifier, name) => {
-    // The public key should always exist, but we've seen Veramo weirdness
-    // where an entry in the key table with a lowercase DID will be overwritten
-    // by one with mixed case but the associated entry in the identifier table
-    // will remain (so one identifier will not have an associated key). Ug.
-    if (identifier.keys[0] && identifier.keys[0].publicKeyHex && identifier.keys[0].privateKeyHex) {
-      try {
-        const sharePayload = uportJwtPayload(identifier.did, name, identifier.keys[0].publicKeyHex)
-
-        const newJwt = await utility.createJwt(identifier, sharePayload)
-        const viewPrefix = appStore.getState().viewServer + utility.ENDORSER_JWT_URL_LOCATION
-        const qrJwt = viewPrefix + newJwt
-        setQrJwts(jwts => R.set(R.lensProp(identifier.did), qrJwt, jwts))
-      } catch (err) {
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error setting JWT contents for contact: " + err}))
-      }
+    try {
+      const qrJwt = await utility.contactJwtForPayload(appStore, identifier)
+      setQrJwts(jwts => R.set(R.lensProp(identifier.did), qrJwt, jwts))
+    } catch (err) {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error setting JWT contents for contact: " + err}))
     }
   }
 

@@ -1,6 +1,9 @@
 import { StyleSheet } from 'react-native'
 
 export const styles = StyleSheet.create({
+  centeredText: {
+    textAlign: "center"
+  },
   centeredView: {
     flex: 1,
     justifyContent: "center",

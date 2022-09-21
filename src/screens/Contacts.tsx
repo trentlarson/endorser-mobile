@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
 import { CheckBox } from 'react-native-elements'
+import QRCode from "react-native-qrcode-svg"
 import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
@@ -32,8 +33,10 @@ export function ContactsScreen({ navigation, route }) {
   const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
   const [loadingAction2, setLoadingAction2] = useState<Record<string,boolean>>({})
+  const [qrCode, setQrCode] = useState<string>('')
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [scannedImport, setScannedImport] = useState<string>(null)
+  const [showMyQr, setShowMyQr] = useState<boolean>(false)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
   const [wantsToRegister, setWantsToRegister] = useState<boolean>(true)
   const [wantsCsvText, setWantsCsvText] = useState<boolean>(false)
@@ -457,6 +460,11 @@ export function ContactsScreen({ navigation, route }) {
     React.useCallback(() => {
       setId0(allIdentifiers[0])
       utility.loadContacts(appSlice, appStore, dbConnection)
+
+      async function setQr() {
+        setQrCode(await utility.contactJwtForPayload(appStore, allIdentifiers[0]))
+      }
+      setQr()
     }, [])
   )
 
@@ -841,6 +849,34 @@ export function ContactsScreen({ navigation, route }) {
           </Modal>
 
         </View>
+        {
+          allIdentifiers.length > 0
+          ?
+            <View style={{ padding: 10 }}>
+              <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
+              <Text>My Info</Text>
+              {
+                showMyQr
+                ?
+                  <View style={{ marginBottom: 10, ...styles.centeredView}}>
+                    <QRCode
+                      value={qrCode}
+                      size={300}
+                    />
+                  </View>
+                :
+                  <View/>
+              }
+              <Text
+                style={{ color: 'blue', ...styles.centeredText }}
+                onPress={() => setShowMyQr(!showMyQr)}
+              >
+                { (showMyQr ? "Hide" : "Show") + " My QR Code" }
+              </Text>
+            </View>
+          :
+            <View/>
+        }
         <View style={{ padding: 10 }}>
           { allContacts && allContacts.length > 0
             ? <View>
