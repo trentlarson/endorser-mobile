@@ -73,6 +73,8 @@ export const DEFAULT_DID_PROVIDER_NAME = didProviderName(DEFAULT_DID_PROVIDER_NE
 
 export const HANDY_APP = true
 
+export const HOME_SCREEN = HANDY_APP ? 'Goodlaw Signatures' : 'Community Endorser'
+
 // this is used as the object in RegisterAction claims
 export const SERVICE_ID = 'endorser.ch'
 

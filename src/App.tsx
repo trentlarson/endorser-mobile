@@ -19,7 +19,7 @@ import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { styles } from './screens/style'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER } from './veramo/appSlice'
-import { agent, dbConnection, HANDY_APP } from './veramo/setup'
+import { agent, dbConnection, HANDY_APP, HOME_SCREEN } from './veramo/setup'
 import * as utility from './utility/utility.ts'
 import { BVCButton } from './utility/utility.tsx'
 
@@ -28,8 +28,6 @@ export const ENABLE_NOTIFICATIONS = !HANDY_APP
 /**
   Screens for minimal app
  **/
-import { AppHandyInitializeScreen } from './screens/AppHandyInitialize'
-import { AppHandyExportIdentityScreen, AppHandyImportIdentityScreen, AppHandySettingsScreen } from "./screens/AppHandySettings";
 import { AppHandyReportScreen } from './screens/AppHandyReportFromEndorser'
 import { AppHandyScanPresentationScreen, AppHandyVerifyCredentialScreen } from './screens/AppHandyVerifyCredential'
 import { AppHandySignCredentialScreen } from './screens/AppHandySignSendToEndorser'
@@ -40,7 +38,7 @@ import { ConstructCredentialScreen } from './screens/ConstructCredential'
 import { ContactImportScreen } from './screens/ContactImportScan.tsx'
 import { ContactsScreen } from './screens/Contacts'
 import { ContractFormScreen } from './screens/ContractForm'
-import { SettingsScreen } from "./screens/Settings";
+import { InitializeScreen } from './screens/Initialize'
 import { ExportIdentityScreen, ImportIdentityScreen } from "./screens/ExportImportIdentity";
 import { MyCredentialsScreen } from './screens/MyCredentials'
 import { MyGivenScreen } from './screens/MyGiven'
@@ -52,6 +50,7 @@ import { ReportScreen } from './screens/ReportFromEndorser'
 import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
+import { SettingsScreen } from "./screens/Settings";
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
 
 
@@ -75,26 +74,26 @@ export function App() {
             HANDY_APP
             ?
               <Stack.Navigator>
-                <Stack.Screen name="Goodlaw Signatures" component={AppHandyHomeScreen} />
-                <Stack.Screen name="Export Seed Phrase" component={AppHandyExportIdentityScreen} />
-                <Stack.Screen name="Import Seed Phrase" component={AppHandyImportIdentityScreen} />
-                <Stack.Screen name="Initialize" component={AppHandyInitializeScreen} />
+                <Stack.Screen name={ HOME_SCREEN } component={AppHandyHomeScreen} />
                 <Stack.Screen name="Scan Presentation" component={AppHandyScanPresentationScreen} />
                 <Stack.Screen name="Search Contracts" component={AppHandyReportScreen} />
-                <Stack.Screen name="Settings" component={AppHandySettingsScreen} />
                 <Stack.Screen name="Signature Results" component={AppHandySignCredentialScreen} />
                 <Stack.Screen name="Verify Credential" component={AppHandyVerifyCredentialScreen} />
 
                 <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
                 <Stack.Screen name="Contacts" component={ContactsScreen} />
                 <Stack.Screen name="Contract Form" component={ContractFormScreen} />
+                <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
                 <Stack.Screen name="Help" component={HelpScreen} />
+                <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
+                <Stack.Screen name="Initialize" component={InitializeScreen} />
                 <Stack.Screen name="Review & Sign" component={ReviewToSignCredentialScreen} />
                 <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
+                <Stack.Screen name="Settings" component={SettingsScreen} />
               </Stack.Navigator>
             :
               <Stack.Navigator>
-                <Stack.Screen name="Community Endorser" component={HomeScreen} />
+                <Stack.Screen name={ HOME_SCREEN } component={HomeScreen} />
                 <Stack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
                 <Stack.Screen name="Contact Import" component={ContactImportScreen} />
                 <Stack.Screen name="Contacts" component={ContactsScreen} />
@@ -103,6 +102,7 @@ export function App() {
                 <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
                 <Stack.Screen name="Help" component={HelpScreen} />
                 <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
+                <Stack.Screen name="Initialize" component={InitializeScreen} />
                 <Stack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
                 <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
                 <Stack.Screen name="Report Claims Feed" component={ReportFeedScreen} />
@@ -404,7 +404,7 @@ function HomeScreen({ navigation }) {
             <View>
               <Button
                 title="Create New Identifier"
-                onPress={() => navigation.navigate('Settings')}
+                onPress={() => navigation.navigate('Initialize')}
               />
               <View style={{ marginTop: 5 }}/>
               <Button

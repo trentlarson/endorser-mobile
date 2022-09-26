@@ -283,15 +283,19 @@ export function SettingsScreen({navigation}) {
                 finishedCheckingIds
                 ?
                   <View>
-                    <Text style={{ marginTop: 10 }}>There are no identifiers.</Text>
+                    <Text style={{ marginTop: 10 }}>
+                      The first step to validating contracts is to create your own private keys.
+                      Hit "Create Keys" and get started.
+                    </Text>
                     { creatingId
                       ? <View>
                         <Text>{createStatus}</Text>
                         <ActivityIndicator size="large" color="#00ff00" />
                       </View>
                       : <View>
-                        <Button title="Create Identifier" onPress={() => { setCreatingId(true) }} />
-                        <Text>... and guard seed phrase with password:</Text>
+                        <Button title="Create Keys" onPress={() => { setCreatingId(true) }} />
+                        <Text>Advanced</Text>
+                        <Text>You may guard your seed phrase with a password, but this is optional.</Text>
                         <TextInput
                           autoCapitalize={'none'}
                           defaultValue={ mnemonicPassword }

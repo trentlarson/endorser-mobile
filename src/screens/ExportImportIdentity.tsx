@@ -8,7 +8,7 @@ import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
 import { importAndStoreIdentifier } from "../utility/idUtility"
 import { appSlice, appStore } from "../veramo/appSlice"
-import { dbConnection } from "../veramo/setup"
+import { dbConnection, HANDY_APP, HOME_SCREEN } from "../veramo/setup"
 
 export function ExportIdentityScreen({navigation}) {
   const [error, setError] = useState<String>('')
@@ -147,7 +147,7 @@ export function ImportIdentityScreen({navigation}) {
         // one reason redirect automatically is to force reload of ID (which doen't show if they go "back")
         setTimeout(() => {
           // if we goBack or popToTop then the home screen doesn't see the new ID
-          navigation.reset({ index: 0, routes: [{ name: "Community Endorser" }] })
+          navigation.reset({ index: 0, routes: [{ name: HOME_SCREEN }] })
         }, 500)
       })
       .catch(err => {
@@ -204,14 +204,22 @@ export function ImportIdentityScreen({navigation}) {
                       style={{borderWidth: 1}}
                       textContentType={'newPassword'}
                     />
-                    <CheckBox
-                      title='Convert Address to Lowercase -- Check this if you used the original uPort app.'
-                      checked={makeLowercase}
-                      onPress={() => setMakeLowercase(!makeLowercase)}
-                    />
-                    <Text>Note that this will also create an identifier with the default uPort derivation path.</Text>
+                    {
+                    HANDY_APP
+                    ?
+                      <View/>
+                    :
+                      <View>
+                        <CheckBox
+                          title='Convert Address to Lowercase -- Check this if you used the original uPort app.'
+                          checked={makeLowercase}
+                          onPress={() => setMakeLowercase(!makeLowercase)}
+                        />
+                        <Text>Note that this will also create an identifier with the default uPort derivation path.</Text>
+                      </View>
+                    }
                     <Button
-                      title={'Click to import from mnemonic seed phrase'}
+                      title={'Import From Seed Phrase'}
                       onPress={()=>setIdImporting(true)}
                     />
                     {error ? (
