@@ -1,6 +1,6 @@
 import { computePublicKey } from '@ethersproject/signing-key'
 import { classToPlain } from 'class-transformer'
-import crypto from 'crypto';
+import crypto from 'crypto'
 import * as didJwt from 'did-jwt'
 import { DateTime } from 'luxon'
 import MerkleTools from 'merkle-tools'

@@ -37,11 +37,11 @@ import { AppHandySignCredentialScreen } from './screens/AppHandySignSendToEndors
 
 import { ConfirmOthersScreen } from './screens/ConfirmOthers.tsx'
 import { ConstructCredentialScreen } from './screens/ConstructCredential'
-import { SignCredentialScreen } from './screens/SignSendToEndorser'
 import { ContactImportScreen } from './screens/ContactImportScan.tsx'
 import { ContactsScreen } from './screens/Contacts'
 import { ContractFormScreen } from './screens/ContractForm'
-import { ExportIdentityScreen, ImportIdentityScreen, SettingsScreen } from "./screens/Settings";
+import { SettingsScreen } from "./screens/Settings";
+import { ExportIdentityScreen, ImportIdentityScreen } from "./screens/ExportImportIdentity";
 import { MyCredentialsScreen } from './screens/MyCredentials'
 import { MyGivenScreen } from './screens/MyGiven'
 import { MyOffersScreen } from './screens/MyOffers'
@@ -52,6 +52,7 @@ import { ReportScreen } from './screens/ReportFromEndorser'
 import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
+import { SignCredentialScreen } from './screens/SignSendToEndorser'
 
 
 
