@@ -226,7 +226,8 @@ export const accessToken = async (identifier) => {
   const endEpoch = nowEpoch + 60 // add one minute
 
   const uportTokenPayload = { exp: endEpoch, iat: nowEpoch, iss: did }
-  const jwt: string = await didJwt.createJWT(uportTokenPayload, { issuer: did, signer })
+  const alg = undefined // defaults to 'ES256K', more standardized but harder to verify vs ES256K-R
+  const jwt: string = await didJwt.createJWT(uportTokenPayload, { alg, issuer: did, signer })
   return jwt
 }
 

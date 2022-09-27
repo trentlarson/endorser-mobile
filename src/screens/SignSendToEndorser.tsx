@@ -106,7 +106,8 @@ export function SignCredentialScreen({ navigation, route }) {
     const did: string = identifier.did
 
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signer and now signing..."}))
-    const vcJwt: string = await didJwt.createJWT(utility.vcPayload(vcClaim),{ issuer: did, signer })
+    const alg = undefined // defaults to 'ES256K', more standardized but harder to verify vs ES256K-R
+    const vcJwt: string = await didJwt.createJWT(utility.vcPayload(vcClaim),{ alg, issuer: did, signer })
     setJwts(R.update(index, vcJwt))
     setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + "."))
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
