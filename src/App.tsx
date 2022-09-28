@@ -29,7 +29,6 @@ export const ENABLE_NOTIFICATIONS = !HANDY_APP
   Screens for minimal app
  **/
 import { AppHandyReportScreen } from './screens/AppHandyReportFromEndorser'
-import { AppHandyScanPresentationScreen, AppHandyVerifyCredentialScreen } from './screens/AppHandyVerifyCredential'
 
 import { ConfirmOthersScreen } from './screens/ConfirmOthers.tsx'
 import { ConstructCredentialScreen } from './screens/ConstructCredential'
@@ -73,9 +72,7 @@ export function App() {
             ?
               <Stack.Navigator>
                 <Stack.Screen name={ HOME_SCREEN } component={AppHandyHomeScreen} />
-                <Stack.Screen name="Scan Presentation" component={AppHandyScanPresentationScreen} />
                 <Stack.Screen name="Search Contracts" component={AppHandyReportScreen} />
-                <Stack.Screen name="Verify Credential" component={AppHandyVerifyCredentialScreen} />
 
                 <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
                 <Stack.Screen name="Contacts" component={ContactsScreen} />
@@ -86,8 +83,10 @@ export function App() {
                 <Stack.Screen name="Initialize" component={InitializeScreen} />
                 <Stack.Screen name="Review & Sign" component={ReviewToSignCredentialScreen} />
                 <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
+                <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
                 <Stack.Screen name="Settings" component={SettingsScreen} />
                 <Stack.Screen name="Signature Results" component={SignCredentialScreen} />
+                <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
               </Stack.Navigator>
             :
               <Stack.Navigator>
