@@ -482,18 +482,26 @@ export function SettingsScreen({navigation}) {
           <View style={{ marginBottom: 50 }}>
             <Text style={{ fontSize: 30, fontWeight: 'bold', marginTop: 20 }}>Other</Text>
 
+            <View style={{ marginTop: 10 }}/>
             <View>
               <Text selectable={true}>Version { pkg.version } ({ VersionNumber.buildVersion })</Text>
             </View>
 
-            <View style={{ marginTop: 20, padding: 10 }}>
-              <Text
-                style={{ color: 'blue' }}
-                onPress={() => navigation.navigate('Notification Permissions')}
-              >
-                Check Permissions
-              </Text>
-            </View>
+            <View style={{ marginTop: 10 }}/>
+            <Text
+              style={{ color: 'blue' }}
+              onPress={() => navigation.navigate(utility.HELP_SCREEN_NAV)}
+            >
+              Help
+            </Text>
+
+            <View style={{ marginTop: 10 }}/>
+            <Text
+              style={{ color: 'blue' }}
+              onPress={() => navigation.navigate('Notification Permissions')}
+            >
+              Check Permissions
+            </Text>
 
             <View style={{ marginTop: 20, padding: 10 }}>
               <Text>Home Screen</Text>

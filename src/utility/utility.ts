@@ -32,6 +32,12 @@ export const UPORT_JWT_PREFIX = 'https://id.uport.me/req/'
 
 export const ANDROID_FEED_ACTION = 'default' // only 'default' will launch the app if background / terminated on android
 
+export const CLAIMS_HOME_SCREEN_NAV = 'Claims'
+export const HELP_SCREEN_NAV = 'Help'
+export const REPORT_FEED_SCREEN_NAV = 'Report Claims Feed'
+export const REPORT_SCREEN_NAV = 'Reports from Endorser server'
+export const REVIEW_SIGN_SCREEN_NAV = 'Review & Sign'
+
 const merkler = new MerkleTools({ hashType: 'sha256' })
 
 export function isDid(value) {

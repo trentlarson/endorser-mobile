@@ -12,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer, StackActions } from '@react-navigation/native'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack'
 import { Provider, useSelector } from 'react-redux'
 
@@ -19,15 +20,13 @@ import * as pkg from '../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from './entity/settings'
 import { styles } from './screens/style'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER } from './veramo/appSlice'
-import { agent, dbConnection, HANDY_APP, HOME_SCREEN } from './veramo/setup'
+import { agent, dbConnection, HANDY_APP } from './veramo/setup'
 import * as utility from './utility/utility.ts'
 import { BVCButton } from './utility/utility.tsx'
 
 export const ENABLE_NOTIFICATIONS = !HANDY_APP
 
-/**
-  Screens for minimal app
- **/
+// screen for minimal app
 import { AppHandyReportScreen } from './screens/AppHandyReportFromEndorser'
 
 import { ConfirmOthersScreen } from './screens/ConfirmOthers.tsx'
@@ -51,7 +50,6 @@ import { SettingsScreen } from "./screens/Settings";
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
 
 
-
 /****************************************************************
 
  Screens
@@ -59,67 +57,91 @@ import { SignCredentialScreen } from './screens/SignSendToEndorser'
  ****************************************************************/
 
 
-const Stack = createStackNavigator();
 
 export function App() {
-
   return (
     <Provider store={ appStore }>
       <SafeAreaProvider>
         <NavigationContainer>
-          {
-            HANDY_APP
-            ?
-              <Stack.Navigator>
-                <Stack.Screen name={ HOME_SCREEN } component={AppHandyHomeScreen} />
-                <Stack.Screen name="Search Contracts" component={AppHandyReportScreen} />
-
-                <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
-                <Stack.Screen name="Contacts" component={ContactsScreen} />
-                <Stack.Screen name="Contract Form" component={ContractFormScreen} />
-                <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
-                <Stack.Screen name="Help" component={HelpScreen} />
-                <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
-                <Stack.Screen name="Initialize" component={InitializeScreen} />
-                <Stack.Screen name="Review & Sign" component={ReviewToSignCredentialScreen} />
-                <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
-                <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
-                <Stack.Screen name="Settings" component={SettingsScreen} />
-                <Stack.Screen name="Signature Results" component={SignCredentialScreen} />
-                <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
-              </Stack.Navigator>
-            :
-              <Stack.Navigator>
-                <Stack.Screen name={ HOME_SCREEN } component={HomeScreen} />
-                <Stack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
-                <Stack.Screen name="Contact Import" component={ContactImportScreen} />
-                <Stack.Screen name="Contacts" component={ContactsScreen} />
-                <Stack.Screen name="Contract Form" component={ContractFormScreen} />
-                <Stack.Screen name="Create Credential" component={ConstructCredentialScreen} />
-                <Stack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
-                <Stack.Screen name="Help" component={HelpScreen} />
-                <Stack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
-                <Stack.Screen name="Initialize" component={InitializeScreen} />
-                <Stack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
-                <Stack.Screen name="Present Credential" component={PresentCredentialScreen} />
-                <Stack.Screen name="Report Claims Feed" component={ReportFeedScreen} />
-                <Stack.Screen name="Reports from Endorser server" component={ReportScreen} />
-                <Stack.Screen name="Review & Sign" component={ReviewToSignCredentialScreen} />
-                <Stack.Screen name="Scan Content" component={ScanAnythingScreen} />
-                <Stack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
-                <Stack.Screen name="Signature Results" component={SignCredentialScreen} />
-                <Stack.Screen name="Settings" component={SettingsScreen} />
-                <Stack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
-                <Stack.Screen name="Your Credentials" component={MyCredentialsScreen} />
-                <Stack.Screen name="Your Given" component={MyGivenScreen} />
-                <Stack.Screen name="Your Offers" component={MyOffersScreen} />
-              </Stack.Navigator>
-          }
+          <BottomTabs />
         </NavigationContainer>
       </SafeAreaProvider>
     </Provider>
+  );
+}
+
+const HOME_SCREEN_TITLE = HANDY_APP ? 'Goodlaw Signatures' : 'Community Endorser'
+
+const BottomTab = createBottomTabNavigator();
+function BottomTabs() {
+  return (
+    <BottomTab.Navigator>
+      <BottomTab.Screen name={utility.CLAIMS_HOME_SCREEN_NAV} component={ClaimsStackScreen}
+        options={{ headerTitle: HOME_SCREEN_TITLE }}
+      />
+      <BottomTab.Screen name="Contacts" component={ContactsStackScreen} />
+      <BottomTab.Screen name="Settings" component={SettingsStackScreen} />
+    </BottomTab.Navigator>
+  );
+}
+
+const ClaimsStack = createStackNavigator();
+function ClaimsStackScreen() {
+  const homeScreen = HANDY_APP ? AppHandyHomeScreen : HomeScreen
+  return (
+    <ClaimsStack.Navigator>
+      <ClaimsStack.Screen name="All Claims" component={homeScreen}
+        options={{ headerTitle: "" }}
+      />
+
+      <ClaimsStack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
+      <ClaimsStack.Screen name="Contract Form" component={ContractFormScreen} />
+      <ClaimsStack.Screen name="Create Credential" component={ConstructCredentialScreen} />
+      <ClaimsStack.Screen name="Present Credential" component={PresentCredentialScreen} />
+      <ClaimsStack.Screen name={utility.REPORT_FEED_SCREEN_NAV} component={ReportFeedScreen} />
+      <ClaimsStack.Screen name={utility.REPORT_SCREEN_NAV} component={ReportScreen}
+        options={{ headerTitle: "Search" }}
+      />
+      <ClaimsStack.Screen name={utility.REVIEW_SIGN_SCREEN_NAV} component={ReviewToSignCredentialScreen} />
+      <ClaimsStack.Screen name="Scan Content" component={ScanAnythingScreen} />
+      <ClaimsStack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
+      <ClaimsStack.Screen name="Signature Results" component={SignCredentialScreen} />
+      <ClaimsStack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
+      <ClaimsStack.Screen name="Your Credentials" component={MyCredentialsScreen} />
+      <ClaimsStack.Screen name="Your Given" component={MyGivenScreen} />
+      <ClaimsStack.Screen name="Your Offers" component={MyOffersScreen} />
+    </ClaimsStack.Navigator>
   )
 }
+
+const ContactsStack = createStackNavigator();
+function ContactsStackScreen() {
+  return (
+    <ContactsStack.Navigator>
+       <ContactsStack.Screen name="Contact List" component={ContactsScreen} />
+
+       <ContactsStack.Screen name="Contact Import" component={ContactImportScreen} />
+    </ContactsStack.Navigator>
+  )
+}
+
+const SettingsStack = createStackNavigator();
+function SettingsStackScreen() {
+  return (
+    <SettingsStack.Navigator>
+      <SettingsStack.Screen name="All Settings" component={SettingsScreen} />
+
+      <SettingsStack.Screen name="Export Seed Phrase" component={ExportIdentityScreen} />
+      <SettingsStack.Screen name={utility.HELP_SCREEN_NAV} component={HelpScreen} />
+      <SettingsStack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
+      <SettingsStack.Screen name="Initialize" component={InitializeScreen} />
+      <SettingsStack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
+    </SettingsStack.Navigator>
+  )
+}
+
+
+
 
 const initializeSettings = async () => {
   // Initialize DB, eg. settings.
@@ -156,8 +178,6 @@ const logNative = () => {
 **/
 
 function HomeScreen({ navigation }) {
-
-  const REPORT_CLAIMS_FEED_PAGE = 'Report Claims Feed'
 
   const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
@@ -363,12 +383,12 @@ function HomeScreen({ navigation }) {
               <View style={{ marginTop: 5 }}/>
               <Button
                 title="View Feed"
-                onPress={() => navigation.navigate('Report Claims Feed')}
+                onPress={() => navigation.navigate(utility.REPORT_FEED_SCREEN_NAV)}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
                 title="Search"
-                onPress={() => navigation.navigate('Reports from Endorser server')}
+                onPress={() => navigation.navigate(utility.REPORT_SCREEN_NAV)}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
@@ -376,15 +396,6 @@ function HomeScreen({ navigation }) {
                 onPress={() => navigation.navigate('Scan Presentation')}
               />
               <View style={{ marginTop: 100 }}/>
-              <Button
-                title="Contacts"
-                onPress={() => navigation.navigate('Contacts')}
-              />
-              <View style={{ marginTop: 5 }}/>
-              <Button
-                title="Settings"
-                onPress={() => navigation.navigate('Settings')}
-              />
               {oldMnemonic ? (
                 <View style={{ marginTop: 10, marginBottom: 10 }}>
                   <Text style={{ color: 'red', textAlign: 'center' }}>Your identity is not encrypted.</Text>
@@ -416,11 +427,6 @@ function HomeScreen({ navigation }) {
             </View>
           )
         }
-        <View style={{ marginTop: 5 }}/>
-        <Button
-          title="Help"
-          onPress={() => navigation.navigate('Help')}
-        />
 
       <Modal
         animationType="slide"
@@ -443,7 +449,6 @@ function AppHandyHomeScreen({ navigation }) {
 
   const [initError, setInitError] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
-  const [quickMessage, setQuickMessage] = useState<string>(null)
 
   const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
@@ -509,19 +514,10 @@ function AppHandyHomeScreen({ navigation }) {
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Search Contracts"
-                onPress={() => navigation.navigate('Search Contracts')}
+                title="Search"
+                onPress={() => navigation.navigate(utility.REPORT_SCREEN_NAV)}
               />
               <View style={{ marginTop: 100 }}/>
-              <Button
-                title="Contacts"
-                onPress={() => navigation.navigate('Contacts')}
-              />
-              <View style={{ marginTop: 5 }}/>
-              <Button
-                title="Settings"
-                onPress={() => navigation.navigate('Settings')}
-              />
             </View>
           ) : ( // there are no identifiers
             <View>
@@ -542,23 +538,6 @@ function AppHandyHomeScreen({ navigation }) {
             </View>
           )
         }
-        <View style={{ marginTop: 5 }}/>
-        <Button
-          title="Help"
-          onPress={() => navigation.navigate('Help')}
-        />
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={!!quickMessage}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text>{ quickMessage }</Text>
-          </View>
-        </View>
-      </Modal>
 
       </ScrollView>
     </SafeAreaView>

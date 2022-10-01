@@ -9,7 +9,7 @@ import { styles } from '../screens/style'
 
 function setClaimToAttendance(id: IIdentifier | undefined, startTime: string, navigation) {
   const claimObj = utility.bvcClaim(id ? id.did : 'UNKNOWN', startTime)
-  navigation.navigate('Review to Sign Credential', { credentialSubject: claimObj })
+  navigation.navigate(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: claimObj })
 }
 
 export const BVCButton = ({ identifier, navigation, description }) => {
@@ -191,7 +191,7 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                       <Text
                         style={{ color: 'blue' }}
                         onPress={() => navigation.navigate(
-                          'Review to Sign Credential',
+                          utility.REVIEW_SIGN_SCREEN_NAV,
                           { credentialSubject: utility.constructContract(item.claim.contractFormIpfsCid, item.claim.fields) }
                         )}
                       >
@@ -207,7 +207,7 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                       <Text
                         style={{ color: 'blue' }}
                         onPress={() => navigation.navigate(
-                          'Review to Sign Credential',
+                          utility.REVIEW_SIGN_SCREEN_NAV,
                           { credentialSubject:
                             { '@context': 'https://schema.org',
                               '@type': 'GiveAction',
@@ -231,7 +231,7 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                       <Text
                         style={{ color: 'blue' }}
                         onPress={() => navigation.navigate(
-                          'Review to Sign Credential',
+                          utility.REVIEW_SIGN_SCREEN_NAV,
                           { credentialSubject:
                             { '@context': 'https://schema.org',
                               '@type': 'AgreeAction',

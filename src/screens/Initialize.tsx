@@ -108,8 +108,9 @@ export function InitializeScreen({navigation}) {
 
                       <Text>You now have your own keys!</Text>
 
+                      <View style={{ marginTop: 10 }} />
                       <Text>
-                        Here it is for reference, but you don't have to remember it...
+                        For reference, here is your ID. But you don't have to remember it...
                         we will maintain it for you, and you can find it again any time.
                       </Text>
 
@@ -122,7 +123,7 @@ export function InitializeScreen({navigation}) {
                   }
 
                   <View style={{ marginTop: 20, marginBottom: 20 }}>
-                    <Text>You may backup your keys now if you like. You can also do this anytime in the future.</Text>
+                    <Text>We recommend you backup your keys now. You can also do this anytime in the future.</Text>
                     <Button
                       title="Export Seed Phrase"
                       onPress={() => navigation.navigate('Export Seed Phrase')}

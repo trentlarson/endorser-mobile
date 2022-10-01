@@ -8,7 +8,7 @@ import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
 import { importAndStoreIdentifier } from "../utility/idUtility"
 import { appSlice, appStore } from "../veramo/appSlice"
-import { dbConnection, HANDY_APP, HOME_SCREEN } from "../veramo/setup"
+import { dbConnection, HANDY_APP } from "../veramo/setup"
 
 export function ExportIdentityScreen({navigation}) {
   const [error, setError] = useState<String>('')
@@ -147,7 +147,8 @@ export function ImportIdentityScreen({navigation}) {
         // one reason redirect automatically is to force reload of ID (which doen't show if they go "back")
         setTimeout(() => {
           // if we goBack or popToTop then the home screen doesn't see the new ID
-          navigation.reset({ index: 0, routes: [{ name: HOME_SCREEN }] })
+          navigation.reset({ index: 0, routes: [{ name: "Settings" }] })
+          navigation.navigate(utility.CLAIMS_HOME_SCREEN_NAV)
         }, 500)
       })
       .catch(err => {

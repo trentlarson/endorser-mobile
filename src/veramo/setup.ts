@@ -71,9 +71,7 @@ const DEFAULT_DID_PROVIDER_NETWORK_NAME = 'mainnet'
 
 export const DEFAULT_DID_PROVIDER_NAME = didProviderName(DEFAULT_DID_PROVIDER_NETWORK_NAME)
 
-export const HANDY_APP = true
-
-export const HOME_SCREEN = HANDY_APP ? 'Goodlaw Signatures' : 'Community Endorser'
+export const HANDY_APP = false
 
 // this is used as the object in RegisterAction claims
 export const SERVICE_ID = 'endorser.ch'
