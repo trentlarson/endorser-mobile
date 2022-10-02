@@ -597,7 +597,7 @@ export function ContactsScreen({ navigation, route }) {
                     </TextInput>
 
                     <CheckBox
-                      title={ 'After saving, make my claims visible to all of them on the server.' }
+                      title={ 'After saving, make your claims visible to all of them on the server.' }
                       checked={wantsToBeVisible}
                       onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                     />
@@ -661,7 +661,7 @@ export function ContactsScreen({ navigation, route }) {
                     </TextInput>
 
                     <CheckBox
-                      title={ 'After saving, make my claims visible to all of them on the server.' }
+                      title={ 'After saving, make your claims visible to all of them on the server.' }
                       checked={wantsToBeVisible}
                       onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                     />
@@ -733,7 +733,7 @@ export function ContactsScreen({ navigation, route }) {
                 />
 
                 <CheckBox
-                  title={ 'Make my claims visible to them on the server.' }
+                  title={ 'Make your claims visible to them on the server.' }
                   checked={wantsToBeVisible}
                   onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                 />
@@ -780,7 +780,7 @@ export function ContactsScreen({ navigation, route }) {
                 />
 
                 <CheckBox
-                  title={ 'Make my claims visible to them on the server.' }
+                  title={ 'Make your claims visible to them on the server.' }
                   checked={wantsToBeVisible}
                   onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                 />
@@ -860,13 +860,13 @@ export function ContactsScreen({ navigation, route }) {
           ?
             <View style={{ padding: 10 }}>
               <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
-              <Text>My Info</Text>
+              <Text>Your Info</Text>
 
               <Text
                 style={{ color: 'blue', ...styles.centeredText }}
                 onPress={() => copyToClipboard(myContactUrl)}
               >
-                Copy My URL to the Clipboard
+                Copy Your URL to the Clipboard
               </Text>
 
               <View style={{ padding: 10 }} />
@@ -874,7 +874,7 @@ export function ContactsScreen({ navigation, route }) {
                 style={{ color: 'blue', ...styles.centeredText }}
                 onPress={() => setShowMyQr(!showMyQr)}
               >
-                { (showMyQr ? "Hide" : "Show") + " My URL in a QR Code" }
+                { (showMyQr ? "Hide" : "Show") + " Your URL in a QR Code" }
               </Text>
               {
                 showMyQr
@@ -939,7 +939,7 @@ export function ContactsScreen({ navigation, route }) {
                             />
                             <View style={{ marginTop: 5 }}/>
                             <Button
-                              title="Make Me Visible"
+                              title="Make Yourself Visible"
                               onPress={() => {allowToSeeMe(contact)}}
                             />
                           </View>
@@ -951,11 +951,11 @@ export function ContactsScreen({ navigation, route }) {
                             {
                               contact.seesMe
                               ? <Button
-                                title="Hide Me"
+                                title="Hide Yourself"
                                 onPress={() => {disallowToSeeMe(contact)}}
                               />
                               : <Button
-                                title="Make Me Visible"
+                                title="Make Yourself Visible"
                                 onPress={() => {allowToSeeMe(contact)}}
                               />
                             }

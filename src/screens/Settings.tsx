@@ -221,7 +221,7 @@ export function SettingsScreen({navigation}) {
       setFinishedCheckingIds(true)
     }
     getIdentifiers()
-  }, []) // Why does this loop infinitely with any variable, even with classToPlain(identifiers) that doesn't change?
+  }, [appStore.getState().identifiers])
 
   useEffect(() => {
     const createIdentifier = async () => {
@@ -343,18 +343,21 @@ export function SettingsScreen({navigation}) {
 
                         <View>
 
-                          <Text style={{ marginBottom: 10, ...styles.centeredText }}>
+                          <Text>
                             Share Your Public Info URL:
                           </Text>
 
-                          <Text style={{ color: 'blue', ...styles.centeredText }} onPress={() => Linking.openURL(qrJwts[ident.did])}>
-                            View Online
-                          </Text>
-
+                          <View style={{ padding: 10 }} />
                           <Text style={{ color: 'blue', ...styles.centeredText }} onPress={() => copyToClipboard(qrJwts[ident.did])}>
                             Copy to Clipboard
                           </Text>
 
+                          <View style={{ padding: 10 }} />
+                          <Text style={{ color: 'blue', ...styles.centeredText }} onPress={() => Linking.openURL(qrJwts[ident.did])}>
+                            View Online
+                          </Text>
+
+                          <View style={{ padding: 10 }} />
                           <Text
                             style={{ color: 'blue', ...styles.centeredText }}
                             onPress={() => setShowMyQr(!showMyQr)}
