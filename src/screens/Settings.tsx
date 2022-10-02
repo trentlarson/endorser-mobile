@@ -47,6 +47,7 @@ export function SettingsScreen({navigation}) {
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
+  const [showMyQr, setShowMyQr] = useState<boolean>(false)
   const [showPrivateKey, setShowPrivateKey] = useState<boolean>(false)
   const [storedApiServer, setStoredApiServer] = useState<string>(appStore.getState().settings.apiServer)
   const [storedName, setStoredName] = useState<string>('')
@@ -342,15 +343,35 @@ export function SettingsScreen({navigation}) {
 
                         <View>
 
-                          <QRCode value={qrJwts[ident.did]} size={300}/>
+                          <Text style={{ marginBottom: 10, ...styles.centeredText }}>
+                            Share Your Public Info URL:
+                          </Text>
 
-                          <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => Linking.openURL(qrJwts[ident.did])}>
+                          <Text style={{ color: 'blue', ...styles.centeredText }} onPress={() => Linking.openURL(qrJwts[ident.did])}>
                             View Online
                           </Text>
 
-                          <Text style={{ color: 'blue', textAlign: 'right' }} onPress={() => copyToClipboard(qrJwts[ident.did])}>
+                          <Text style={{ color: 'blue', ...styles.centeredText }} onPress={() => copyToClipboard(qrJwts[ident.did])}>
                             Copy to Clipboard
                           </Text>
+
+                          <Text
+                            style={{ color: 'blue', ...styles.centeredText }}
+                            onPress={() => setShowMyQr(!showMyQr)}
+                          >
+                            { (showMyQr ? "Hide" : "Show") + " QR Code" }
+                          </Text>
+                          {
+                            showMyQr
+                            ?
+                              <View style={{ marginBottom: 10, ...styles.centeredView}}>
+                                <QRCode value={qrJwts[ident.did]} size={300}/>
+                              </View>
+                            :
+                              <View/>
+                          }
+
+                          <View style={{ padding: 10 }} />
 
                           <Text>Public Key (base64)</Text>
                           <Text style={{ marginBottom: 20 }} selectable={true}>

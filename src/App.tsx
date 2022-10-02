@@ -536,7 +536,7 @@ function AppHandyHomeScreen({ navigation }) {
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Verify Someone Else's Signature"
+                title="Verify Counterparty's Signature"
                 onPress={() => navigation.navigate('Scan Presentation')}
               />
               <View style={{ marginTop: 5 }}/>
@@ -559,7 +559,7 @@ function AppHandyHomeScreen({ navigation }) {
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Verify Someone Else's Signature"
+                title="Verify Counterparty's Signature"
                 onPress={() => navigation.navigate('Scan Presentation')}
               />
             </View>

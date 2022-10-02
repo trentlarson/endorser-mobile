@@ -33,7 +33,7 @@ export function ContactsScreen({ navigation, route }) {
   const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
   const [loadingAction2, setLoadingAction2] = useState<Record<string,boolean>>({})
-  const [qrCode, setQrCode] = useState<string>('')
+  const [myContactUrl, setMyContactUrl] = useState<string>('')
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [scannedImport, setScannedImport] = useState<string>(null)
   const [showMyQr, setShowMyQr] = useState<boolean>(false)
@@ -65,8 +65,14 @@ export function ContactsScreen({ navigation, route }) {
     setScannedImport(route.params.scannedDatum)
   }
 
-  const copyToClipboard = () => {
-    Clipboard.setString(Papa.unparse(allContacts))
+  const copyToClipboard = (text) => {
+    Clipboard.setString(text)
+    setQuickMessage('Copied')
+    setTimeout(() => { setQuickMessage(null) }, 1000)
+  }
+
+  const copyContactsToClipboard = () => {
+    copyToClipboard(Papa.unparse(allContacts))
   }
 
   const saveContact = async (contact: Contact) => {
@@ -462,7 +468,7 @@ export function ContactsScreen({ navigation, route }) {
       utility.loadContacts(appSlice, appStore, dbConnection)
 
       async function setQr() {
-        setQrCode(await utility.contactJwtForPayload(appStore, allIdentifiers[0]))
+        setMyContactUrl(await utility.contactJwtForPayload(appStore, allIdentifiers[0]))
       }
       setQr()
     }, [])
@@ -855,24 +861,34 @@ export function ContactsScreen({ navigation, route }) {
             <View style={{ padding: 10 }}>
               <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
               <Text>My Info</Text>
+
+              <Text
+                style={{ color: 'blue', ...styles.centeredText }}
+                onPress={() => copyToClipboard(myContactUrl)}
+              >
+                Copy My URL to the Clipboard
+              </Text>
+
+              <View style={{ padding: 10 }} />
+              <Text
+                style={{ color: 'blue', ...styles.centeredText }}
+                onPress={() => setShowMyQr(!showMyQr)}
+              >
+                { (showMyQr ? "Hide" : "Show") + " My URL in a QR Code" }
+              </Text>
               {
                 showMyQr
                 ?
                   <View style={{ marginBottom: 10, ...styles.centeredView}}>
                     <QRCode
-                      value={qrCode}
+                      value={myContactUrl}
                       size={300}
                     />
                   </View>
                 :
                   <View/>
               }
-              <Text
-                style={{ color: 'blue', ...styles.centeredText }}
-                onPress={() => setShowMyQr(!showMyQr)}
-              >
-                { (showMyQr ? "Hide" : "Show") + " My QR Code" }
-              </Text>
+
             </View>
           :
             <View/>
@@ -882,7 +898,7 @@ export function ContactsScreen({ navigation, route }) {
             ? <View>
                 <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
                 <Text>All Contacts</Text>
-                <Button title="Export All to Clipboard (CSV)" onPress={copyToClipboard} />
+                <Button title="Export All to Clipboard (CSV)" onPress={copyContactsToClipboard} />
               </View>
             : <View/>
           }
