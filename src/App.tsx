@@ -77,10 +77,21 @@ function BottomTabs() {
   return (
     <BottomTab.Navigator>
       <BottomTab.Screen name={utility.CLAIMS_HOME_SCREEN_NAV} component={ClaimsStackScreen}
-        options={{ headerTitle: HOME_SCREEN_TITLE }}
+        options={{
+          headerTitle: HOME_SCREEN_TITLE,
+          tabBarIcon: ({ color, size }) => <Icon color={color} name="hand-paper-o" size={size} />,
+        }}
       />
-      <BottomTab.Screen name="Contacts" component={ContactsStackScreen} />
-      <BottomTab.Screen name="Settings" component={SettingsStackScreen} />
+      <BottomTab.Screen name="Contacts" component={ContactsStackScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => <Icon color={color} name="users" size={size} />,
+        }}
+      />
+      <BottomTab.Screen name="Settings" component={SettingsStackScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => <Icon color={color} name="cog" size={size} />,
+        }}
+      />
     </BottomTab.Navigator>
   );
 }
