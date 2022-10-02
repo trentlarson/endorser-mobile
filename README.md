@@ -185,8 +185,8 @@ To Do First Release:
 To Release:
 - Release endorser.ch (for registration)
 - For minimal Contract app, change configuration
-  - Set src/utility/utility.tsx ENABLE_NOTIFICATIONS to false
-  - Comment correct import section in src/App.tsx
+  - In src/veramo/setup.ts, switch HANDY_APP to true
+  - Copy icons into the 'src' directory
 - Test everything.
 - Update CHANGELOG.md
 - Set INFURA_PROJECT_ID in src/veramo/setup.ts (useful for checking claims)

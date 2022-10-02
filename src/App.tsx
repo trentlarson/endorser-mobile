@@ -6,7 +6,7 @@ import 'reflect-metadata'
 import { classToPlain } from 'class-transformer'
 import notifee, { AuthorizationStatus, EventType, TriggerType } from '@notifee/react-native';
 import React, { useEffect, useState } from 'react'
-import { Button, Linking, Modal, NativeModules, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { Button, Image, Linking, Modal, NativeModules, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { requestNotifications } from 'react-native-permissions'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/FontAwesome'
@@ -70,9 +70,8 @@ export function App() {
   );
 }
 
-const HOME_SCREEN_TITLE = HANDY_APP ? 'Goodlaw Signatures' : 'Community Endorser'
-
 const BottomTab = createBottomTabNavigator();
+const HOME_SCREEN_TITLE = HANDY_APP ? 'Goodlaw Signatures' : 'Community Endorser'
 function BottomTabs() {
   return (
     <BottomTab.Navigator>
@@ -97,12 +96,29 @@ function BottomTabs() {
 }
 
 const ClaimsStack = createStackNavigator();
+
+const APP_IMAGE =
+  // without any 'header' spec, it leaves whitespace about this size (use 'headerTitle' for plain text)
+  <View style={{ backgroundColor: 'white', height: 40, width: '100%' }}>
+    {
+    HANDY_APP
+    ? (
+      <Image
+        style={{ height: 30, marginLeft: '45%', width: 30 }}
+        source={require('./goodlaw-icon-white.png')}
+      />
+    ) : (
+      <View />
+    )
+    }
+  </View>
+
 function ClaimsStackScreen() {
   const homeScreen = HANDY_APP ? AppHandyHomeScreen : HomeScreen
   return (
     <ClaimsStack.Navigator>
       <ClaimsStack.Screen name="All Claims" component={homeScreen}
-        options={{ headerTitle: "" }}
+        options={{ header: () => APP_IMAGE }}
       />
 
       <ClaimsStack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
