@@ -859,6 +859,7 @@ export function ContactsScreen({ navigation, route }) {
           allIdentifiers.length > 0
           ?
             <View style={{ padding: 10 }}>
+              {/*----------------------------------------------------------------*/}
               <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
               <Text>Your Info</Text>
 
@@ -896,6 +897,7 @@ export function ContactsScreen({ navigation, route }) {
         <View style={{ padding: 10 }}>
           { allContacts && allContacts.length > 0
             ? <View>
+                {/*----------------------------------------------------------------*/}
                 <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
                 <Text>All Contacts</Text>
                 <Button title="Export All to Clipboard (CSV)" onPress={copyContactsToClipboard} />

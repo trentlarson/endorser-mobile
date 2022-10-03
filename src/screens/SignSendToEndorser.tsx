@@ -89,7 +89,7 @@ export function SignCredentialScreen({ navigation, route }) {
   /**
    * return claim ID from Endorser server, or nothing if they didn't choose to send it
    */
-  async function signAndSend(credSubj, index: number, dataId: number): string {
+  async function signAndSend(credSubj, index: number): string {
     /**
     // would like to use https://www.npmjs.com/package/did-jwt-vc
     // but: "TypeError: Object is not a constructor (evaluating 'new EthrDID')"
@@ -124,30 +124,32 @@ export function SignCredentialScreen({ navigation, route }) {
 
   async function saveSignSend(cred, index) {
     try {
-      const fullCred = R.clone(cred)
+      let privateDataId
       if (privateFields[index]) {
+        const fullCred = R.clone(cred)
         fullCred.fields = privateFields[index]
-      }
-      const conn = await dbConnection
-      const data = new PrivateData()
-      data.claimContext = cred['@context']
-      data.claimType = cred['@type']
-      data.claim = JSON.stringify(fullCred)
-      data.did = identifier.did
-      data.issuedAt = Math.round(new Date().valueOf() / 1000)
-      if (utility.isContract(cred)) {
-        data.contractFormIpfsCid = cred.contractFormIpfsCid,
-        data.contractFullMdHash = cred.contractFullMdHash
-      } else if (utility.isContractAccept(cred)) {
-        data.contractFormIpfsCid = cred.object.contractFormIpfsCid,
-        data.contractFullMdHash = cred.object.contractFullMdHash
-      }
-      const saved = await conn.manager.insert(PrivateData, data)
-      const dataId = saved.raw
 
-      const sentResult = await signAndSend(cred, index, dataId)
+        const conn = await dbConnection
+        const data = new PrivateData()
+        data.claimContext = cred['@context']
+        data.claimType = cred['@type']
+        data.claim = JSON.stringify(fullCred)
+        data.did = identifier.did
+        data.issuedAt = Math.round(new Date().valueOf() / 1000)
+        if (utility.isContract(cred)) {
+          data.contractFormIpfsCid = cred.contractFormIpfsCid,
+          data.contractFullMdHash = cred.contractFullMdHash
+        } else if (utility.isContractAccept(cred)) {
+          data.contractFormIpfsCid = cred.object.contractFormIpfsCid,
+          data.contractFullMdHash = cred.object.contractFullMdHash
+        }
+        const saved = await conn.manager.insert(PrivateData, data)
+        privateDataId = saved.raw
+      }
 
-      if (sentResult) {
+      const sentResult = await signAndSend(cred, index)
+
+      if (sentResult && privateDataId) {
         const conn = await dbConnection
         let host = appStore.getState().settings.apiServer
         if (host.startsWith('https://')) {
@@ -157,14 +159,16 @@ export function SignCredentialScreen({ navigation, route }) {
         }
         const saveResult = await conn.manager.update(
           PrivateData,
-          dataId,
+          privateDataId,
           {
             serverHost: host,
             serverId: sentResult,
             serverUrl: appStore.getState().settings.apiServer + '/api/claim/' + sentResult,
           }
         )
+      }
 
+      if (sentResult) {
         setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + " and sent it to the server."))
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished storing server data locally."}))
         return sentResult

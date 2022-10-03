@@ -19,7 +19,7 @@ export class PrivateData extends BaseEntity {
   did: string
 
   /**
-   * full claim
+   * full claim; for contracts, that includes the private "fields"
    **/
   @Column('text')
   //@ts-ignore
