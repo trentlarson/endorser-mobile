@@ -9,6 +9,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
 import { styles } from './style'
+import { PrivateData } from '../entity/privateData'
 import * as utility from '../utility/utility'
 import { VisibleDidModal, YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
@@ -112,6 +113,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [issuer, setIssuer] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [numHidden, setNumHidden] = useState<number>(0)
+  const [privateData, setPrivateData] = useState<string>('')
   const [veriCredObject, setVeriCredObject] = useState<any>()
   const [verifyError, setVerifyError] = useState<string>('')
   const [visibleIdList, setVisibleIdList] = useState<string[]>([])
@@ -276,6 +278,25 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
           }
         }
+
+        {
+          // this retrieves any private data
+          let contractClaim
+          if (vcObj && utility.isContractAccept(vcObj)) {
+            contractClaim = vcObj.object
+          } else if (wrappedClaim && utility.isContractAccept(wrappedClaim.claim)) {
+            contractClaim = wrappedClaim.claim.object
+          }
+          if (contractClaim) {
+            const conn = await dbConnection
+            conn.manager.findOne(PrivateData, {where: {contractFullMdHash: contractClaim.contractFullMdHash}})
+            .then((foundContract) => {
+              const claim = JSON.parse(foundContract.claim)
+              setPrivateData(claim.fields)
+            })
+          }
+        }
+
         setVeriCredObject(vcObj)
         setLoading(false)
       }
@@ -297,6 +318,17 @@ export function VerifyCredentialScreen({ navigation, route }) {
           }
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Claim</Text>
           <YamlFormat source={credentialSubject} navigation={navigation} />
+
+          {
+          privateData
+          ?
+            <View>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>Private Data</Text>
+              <YamlFormat source={privateData} />
+            </View>
+          :
+            <View />
+          }
 
           {/*----------------------------------------------------------------*/}
           <View style={styles.line} />

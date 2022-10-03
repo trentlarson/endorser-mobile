@@ -15,7 +15,7 @@ export class EndorserRecord {
   subject: string | null
   claimContext: string
   claimType: string
-  claim: string // JSON.parse this
+  claim: object // this is full object from the server, at least in /api/claim?... and /api/claim/ID
   hashHex: string
   hashChainHex: string | null // these eventually have an immutable value, but it may be empty for a while after recording
   jwtEncoded?: string // this may not be accessible by the current user/endpoint and thus may not be in result data
@@ -58,11 +58,11 @@ export const isHiddenDid = (did) => {
 }
 
 export const isContract = (claim) => {
-  return claim['@context'] === 'http://purl.org/cerif/frapo' && claim['@type'] === 'Contract'
+  return claim && claim['@context'] === 'http://purl.org/cerif/frapo' && claim['@type'] === 'Contract'
 }
 
 export const isAccept = (claim) => {
-  return claim['@context'] === 'https://schema.org' && claim['@type'] === 'AcceptAction'
+  return claim && claim['@context'] === 'https://schema.org' && claim['@type'] === 'AcceptAction'
 }
 
 export const isContractAccept = (claim) => {
