@@ -2,9 +2,11 @@ import didJwt from 'did-jwt'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Button, Modal, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import Clipboard from '@react-native-community/clipboard'
 import { CheckBox } from 'react-native-elements'
 import QRCodeScanner from 'react-native-qrcode-scanner'
+import QRCode from "react-native-qrcode-svg"
 import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
@@ -98,7 +100,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
   // Only one of the following is expected:
   // - veriCred is Verified Credential
   // - veriCredStr is JSON.stringified Verified Credential
-  // - wrappedClaim is directly from Endorser server (a utility.EndorserRecord)
+  // - wrappedClaim is directly from Endorser server (a utility.EndorserRecord),
+  //   typically from previous search results
   const { veriCred, veriCredStr, wrappedClaim } = route.params
 
   const [confirmError, setConfirmError] = useState<string>('')
@@ -113,19 +116,40 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [issuer, setIssuer] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [numHidden, setNumHidden] = useState<number>(0)
-  const [privateData, setPrivateData] = useState<string>('')
+  const [quickMessage, setQuickMessage] = useState<string>(null)
+  const [showMyQr, setShowMyQr] = useState<boolean>(false)
   const [veriCredObject, setVeriCredObject] = useState<any>()
   const [verifyError, setVerifyError] = useState<string>('')
   const [visibleIdList, setVisibleIdList] = useState<string[]>([])
   const [visibleTo, setVisibleTo] = useState<string[]>([])
 
+  // These are set in an Effect, but they're just for caching so we should set once and not change.
+  const [CONTRACT_ACCEPT, SET_CONTRACT_ACCEPT] = useState<any>({})
+  const [PRIVATE_DATA, SET_PRIVATE_DATA] = useState<string>('')
+
   const identifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
+
+  const copyToClipboard = (text) => {
+    Clipboard.setString(text)
+    setQuickMessage('Copied')
+    setTimeout(() => { setQuickMessage(null) }, 1000)
+  }
+
+  const copyOfContractAcceptCred = (cred, data) => {
+    const contract = utility.constructContract(cred.credentialSubject.object.contractFormIpfsCid, data)
+    contract.contractFullMdHash = cred.credentialSubject.object.contractFullMdHash
+    contract.fieldsMerkle = cred.credentialSubject.object.fieldsMerkle
+    const accept = utility.constructAccept(utility.REPLACE_USER_DID_STRING, contract)
+    return accept
+  }
 
   useFocusEffect(
     React.useCallback(() => {
       async function verifyAll() {
 
+        // This is what we'll show as the full verifiable credential.
+        // If from the server (from a wrappedClaim) then it's constructed from those pieces.
         let vcObj = veriCred || (veriCredStr && JSON.parse(veriCredStr))
 
         setLoading(true)
@@ -289,10 +313,11 @@ export function VerifyCredentialScreen({ navigation, route }) {
           }
           if (contractClaim) {
             const conn = await dbConnection
-            conn.manager.findOne(PrivateData, {where: {contractFullMdHash: contractClaim.contractFullMdHash}})
+            await conn.manager.findOne(PrivateData, {where: {contractFullMdHash: contractClaim.contractFullMdHash}})
             .then((foundContract) => {
               const claim = JSON.parse(foundContract.claim)
-              setPrivateData(claim.fields)
+              SET_PRIVATE_DATA(claim.fields)
+              SET_CONTRACT_ACCEPT(copyOfContractAcceptCred(vcObj, claim.fields))
             })
           }
         }
@@ -320,11 +345,41 @@ export function VerifyCredentialScreen({ navigation, route }) {
           <YamlFormat source={credentialSubject} navigation={navigation} />
 
           {
-          privateData
+          PRIVATE_DATA
           ?
             <View>
               <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>Private Data</Text>
-              <YamlFormat source={privateData} />
+              <YamlFormat source={PRIVATE_DATA} />
+
+              <View style={{ padding: 10 }} />
+              <Text
+                style={{ color: 'blue', ...styles.centeredText }}
+                onPress={() => copyToClipboard(JSON.stringify(CONTRACT_ACCEPT))}
+              >
+                Copy Full Contract with Private Data to the Clipboard
+              </Text>
+
+              <View style={{ padding: 10 }} />
+              <Text
+                style={{ color: 'blue', ...styles.centeredText }}
+                onPress={() => setShowMyQr(!showMyQr)}
+              >
+                { (showMyQr ? "Hide" : "Show") + " Full Contract with Private Data in a QR Code" }
+              </Text>
+              {
+                showMyQr
+                ?
+                  <View style={{ marginBottom: 10, ...styles.centeredView}}>
+                    <QRCode
+                      value={JSON.stringify(CONTRACT_ACCEPT)}
+                      size={300}
+                    />
+                  </View>
+                :
+                  <View/>
+              }
+
+              <View style={{ padding: 10 }} />
             </View>
           :
             <View />
@@ -441,6 +496,19 @@ export function VerifyCredentialScreen({ navigation, route }) {
           }
           <Text selectable={true}>{ veriCredObject ? JSON.stringify(veriCredObject) : '' }</Text>
           <Text selectable={true}>{ wrappedClaim ? JSON.stringify(wrappedClaim) : '' }</Text>
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!quickMessage}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text>{ quickMessage }</Text>
+              </View>
+            </View>
+          </Modal>
+
         </View>
       </ScrollView>
     </SafeAreaView>
