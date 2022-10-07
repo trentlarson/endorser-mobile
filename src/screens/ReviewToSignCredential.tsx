@@ -109,6 +109,10 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
     }
   }
 
+  function findContractWithCid(cid: string) {
+    return R.find(def => def.templateIpfsCid === cid, R.values(onboarding))
+  }
+
   function changeCurlyQuotes() {
     setClaimArrayStr(claimArrayStr.replace(/”/g, "\"").replace(/“/g, "\""))
   }
@@ -205,7 +209,38 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                   }
 
                   <Text style={{ marginTop: 75, marginBottom: 5, fontSize: 20, fontWeight: 'bold' }}>Details</Text>
-                  <YamlFormat source={ JSON.parse(claimArrayStr) } />
+                  {
+                  allFinalCredSubjs.map((subj, index) =>
+                    <View key={index}>
+                      <View style={{ padding: 10 }} />
+                      <Text>{ allFinalCredSubjs.length < 2 ? "" : ("Claim #" + (index + 1)) }</Text>
+                      {
+                        (utility.isContract(subj) || utility.isContractAccept(subj))
+                        ?
+                          <Text
+                            style={{ color: 'blue' }}
+                            onPress={() => navigation.navigate(
+                              'Contract Form',
+                              {
+                                nextScreen: 'Review & Sign',
+                                onboardingChoice: findContractWithCid(
+                                  utility.isContractAccept(subj) ? subj.object.contractFormIpfsCid : subj.contractFormIpfsCid
+                                ),
+                                privateFields: privateFields[index],
+                              }
+                            )}
+                          >
+                            Edit Information
+                          </Text>
+                        :
+                          <View />
+                      }
+                      <YamlFormat source={ subj } />
+                      <YamlFormat source={ privateFields[index] } />
+                    </View>
+                  )
+                  }
+
                   <Text style={{ marginTop: 200, marginBottom: 5, fontSize: 20, fontWeight: 'bold' }}>Technical Details</Text>
                   <Text style={{ fontSize: 11 }}>Signing As:</Text>
                   <Text style={{ fontSize: 11 }}>{id0.did}</Text>

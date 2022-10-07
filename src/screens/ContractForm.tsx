@@ -7,10 +7,22 @@ import * as utility from '../utility/utility'
 
 export function ContractFormScreen({ navigation, route }) {
 
-  const { nextScreen, onboardingChoice } = route.params
+  const { nextScreen, onboardingChoice, privateFields } = route.params
 
-  const [data, setData] = React.useState({});
+  const [data, setData] = React.useState(privateFields || {});
   const [accept, setAccept] = React.useState<boolean>(true);
+
+  if (!onboardingChoice) {
+    return (
+      <SafeAreaView>
+        <ScrollView>
+          <View style={{ padding: 20 }}>
+            <Text>That contract is not recognized. Please review the information with the source and try again.</Text>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    )
+  }
 
   const contractText = onboardingChoice.templateText
   const titleLine = contractText.match(/.*?\n/)[0].slice(0, -1)
@@ -31,9 +43,11 @@ export function ContractFormScreen({ navigation, route }) {
               <View key={field}>
                 <Text>{field.replace(/_/g, ' ')}</Text>
                 <TextInput
-                    onChangeText={text => setData(R.set(R.lensProp(field), text, data))}
-                    style={{ borderWidth: 1, marginTop: 5}}
-                  />
+                  multiline={true}
+                  onChangeText={text => setData(R.set(R.lensProp(field), text, data))}
+                  style={{ borderWidth: 1, marginTop: 5}}
+                  value={data[field]}
+                />
               </View>
             )
           }
