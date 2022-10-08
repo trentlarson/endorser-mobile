@@ -182,18 +182,22 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                     Check
                   </Text>
                   {
-                    item.claimType === 'Contract'
-                    || item.claim && item.claim['@type'] === 'Contract'
-                    || (item.claimType === 'AcceptAction'
-                        && item.claim.object && item.claim.object['@type'] === 'Contract'
-                    )
+                    utility.isContract(item.claim) || utility.isContractAccept(item.claim)
                     ?
                       <Text
                         style={{ color: 'blue' }}
-                        onPress={() => navigation.navigate(
-                          utility.REVIEW_SIGN_SCREEN_NAV,
-                          { credentialSubject: utility.constructContract(item.claim.contractFormIpfsCid, item.claim.fields) }
-                        )}
+                        onPress={() => {
+                          contract = utility.isContract(item.claim) ? item.claim : item.claim.object
+                          return navigation.navigate(
+                            utility.REVIEW_SIGN_SCREEN_NAV,
+                            {
+                              credentialSubject: utility.constructAccept(
+                                identifiers[0],
+                                utility.constructContract(contract.contractFormIpfsCid, contract.fields)
+                              )
+                            }
+                          )
+                        }}
                       >
                         Accept Contract
                       </Text>

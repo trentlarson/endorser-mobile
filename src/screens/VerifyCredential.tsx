@@ -136,10 +136,10 @@ export function VerifyCredentialScreen({ navigation, route }) {
     setTimeout(() => { setQuickMessage(null) }, 1000)
   }
 
-  const copyOfContractAcceptCred = (cred, data) => {
-    const contract = utility.constructContract(cred.credentialSubject.object.contractFormIpfsCid, data)
-    contract.contractFullMdHash = cred.credentialSubject.object.contractFullMdHash
-    contract.fieldsMerkle = cred.credentialSubject.object.fieldsMerkle
+  const acceptClaimForContract = (contractClaim, data) => {
+    const contract = utility.constructContract(contractClaim.contractFormIpfsCid, data)
+    contract.contractFullMdHash = contractClaim.contractFullMdHash
+    contract.fieldsMerkle = contractClaim.fieldsMerkle
     const accept = utility.constructAccept(utility.REPLACE_USER_DID_STRING, contract)
     return accept
   }
@@ -315,9 +315,11 @@ export function VerifyCredentialScreen({ navigation, route }) {
             const conn = await dbConnection
             await conn.manager.findOne(PrivateData, {where: {contractFullMdHash: contractClaim.contractFullMdHash}})
             .then((foundContract) => {
-              const claim = JSON.parse(foundContract.claim)
-              SET_PRIVATE_DATA(claim.fields)
-              SET_CONTRACT_ACCEPT(copyOfContractAcceptCred(vcObj, claim.fields))
+              if (foundContract) {
+                const claim = JSON.parse(foundContract.claim)
+                SET_PRIVATE_DATA(claim.fields)
+                SET_CONTRACT_ACCEPT(acceptClaimForContract(contractClaim, claim.fields))
+              }
             })
           }
         }
