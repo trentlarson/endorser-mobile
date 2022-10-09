@@ -79,6 +79,7 @@ function BottomTabs() {
         options={{
           headerTitle: HOME_SCREEN_TITLE,
           tabBarIcon: ({ color, size }) => <Icon color={color} name="hand-paper-o" size={size} />,
+          tabBarLabel: HANDY_APP ? 'Contracts' : 'Claims',
         }}
       />
       <BottomTab.Screen name="Contacts" component={ContactsStackScreen}
