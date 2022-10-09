@@ -519,23 +519,6 @@ export function SettingsScreen({navigation}) {
               Help
             </Text>
 
-            <View style={{ marginTop: 10 }}/>
-            <Text
-              style={{ color: 'blue' }}
-              onPress={() => navigation.navigate('Notification Permissions')}
-            >
-              Check Permissions
-            </Text>
-
-            <View style={{ marginTop: 20, padding: 10 }}>
-              <Text>Home Screen</Text>
-              <CheckBox
-                title='Bountiful Voluntaryist Community'
-                checked={homeScreenSelector === 'BVC'}
-                onPress={toggleStateForHomeIsBVC}
-              />
-            </View>
-
             <CheckBox
               title='Advanced Mode'
               checked={isInAdvancedMode}
@@ -547,6 +530,15 @@ export function SettingsScreen({navigation}) {
             ? (
               <View>
 
+                <View style={{ marginTop: 10 }}/>
+                <Text
+                  style={{ color: 'blue' }}
+                  onPress={() => navigation.navigate('Notification Permissions')}
+                >
+                  Check Permissions
+                </Text>
+
+                <View style={{ marginTop: 10 }}/>
                 <Text>Endorser API Server</Text>
                 <TextInput
                   value={inputApiServer ? inputApiServer : ''}
@@ -565,6 +557,15 @@ export function SettingsScreen({navigation}) {
                   )() :
                     <View />
                 }
+
+                <View style={{ marginTop: 10, padding: 10 }}>
+                  <Text>Home Screen</Text>
+                  <CheckBox
+                    title='Bountiful Voluntaryist Community'
+                    checked={homeScreenSelector === 'BVC'}
+                    onPress={toggleStateForHomeIsBVC}
+                  />
+                </View>
 
                 <CheckBox
                   title='Test Mode'

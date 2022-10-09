@@ -125,6 +125,8 @@ function ClaimsStackScreen() {
       <ClaimsStack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
       <ClaimsStack.Screen name="Contract Form" component={ContractFormScreen} />
       <ClaimsStack.Screen name="Create Credential" component={ConstructCredentialScreen} />
+      <ClaimsStack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
+      <ClaimsStack.Screen name="Initialize" component={InitializeScreen} />
       <ClaimsStack.Screen name="Present Credential" component={PresentCredentialScreen} />
       <ClaimsStack.Screen name={utility.REPORT_FEED_SCREEN_NAV} component={ReportFeedScreen} />
       <ClaimsStack.Screen name={utility.REPORT_SCREEN_NAV} component={ReportScreen}

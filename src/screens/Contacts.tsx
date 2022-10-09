@@ -464,13 +464,17 @@ export function ContactsScreen({ navigation, route }) {
 
   useFocusEffect(
     React.useCallback(() => {
-      setId0(allIdentifiers[0])
+      if (allIdentifiers[0]) {
+        setId0(allIdentifiers[0])
+
+        async function setQr() {
+          setMyContactUrl(await utility.contactJwtForPayload(appStore, allIdentifiers[0]))
+        }
+        setQr()
+      }
+
       utility.loadContacts(appSlice, appStore, dbConnection)
 
-      async function setQr() {
-        setMyContactUrl(await utility.contactJwtForPayload(appStore, allIdentifiers[0]))
-      }
-      setQr()
     }, [])
   )
 
