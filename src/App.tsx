@@ -441,12 +441,12 @@ function HomeScreen({ navigation }) {
           ) : ( // there are no identifiers
             <View>
               <Button
-                title="Create New Identifier"
+                title="Create New Keys"
                 onPress={() => navigation.navigate('Initialize')}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Import Seed Phrase"
+                title="Import Keys"
                 onPress={() => navigation.navigate('Import Seed Phrase')}
               />
               <View style={{ marginTop: 5 }}/>
@@ -552,12 +552,12 @@ function AppHandyHomeScreen({ navigation }) {
           ) : ( // there are no identifiers
             <View>
               <Button
-                title="Initialize New Wallet"
+                title="Create New Keys"
                 onPress={() => navigation.navigate('Initialize')}
               />
               <View style={{ marginTop: 5 }}/>
               <Button
-                title="Import Previous Wallet"
+                title="Import Keys"
                 onPress={() => navigation.navigate('Import Seed Phrase')}
               />
               <View style={{ marginTop: 5 }}/>
