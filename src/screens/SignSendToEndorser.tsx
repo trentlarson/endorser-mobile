@@ -223,7 +223,8 @@ export function SignCredentialScreen({ navigation, route }) {
                         fetched[index] ? (
                           endorserIds[index] ? (
                             <View>
-                              <Text>Endorser ID <Text selectable={true}>{ endorserIds[index] }</Text></Text>
+                              <Text>Endorser ID</Text>
+                              <Text style={{ textAlign: "center" }} selectable={true}>{ endorserIds[index] }</Text>
                               <Button
                                 title="Success!"
                                 onPress={() => {
