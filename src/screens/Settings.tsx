@@ -151,15 +151,22 @@ export function SettingsScreen({navigation}) {
   const storeNewName = async () => {
     const conn = await dbConnection
     await conn.manager.update(Settings, MASTER_COLUMN_VALUE, {name: inputName})
+
+    const settings = classToPlain(appStore.getState().settings)
+    settings.name = inputName
+    await appStore.dispatch(appSlice.actions.setSettings(settings))
+
+    // The JWT QR depends on the name being stored in the settings.
     identifiersSelector.forEach(ident => {
       setQrJwtForPayload(ident, inputName)
     })
+
     setStoredName(inputName)
   }
 
   const setQrJwtForPayload = async (identifier, name) => {
     try {
-      const qrJwt = await utility.contactJwtForPayload(appStore, identifier)
+      const qrJwt = await utility.contactJwtForPayload(DEFAULT_ENDORSER_VIEW_SERVER, identifier, name)
       setQrJwts(jwts => R.set(R.lensProp(identifier.did), qrJwt, jwts))
     } catch (err) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error setting JWT contents for contact: " + err}))

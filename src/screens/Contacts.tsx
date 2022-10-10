@@ -468,7 +468,12 @@ export function ContactsScreen({ navigation, route }) {
         setId0(allIdentifiers[0])
 
         async function setQr() {
-          setMyContactUrl(await utility.contactJwtForPayload(appStore, allIdentifiers[0]))
+          const url = await utility.contactJwtForPayload(
+            DEFAULT_ENDORSER_VIEW_SERVER,
+            allIdentifiers[0],
+            appStore.getState().settings.name
+          )
+          setMyContactUrl(url)
         }
         setQr()
       }

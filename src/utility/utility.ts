@@ -384,15 +384,15 @@ function uportJwtPayload(did, name, publicKeyHex) {
 }
 
 // returns null if the identifier doesn't have all necessary data
-export const contactJwtForPayload = async (appStore, identifier) => {
+export const contactJwtForPayload = async (viewServer, identifier, name) => {
   // The public key should always exist, but we've seen Veramo weirdness
   // where an entry in the key table with a lowercase DID will be overwritten
   // by one with mixed case but the associated entry in the identifier table
   // will remain (so one identifier will not have an associated key). Ug.
   if (identifier.keys[0] && identifier.keys[0].publicKeyHex && identifier.keys[0].privateKeyHex) {
-    const sharePayload = uportJwtPayload(identifier.did, appStore.getState().settings.name, identifier.keys[0].publicKeyHex)
+    const sharePayload = uportJwtPayload(identifier.did, name, identifier.keys[0].publicKeyHex)
     const newJwt = await createJwt(identifier, sharePayload)
-    const viewPrefix =  appStore.getState().viewServer + ENDORSER_JWT_URL_LOCATION
+    const viewPrefix =  viewServer + ENDORSER_JWT_URL_LOCATION
     const qrJwt: string = viewPrefix + newJwt
     return qrJwt
   } else {
