@@ -12,6 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [6.3.104] - 2022-10-10
+
+### Added
+- Create contracts with private data.
+- Send contact registrations.
+
+
+
+
 ## [6.3.103] - 2022-08-25
 
 ### Added
