@@ -328,7 +328,7 @@ export function MyCredentialsScreen({ navigation }) {
                             <Pressable
                               style={{ padding: 10 }}
                               onPress={ () =>
-                                navigation.navigate(utility.REVIEW_SIGN_SCREEN_NAV, {
+                                navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
                                   credentialSubject: {
                                     "@context": "https://schema.org",
                                     "@type": "GiveAction",
@@ -353,7 +353,7 @@ export function MyCredentialsScreen({ navigation }) {
                           <Pressable
                             style={{ padding: 10 }}
                             onPress={ () =>
-                              navigation.navigate(utility.REVIEW_SIGN_SCREEN_NAV, {
+                              navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
                                 credentialSubjects: {
                                   "@context": "https://schema.org",
                                   "@type": "AgreeAction",
@@ -376,7 +376,7 @@ export function MyCredentialsScreen({ navigation }) {
                           <Pressable
                             style={{ padding: 10 }}
                             onPress={ () =>
-                              navigation.navigate(utility.REVIEW_SIGN_SCREEN_NAV, {
+                              navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
                                 credentialSubject: {
                                   "@context": "https://schema.org",
                                   "@type": "TakeAction",

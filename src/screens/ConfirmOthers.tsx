@@ -106,7 +106,7 @@ export function ConfirmOthersScreen({ navigation }) {
             "object": aClaim,
           }
         })
-        navigation.navigate(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: fullClaims })
+        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: fullClaims })
       }
     }
   }
