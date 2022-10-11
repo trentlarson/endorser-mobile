@@ -84,7 +84,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForClaimInfo(false) }
                       proceed={ claim => {
                         setAskForClaimInfo(false)
-                        navigation.navigate('Review & Sign', { credentialSubject: claim })
+                        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -95,7 +95,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForGaveInfo(false) }
                       proceed={ claim => {
                         setAskForGaveInfo(false)
-                        navigation.navigate('Review & Sign', { credentialSubject: claim })
+                        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: claim })
                       }}
                       userId={ identifiers[0].did }
                     />
@@ -107,7 +107,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForOfferInfo(false) }
                       proceed={ claim => {
                         setAskForOfferInfo(false)
-                        navigation.navigate('Review & Sign', { credentialSubject: claim })
+                        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: claim })
                       }}
                       userId={ identifiers[0].did }
                     />
@@ -120,7 +120,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForPlanInfo(false) }
                       proceed={ claim => {
                         setAskForPlanInfo(false)
-                        navigation.navigate('Review & Sign', { credentialSubject: claim })
+                        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -132,7 +132,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForPersonInfo(false) }
                       proceed={ claim => {
                         setAskForPersonInfo(false)
-                        navigation.navigate('Review & Sign', { credentialSubject: claim })
+                        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -147,7 +147,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       proceed={ claim => {
                         setAskForPledgeAbout('')
                         setAskForPledgeInfo('')
-                        navigation.navigate('Review & Sign', { credentialSubject: claim })
+                        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -159,7 +159,7 @@ export function ConstructCredentialScreen({ navigation }) {
                       cancel={ () => setAskForWitnessInfo('') }
                       proceed={ claim => {
                         setAskForWitnessInfo('')
-                        navigation.navigate('Review & Sign', { credentialSubject: claim })
+                        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: claim })
                       }}
                     />
                   : <View/>
@@ -269,10 +269,10 @@ export function ConstructCredentialScreen({ navigation }) {
 
                   <Button
                     title={'Common Paper Mutual NDA'}
-                    onPress={() => navigation.navigate(
+                    onPress={() => navigation.push(
                       'Contract Form',
                       {
-                        nextScreen: 'Review & Sign',
+                        nextScreen: utility.REVIEW_SIGN_SCREEN_NAV,
                         onboardingChoice: onboarding.common_paper_mnda,
                       }
                     )}
@@ -280,9 +280,9 @@ export function ConstructCredentialScreen({ navigation }) {
 
                   <Button
                     title={'C30 Master Collaboration Agreement'}
-                    onPress={() => navigation.navigate(
+                    onPress={() => navigation.push(
                       'Contract Form',
-                      { nextScreen: 'Review & Sign', onboardingChoice: onboarding.c30_mca }
+                      { nextScreen: utility.REVIEW_SIGN_SCREEN_NAV, onboardingChoice: onboarding.c30_mca }
                     )}
                   />
 
@@ -293,11 +293,11 @@ export function ConstructCredentialScreen({ navigation }) {
                   <Button
                     title={'Scan For Claim'}
                     onPress={() =>
-                      navigation.navigate(
+                      navigation.push(
                         'Scan Content',
                         {
                           nextData: { substitute: true },
-                          nextScreen: 'Review & Sign',
+                          nextScreen: utility.REVIEW_SIGN_SCREEN_NAV,
                           title: 'Scan Claim Template',
                         }
                       )

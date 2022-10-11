@@ -36,7 +36,7 @@ export const CLAIMS_HOME_SCREEN_NAV = 'Claims'
 export const HELP_SCREEN_NAV = 'Help'
 export const REPORT_FEED_SCREEN_NAV = 'Report Claims Feed'
 export const REPORT_SCREEN_NAV = 'Reports from Endorser server'
-export const REVIEW_SIGN_SCREEN_NAV = 'Review & Sign'
+export const REVIEW_SIGN_SCREEN_NAV = 'Review & Sign' // be sure to 'navigation.push' this to avoid data reuse
 
 const merkler = new MerkleTools({ hashType: 'sha256' })
 

@@ -28,7 +28,7 @@ export function ContractFormScreen({ navigation, route }) {
   const titleLine = contractText.match(/.*?\n/)[0].slice(0, -1)
   const title = titleLine.replace(/#*/, '').replace(/ */, '')
 
-  // documentation implies that matches happen in order of appearance in the text
+  // javascript documentation implies that matches happen in order of appearance in the text
   const fields = [...contractText.matchAll(/{{.*?}}/g)].flat()
   const finalFields = R.uniq(fields).map(s => s.slice(2).slice(0, -2))
 
@@ -57,8 +57,8 @@ export function ContractFormScreen({ navigation, route }) {
             onPress={() => {setAccept(!accept)}}
           />
           <Button
-            title="Sign"
-            onPress={() => navigation.navigate(
+            title="Review"
+            onPress={() => navigation.push(
               nextScreen,
               {
                 credentialSubject: utility.constructContract(onboardingChoice.templateIpfsCid, data),

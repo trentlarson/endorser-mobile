@@ -28,11 +28,9 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
   // add hashes for fields if they're missing
   // note that they may have come through via a scan of a Contract or a Contract AcceptAction
   for (subj of credSubjArray) {
-    const hasContractWithoutHashes =
-      utility.isContract(subj) && (!subj.fieldsMerkle || !subj.contractFullMdHash)
-    const hasContractAcceptWithoutHashes =
-      utility.isContractAccept(subj) && (!subj.object.fieldsMerkle || !subj.object.contractFullMdHash)
-    if (hasContractWithoutHashes || hasContractAcceptWithoutHashes) {
+    const hasContractAndPrivateFields = utility.isContract(subj) && subj.fields
+    const hasContractAcceptAndPrivateFields = utility.isContractAccept(subj) && subj.object.fields
+    if (hasContractAndPrivateFields || hasContractAcceptAndPrivateFields) {
       const fields = subj.fields || (subj.object && subj.object.fields)
       const fieldsMerkle: string = utility.valuesMerkleRootHex(fields)
 
@@ -185,12 +183,12 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                   {
                     (claimJsonError && claimJsonError.length > 0)
                     ?
-                      <Text style={{ textAlign: 'center' }}>Sign{'\n'}(... after fixing the formatting error.)</Text>
+                      <Text style={{ textAlign: 'center' }}>Sign{'\n'}(... ready after fixing the formatting error.)</Text>
                     :
                       <View>
                         <Button
                           title={'Sign'}
-                          onPress={() => navigation.navigate(
+                          onPress={() => navigation.push(
                             'Signature Results',
                             {
                               identifier: id0,
@@ -219,10 +217,10 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                         ?
                           <Text
                             style={{ color: 'blue' }}
-                            onPress={() => navigation.navigate(
+                            onPress={() => navigation.push(
                               'Contract Form',
                               {
-                                nextScreen: 'Review & Sign',
+                                nextScreen: utility.REVIEW_SIGN_SCREEN_NAV,
                                 onboardingChoice: findContractWithCid(
                                   utility.isContractAccept(subj) ? subj.object.contractFormIpfsCid : subj.contractFormIpfsCid
                                 ),
