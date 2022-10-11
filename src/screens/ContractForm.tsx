@@ -28,9 +28,7 @@ export function ContractFormScreen({ navigation, route }) {
   const titleLine = contractText.match(/.*?\n/)[0].slice(0, -1)
   const title = titleLine.replace(/#*/, '').replace(/ */, '')
 
-  // javascript documentation implies that matches happen in order of appearance in the text
-  const fields = [...contractText.matchAll(/{{.*?}}/g)].flat()
-  const finalFields = R.uniq(fields).map(s => s.slice(2).slice(0, -2))
+  const finalFields = utility.fieldKeysInOrder(contractText)
 
   return (
     <SafeAreaView>

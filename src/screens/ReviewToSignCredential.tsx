@@ -32,19 +32,25 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
     const hasContractAcceptAndPrivateFields = utility.isContractAccept(subj) && subj.object.fields
     if (hasContractAndPrivateFields || hasContractAcceptAndPrivateFields) {
       const fields = subj.fields || (subj.object && subj.object.fields)
-      const fieldsMerkle: string = utility.valuesMerkleRootHex(fields)
 
+      let orderedFields = fields // hopefully these will be template-ordered soon
+      let fieldsMerkle: string
       let contractFullMdHash: string
       const contractCid = subj.contractFormIpfsCid || (subj.object && subj.object.contractFormIpfsCid)
-      const contractTemplate = R.filter(x => x.templateIpfsCid == contractCid, R.values(onboarding))
+      const contractTemplate = R.find(x => x.templateIpfsCid == contractCid, R.values(onboarding))
       if (contractTemplate) {
-        contractFullMdHash = utility.contractHashHex(fields, contractTemplate.templateText)
+        // orderedFields will have fields in the right order for the template
+        orderedFields = utility.fieldsInsertionOrdered(contractTemplate.templateText, fields)
+        contractFullMdHash = utility.contractHashHex(orderedFields, contractTemplate.templateText)
       }
+      fieldsMerkle = utility.valuesMerkleRootHex(orderedFields)
 
       if (utility.isContract(subj)) {
+        subj.fields = orderedFields
         subj.fieldsMerkle = fieldsMerkle
         subj.contractFullMdHash = contractFullMdHash
       } else { // must be isContractAccept
+        subj.object.fields = orderedFields
         subj.object.fieldsMerkle = fieldsMerkle
         subj.object.contractFullMdHash = contractFullMdHash
       }

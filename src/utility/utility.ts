@@ -638,6 +638,26 @@ export const Toggle = () => {
   }
 }
 
+// returns array of all fields in contractTextsurrounded by "{{...}}", preserving order
+export const fieldKeysInOrder: Array<string> = (contractText) => {
+  // javascript documentation implies that matches really do happen in order of appearance in the text
+  const fields = [...contractText.matchAll(/{{.*?}}/g)].flat()
+  const fieldKeys = R.uniq(fields).map(s => s.slice(2).slice(0, -2))
+  return fieldKeys
+}
+
+// returns fieldValues object with keys in the order they appear in contractText
+export const fieldsInsertionOrdered: Array<string> = (contractText, fieldValues) => {
+  const fieldKeys = fieldKeysInOrder(contractText)
+  const result = {}
+  for (let key of fieldKeys) {
+    if (fieldValues[key]) {
+      result[key] = fieldValues[key]
+    }
+  }
+  return result
+}
+
 /**
   Create the merkle tree root hex from a contract-value object, or null
  **/
