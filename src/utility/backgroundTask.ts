@@ -64,7 +64,7 @@ const checkServer = (killToggle) => async (taskData) => {
           // there was probably some error, since we'd expect at least []; anyway, stop
           beforeId = null
         }
-      } while (beforeId && Date.now() < mustStopTime && !killToggle.getToggle())
+      } while (beforeId && Date.now() < mustStopTime && (!killToggle || !killToggle.getToggle()))
 
       if (killToggle) {
         // reset now that it's done the job of killing our loop
