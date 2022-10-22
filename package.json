@@ -65,6 +65,7 @@
     "readable-stream": "^1.0.33",
     "reflect-metadata": "^0.1.13",
     "stream-browserify": "^1.0.0",
+    "string.prototype.matchall": "^4.0.7",
     "vm-browserify": "0.0.4",
     "web-did-resolver": "^1.3.5"
   },
@@ -116,13 +117,14 @@
     "vm": "vm-browserify"
   },
   "browser": {
-    "crypto": "react-native-crypto",
-    "_stream_transform": "readable-stream/transform",
-    "_stream_readable": "readable-stream/readable",
-    "_stream_writable": "readable-stream/writable",
     "_stream_duplex": "readable-stream/duplex",
     "_stream_passthrough": "readable-stream/passthrough",
+    "_stream_readable": "readable-stream/readable",
+    "_stream_transform": "readable-stream/transform",
+    "_stream_writable": "readable-stream/writable",
+    "crypto": "react-native-crypto",
     "stream": "stream-browserify",
     "vm": "vm-browserify"
-  }
+  },
+  "packageManager": "yarn@2.4.1"
 }
