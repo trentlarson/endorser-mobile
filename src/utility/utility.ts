@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import * as didJwt from 'did-jwt'
 import { DateTime } from 'luxon'
 import MerkleTools from 'merkle-tools'
+import matchAll from 'string.prototype.matchall'
 import * as R from 'ramda'
 
 import { Contact } from '../entity/contact'
@@ -645,7 +646,7 @@ const POSTFIX_DELIM = '}}'
 export const fieldKeysInOrder: Array<string> = (contractText) => {
   // javascript documentation implies that matches really do happen in order of appearance in the text
   const fieldRegex = new RegExp(PREFIX_DELIM + ".*?" + POSTFIX_DELIM, 'g')
-  const fields = [...contractText.matchAll(fieldRegex)].flat()
+  const fields = [...matchAll(contractText, fieldRegex)].flat()
   const fieldKeys =
     R.uniq(fields).map(s => s.slice(PREFIX_DELIM.length).slice(0, -POSTFIX_DELIM.length))
   return fieldKeys

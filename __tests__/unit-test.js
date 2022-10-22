@@ -224,12 +224,12 @@ test('account Offers & Gives', () => {
 })
 
 test('contract field extraction works', () => {
-  const contract1 = '\
-{{date}}\
-Hi, {{name}}.\
-Hope {{area}} is treating you well.\
-Bye, {{name}}.\
-'
+  const contract1 = `
+{{date}}
+Hi, {{name}}.
+Hope {{area}} is treating you well.
+Bye, {{name}}.
+`
   expect(utility.fieldKeysInOrder(contract1)).toEqual(['date','name','area'])
 })
 
