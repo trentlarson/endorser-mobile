@@ -638,11 +638,16 @@ export const Toggle = () => {
   }
 }
 
-// returns array of all fields in contractTextsurrounded by "{{...}}", preserving order
+const PREFIX_DELIM = '{{'
+const POSTFIX_DELIM = '}}'
+
+// returns array of all fields in contractTextsurrounded by field delimteres, preserving order
 export const fieldKeysInOrder: Array<string> = (contractText) => {
   // javascript documentation implies that matches really do happen in order of appearance in the text
-  const fields = [...contractText.matchAll(/{{.*?}}/g)].flat()
-  const fieldKeys = R.uniq(fields).map(s => s.slice(2).slice(0, -2))
+  const fieldRegex = new RegExp(PREFIX_DELIM + ".*?" + POSTFIX_DELIM, 'g')
+  const fields = [...contractText.matchAll(fieldRegex)].flat()
+  const fieldKeys =
+    R.uniq(fields).map(s => s.slice(PREFIX_DELIM.length).slice(0, -POSTFIX_DELIM.length))
   return fieldKeys
 }
 
