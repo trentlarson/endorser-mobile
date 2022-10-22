@@ -116,13 +116,14 @@
     "vm": "vm-browserify"
   },
   "browser": {
-    "crypto": "react-native-crypto",
-    "_stream_transform": "readable-stream/transform",
-    "_stream_readable": "readable-stream/readable",
-    "_stream_writable": "readable-stream/writable",
     "_stream_duplex": "readable-stream/duplex",
     "_stream_passthrough": "readable-stream/passthrough",
+    "_stream_readable": "readable-stream/readable",
+    "_stream_transform": "readable-stream/transform",
+    "_stream_writable": "readable-stream/writable",
+    "crypto": "react-native-crypto",
     "stream": "stream-browserify",
     "vm": "vm-browserify"
-  }
+  },
+  "packageManager": "yarn@2.4.1"
 }
