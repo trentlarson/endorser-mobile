@@ -14,4 +14,8 @@ module.exports = {
       },
     }),
   },
+  resolver: {
+    // for did-jwt error on index.cjs "Error: While trying to resolve module ... Indeed, none of these files exist"
+    sourceExts: ['cjs', 'js', 'json', 'jsx', 'ts', 'tsx'],
+  },
 };
