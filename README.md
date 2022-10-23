@@ -29,7 +29,8 @@ Run ios:
 
 Run android:
 
-`yarn run android`
+- If [this issue](https://github.com/ethers-io/ethers.js/issues/3460) isn't fixed then apply the @ethersproject/base64 fix below.
+- `yarn run android`
 
 (If it cannot find emulators, see Troubleshooting below.)
 
@@ -43,6 +44,8 @@ Clean:
 
 
 #### Troubleshoot:
+
+- "Can't find variable: atob" or "Property 'atob' doesn't exist": paste in the solution from [here](https://github.com/ethers-io/ethers.js/issues/3460#issuecomment-1288202217).
 
 - A "CompileC" error can happen after removing a dependency. You may have to manually remove node_modules and pods (both `ios/Pods` and `~/Library/Caches/CocoaPods`) and reinstall them... but even that may not work and sometimes I just clone a new copy and installe anew. (I've also seen it work to just rerun the app.
 
