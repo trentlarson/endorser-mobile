@@ -11,11 +11,15 @@ For the reporting facility, we use the [endorser-ch APIs](https://github.com/tre
 
 `yarn install`
 
-- Note that there are also some other mobile dependencies, eg. iOS CocoaPods and Android Studio. The tools will prompt you along the way.
+- Note that there are also some other mobile dependencies, eg. Xcode, iOS CocoaPods, and Android Studio. The tools will prompt you along the way.
 
 - There are some values to customize: SERVICE_ID, INFURA_PROJECT_ID, *_ENDORSER_*_SERVER
 
-- For ios: `cd ios; pod install; cd ..`
+- For ios:
+
+  - `brew install cocoapods` # note that I had problems on an M1 with `gem install`
+
+  - `cd ios; pod install; cd ..`
 
 Run ios:
 
@@ -82,11 +86,17 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 - Got "No emulators found as an output of `emulator -list-avds`". Follow previous step.
 
-- Got "SDK location not found. Define location with an ANDROID_SDK_ROOT environment variable or by setting the sdk.dir path in your project's local properties file at '???/android/local.properties'." Put the line "sdk.dir=" with that ANDROID_SDK_ROOT setting (because just setting the environment variable doesn't always work).
+- Got "CMake '???' found in PATH did not match requested version '3.6.0'."? Install cmake in Android Studio -> Preferences -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools. Any 3.6 version should do.
+
+- Got "SDK location not found. Define location with an ANDROID_SDK_ROOT environment variable or by setting the sdk.dir path in your project's local properties file at '???/android/local.properties'." Put the line "sdk.dir=" with that ANDROID_SDK_ROOT setting, eg. /Users/trent/Library/Android/sdk (because just setting the environment variable doesn't always work).
 
 - Got "InstallException: Unknown failure: cmd: Can't find service: package"? Try running the command again (in case the emulator wasn't fully started).
 
 - Got "BGTaskSchedulerErrorDomain error 1"? If you're running in a simulator, that's expected.
+
+- Got "Unable to deserialize cloned data due to invalid or unsupported version."? Delete .yarn & .yarnrc.yml files
+
+- Got "No toolchains found in the NDK toolchains folder for ABI with prefix: arm-linux-androideabi"? Go to Android Studio -> Preferences -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools and downgrade NDK (v 22 worked while v 23 broke).
 
 
 
