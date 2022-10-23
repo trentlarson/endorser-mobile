@@ -32,7 +32,7 @@ const checkServer = (killToggle) => async (taskData) => {
       let beforeId = null
       const mustStopTime = startDate.valueOf() + (25 * 1000) // iOS is strict about their 30-second limit
       do {
-        const nextResults = await utility.retrieveClaims(endorserApiServer, id0, afterId, beforeId)
+        const nextResults = !id0 ? {} : await utility.retrieveClaims(endorserApiServer, id0, afterId, beforeId)
         if (nextResults.data) {
           newClaimCount += nextResults.data.length
           // only set lastClaimId the first time through the loop, only if we get results.
@@ -104,6 +104,7 @@ const checkServer = (killToggle) => async (taskData) => {
     console.log('Finished background JavaScript.')
   } catch (e) {
     console.log('Got error in background JavaScript', e)
+    //console.log(e.stack)
     return 'Got error running a background check.'
   }
 
