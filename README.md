@@ -196,8 +196,9 @@ To Release:
 - Release endorser.ch (for registration)
 - For minimal Contract app, change configuration
   - In src/veramo/setup.ts, switch HANDY_APP to true
-  - Copy icons into the 'src' directory
+- Copy icons into the 'src' directory. (Minimal app requires it, and iOS build looks for it, so just include it.)
 - Test everything.
+  - To install on a local iPhone, you can edit the scheme in the product to have a build configuration of "Release".
 - Update CHANGELOG.md
 - Set INFURA_PROJECT_ID in src/veramo/setup.ts (useful for checking claims)
 - In package.json, update version
@@ -224,7 +225,7 @@ To Release:
     - To release: Go to Internal Testing, then View Release Details, then "Promote release" and select "Production", add details and "Save", then "Start rollout to Production". It'll show as "In review" for a little while. (Old instructions: repeatedly check the "Production" track and the release details/track until it allows you to release to production; sometimes it doesn't show for a few minutes; maybe login/logout would help.)
 
 - ios
-  - To install on a local iPhone, you can edit the scheme in the product to have a build configuration of "Release".
+  - Change scheme to have a buildConfiguration of "Release" in ios/EndorserMobile.xcodeproj/xcshareddata/xcschemes/EndorserMobile.xcscheme
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json, and CFBundleVersion to be the build number (same as in Android).
     - Note that you cannot repeat an upload of a build number. (Version is OK.)
   - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION to be the build number (same as CFBundle Version. same as in android).
@@ -247,7 +248,7 @@ To Release:
     - After entering the 6-digit code (in about 18 minutes), it should say "Login Successful". It failed when I was on a VPN... maybe because I hadn't created the version in the App Store yet.
   - Submit the release for review (by filling in the "What's New" and "Notes"), and after they approve the review then you can test in TestFlight or release.
     - Double-check that it's submitted for review: it should say "Waiting for Review". (choose the app, click App Review on the side, choose it from Ready For Review list, and hit "Submit to App Review". Just clicking "Add to Review" on the first screen isn't enough.)
-    - Review for TestFlight is different from the app review, so: make sure to choose the group for testing, click on the version build number, and submit for review. (When you first add the build, it'll say "Waiting for Review", then "Processing" on the group "Builds" section. It'll be ready when the build under "Version" has a green check and says "Testing". "App Store Connect Users" doesn't show the same options or details. "Ready to Submit" means you haven't submitted it for testing so try again.)
+    - Review for TestFlight is different from the app review, so: make sure to choose the group for testing, click on the version build number, and submit for review. (When you first add the build, it'll say "Waiting for Review", then "Processing" on the group "Builds" section. It'll have a yellow dot with "Approved" with a link to "Notify Testers" until you click to notify them. It'll be ready when the build under "Version" has a green check and says "Testing". "App Store Connect Users" doesn't show the same options or details. "Ready to Submit" means you haven't submitted it for testing so try again.)
       - Test that you've got existing data on a device before upgrading in TestFlight.
   - If you haven't told it to release automatically, be sure to click the button.
 
