@@ -15,81 +15,85 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
 
   let { acceptContract, credentialSubject, scanned, substitute } = route.params
 
-  let credSubjArray = []
-  if (credentialSubject != null) {
-    credSubjArray = Array.isArray(credentialSubject) ? credentialSubject : [ credentialSubject ]
-  } else if (scanned != null) {
-    let scannedCred = JSON.parse(scanned)
-    credSubjArray = Array.isArray(scannedCred) ? scannedCred : [ scannedCred ]
-  }
-
   const id0 = appStore.getState().identifiers && appStore.getState().identifiers[0]
 
-  // add hashes for fields if they're missing
-  // note that they may have come through via a scan of a Contract or a Contract AcceptAction
-  for (subj of credSubjArray) {
-    const hasContractAndPrivateFields = utility.isContract(subj) && subj.fields
-    const hasContractAcceptAndPrivateFields = utility.isContractAccept(subj) && subj.object.fields
-    if (hasContractAndPrivateFields || hasContractAcceptAndPrivateFields) {
-      const fields = subj.fields || (subj.object && subj.object.fields)
-
-      let orderedFields = fields // hopefully these will be template-ordered soon
-      let fieldsMerkle: string
-      let contractFullMdHash: string
-      const contractCid = subj.contractFormIpfsCid || (subj.object && subj.object.contractFormIpfsCid)
-      const contractTemplate = R.find(x => x.templateIpfsCid == contractCid, R.values(onboarding))
-      if (contractTemplate) {
-        // orderedFields will have fields in the right order for the template
-        orderedFields = utility.fieldsInsertionOrdered(contractTemplate.templateText, fields)
-        contractFullMdHash = utility.contractHashHex(orderedFields, contractTemplate.templateText)
-      }
-      fieldsMerkle = utility.valuesMerkleRootHex(orderedFields)
-
-      if (utility.isContract(subj)) {
-        subj.fields = orderedFields
-        subj.fieldsMerkle = fieldsMerkle
-        subj.contractFullMdHash = contractFullMdHash
-      } else { // must be isContractAccept
-        subj.object.fields = orderedFields
-        subj.object.fieldsMerkle = fieldsMerkle
-        subj.object.contractFullMdHash = contractFullMdHash
-      }
-    }
-  }
-
-  // set agent for a Contract Accept if not this person already
-  for (subj of credSubjArray) {
-    if (utility.isAccept(subj)
-        && (!subj.agent || subj.agent.identifier !== id0.did)) {
-      subj.agent = { identifier: id0.did }
-    }
-  }
-
-  // now separate any private data from shared-ledger data
   const allFinalCredSubjs = []
   const privateFields = []
-  for (subj of credSubjArray) {
-    if (utility.isContract(subj)) {
-      const strippedContract = R.clone(subj)
-      const erasedPrivates = R.clone(subj.fields)
-      delete strippedContract.fields
-      if (acceptContract) {
-        allFinalCredSubjs.push(utility.constructAccept(id0.did, strippedContract))
-        privateFields.push(erasedPrivates)
-      } else {
+  try {
+    let credSubjArray = []
+    if (credentialSubject != null) {
+      credSubjArray = Array.isArray(credentialSubject) ? credentialSubject : [ credentialSubject ]
+    } else if (scanned != null) {
+      let scannedCred = JSON.parse(scanned)
+      credSubjArray = Array.isArray(scannedCred) ? scannedCred : [ scannedCred ]
+    }
+
+    // add hashes for fields if they're missing
+    // note that they may have come through via a scan of a Contract or a Contract AcceptAction
+    for (subj of credSubjArray) {
+      const hasContractAndPrivateFields = utility.isContract(subj) && subj.fields
+      const hasContractAcceptAndPrivateFields = utility.isContractAccept(subj) && subj.object.fields
+      if (hasContractAndPrivateFields || hasContractAcceptAndPrivateFields) {
+        const fields = subj.fields || (subj.object && subj.object.fields)
+
+        let orderedFields = fields // hopefully these will be template-ordered soon
+        let fieldsMerkle: string
+        let contractFullMdHash: string
+        const contractCid = subj.contractFormIpfsCid || (subj.object && subj.object.contractFormIpfsCid)
+        const contractTemplate = R.find(x => x.templateIpfsCid == contractCid, R.values(onboarding))
+        if (contractTemplate) {
+          // orderedFields will have fields in the right order for the template
+          orderedFields = utility.fieldsInsertionOrdered(contractTemplate.templateText, fields)
+          contractFullMdHash = utility.contractHashHex(orderedFields, contractTemplate.templateText)
+        }
+        fieldsMerkle = utility.valuesMerkleRootHex(orderedFields)
+
+        if (utility.isContract(subj)) {
+          subj.fields = orderedFields
+          subj.fieldsMerkle = fieldsMerkle
+          subj.contractFullMdHash = contractFullMdHash
+        } else { // must be isContractAccept
+          subj.object.fields = orderedFields
+          subj.object.fieldsMerkle = fieldsMerkle
+          subj.object.contractFullMdHash = contractFullMdHash
+        }
+      }
+    }
+
+    // set agent for a Contract Accept if not this person already
+    for (subj of credSubjArray) {
+      if (utility.isAccept(subj)
+          && (!subj.agent || subj.agent.identifier !== id0.did)) {
+        subj.agent = { identifier: id0.did }
+      }
+    }
+
+    // now separate any private data from shared-ledger data
+    for (subj of credSubjArray) {
+      if (utility.isContract(subj)) {
+        const strippedContract = R.clone(subj)
+        const erasedPrivates = R.clone(subj.fields)
+        delete strippedContract.fields
+        if (acceptContract) {
+          allFinalCredSubjs.push(utility.constructAccept(id0.did, strippedContract))
+          privateFields.push(erasedPrivates)
+        } else {
+          allFinalCredSubjs.push(strippedContract)
+          privateFields.push(erasedPrivates)
+        }
+      } else if (utility.isContractAccept(subj)) {
+        const strippedContract = R.clone(subj)
+        const erasedPrivates = R.clone(subj.object.fields)
+        delete strippedContract.object.fields
         allFinalCredSubjs.push(strippedContract)
         privateFields.push(erasedPrivates)
+      } else {
+        allFinalCredSubjs.push(subj)
+        privateFields.push(null)
       }
-    } else if (utility.isContractAccept(subj)) {
-      const strippedContract = R.clone(subj)
-      const erasedPrivates = R.clone(subj.object.fields)
-      delete strippedContract.object.fields
-      allFinalCredSubjs.push(strippedContract)
-      privateFields.push(erasedPrivates)
-    } else {
-      allFinalCredSubjs.push(subj)
-      privateFields.push(null)
     }
+  } catch (e) {
+    console.log(e)
   }
 
   const [claimJsonError, setClaimJsonError] = useState<string>(null)
