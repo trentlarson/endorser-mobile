@@ -2455,9 +2455,9 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*":
-  version: 18.11.3
-  resolution: "@types/node@npm:18.11.3"
-  checksum: 8107b5c631b6cbb9e11d879d5eef1c6c96229348730135fb61e0bc302dd179727c2db9678832effc234e6c08fe5f24a2921c29210df6a7c85b80663b9d2b0ec0
+  version: 18.11.7
+  resolution: "@types/node@npm:18.11.7"
+  checksum: 5d7f070dc4f34259212d6248204cc8c0a3c024f18693e9b0cf0d3fa3cc6f0c6a63b2784a3ea09c487ddebb06313b46a04ef36a90070e8454aa2827095571e2b3
   languageName: node
   linkType: hard
 
@@ -2539,24 +2539,24 @@ __metadata:
   linkType: hard
 
 "@types/react@npm:*":
-  version: 18.0.21
-  resolution: "@types/react@npm:18.0.21"
+  version: 18.0.23
+  resolution: "@types/react@npm:18.0.23"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: 6961fc4fcca55bcaf3c1b843d1359a26b10227187e8b5f4a49cbb68b7b967dea0cfda0f1ff7388ac737f5ec07ae23a7a192ee615c185854194362a84627b6c64
+  checksum: 5490e27535a861ab8972dd8b6af2f10dc65d593171c9dd2c90410f724913eed578c995397242bf9229e322f158ad14af1a0b424f130ee859f020d535d8b0b924
   languageName: node
   linkType: hard
 
 "@types/react@npm:^16":
-  version: 16.14.32
-  resolution: "@types/react@npm:16.14.32"
+  version: 16.14.33
+  resolution: "@types/react@npm:16.14.33"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: cbdd47836e1b29ed534d18859d548286f89eda3e94a9d4047840e46c8bef84689074fd1c0cf7629429efd8d92ccccb653507d5c0b6e7cf480269e6267d431db0
+  checksum: 5c08958266e7fe274adfb2571be51089e5ed5e865f1c933f80ab3f494cd2a0839889ec629db260dc8c5c0b700f9c5b7053cc663889bde0c70877b95c03a8477f
   languageName: node
   linkType: hard
 
@@ -4024,9 +4024,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001400":
-  version: 1.0.30001423
-  resolution: "caniuse-lite@npm:1.0.30001423"
-  checksum: 515da4fe96008e845fb14d2ea2a17a4bed32ba30a4260cc42cd362967df365d182feb65f3ce21b62a17f4c7cdf4a8f8c80ed330383cd196f491e2bfd682c5acb
+  version: 1.0.30001425
+  resolution: "caniuse-lite@npm:1.0.30001425"
+  checksum: 17f1736194da4201e3f95bc88e43c98ea2b6b3c45e946a6e5f37f449833722297372446bc569cbfbe3b087ff81d53afd16fee0495d52cd1f345ae08566364255
   languageName: node
   linkType: hard
 
@@ -4490,18 +4490,18 @@ __metadata:
   linkType: hard
 
 "core-js-compat@npm:^3.25.1":
-  version: 3.25.5
-  resolution: "core-js-compat@npm:3.25.5"
+  version: 3.26.0
+  resolution: "core-js-compat@npm:3.26.0"
   dependencies:
     browserslist: ^4.21.4
-  checksum: 2d9be3b454426d371376c924f00f96fa79dbbf17693f07e2b7dae51025d6021b308516341642f3abe7fa17e319bc99ba0a304640cb9346c2b9c6502cc32f5647
+  checksum: a81f4a6ad1be2bdf6dcb929dea5b19fed1ae232626b13cee54d58e3ccc90fb83ad440c86a41cc1894de9224f540278c01ddf07ab0188add192a54238bccf317f
   languageName: node
   linkType: hard
 
 "core-js-pure@npm:^3.25.1":
-  version: 3.25.5
-  resolution: "core-js-pure@npm:3.25.5"
-  checksum: db16e975b2a09668e7bc0386894096e01b03042d3b6b5e9fac8558ac4965ce5c219c3c728a6e295023b8df0a0a3f448ccc866d8281b0d308643fbfc0547125aa
+  version: 3.26.0
+  resolution: "core-js-pure@npm:3.26.0"
+  checksum: 4ffae0dadfc01ecfb909bcb5f51f50a02bf54ae586fa0f203f97a85f501a5e46243a43381367a7c2e0a6f2fd3ec6e7e2ffd07bd96d4b6160ecec214c04beb341
   languageName: node
   linkType: hard
 
@@ -6901,9 +6901,9 @@ fsevents@^2.1.2:
   linkType: hard
 
 "immer@npm:^9.0.7":
-  version: 9.0.15
-  resolution: "immer@npm:9.0.15"
-  checksum: 77bf457789a4e89c9e655287f8876a0cdd1b23e6bbfcbe7f19f6463eacbe1767d946ad1a2f713a2fdd0b851e2bb2696cf86676f863a9d7138f4f9137ffe75076
+  version: 9.0.16
+  resolution: "immer@npm:9.0.16"
+  checksum: b80e8b2672d99992e35d2274cad857d59ef55b567a4231277044f4fb69324a5a6fdfcb8421c2ccb787ca0f5e108a7bca3162269fb9e771cf938105f5c72321d0
   languageName: node
   linkType: hard
 
@@ -10207,11 +10207,11 @@ fsevents@^2.1.2:
   linkType: hard
 
 "promise@npm:^8.0.3":
-  version: 8.2.0
-  resolution: "promise@npm:8.2.0"
+  version: 8.3.0
+  resolution: "promise@npm:8.3.0"
   dependencies:
     asap: ~2.0.6
-  checksum: 28be21dd24f3542cad4ff2fbf54cfa2496993b5b0c78e37dd3b5a9d03d9c78f16ca7b4b453408f6c704d2e2873d69701e774f58a72310bedee6e73d815762b2f
+  checksum: 5f143ccbf744de94bc1397d1994599d61e79c56fed7a2fb0f90cdf0e5149dfd681b08398e29403cb659d476f182950e8debcf41d9b127f25e7549b7c153bf74d
   languageName: node
   linkType: hard
 
@@ -10386,11 +10386,9 @@ fsevents@^2.1.2:
   linkType: hard
 
 "react-native-background-fetch@npm:^4.1.1":
-  version: 4.1.3
-  resolution: "react-native-background-fetch@npm:4.1.3"
-  peerDependencies:
-    react-native: ">=0.28.0"
-  checksum: 72c901d382be84a4b3d09f9887f95ec900da49290bf761caf6c468f9298a107c15787a9ffd984bca9342c71ac6773c04559340a0a94a7119cc837a14fb880a05
+  version: 4.1.5
+  resolution: "react-native-background-fetch@npm:4.1.5"
+  checksum: adc74a8a2f345156749b190d222aaa11a1585b4e3b93e7fbd54398c7cfaacc365fe8cc01a3e87142675fdfc3abd02e4b68c34676e92e58c12ff098e053758635
   languageName: node
   linkType: hard
 
