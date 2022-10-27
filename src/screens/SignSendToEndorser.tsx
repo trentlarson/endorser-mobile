@@ -173,7 +173,7 @@ export function SignCredentialScreen({ navigation, route }) {
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished storing server data locally."}))
         return sentResult
       } else {
-        setResultMessages(R.update(index, "Successfully signed and sent claim" + claimNumber(index) + " but failed to record server result. You'll have to search to find that information."))
+        setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + " but did not record any server result."))
       }
 
     } catch (e) {
@@ -246,7 +246,7 @@ export function SignCredentialScreen({ navigation, route }) {
                               <Text>Saving to the Endorser server...</Text>
                             </View>
                           ) : ( /* !fetched && !fetching */
-                            <Text>Something went very wrong.</Text>
+                            <Text>Data is not saved on the Endorser server.</Text>
                           )
                         )
                       }

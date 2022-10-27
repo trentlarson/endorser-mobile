@@ -56,21 +56,21 @@ export function ScanAnythingScreen({ navigation, route }) {
                   <Button
                     title={ 'Send fake stuff to ' + nextScreen + ' screen'}
                     onPress={() => {
-                      nextData.scanned = '"Some sample data for you. Yum!"'
+                      nextData.scannedText = '"Some sample data for you. Yum!"'
                       return navigation.navigate(nextScreen, nextData)
                     }}
                   />
                   <Button
                     title={ 'Send fake credential template to ' + nextScreen + ' screen'}
                     onPress={() => {
-                      nextData.scanned = JSON.stringify(SAMPLE_CREDENTIAL_TEMPLATE)
+                      nextData.scannedText = JSON.stringify(SAMPLE_CREDENTIAL_TEMPLATE)
                       return navigation.navigate(nextScreen, nextData)
                     }}
                   />
                   <Button
                     title={ 'Send fake credential list to ' + nextScreen + ' screen'}
                     onPress={() => {
-                      nextData.scanned = JSON.stringify(SAMPLE_MULTIPLE_CREDENTIALS)
+                      nextData.scannedText = JSON.stringify(SAMPLE_MULTIPLE_CREDENTIALS)
                       return navigation.navigate(nextScreen, nextData)
                     }}
                   />

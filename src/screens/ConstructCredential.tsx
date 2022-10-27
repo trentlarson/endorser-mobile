@@ -278,6 +278,7 @@ export function ConstructCredentialScreen({ navigation }) {
                     )}
                   />
 
+                  <View style={{ padding: 5 }} />
                   <Button
                     title={'C30 Master Collaboration Agreement'}
                     onPress={() => navigation.push(
@@ -303,6 +304,8 @@ export function ConstructCredentialScreen({ navigation }) {
                       )
                     }
                   />
+
+                  <View style={{ padding: 5 }} />
                   <Button
                     title={'Paste Claim'}
                     onPress={() => setAskForClaimInfo(true)}
