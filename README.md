@@ -121,7 +121,7 @@ Automatically with: `yarn test`
 
 ... but note:
 
-- The App-test.js fails with "NativeModule.RNPermissions is null". I've tried but failed with the recommendation here: https://github.com/zoontek/react-native-permissions#testing-with-jest
+- The App-test.js fails with "NativeModule.RNPermissions is null" or "Notifee native module not found". I've tried but failed with the recommendation here: https://github.com/zoontek/react-native-permissions#testing-with-jest
 
 Manually
 
