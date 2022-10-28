@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [6.3.105] - 2022-10-23
+
+### Fixed
+- Contract-parsing error that crashed Android.
+
+
+
+
 ## [6.3.104] - 2022-10-10
 
 ### Added
