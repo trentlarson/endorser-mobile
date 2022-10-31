@@ -223,7 +223,7 @@ function HomeScreen({ navigation }) {
   const handleChange = (newState: any) => {
     if (newState === 'active' && pressedInBackground) {
         pressedInBackground = false
-        navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
+        navigation.dispatch(StackActions.push(utility.REPORT_FEED_SCREEN_NAV))
       }
     }
   };
@@ -294,7 +294,7 @@ function HomeScreen({ navigation }) {
 
             // tried customizing initNotify.pressAction.launchActivity but it always comes back as 'default'
             // might use initNotify data or id or body or title
-            navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
+            navigation.dispatch(StackActions.push(utility.REPORT_FEED_SCREEN_NAV))
           }
         }
         /**
@@ -312,7 +312,7 @@ function HomeScreen({ navigation }) {
         // on ios: handles when in the foreground or background
         notifee.onForegroundEvent(({ type, detail }) => {
           if (type === EventType.PRESS) { // iOS hits this, even when in background
-            navigation.dispatch(StackActions.push(REPORT_CLAIMS_FEED_PAGE))
+            navigation.dispatch(StackActions.push(utility.REPORT_FEED_SCREEN_NAV))
           }
         })
 
