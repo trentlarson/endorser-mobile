@@ -112,6 +112,9 @@ Switch to the Simulator app, choose "File" and "Open Simulator" and choose one t
 
 - During the upload to Apple, you may get errors like "could not find the service with interface (com.apple.transporter.osgi.TransporterService)" or "resource download failed: com.fasterxml.jackson.core.jackson-core", but they indicate some network error so just try again.
 
+- During "bundle exec fastlane beta", you might see a message of "Could not find fastlane-2.210.1, CFPropertyList-3.0.5... in any of the sources". Try "bundle install".
+
+
 
 
 
