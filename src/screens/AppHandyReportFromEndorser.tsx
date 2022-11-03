@@ -63,7 +63,7 @@ export function AppHandyReportScreen({ navigation }) {
         setSearchResults(correctResults)
         setSearchError('')
       }).catch(err => {
-        console.log(err)
+        console.log('There was a problem searching on ', param, err)
         setSearchError('There was a problem searching.')
       })
       

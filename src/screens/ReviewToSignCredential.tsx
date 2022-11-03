@@ -44,7 +44,6 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
             !id0
             ? scannedText
             : scannedText.replace(new RegExp(utility.REPLACE_USER_DID_STRING, 'g'), id0.did)
-          console.log("newScannedText", newScannedText)
           const scannedCred = JSON.parse(newScannedText)
           credSubjArray = Array.isArray(scannedCred) ? scannedCred : [ scannedCred ]
         }
