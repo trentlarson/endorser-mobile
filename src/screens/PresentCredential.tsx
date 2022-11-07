@@ -117,15 +117,17 @@ export function PresentCredentialScreen({ navigation, route }) {
                 ? <Text>{errorMsg}</Text>
                 : <View>
                     <Text>{ qrMessage }</Text>
-                    <View style={{ marginTop: 100 }} />
+                    <View style={{ marginTop: 70 }} />
                     {
                       prezStrs.map((prez, index, array) =>
                         <View key={ index }>
                           <QRCode value={ prez } size={ 300 } onError={ err => {setErrorMsg(err.toString()) /* Gives an 'update a component' complaint but cannot get around it. */} }/>
                           {
                             index < array.length - 1
-                            ? <Text style={{ marginTop: 10, marginBottom: 100 }}>Scroll down for the next.</Text>
-                            : <Text />
+                            ? <Text style={{ marginTop: 10, marginBottom: 80 }}>Scroll down for the next.</Text>
+                            : array.length > 1
+                              ? <Text style={{ marginTop: 10 }}>That completes your presentation.</Text>
+                              : <Text />
                           }
                         </View>
                       )
