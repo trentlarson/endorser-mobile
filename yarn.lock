@@ -1833,18 +1833,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-community/async-storage@npm:^1.6.1":
-  version: 1.12.1
-  resolution: "@react-native-community/async-storage@npm:1.12.1"
-  dependencies:
-    deep-assign: ^3.0.0
-  peerDependencies:
-    react: ^16.8
-    react-native: ">=0.59"
-  checksum: 23d9e3bfb5a6e1018599b95af0e4110b1ee533096a7d0d6dcb68c6bfb74331b0cbe79d1af09519e71fb051c5819af237ebc3fddd56e466c0f9530d24112ae916
-  languageName: node
-  linkType: hard
-
 "@react-native-community/cli-debugger-ui@npm:^4.13.1":
   version: 4.13.1
   resolution: "@react-native-community/cli-debugger-ui@npm:4.13.1"
@@ -2851,14 +2839,12 @@ __metadata:
     react: 16.13.1
     react-native: 0.63.4
     react-native-background-fetch: ^4.1.1
-    react-native-camera: ^3.42.0
     react-native-clean-project: ^3.4.0
     react-native-crypto: ^2.2.0
     react-native-elements: ^3.2.0
     react-native-gesture-handler: ^1.9.0
     react-native-headless-task-worker: ^1.0.0
     react-native-permissions: 3.0.0
-    react-native-qrcode-scanner: ^1.5.3
     react-native-qrcode-svg: ^6.0.6
     react-native-radio-buttons-group: ^2.2.10
     react-native-randombytes: ^3.6.0
@@ -4738,15 +4724,6 @@ __metadata:
   version: 0.2.0
   resolution: "decode-uri-component@npm:0.2.0"
   checksum: d8cb28c33f7b0a70b159b5fa126aee821ba090396689bd46ad2c423c3a658c504d2743ab18060fd5ed1cae5377bdd3632760a8e98ba920ff49637d43dc6a9687
-  languageName: node
-  linkType: hard
-
-"deep-assign@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "deep-assign@npm:3.0.0"
-  dependencies:
-    is-obj: ^1.0.0
-  checksum: 25c6583d3c46abbdd1a76c9792d930713e48950f6b8656b5bbef9492ab3408bfa0fe3a708160b767d18bd0e8e2491dbff5495a6e1ba499f2d6a9b0f8bda479e9
   languageName: node
   linkType: hard
 
@@ -7338,13 +7315,6 @@ fsevents@^2.1.2:
   version: 7.0.0
   resolution: "is-number@npm:7.0.0"
   checksum: eec6e506c6de472af4bdfd0cc477e8aeb76f0a7066c8680fcdfed5324ee31a7d2b59d22313007c58aa80eb937f0c40eefdceedb851997d46b490b49f87160369
-  languageName: node
-  linkType: hard
-
-"is-obj@npm:^1.0.0":
-  version: 1.0.1
-  resolution: "is-obj@npm:1.0.1"
-  checksum: 0913a3bb6424d6bfb37e2daa5ef4a5d31a388b0f5a53f36bbe1fd95f1264efe92c6fd87a5c3f41e25b3db42fe60924fe6ae1f0efb274375b090fd093a5301ccf
   languageName: node
   linkType: hard
 
@@ -10225,7 +10195,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.10, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2":
+"prop-types@npm:^15.6.2, prop-types@npm:^15.7.2":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -10392,15 +10362,6 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"react-native-camera@npm:^3.42.0":
-  version: 3.44.3
-  resolution: "react-native-camera@npm:3.44.3"
-  dependencies:
-    prop-types: ^15.6.2
-  checksum: a2686b37e46cdcb8704135ba6f62de047ad7c8a99b00565c17c2cbcfc208acc852e2d0466772573fcd27946d88ccc47e08910fe73dc6c07d86429adda2d547fe
-  languageName: node
-  linkType: hard
-
 "react-native-clean-project@npm:^3.4.0":
   version: 3.6.7
   resolution: "react-native-clean-project@npm:3.6.7"
@@ -10480,29 +10441,6 @@ fsevents@^2.1.2:
     react-native: ">=0.63.3"
     react-native-windows: ">=0.62.0"
   checksum: 52e55c93d22f2c5fb2bbd4b153804adbce8504e76ecd72064b0c784d39803d7fd1bc0d3f0e489170ab9d11d530ad71b8e58dd65b0d9d6f0be5a086eedddd73e9
-  languageName: node
-  linkType: hard
-
-"react-native-permissions@npm:^2.0.2":
-  version: 2.2.2
-  resolution: "react-native-permissions@npm:2.2.2"
-  peerDependencies:
-    react: ">=16.8.6"
-    react-native: ">=0.60.0"
-  checksum: c5102c203bc1fe4b4016ed7c75131a33bbe4ad10725086b2eb4f8bd6e7a8009dc9675dffc67126a0327febb2d574dda25fc02361dce26d4f9b06bb7293ae1de2
-  languageName: node
-  linkType: hard
-
-"react-native-qrcode-scanner@npm:^1.5.3":
-  version: 1.6.0
-  resolution: "react-native-qrcode-scanner@npm:1.6.0"
-  dependencies:
-    "@react-native-community/async-storage": ^1.6.1
-    prop-types: ^15.5.10
-    react-native-permissions: ^2.0.2
-  peerDependencies:
-    react-native-camera: ">=1.0.2"
-  checksum: d7e32799ca0270d1031eec469cd1d0f703315c4342fe97aae6c029a44b2471aa4410907840d98e801ca6d5a66a8d10d1eaa74d7d4fe5cbca5a97b02e0f9faefe
   languageName: node
   linkType: hard
 
