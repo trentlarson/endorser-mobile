@@ -89,7 +89,7 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 - Got "No emulators found as an output of `emulator -list-avds`". Follow previous step.
 
-- Got "CMake '???' found in PATH did not match requested version '3.6.0'."? Install cmake in Android Studio -> Preferences -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools. Any 3.6 version should do.
+- Got "CMake '???' found in PATH did not match requested version '3.6.0'."? Install cmake in Android Studio -> Preferences -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools. Any 3.6 version should do, though when I did this more recently I had to install 3.10.2
 
 - Got "SDK location not found. Define location with an ANDROID_SDK_ROOT environment variable or by setting the sdk.dir path in your project's local properties file at '???/android/local.properties'." Put the line "sdk.dir=" with that ANDROID_SDK_ROOT setting, eg. /Users/trent/Library/Android/sdk (because just setting the environment variable doesn't always work).
 
@@ -100,6 +100,8 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 - Got "Unable to deserialize cloned data due to invalid or unsupported version."? Delete .yarn & .yarnrc.yml files.
 
 - Got "No toolchains found in the NDK toolchains folder for ABI with prefix: arm-linux-androideabi"? Go to Android Studio -> Preferences -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools and downgrade NDK (v 22 worked while v 23 broke).
+
+- Got "More than one file was found with OS independent path 'lib/armeabi-v7a/libsodium.so'."? Hack the node_modules/react-native-sodium/android/build.gradle as shown [here](https://stackoverflow.com/a/56453718).
 
 - The following means the Simulator is in a "Shutdown" state even though the Simulator is running:
 
@@ -199,7 +201,7 @@ To Do First Release:
 - Android
   - In the android/app folder, put pc-api-....json and google-comm-endo-upload-key.keystore
 - iOS
-  - In Xcode, add the developer account under Preferences. (Maybe import the project.)
+  - In Xcode, add the developer account under Preferences -> Accounts. (Maybe import the project.)
 - Configure Apple signing.
   - To renew certificate: https://developer.apple.com/account/resources/certificates/list
     ... and make one for Apple Distribution
