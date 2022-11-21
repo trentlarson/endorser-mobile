@@ -131,6 +131,7 @@ android {
     defaultConfig {
         applicationId "ch.endorser.mobile"
         minSdkVersion rootProject.ext.minSdkVersion
+        missingDimensionStrategy 'react-native-camera', 'general'
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 107
         versionName "6.3.107"

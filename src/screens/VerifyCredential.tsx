@@ -5,6 +5,7 @@ import React, { useState } from 'react'
 import { ActivityIndicator, Button, Modal, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
 import { CheckBox } from 'react-native-elements'
+import QRCodeScanner from 'react-native-qrcode-scanner'
 import QRCode from "react-native-qrcode-svg"
 import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
@@ -58,6 +59,7 @@ export function ScanPresentationScreen({ navigation }) {
             onPress={() => {setScanMultiple(!scanMultiple)}}
           />
 
+          <QRCodeScanner onRead={onSuccessfulQrEvent} />
           { appStore.getState().testMode
             ? <View>
                 <Button

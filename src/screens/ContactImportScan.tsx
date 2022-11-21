@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import QRCodeScanner from 'react-native-qrcode-scanner'
 
 import { appSlice, appStore } from '../veramo/appSlice'
 import * as utility from '../utility/utility'
@@ -19,6 +20,7 @@ export function ContactImportScreen({ navigation }) {
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Import Contact</Text>
 
           <View>
+            <QRCodeScanner onRead={onSuccessfulQrEvent} />
             { appStore.getState().testMode
               ?
                 <View>

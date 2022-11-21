@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import QRCodeScanner from 'react-native-qrcode-scanner'
 
 import { appStore } from '../veramo/appSlice'
 import * as utility from '../utility/utility'
@@ -48,6 +49,7 @@ export function ScanAnythingScreen({ navigation, route }) {
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>{ title }</Text>
 
           <View>
+            <QRCodeScanner onRead={onSuccessfulQrEvent} />
             { appStore.getState().testMode
               ?
                 <View>
