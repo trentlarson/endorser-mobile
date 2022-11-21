@@ -2837,7 +2837,7 @@ __metadata:
     process: ^0.11.10
     ramda: ^0.27.1
     react: 16.13.1
-    react-native: 0.63.5
+    react-native: 0.63.4
     react-native-background-fetch: ^4.1.1
     react-native-clean-project: ^3.4.0
     react-native-crypto: ^2.2.0
@@ -2856,7 +2856,6 @@ __metadata:
     react-native-svg: ^12.1.0
     react-native-vector-icons: ^8.1.0
     react-native-version-number: ^0.3.6
-    react-native-vision-camera: 2.13.0
     react-redux: ^7.2.2
     react-test-renderer: 16.13.1
     readable-stream: ^1.0.33
@@ -10586,19 +10585,9 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"react-native-vision-camera@npm:2.13.0":
-  version: 2.13.0
-  resolution: "react-native-vision-camera@npm:2.13.0"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: af9a749fe5ab5af24990b3121daac2fa6d9a3230b6c450675ccc79f5fee8a693553d0c0d8150d7a94568dd44339ba425e304e14aadfac59b511e7707098f2ec8
-  languageName: node
-  linkType: hard
-
-"react-native@npm:0.63.5":
-  version: 0.63.5
-  resolution: "react-native@npm:0.63.5"
+"react-native@npm:0.63.4":
+  version: 0.63.4
+  resolution: "react-native@npm:0.63.4"
   dependencies:
     "@babel/runtime": ^7.0.0
     "@react-native-community/cli": ^4.10.0
@@ -10631,7 +10620,7 @@ fsevents@^2.1.2:
     react: 16.13.1
   bin:
     react-native: ./cli.js
-  checksum: f81cc559ce04fc6b380f965aab3046bb388922218d292f39db16b3b10ae9384fb35788432676d7f5b0769f0abe61613055fef453f9ddf149b458fda6ba1c92b7
+  checksum: df562a1237abb2311bdf795e8e28d0e6be468e692cdbcc426a40f2b1f0db070f57ad0cd8ee7bfb52917fc90570fd7b370baed62c41c21ec5f2b52b873d314a8e
   languageName: node
   linkType: hard
 
