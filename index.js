@@ -4,6 +4,7 @@
 
 import './shim'
 import '@zxing/text-encoding'
+import 'react-native-reanimated'
 
 import { AppRegistry, Platform } from 'react-native';
 import BackgroundFetch from 'react-native-background-fetch'
