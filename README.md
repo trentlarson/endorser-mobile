@@ -47,6 +47,17 @@ Clean:
 
 - "Can't find variable: atob" or "Property 'atob' doesn't exist": paste into base64/lib/browser-base64.js the solution from [here](https://github.com/ethers-io/ethers.js/issues/3460#issuecomment-1288202217).
 
+```
+var Buffer = require('buffer/').Buffer;
+function atob(str) {
+  return Buffer.from(str, 'base64').toString('binary');
+}
+function btoa(str) {
+  return Buffer.from(str, 'binary').toString('base64');
+}
+```
+
+
 - A "CompileC" error can happen after removing a dependency. You may have to manually remove node_modules and pods (both `ios/Pods` and `~/Library/Caches/CocoaPods`) and reinstall them... but even that may not work and sometimes I just clone a new copy and installe anew. (I've also seen it work to just rerun the app.
 
 
@@ -101,7 +112,16 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 - Got "No toolchains found in the NDK toolchains folder for ABI with prefix: arm-linux-androideabi"? Go to Android Studio -> Preferences -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools and downgrade NDK (v 22 worked while v 23 broke).
 
-- Got "More than one file was found with OS independent path 'lib/armeabi-v7a/libsodium.so'."? Hack the node_modules/react-native-sodium/android/build.gradle in the 'android' section as shown [here](https://stackoverflow.com/a/56453718).
+- Got "More than one file was found with OS independent path 'lib/armeabi-v7a/libsodium.so'."? Hack the node_modules/react-native-sodium/android/build.gradle and paste in the 'android' section as shown [here](https://stackoverflow.com/a/56453718).
+
+```
+packagingOptions {
+    pickFirst 'lib/armeabi-v7a/libsodium.so'
+    pickFirst 'lib/arm64-v8a/libsodium.so'
+    pickFirst 'lib/x86/libsodium.so'
+    pickFirst 'lib/x86_64/libsodium.so'
+}
+```
 
 - The following means the Simulator is in a "Shutdown" state even though the Simulator is running:
 
