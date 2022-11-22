@@ -38,7 +38,7 @@ export function ScanAnythingScreen({ navigation, route }) {
   const title = route.params.title
 
   const onSuccessfulQrEvent = async (e) => {
-    nextData.scanned = e.data
+    nextData.scannedText = e.data
     navigation.navigate(nextScreen, nextData)
   }
 
