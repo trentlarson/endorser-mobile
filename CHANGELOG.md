@@ -12,7 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.3.106] - 2022-10-31
+## [6.3.108] - 2022-11-21 - 6c7b958d167d73ca0ff568f22c39bbd6270d8b9a
+
+### Fixed
+- Scanning QR codes for claims and contacts.
+
+
+
+
+## [6.3.106] - 2022-10-31 - 6d2d8973a917f0243d8b0c4bc5152fc979870326
 
 ### Fixed
 - Contract-parsing error that crashed Android.
@@ -20,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.3.104] - 2022-10-10
+## [6.3.104] - 2022-10-10 - afbc95215ad55c5eb057410c5a3a870796c3920c
 
 ### Added
 - Create contracts with private data.
@@ -29,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.3.103] - 2022-08-25
+## [6.3.103] - 2022-08-25 - 64bdf912703595ef42503545784c61a282b80a7a
 
 ### Added
 - Message for notification permissions on front page.
