@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import QRCodeScanner from 'react-native-qrcode-scanner'
+import QRCode from "react-native-qrcode-svg"
 
 import { appStore } from '../veramo/appSlice'
 import * as utility from '../utility/utility'
@@ -54,25 +55,29 @@ export function ScanAnythingScreen({ navigation, route }) {
               ?
                 <View>
                   <Button
-                    title={ 'Send fake stuff to ' + nextScreen + ' screen'}
+                    title={ 'Send random text to ' + nextScreen + ' screen'}
                     onPress={() => {
                       nextData.scannedText = '"Some sample data for you. Yum!"'
                       return navigation.navigate(nextScreen, nextData)
                     }}
                   />
                   <Button
-                    title={ 'Send fake credential template to ' + nextScreen + ' screen'}
+                    title={ 'Send test cred template to ' + nextScreen + ' screen'}
                     onPress={() => {
                       nextData.scannedText = JSON.stringify(SAMPLE_CREDENTIAL_TEMPLATE)
                       return navigation.navigate(nextScreen, nextData)
                     }}
                   />
                   <Button
-                    title={ 'Send fake credential list to ' + nextScreen + ' screen'}
+                    title={ 'Send list of cred templates to ' + nextScreen + ' screen'}
                     onPress={() => {
                       nextData.scannedText = JSON.stringify(SAMPLE_MULTIPLE_CREDENTIALS)
                       return navigation.navigate(nextScreen, nextData)
                     }}
+                  />
+                  <QRCode
+                    value={JSON.stringify(SAMPLE_MULTIPLE_CREDENTIALS)}
+                    size={300}
                   />
                 </View>
               :

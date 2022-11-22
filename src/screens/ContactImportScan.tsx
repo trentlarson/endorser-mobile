@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import QRCodeScanner from 'react-native-qrcode-scanner'
+import QRCode from "react-native-qrcode-svg"
 
 import { appSlice, appStore } from '../veramo/appSlice'
 import * as utility from '../utility/utility'
@@ -35,6 +36,10 @@ export function ContactImportScreen({ navigation }) {
                   <Button
                     title='Fake 127.0.0.1:8080/test.csv'
                     onPress={() => navigation.navigate('Contact List', { scannedDatum: "http://127.0.0.1:8080/test.csv" })}
+                  />
+                  <QRCode
+                    value={CURRENT_JWT_PREFIX + "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJpYXQiOjE2MTUyNjMwODc3OTMsImlzcyI6ImRpZDpldGhyOjB4N3ZyMDVFMTgwOGU4NWVDREFmYTU0MGYyZEE1N0JkQzhkOWQyZDUxRCIsIm93biI6eyJuYW1lIjoiN3R1ZmYiLCJwdWJsaWNFbmNLZXkiOiJNN1oxbUpzSDlzRVVXM1ZremtXb2tZenlKRUdGUUFidG9QcnFqT0s3RWs0PSJ9fQ.h27enm55_0Bd06UJHAQWRmULwidOOhHNe2reqjYTAcVJvQ0aUTCEmP88HlJcZ3bUa-VbrXT76sqV6i19bQZ_PA"}
+                    size={300}
                   />
                 </View>
               :

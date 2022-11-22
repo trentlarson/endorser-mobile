@@ -86,6 +86,10 @@ export function ScanPresentationScreen({ navigation }) {
                   title='Fake & Invalid 777'
                   onPress={() => onSuccessfulQrText(id28_777Bad)}
                 />
+                <QRCode
+                  value={id19_333Pres}
+                  size={300}
+                />
               </View>
             : <View/>
           }
