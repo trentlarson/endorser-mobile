@@ -71,3 +71,6 @@ buck-out/
 
 # Google signing
 android/app/pc-api-*.json
+
+# Apple credentials for Fastlane
+ios/.env.default

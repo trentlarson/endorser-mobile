@@ -216,19 +216,29 @@ Manually
 
 ## Package & Deploy
 
-To Do First Release:
+To configure first release on new environment:
 
 - Android
   - In the android/app folder, put pc-api-....json and google-comm-endo-upload-key.keystore
 - iOS
+  - In the ios directory, run `bundle update`
   - In Xcode, add the developer account under Preferences -> Accounts. (Maybe import the project.)
-- Configure Apple signing.
-  - To renew certificate: https://developer.apple.com/account/resources/certificates/list
-    ... and make one for Apple Distribution
-    ... and also Apple Development (not sure about iOS App Development or iOS App Distribution)
-    ... and add a new Provisioning Profile - for Development (and maybe iOS App Development), selecting the Dev cert
-    ... and possibly restart Xcode. (Yes, that make it work after these errors: "Provisioning profile... doesn't include signing certificate")
-
+  - Configure Apple signing. (Certain errors will prompt you for this stuff, eg. "Signing for "React-Core-AccessibilityResources" requires a development team. Select a development team in the Signing & Capabilities editor.")
+    - To renew certificate: https://developer.apple.com/account/resources/certificates/list
+      ... and make one for Apple Distribution
+      ... and also Apple Development (not sure about iOS App Development or iOS App Distribution)
+      ... and add a new Provisioning Profile - for Development (and maybe iOS App Development), selecting the Dev cert
+      ... and go to Pods -> Build Settings -> Signing
+        - Code Signing Identity -> Release -> set to Apple Development
+        - Development Team set to Trent Larson
+      ... and possibly restart Xcode. (Yes, that make it work after these errors: "Provisioning profile... doesn't include signing certificate")
+    - I've had to type in my password in a pop-up dozens of times.
+    - The file `.env.default` in `ios` will allow you to upload to Apple:
+```
+FASTLANE_USER=<Apple USER ID>
+FASTLANE_PASSWORD=<Apple Password>
+FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=<App-Specific Password>
+```
 
 
 To Release:

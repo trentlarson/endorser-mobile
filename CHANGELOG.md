@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.3.106] - 2022-10-31 - 6d2d8973a917f0243d8b0c4bc5152fc979870326
 
+Unreleased
+
 ### Fixed
 - Contract-parsing error that crashed Android.
 
@@ -29,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [6.3.104] - 2022-10-10 - afbc95215ad55c5eb057410c5a3a870796c3920c
+
+Unreleased
 
 ### Added
 - Create contracts with private data.
@@ -38,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [6.3.103] - 2022-08-25 - 64bdf912703595ef42503545784c61a282b80a7a
+
+Released
 
 ### Added
 - Message for notification permissions on front page.
