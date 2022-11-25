@@ -123,6 +123,8 @@ packagingOptions {
 }
 ```
 
+- Got a blank screen when running on a physical app connected by USB? Try restarting the app on the device. Also, ensure Metro is running on the same network, and the developer tools (opened with `adb shell input keyevent 82`) have Settings with debug server host & port set to the right IP & port (usually 8081).
+
 - The following means the Simulator is in a "Shutdown" state even though the Simulator is running:
 
 ```
@@ -132,7 +134,7 @@ Unable to lookup in current state: Shutdown
 
 Switch to the Simulator app, choose "File" and "Open Simulator" and choose one to run.
 
-- During the upload to Apple, you may get errors like "could not find the service with interface (com.apple.transporter.osgi.TransporterService)" or "resource download failed: com.fasterxml.jackson.core.jackson-core", but they indicate some network error so just try again.
+- During the upload to Apple, you may get errors like "could not find the service with interface (com.apple.transporter.osgi.TransporterService)" or "resource download failed: com.fasterxml.jackson.core.jackson-core". They indicate some network error so just try again.
 
 - During "bundle exec fastlane beta", you might see a message of "Could not find fastlane-2.210.1, CFPropertyList-3.0.5... in any of the sources". Try "bundle install".
 
