@@ -63,6 +63,7 @@ export function ContactsScreen({ navigation, route }) {
 
   if (route.params && route.params.scannedDatum && (scannedImport != route.params.scannedDatum)) {
     setScannedImport(route.params.scannedDatum)
+    route.params = undefined
   }
 
   const copyToClipboard = (text) => {
@@ -504,6 +505,7 @@ export function ContactsScreen({ navigation, route }) {
           setWantsCsvText(true)
         })
       }
+      setScannedImport(null)
     }
     }, [scannedImport])
   )
