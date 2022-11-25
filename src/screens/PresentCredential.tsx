@@ -11,7 +11,7 @@ import { agent } from '../veramo/setup'
 // Maximums: https://www.npmjs.com/package/qrcode#qr-code-capacity
 // Tables: https://www.qrcode.com/en/about/version.html
 // (Trial and error shows that QRCode can handle a max of 2342.)
-const MAX_QR_BYTES = 1133 // 1134 jumps to the next resolution
+const MAX_QR_BYTES = 1000 // 1133 resolution sometimes works; 1134 jumps to the next resolution that works less often
 
 export function PresentCredentialScreen({ navigation, route }) {
 
@@ -121,6 +121,7 @@ export function PresentCredentialScreen({ navigation, route }) {
                     {
                       prezStrs.map((prez, index, array) =>
                         <View key={ index }>
+                          <Text>{array.length === 1 ? '' : '#' + (index + 1)}</Text>
                           <QRCode value={ prez } size={ 300 } onError={ err => {setErrorMsg(err.toString()) /* Gives an 'update a component' complaint but cannot get around it. */} }/>
                           {
                             index < array.length - 1

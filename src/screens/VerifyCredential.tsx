@@ -19,31 +19,45 @@ import { agent, dbConnection, DEFAULT_BASIC_RESOLVER } from '../veramo/setup'
 
 export function ScanPresentationScreen({ navigation }) {
 
+  const [acceptScan, setAcceptScan] = useState<boolean>(true)
+  const [numScanned, setNumScanned] = useState<number>(0)
+  const [scanError, setScanError] = useState<boolean>(false)
   const [scanMultiple, setScanMultiple] = useState<boolean>(true)
   const [scanned, setScanned] = useState<string>('')
 
   const onSuccessfulQrEvent = async (e) => {
+    setAcceptScan(false)
     onSuccessfulQrText(e.data)
   }
 
   const onSuccessfulQrText = async (qrText) => {
-    const allScanned = scanned + qrText
-    if (scanMultiple) {
-      setScanned(allScanned)
 
-      let parseSucceeded = false
-      try {
-        JSON.parse(allScanned)
-        parseSucceeded = true;
-      } catch (e) {
-        //console.log('Parse failed:', e)
-        // probably not at the end
-      }
-      if (parseSucceeded) {
+    const lastChar = qrText && qrText.slice(-1)
+    if (qrText.length < 30
+        && lastChar != '}' /* This is just in case we're really at the end*/) {
+      // this happens a lot, where it scans a large barcode as a short code, typically 8 numeric digits and classified as a "Product""
+      setScanError(true)
+    } else {
+
+      const allScanned = scanned + qrText
+      setNumScanned(prev => prev + 1)
+      if (scanMultiple) {
+        setScanned(allScanned)
+
+        let parseSucceeded = false
+        try {
+          JSON.parse(allScanned)
+          parseSucceeded = true;
+        } catch (e) {
+          //console.log('Parse failed:', e)
+          // probably not at the end
+        }
+        if (parseSucceeded) {
+          navigation.navigate('Verify Credential', { veriCredStr: allScanned })
+        }
+      } else {
         navigation.navigate('Verify Credential', { veriCredStr: allScanned })
       }
-    } else {
-      navigation.navigate('Verify Credential', { veriCredStr: allScanned })
     }
   }
 
@@ -58,8 +72,37 @@ export function ScanPresentationScreen({ navigation }) {
             checked={scanMultiple}
             onPress={() => {setScanMultiple(!scanMultiple)}}
           />
+          {
+            acceptScan && numScanned > 0
+            ? <Text>{numScanned} scanned...</Text>
+            : <Text />
+          }
 
-          <QRCodeScanner onRead={onSuccessfulQrEvent} />
+          {
+            scanError ? (
+              <View>
+                <Text>That scan didn't register correctly.</Text>
+                <Text>{numScanned} scanned, still incomplete.</Text>
+                <Button
+                  title={'Try again to scan #' + (numScanned + 1)}
+                  onPress={() => {setScanError(false); setAcceptScan(true)} }
+                />
+              </View>
+            ) : (
+              acceptScan ? (
+                <QRCodeScanner onRead={onSuccessfulQrEvent} reactivate={true} />
+              ) : (
+                <View>
+                  <Text>{numScanned} scanned, still incomplete.</Text>
+                  <Button
+                    title={'Scan #' + (numScanned + 1)}
+                    onPress={() => setAcceptScan(true) }
+                  />
+                </View>
+              )
+            )
+          }
+
           { appStore.getState().testMode
             ? <View>
                 <Button

@@ -148,6 +148,9 @@ export function MyCredentialsScreen({ navigation }) {
 
   return (
     <SafeAreaView>
+      <ScrollView>{/* vertical scrolling */}
+        <ScrollView horizontal={ true }>{/* horizontal scrolling for long string values */}
+
       <View style={{ padding: 20, height: screenHeight }}>
         <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search</Text>
         {
@@ -279,14 +282,14 @@ export function MyCredentialsScreen({ navigation }) {
 
                     {
                       (numStrangesAndUnknowns > 0)
-                      ? <Text>{numStrangesAndUnknowns} of these claims do{numStrangesAndUnknowns === 1 ? "es" : ""} not have specific, measurable info.</Text>
+                      ? <Text>{numStrangesAndUnknowns} of these claims {numStrangesAndUnknowns === 1 ? "does" : "do"} not have specific, measurable info.</Text>
                       : <View />
                     }
                     <View style={styles.line} />
                   </View>
                 }
 
-                ListFooterComponent={<View style={{ marginBottom: 50}} />}
+                ListFooterComponent={<View style={{ marginBottom: 200}}>{/* Without this, bottom tabs hide the bottom. */}</View>}
 
                 renderItem={data =>
                   <View>
@@ -425,6 +428,9 @@ export function MyCredentialsScreen({ navigation }) {
             </View>
         }
       </View>
+
+        </ScrollView>
+      </ScrollView>
     </SafeAreaView>
   )
 }
