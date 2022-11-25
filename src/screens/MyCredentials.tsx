@@ -151,283 +151,283 @@ export function MyCredentialsScreen({ navigation }) {
       <ScrollView>{/* vertical scrolling */}
         <ScrollView horizontal={ true }>{/* horizontal scrolling for long string values */}
 
-      <View style={{ padding: 20, height: screenHeight }}>
-        <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search</Text>
-        {
-          loading
-          ?
-            <View>
-              <Text>Loaded { loadedNumber }...</Text>
-              <ActivityIndicator color="#00FF00" />
-            </View>
-          :
-            <View>
-
-              <Text>
-                Filter (optional)
-                &nbsp;
-                <Icon name="info-circle" onPress={() => setShowSearchInfoModal(true)} />
-              </Text>
-              <Modal
-                animationType="slide"
-                transparent={true}
-                visible={!!showSearchInfoModal}
-              >
-                <View style={styles.centeredView}>
-                  <View style={styles.modalView}>
-                    <Text>This only retrieves the 50 most recent matches.</Text>
-                    <TouchableHighlight
-                      onPress={() => {
-                        setShowSearchInfoModal(false)
-                      }}
-                    >
-                      <Text>Close</Text>
-                    </TouchableHighlight>
-                  </View>
+          <View style={{ padding: 20, height: screenHeight }}>
+            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search</Text>
+            {
+              loading
+              ?
+                <View>
+                  <Text>Loaded { loadedNumber }...</Text>
+                  <ActivityIndicator color="#00FF00" />
                 </View>
-              </Modal>
-              <TextInput
-                autoCapitalize={'none'}
-                value={searchTerm}
-                onChangeText={setSearchTerm}
-                editable
-                style={{ borderWidth: 1 }}
-              />
-              <Button
-                title="Search About You"
-                onPress={searchEndorserForString}
-              />
+              :
+                <View>
 
-              <View style={{ padding: 5 }} />
-              <Button
-                title="Retrieve All Your Transactional Claims"
-                onPress={searchEndorserForTransactions}
-              />
-
-              <FlatList
-                data={searchResults}
-                keyExtractor={item => item.id.toString()}
-                ItemSeparatorComponent={() => <View style={styles.line} />}
-                ListEmptyComponent={<Text>{ searchResults == null ? "" : "None" }</Text>}
-                ListHeaderComponent={
-                  <View>
-                    {
-                      searchResults != null
-                      ? <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
-                      : <Text />
-                    }
-
-                    {
-                      (R.equals(totalCurrenciesOutstanding, {}))
-                      ? <View/>
-                      :
-                        <View>
-                          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly' }}>
-                            <Text>Total Outstanding Offers</Text>
-                            {
-                              R.map(
-                                arr =>
-                                  <Text
-                                    key={arr[0]}
-                                    style={{ color: 'blue' }}
-                                    onPress={ () =>
-                                      navigation.navigate(
-                                        'Your Offers',
-                                        {
-                                          currencyLabel: displayCurrencyLabel(arr[0]),
-                                          offerList: outstandingPerCurrency[arr[0]],
-                                        }
-                                      )
-                                    }
-                                  >
-                                    {displayAmount(arr[0], arr[1])}
-                                  </Text>,
-                                R.toPairs(totalCurrenciesOutstanding)
-                              )
-                            }
-                          </View>
-                        </View>
-                    }
-                    {
-                      (R.equals(totalCurrenciesPaid, {}))
-                      ? <View/>
-                      :
-                        <View>
-                          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly' }}>
-                            <Text>Total Paid</Text>
-                            {
-                              R.map(
-                                arr =>
-                                  <Text
-                                    key={arr[0]}
-                                    style={{ color: 'blue' }}
-                                    onPress={ () =>
-                                      navigation.navigate(
-                                        'Your Given',
-                                        {
-                                          currencyLabel: displayCurrencyLabel(arr[0]),
-                                          givenList: paidPerCurrency[arr[0]],
-                                        }
-                                      )
-                                    }
-                                  >
-                                    {displayAmount(arr[0], arr[1])}
-                                  </Text>,
-                                R.toPairs(totalCurrenciesPaid)
-                              )
-                            }
-                          </View>
-                        </View>
-                    }
-
-                    {
-                      (numStrangesAndUnknowns > 0)
-                      ? <Text>{numStrangesAndUnknowns} of these claims {numStrangesAndUnknowns === 1 ? "does" : "do"} not have specific, measurable info.</Text>
-                      : <View />
-                    }
-                    <View style={styles.line} />
-                  </View>
-                }
-
-                ListFooterComponent={<View style={{ marginBottom: 200}}>{/* Without this, bottom tabs hide the bottom. */}</View>}
-
-                renderItem={data =>
-                  <View>
-
-                    <Text selectable={true}>{
-                      utility.claimSummary(
-                        data.item,
-                        isUser(data.item.issuer) ? '' : ' (issued by someone else)'
-                      )
-                    }</Text>
-
-                    <YamlFormat source={ data.item.claim || data.item } navigation={navigation} />
-
-                    <View style={{ flexDirection: 'row' }}>
-                      {
-                        <Pressable
-                          style={{ padding: 10 }}
-                          onPress={ () => navigation.navigate('Verify Credential', { wrappedClaim: data.item }) }
+                  <Text>
+                    Filter (optional)
+                    &nbsp;
+                    <Icon name="info-circle" onPress={() => setShowSearchInfoModal(true)} />
+                  </Text>
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={!!showSearchInfoModal}
+                  >
+                    <View style={styles.centeredView}>
+                      <View style={styles.modalView}>
+                        <Text>This only retrieves the 50 most recent matches.</Text>
+                        <TouchableHighlight
+                          onPress={() => {
+                            setShowSearchInfoModal(false)
+                          }}
                         >
-                          <Text style={{ color: "blue" }}>Check it</Text>
-                        </Pressable>
-                      }
+                          <Text>Close</Text>
+                        </TouchableHighlight>
+                      </View>
+                    </View>
+                  </Modal>
+                  <TextInput
+                    autoCapitalize={'none'}
+                    value={searchTerm}
+                    onChangeText={setSearchTerm}
+                    editable
+                    style={{ borderWidth: 1 }}
+                  />
+                  <Button
+                    title="Search About You"
+                    onPress={searchEndorserForString}
+                  />
 
-                      {
-                        <Pressable
-                          style={{ padding: 10 }}
-                          onPress={ () =>
-                            navigation.navigate('Present Credential', { fullClaim: data.item })
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title="Retrieve All Your Transactional Claims"
+                    onPress={searchEndorserForTransactions}
+                  />
+
+                  <FlatList
+                    data={searchResults}
+                    keyExtractor={item => item.id.toString()}
+                    ItemSeparatorComponent={() => <View style={styles.line} />}
+                    ListEmptyComponent={<Text>{ searchResults == null ? "" : "None" }</Text>}
+                    ListHeaderComponent={
+                      <View>
+                        {
+                          searchResults != null
+                          ? <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
+                          : <Text />
+                        }
+
+                        {
+                          (R.equals(totalCurrenciesOutstanding, {}))
+                          ? <View/>
+                          :
+                           <View>
+                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly' }}>
+                               <Text>Total Outstanding Offers</Text>
+                               {
+                                 R.map(
+                                   arr =>
+                                     <Text
+                                       key={arr[0]}
+                                       style={{ color: 'blue' }}
+                                       onPress={ () =>
+                                         navigation.navigate(
+                                           'Your Offers',
+                                           {
+                                             currencyLabel: displayCurrencyLabel(arr[0]),
+                                             offerList: outstandingPerCurrency[arr[0]],
+                                           }
+                                         )
+                                       }
+                                     >
+                                       {displayAmount(arr[0], arr[1])}
+                                     </Text>,
+                                   R.toPairs(totalCurrenciesOutstanding)
+                                 )
+                               }
+                             </View>
+                           </View>
+                        }
+                        {
+                          (R.equals(totalCurrenciesPaid, {}))
+                          ? <View/>
+                          :
+                            <View>
+                              <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly' }}>
+                                <Text>Total Paid</Text>
+                                {
+                                  R.map(
+                                    arr =>
+                                      <Text
+                                        key={arr[0]}
+                                        style={{ color: 'blue' }}
+                                        onPress={ () =>
+                                          navigation.navigate(
+                                            'Your Given',
+                                            {
+                                              currencyLabel: displayCurrencyLabel(arr[0]),
+                                              givenList: paidPerCurrency[arr[0]],
+                                            }
+                                          )
+                                        }
+                                      >
+                                        {displayAmount(arr[0], arr[1])}
+                                      </Text>,
+                                    R.toPairs(totalCurrenciesPaid)
+                                  )
+                                }
+                              </View>
+                            </View>
+                        }
+
+                        {
+                          (numStrangesAndUnknowns > 0)
+                          ? <Text>{numStrangesAndUnknowns} of these claims {numStrangesAndUnknowns === 1 ? "does" : "do"} not have specific, measurable info.</Text>
+                          : <View />
+                        }
+                        <View style={styles.line} />
+                      </View>
+                    }
+
+                    ListFooterComponent={<View style={{ marginBottom: 200}}>{/* Without this, bottom tabs hide the bottom. */}</View>}
+
+                    renderItem={data =>
+                      <View>
+
+                        <Text selectable={true}>{
+                          utility.claimSummary(
+                            data.item,
+                            isUser(data.item.issuer) ? '' : ' (issued by someone else)'
+                          )
+                        }</Text>
+
+                        <YamlFormat source={ data.item.claim || data.item } navigation={navigation} />
+
+                        <View style={{ flexDirection: 'row' }}>
+                          {
+                            <Pressable
+                              style={{ padding: 10 }}
+                              onPress={ () => navigation.navigate('Verify Credential', { wrappedClaim: data.item }) }
+                            >
+                              <Text style={{ color: "blue" }}>Check it</Text>
+                            </Pressable>
                           }
-                        >
-                          <Text style={{ color: "blue" }}>Present it</Text>
-                        </Pressable>
-                      }
 
-                      {
-                        isUser(data.item.issuer) && data.item.claim['@type'] === 'Offer'
-                        ?
-                          <View>
+                          {
                             <Pressable
                               style={{ padding: 10 }}
                               onPress={ () =>
-                                navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                                  credentialSubject: {
-                                    "@context": "https://schema.org",
-                                    "@type": "GiveAction",
-                                    agent: { identifier: identifiers[0].did },
-                                    offerId: data.item.claim.identifier,
-                                    recipient: data.item.claim.recipient,
-                                    object: data.item.claim.itemOffered,
-                                  }
-                                })
+                                navigation.navigate('Present Credential', { fullClaim: data.item })
                               }
                             >
-                              <Text style={{ color: "blue" }}>Mark as given</Text>
+                              <Text style={{ color: "blue" }}>Present it</Text>
                             </Pressable>
-                          </View>
-                        :
-                          <View />
-                      }
+                          }
 
-                      {
-                        !isUser(data.item.issuer) && data.item.claim['@type'] != 'AgreeAction'
-                        ?
-                          <Pressable
-                            style={{ padding: 10 }}
-                            onPress={ () =>
-                              navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                                credentialSubjects: {
-                                  "@context": "https://schema.org",
-                                  "@type": "AgreeAction",
-                                  object: removeSchemaContext(data.item.claim),
-                                }
-                              })
-                            }
-                          >
-                            <Text style={{ color: "blue" }}>Agree</Text>
-                          </Pressable>
-                        :
-                          <View />
-                      }
-
-                      {
-                        !isUser(data.item.issuer)
-                        && (data.item.claim['@type'] === 'LoanOrCredit'
-                            || data.item.claim['@type'] === 'GiveAction')
-                        ?
-                          <Pressable
-                            style={{ padding: 10 }}
-                            onPress={ () =>
-                              navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                                credentialSubject: {
-                                  "@context": "https://schema.org",
-                                  "@type": "TakeAction",
-                                  agent: { identifier: identifiers[0].did },
-                                  object: removeSchemaContext(data.item.claim),
-                                }
-                              })
-                            }
-                          >
-                            <Text style={{ color: "blue" }}>Take</Text>
-                          </Pressable>
-                        :
-                          <View />
-                      }
-
-                    </View>
-
-                    <View style={{ flexDirection: 'row' }}>
-                      {
-                        data.item.claim['@type'] === 'Offer'
-                        ?
-                          outstandingPerInvoice[data.item.claim.identifier] > 0
-                          || outstandingPerInvoice[data.item.claim.recipient && data.item.claim.recipient.identifier] > 0
-                          ?
-                            <Text>(Not Fully Paid)</Text>
-                          :
-                            outstandingPerInvoice[data.item.claim.identifier] === 0
-                            || outstandingPerInvoice[data.item.claim.recipient && data.item.claim.recipient.identifier] === 0
+                          {
+                            isUser(data.item.issuer) && data.item.claim['@type'] === 'Offer'
                             ?
-                              <Text>(All Paid)</Text>
+                              <View>
+                                <Pressable
+                                  style={{ padding: 10 }}
+                                  onPress={ () =>
+                                    navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
+                                      credentialSubject: {
+                                        "@context": "https://schema.org",
+                                        "@type": "GiveAction",
+                                        agent: { identifier: identifiers[0].did },
+                                        offerId: data.item.claim.identifier,
+                                        recipient: data.item.claim.recipient,
+                                        object: data.item.claim.itemOffered,
+                                      }
+                                    })
+                                  }
+                                >
+                                  <Text style={{ color: "blue" }}>Mark as given</Text>
+                                </Pressable>
+                              </View>
                             :
-                              <Text>(Not A Specific Amount)</Text>
-                        :
-                          data.item.claim['@type'] === 'GiveAction'
-                          ?
-                            <Text>(Paid)</Text>
-                          :
-                            <View />
-                      }
-                    </View>
+                              <View />
+                          }
 
-                    <View style={styles.line} />
-                  </View>
-                }
-              />
-            </View>
-        }
-      </View>
+                          {
+                            !isUser(data.item.issuer) && data.item.claim['@type'] != 'AgreeAction'
+                            ?
+                              <Pressable
+                                style={{ padding: 10 }}
+                                onPress={ () =>
+                                  navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
+                                    credentialSubjects: {
+                                      "@context": "https://schema.org",
+                                      "@type": "AgreeAction",
+                                      object: removeSchemaContext(data.item.claim),
+                                    }
+                                  })
+                                }
+                              >
+                                <Text style={{ color: "blue" }}>Agree</Text>
+                              </Pressable>
+                            :
+                              <View />
+                          }
+
+                          {
+                            !isUser(data.item.issuer)
+                            && (data.item.claim['@type'] === 'LoanOrCredit'
+                               || data.item.claim['@type'] === 'GiveAction')
+                            ?
+                              <Pressable
+                                style={{ padding: 10 }}
+                                onPress={ () =>
+                                  navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
+                                    credentialSubject: {
+                                      "@context": "https://schema.org",
+                                      "@type": "TakeAction",
+                                      agent: { identifier: identifiers[0].did },
+                                      object: removeSchemaContext(data.item.claim),
+                                    }
+                                  })
+                                }
+                              >
+                                <Text style={{ color: "blue" }}>Take</Text>
+                              </Pressable>
+                            :
+                              <View />
+                          }
+
+                        </View>
+
+                        <View style={{ flexDirection: 'row' }}>
+                          {
+                            data.item.claim['@type'] === 'Offer'
+                            ?
+                              outstandingPerInvoice[data.item.claim.identifier] > 0
+                              || outstandingPerInvoice[data.item.claim.recipient && data.item.claim.recipient.identifier] > 0
+                              ?
+                                <Text>(Not Fully Paid)</Text>
+                              :
+                                outstandingPerInvoice[data.item.claim.identifier] === 0
+                                || outstandingPerInvoice[data.item.claim.recipient && data.item.claim.recipient.identifier] === 0
+                                ?
+                                  <Text>(All Paid)</Text>
+                                :
+                                  <Text>(Not A Specific Amount)</Text>
+                            :
+                              data.item.claim['@type'] === 'GiveAction'
+                              ?
+                                <Text>(Paid)</Text>
+                              :
+                                <View />
+                          }
+                        </View>
+
+                        <View style={styles.line} />
+                      </View>
+                    }
+                  />
+                </View>
+            }
+          </View>
 
         </ScrollView>
       </ScrollView>
