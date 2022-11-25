@@ -266,7 +266,7 @@ export function ContactsScreen({ navigation, route }) {
   const createContactsFromCsvTextInput = async () => {
     await createContactsFromThisCsvText(contactsCsvText)
     setContactsCsvText(null)
-    setWantsCsvText(null)
+    setWantsCsvText(false)
   }
 
   const createContactsFromThisCsvUrl = async (url) => {
@@ -290,7 +290,7 @@ export function ContactsScreen({ navigation, route }) {
   const createContactsFromCsvUrlInput = async () => {
     await createContactsFromThisCsvUrl(contactsCsvUrl)
     setContactsCsvUrl(null)
-    setWantsCsvUrl(null)
+    setWantsCsvUrl(false)
   }
 
   /**
@@ -549,13 +549,13 @@ export function ContactsScreen({ navigation, route }) {
           <View style={{ padding: 5 }} />
           <Button
             title="Import Bulk from CSV Text"
-            onPress={setWantsCsvText}
+            onPress={() => setWantsCsvText(true)}
           />
 
           <View style={{ padding: 5 }} />
           <Button
             title="Import Bulk from URL"
-            onPress={setWantsCsvUrl}
+            onPress={() => setWantsCsvUrl(true)}
           />
 
           {csvMessages.length > 0 ? (
