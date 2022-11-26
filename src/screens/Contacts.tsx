@@ -147,6 +147,7 @@ export function ContactsScreen({ navigation, route }) {
         if (wantsToRegister) {
           register(result)
         }
+        utility.loadContacts(appSlice, appStore, dbConnection)
       }
     })
     .finally(() => {
