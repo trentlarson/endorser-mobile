@@ -187,9 +187,7 @@ Manually
   - As a second user, import via the mnemonic, eg. #3 from endorser-ch test/util.js
 
   - Submit a claim. Run search for this individual's claims, and then for all claims.
-  - As a second user, check that they cannot see the claim details.
-  - As a third user, check that they cannot see the claim details.
-  - As a fourth user, check that they cannot see the claim details.
+  - As a second, third, & fourth user, check that they cannot see the claim details.
 
   - As the second and third user, share contact info.
   - As the initial user, allow the second and third user to see them.

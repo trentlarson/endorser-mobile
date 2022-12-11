@@ -438,13 +438,9 @@ export function ContactsScreen({ navigation, route }) {
         await response
         .json()
         .then(result => {
-          let message = 'There was an error from the server trying to register ' + contact.did + ' See log for more info.'
+          let message = 'There was an error from the server trying to register ' + contact.did
           if (result.error) {
-            if (result.error.code === 'OVER_CLAIM_LIMIT') {
-              message = 'You have hit your limit of claims this week. Contact an administrator for a higher weekly limit.'
-            } else if (result.error.code === 'OVER_REGISTRATION_LIMIT') {
-              message = 'You have hit your limit of registrations this week. Contact an administrator for a higher weekly limit.'
-            } else if (result.error.message) {
+            if (result.error.message) {
               message = result.error.message
             } else {
               appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Error registering " + contact.did + " " + JSON.stringify(result)}))
@@ -997,9 +993,11 @@ export function ContactsScreen({ navigation, route }) {
                         <View />
                     }
                     <View style={{ marginTop: 20 }}/>
-                    <View><Button title={'Delete'} onPress={() => setConfirmDeleteContact(contact.did)}/></View>
                   </View>
                 }
+                <View style={styles.centeredView}>
+                  <Button title={'Delete'} onPress={() => setConfirmDeleteContact(contact.did)}/>
+                </View>
               </View>
             </View>
           ))}

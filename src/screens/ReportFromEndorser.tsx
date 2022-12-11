@@ -52,10 +52,11 @@ export function ReportScreen({ navigation }) {
           "Content-Type": "application/json",
           "Uport-Push-Token": token,
         }
-      }).then(response => {
+      }).then(async response => {
         setLoadingSearch(false)
         if (response.status !== 200) {
-          throw Error('There was an error from the server.')
+          let bodyText = await response.text()
+          throw Error('There was an error from the server with code ' + response.status + ' and body: ' + bodyText)
         }
         return response.json()
       }).then(result => {

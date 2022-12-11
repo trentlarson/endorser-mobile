@@ -1,4 +1,4 @@
-import Debug from 'debug'
+//import Debug from 'debug'
 import * as didJwt from 'did-jwt'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
@@ -12,7 +12,8 @@ import * as utility from '../utility/utility'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 import { dbConnection } from '../veramo/setup'
 
-const debug = Debug('endorser-mobile:sign-send--credential')
+// This didn't show anything in some sessions.
+//const debug = Debug('endorser-mobile:sign-send--credential')
 
 export function SignCredentialScreen({ navigation, route }) {
 
@@ -23,11 +24,12 @@ export function SignCredentialScreen({ navigation, route }) {
   const numCreds = finalCredSubjs.length
 
   // return a space & claim number (1-based) for the index (0-based), or '' if there's only one
-  const claimNumber = (index) => {
-    return numCreds === 1 ? '' : ' #' + (index+1)
+  const claimNumber = (index, upperCase) => {
+    let claimText = upperCase ? 'Claim' : 'claim'
+    return claimText + (numCreds === 1 ? '' : ' #' + (index+1))
   }
 
-  const initialMessages = R.times((n) => 'Not finished with claim' + claimNumber(n) + '.', numCreds)
+  const initialMessages = R.times((n) => 'Not finished with ' + claimNumber(n) + '.', numCreds)
 
   const [endorserIds, setEndorserIds] = useState<Array<string>>(R.times(() => null, numCreds))
   const [fetched, setFetched] = useState<Array<boolean>>(R.times(() => false, numCreds))
@@ -37,6 +39,10 @@ export function SignCredentialScreen({ navigation, route }) {
 
   const endorserViewLink = (endorserId) => {
     return appStore.getState().viewServer + '/reportClaim?claimId=' + endorserId
+  }
+
+  const setOneResultMessage = (index, message) => {
+    setResultMessages(R.update(index, message))
   }
 
   /**
@@ -59,7 +65,6 @@ export function SignCredentialScreen({ navigation, route }) {
     .then(async resp => {
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got server response..."}))
       setFetched(R.update(index, true))
-      debug('Got endorser.ch status', resp.status)
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got server status " + resp.status + "..."}))
       if (resp.ok) {
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the send to Endorser server."}))
@@ -67,19 +72,26 @@ export function SignCredentialScreen({ navigation, route }) {
       } else {
         const text = await resp.text()
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished with error text: " + text}))
-        throw Error('Got failure response code of ' + resp.status + ' with body text of ' + text)
+        try {
+          const json = JSON.parse(text)
+          const moreInfo =
+            (json && json.error && json.error.message)
+            || "Got failure response trying to send " + claimNumber(index) + ". " + text
+          setOneResultMessage(index, moreInfo)
+        } catch (e) {
+          setOneResultMessage(index, "Got unexpected type of response trying to send " + claimNumber(index) + ". " + text)
+        }
       }
     })
     .then(json => {
-      debug('Got endorser.ch result', json)
+      console.log('Got Endorser server result', json)
       setEndorserIds(R.update(index, json))
       return json
     })
     .catch(err => {
-      debug('Got error sending to ' + endorserApiServer, err)
-      throw Error(
-        'Sorry, got a problem with the response from ' + endorserApiServer + ' ' + err,
-      )
+      console.log('Got error sending to ' + endorserApiServer, err)
+      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... but got error sending to " + endorserApiServer + " " + err}))
+      setOneResultMessage(index, "Got error trying to send " + claimNumber(index) + ". The logs may tell more.")
     })
     .finally(() => {
       setFetching(R.update(index, false))
@@ -109,7 +121,7 @@ export function SignCredentialScreen({ navigation, route }) {
     const alg = undefined // defaults to 'ES256K', more standardized but harder to verify vs ES256K-R
     const vcJwt: string = await didJwt.createJWT(utility.vcPayload(vcClaim),{ alg, issuer: did, signer })
     setJwts(R.update(index, vcJwt))
-    setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + "."))
+    setOneResultMessage(index, "Successfully signed " + claimNumber(index) + ".")
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
     if (sendToEndorser) {
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... now sending JWT to server..."}))
@@ -117,7 +129,7 @@ export function SignCredentialScreen({ navigation, route }) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished the signing & sending with result: " + JSON.stringify(sentResult)} + " ..."))
       return sentResult
     } else {
-      setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + ", but failed to send it to the server."))
+      setOneResultMessage(index, "Successfully signed " + claimNumber(index) + ", but failed to send it to the server.")
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... so we're done."}))
     }
   }
@@ -169,22 +181,21 @@ export function SignCredentialScreen({ navigation, route }) {
       }
 
       if (sentResult) {
-        setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + " and sent it to the server."))
+        setOneResultMessage(index, "Successfully signed " + claimNumber(index) + " and sent it to the server.")
         appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished storing server data locally."}))
         return sentResult
       } else {
-        setResultMessages(R.update(index, "Successfully signed claim" + claimNumber(index) + " but did not record any server result."))
+        setOneResultMessage(index, "Successfully signed " + claimNumber(index) + " but did not record any server result.")
       }
 
     } catch (e) {
-      setResultMessages(R.update(index, resultMessages[index] + " Something failed in the signing or sending of claim" + claimNumber(index) + "."))
+      setOneResultMessage(index, "Something failed in the signing or sending of " + claimNumber(index) + ".")
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
       // I have seen cases where each of these give different, helpful info.
       console.log('Error storing / signing / sending claim, 1:', e)
       console.log('Error storing / signing / sending claim, 2: ' + e)
       console.log('Error storing / signing / sending claim, 3:', e.toString())
-      throw e
     }
   }
 
@@ -229,9 +240,7 @@ export function SignCredentialScreen({ navigation, route }) {
                                 title="Success!"
                                 onPress={() => {
                                   Linking.openURL(endorserViewLink(endorserIds[index])).catch(err => {
-                                    throw Error(
-                                      'Sorry, something went wrong trying to let you browse the record on the Endorser server. ' + err,
-                                    )
+                                    setOneResultMessage(index, 'Sorry, something went wrong trying to let you browse the record on the Endorser server. ' + err)
                                   })
                                 }}
                               />
@@ -262,7 +271,7 @@ export function SignCredentialScreen({ navigation, route }) {
                 {
                   finalCredSubjs.map((origCred, index) => (
                     <View style={{ marginTop: 30 }} key={index}>
-                      <Text style={{ fontSize: 20 }}>Claim{ claimNumber(index) }</Text>
+                      <Text style={{ fontSize: 20 }}>{ claimNumber(index, true) }</Text>
 
                       <Text style={{ marginTop: 10, marginBottom: 5 }}>Original Details</Text>
                       <Text style={{ fontSize: 11 }}>Signed As:</Text>

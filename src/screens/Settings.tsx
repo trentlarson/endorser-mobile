@@ -1,6 +1,6 @@
 import * as R from 'ramda'
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { ActivityIndicator, Alert, Button, Linking, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, View } from "react-native"
+import { ActivityIndicator, Alert, Button, DevSettings, Linking, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, View } from "react-native"
 import { CheckBox } from "react-native-elements"
 import { classToPlain } from "class-transformer"
 import QRCode from "react-native-qrcode-svg"
@@ -573,6 +573,8 @@ export function SettingsScreen({navigation}) {
                     onPress={toggleStateForHomeIsBVC}
                   />
                 </View>
+
+                <Button title="Reload App" onPress={() => DevSettings.reload()} />
 
                 <CheckBox
                   title='Test Mode'
