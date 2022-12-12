@@ -7,6 +7,7 @@ import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, Styl
 import Clipboard from '@react-native-community/clipboard'
 import { CheckBox } from 'react-native-elements'
 import QRCode from "react-native-qrcode-svg"
+import Icon from 'react-native-vector-icons/FontAwesome'
 import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
@@ -19,9 +20,9 @@ import { agent, dbConnection, SERVICE_ID } from '../veramo/setup'
 export function ContactsScreen({ navigation, route }) {
 
   const [confirmDeleteContact, setConfirmDeleteContact] = useState<string>(null)
-  const [contactDid, setContactDid] = useState<string>()
-  const [contactName, setContactName] = useState<string>()
-  const [contactPubKeyBase64, setContactPubKeyBase64] = useState<string>()
+  const [contactDid, setContactDid] = useState<string>('')
+  const [contactName, setContactName] = useState<string>('')
+  const [contactPubKeyBase64, setContactPubKeyBase64] = useState<string>('')
   const [contactsCsvText, setContactsCsvText] = useState<string>('')
   const [contactsCsvUrl, setContactsCsvUrl] = useState<string>('')
   const [contactUrl, setContactUrl] = useState<string>('')
@@ -34,7 +35,7 @@ export function ContactsScreen({ navigation, route }) {
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
   const [loadingAction2, setLoadingAction2] = useState<Record<string,boolean>>({})
   const [myContactUrl, setMyContactUrl] = useState<string>('')
-  const [quickMessage, setQuickMessage] = useState<string>(null)
+  const [quickMessage, setQuickMessage] = useState<string>('')
   const [scannedImport, setScannedImport] = useState<string>(null)
   const [showMyQr, setShowMyQr] = useState<boolean>(false)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
@@ -48,7 +49,6 @@ export function ContactsScreen({ navigation, route }) {
   const [doneSavingStoring, setDoneSavingStoring] = useState<boolean>()
   const [saving, setSaving] = useState<boolean>(false)
   const [storingVisibility, setStoringVisibility] = useState<boolean>(false)
-  const [visibilityError, setVisibilityError] = useState<boolean>(false)
 
   const allIdentifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
@@ -110,9 +110,9 @@ export function ContactsScreen({ navigation, route }) {
       contact.did = contactDid
       contact.name = contactName
       contact.pubKeyBase64 = utility.checkPubKeyBase64(contactPubKeyBase64)
-      setContactDid(null)
-      setContactName(null)
-      setContactPubKeyBase64(null)
+      setContactDid('')
+      setContactName('')
+      setContactPubKeyBase64('')
     } else {
       Alert.alert("There must be a URL or a DID to create a contact.");
       return
@@ -135,25 +135,32 @@ export function ContactsScreen({ navigation, route }) {
     }
   }
 
-  const createContactFromDataState = async () => {
+  const userRequestedCreateContactFromDataState = async () => {
     return createContactFromData(contactDid, contactName, contactPubKeyBase64)
     .then((result) => {
+      let resultMessage = null
+      let hitError = false
       if (result) {
-        setQuickMessage('Added ' + (result.name ? result.name : '(but without a name)'))
-        setTimeout(() => { setQuickMessage(null) }, 2000)
+        resultMessage = 'Added ' + (result.name ? result.name : '(but without a name)')
         if (wantsToBeVisible) {
-          allowToSeeMe(result)
+          hitError = allowToSeeMe(result) || hitError
         }
         if (wantsToRegister) {
-          register(result)
+          hitError = register(result) || hitError
         }
         utility.loadContacts(appSlice, appStore, dbConnection)
       }
+      if (resultMessage != null || hitError) {
+        let fullMessage = resultMessage || ''
+        fullMessage += hitError ? ' See registration error at top.' : ''
+        setQuickMessage(fullMessage)
+        setTimeout(() => { setQuickMessage(null) }, 5000)
+      }
     })
     .finally(() => {
-      setContactDid(null)
-      setContactName(null)
-      setContactPubKeyBase64(null)
+      setContactDid('')
+      setContactName('')
+      setContactPubKeyBase64('')
       setInputContactData(false)
     })
   }
@@ -174,15 +181,22 @@ export function ContactsScreen({ navigation, route }) {
   const createContactFromUrlState = async () => {
     return createContactFromUrl(contactUrl)
     .then((result) => {
+      let resultMessage = null
+      let hitError = false
       if (result) {
-        setQuickMessage('Added ' + (result.name ? result.name : '(but without a name)'))
-        setTimeout(() => { setQuickMessage(null) }, 2000)
-        utility.loadContacts(appSlice, appStore, dbConnection)
+        resultMessage = 'Added ' + (result.name ? result.name : '(but without a name)')
         if (wantsToBeVisible) {
-          allowToSeeMe(result)
+          hitError = allowToSeeMe(result) || hitError
         }
         if (wantsToRegister) {
-          register(result)
+          hitError = register(result) || hitError
+        }
+        utility.loadContacts(appSlice, appStore, dbConnection)
+        if (resultMessage != null || hitError) {
+          let fullMessage = resultMessage || ''
+          fullMessage += hitError ? ' See registration error at top.' : ''
+          setQuickMessage(fullMessage)
+          setTimeout(() => { setQuickMessage(null) }, 5000)
         }
       } else {
         // not sure if contact was created, but spec isn't clear
@@ -195,102 +209,122 @@ export function ContactsScreen({ navigation, route }) {
   }
 
   const createContactsFromThisCsvText = async (csvText) => {
-    setSaving(true)
 
-    let contacts: Array<Contact> = []
     let messages: Array<string> = []
-    let showingTrimmedMessage = false
-    const parsed = Papa.parse(csvText, {dynamicTyping: true, skipEmptyLines: true})
-    for (let contactArray of parsed.data) {
-      // each contactArray has the fields detected for one row of input
-      if (contactArray.length === 0) {
-        // quietly skip blank rows
-      } else if (contactArray.length === 1 && (contactArray[0] == null || contactArray[0] === '')) {
-        // quietly skip empty rows
-      } else if (contactArray.length > 1 && contactArray[1] === '') {
-        messages = R.concat(messages, ['Skipped empty DID in the row for "' + contactArray[0] + '".'])
-      } else if (contactArray[0] === contactFields[0] && messages.length === 0) {
-        messages = R.concat(messages, ['Skipped first row with "' + contactFields[0] + '" field of "' + contactFields[0] + '". If you really want to include that, make a header row.'])
-      } else {
-        const contact = new Contact()
-        for (let col = 0; col < contactFields.length; col++) {
-          if (col < contactArray.length) {
-            let value = contactArray[col]
-            if (typeof value === 'string') {
-              value = value.trim()
-              if (!showingTrimmedMessage && value !== contactArray[col]) {
-                messages = R.concat(messages, ['Found whitespace around "' + contactArray[col] + '" in the row for "' + contact.name + '". (Trimmed it, and will do this for every value but will not warn about any other instances.)'])
-                showingTrimmedMessage = true
+
+    try {
+
+      let contacts: Array<Contact> = []
+      let showingTrimmedMessage = false
+      const parsed = Papa.parse(csvText, {dynamicTyping: true, skipEmptyLines: true})
+      for (let contactArray of parsed.data) {
+        // each contactArray has the fields detected for one row of input
+        if (contactArray.length === 0) {
+          // quietly skip blank rows
+        } else if (contactArray.length === 1 && (contactArray[0] == null || contactArray[0] === '')) {
+          // quietly skip empty rows
+        } else if (contactArray.length > 1 && contactArray[1] === '') {
+          messages = R.concat(messages, ['Skipped empty DID in the row for "' + contactArray[0] + '".'])
+        } else if (contactArray[0] === contactFields[0] && messages.length === 0) {
+          messages = R.concat(messages, ['Skipped first row with "' + contactFields[0] + '" field of "' + contactFields[0] + '". If you really want to include that, make a header row.'])
+        } else {
+          const contact = new Contact()
+          for (let col = 0; col < contactFields.length; col++) {
+            if (col < contactArray.length) {
+              let value = contactArray[col]
+              if (typeof value === 'string') {
+                value = value.trim()
+                if (!showingTrimmedMessage && value !== contactArray[col]) {
+                  messages = R.concat(messages, ['Found whitespace around "' + contactArray[col] + '" in the row for "' + contact.name + '". (Trimmed it, and will do this for every value but will not warn about any other instances.)'])
+                  showingTrimmedMessage = true
+                }
               }
+              contact[contactFields[col]] = value
             }
-            contact[contactFields[col]] = value
+          }
+          contact.pubKeyBase64 = utility.checkPubKeyBase64(contact.pubKeyBase64)
+          contacts = R.concat(contacts, [contact])
+          if (contactArray.length < contactFields.length) {
+            messages = R.concat(messages, ['There are fewer than ' + contactFields.length + ' fields in the row for "' + contact.name + '". (Will attempt to save anyway.)'])
+          } else if (contactArray.length > contactFields) {
+            messages = R.concat(messages, ['There are more than ' + contactFields.length + ' fields in the row for "' + contact.name + '". (Will attempt to save anyway.)'])
           }
         }
-        contact.pubKeyBase64 = utility.checkPubKeyBase64(contact.pubKeyBase64)
-        contacts = R.concat(contacts, [contact])
-        if (contactArray.length < contactFields.length) {
-          messages = R.concat(messages, ['There are fewer than ' + contactFields.length + ' fields in the row for "' + contact.name + '". (Will attempt to save anyway.)'])
-        }
-        if (contactArray.length > contactFields) {
-          messages = R.concat(messages, ['There are more than ' + contactFields.length + ' fields in the row for "' + contact.name + '". (Will attempt to save anyway.)'])
-        }
       }
-    }
-    if (contacts.length === 0) {
-      messages = R.concat(messages, ['There were no valid contacts to import.'])
+      if (contacts.length === 0) {
+        messages = R.concat(messages, ['There were no valid contacts to import.'])
+      } else {
+
+        await saveContacts(contacts)
+          .then((savedContacts) => {
+            setCsvMessages(['Saved ' + savedContacts.length + ' contacts.'])
+          })
+          .then(async () => {
+            if (wantsToBeVisible) {
+              // trigger each of the contacts to see me
+              const visAll = await Promise.all(contacts.map((contact) => allowToSeeMe(contact)))
+              if (R.all(x => !!x, visAll)) {
+                messages = R.concat(messages, ['Got an error making you visible to some or all contacts.'])
+              }
+            }
+            if (wantsToRegister) {
+              // register each of the contacts
+              const regAll = await Promise.all(contacts.map((contact) => register(contact)))
+              if (R.all(x => !!x, regAll)) {
+                messages = R.concat(messages, ['Got an error registering some or all contacts.'])
+              }
+            }
+          })
+          .then(() => {
+            utility.loadContacts(appSlice, appStore, dbConnection)
+          })
+          .catch((err) => {
+            messages = R.concat(messages, ['Got an error saving contacts: ' + err])
+          })
+      }
+    } catch (e) {
+      messages = R.concat(messages, ['Got an error saving contacts: ' + err])
     }
 
-    return saveContacts(contacts)
-    .then((savedContacts) => {
-      setSaving(false)
-      setActionErrors(messages)
-      setCsvMessages(['Saved ' + savedContacts.length + ' contacts.'])
-    })
-    .then(() => {
-      if (wantsToBeVisible) {
-        // trigger each of the contacts to see me
-        Promise.all(contacts.map((contact) => allowToSeeMe(contact)))
-      }
-      if (wantsToRegister) {
-        // register each of the contacts
-        Promise.all(contacts.map((contact) => register(contact)))
-      }
-    })
-    .then(() => {
-      return utility.loadContacts(appSlice, appStore, dbConnection)
-    })
-    .catch((err) => {
-      setActionErrors(R.concat(messages, ['Got an error saving contacts: ' + err]))
-    })
+    return {
+      messages: messages
+    }
   }
 
   const createContactsFromCsvTextInput = async () => {
-    await createContactsFromThisCsvText(contactsCsvText)
-    setContactsCsvText(null)
+    setSaving(true)
+    let result = await createContactsFromThisCsvText(contactsCsvText)
+    setSaving(false)
+    if (result.messages) {
+      setActionErrors(result.messages)
+    }
+    setContactsCsvText('')
     setWantsCsvText(false)
   }
 
   const createContactsFromThisCsvUrl = async (url) => {
-    setSaving(true)
-
     return fetch(url, { cache: "no-cache" })
     .then(response => {
       if (response.status !== 200) {
         throw Error('There was an error from the server trying to retrieve contacts.')
       }
       return response.text()
-    }).then(result => {
-      return createContactsFromThisCsvText(result)
+    }).then(async result => {
+      const createResult = await createContactsFromThisCsvText(result)
+      if (createResult.messages) {
+        setActionErrors(createResult.messages)
+      }
     })
     .catch((err) => {
-      setActionErrors(['Got an error retrieving contacts: ' + err])
+      setActionErrors(R.concat(R.__, ['Got an error retrieving contacts: ' + err]))
     })
-
   }
 
   const createContactsFromCsvUrlInput = async () => {
+    setSaving(true)
     await createContactsFromThisCsvUrl(contactsCsvUrl)
-    setContactsCsvUrl(null)
+    setSaving(false)
+    setContactsCsvUrl('')
     setWantsCsvUrl(false)
   }
 
@@ -298,10 +332,12 @@ export function ContactsScreen({ navigation, route }) {
     similar to allowToSeeMe & disallowToSeeMe
    */
   const checkVisibility = async (contact: Contact) => {
+    let hitError = false
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
+
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(id0)
-    return fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + encodeURIComponent(contact.did), {
+    await fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + encodeURIComponent(contact.did), {
       headers: {
         "Content-Type": "application/json",
         "Uport-Push-Token": token,
@@ -310,11 +346,10 @@ export function ContactsScreen({ navigation, route }) {
       if (response.status === 200) {
         return response.json()
       } else {
+        hitError = true
         throw Error('There was an error from the server trying to check visibility.')
       }
     }).then(result => {
-      setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
-
       // contact.seesMe = ... silently fails
       const newContact = R.set(R.lensProp('seesMe'), result, contact)
       return saveContact(newContact)
@@ -322,16 +357,27 @@ export function ContactsScreen({ navigation, route }) {
     .then(() => {
       return utility.loadContacts(appSlice, appStore, dbConnection)
     })
+    .catch(e => {
+      hitError = true
+      setActionErrors(errors => R.concat(errors, [e]))
+    })
+
+    setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
+    return hitError
   }
 
   /**
     similar to disallowToSeeMe & checkVisibility
+
+    Note that this could be called for one or as part of a bulk call.
    */
   const allowToSeeMe = async (contact: Contact) => {
+    let hitError = false
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
+
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(id0)
-    return fetch(endorserApiServer + '/api/report/canSeeMe', {
+    await fetch(endorserApiServer + '/api/report/canSeeMe', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -339,12 +385,12 @@ export function ContactsScreen({ navigation, route }) {
       },
       body: JSON.stringify({ did: contact.did })
     }).then(async response => {
-      setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
       if (response.status === 200) {
         // contact.seesMe = ... silently fails
         const newContact = R.set(R.lensProp('seesMe'), true, contact)
         return saveContact(newContact)
       } else {
+        hitError = true
         await response
         .json()
         .then(result => {
@@ -361,16 +407,25 @@ export function ContactsScreen({ navigation, route }) {
     .then(() => {
       return utility.loadContacts(appSlice, appStore, dbConnection)
     })
+    .catch(e => {
+      hitError = true
+      setActionErrors(errors => R.concat(errors, [e]))
+    })
+
+    setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
+    return hitError
   }
 
   /**
     similar to allowToSeeMe & checkVisibility
    */
   const disallowToSeeMe = async (contact: Contact) => {
+    let hitError = false
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
+
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(id0)
-    return fetch(endorserApiServer + '/api/report/cannotSeeMe', {
+    fetch(endorserApiServer + '/api/report/cannotSeeMe', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -378,12 +433,12 @@ export function ContactsScreen({ navigation, route }) {
       },
       body: JSON.stringify({ did: contact.did })
     }).then(async response => {
-      setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
       if (response.status === 200) {
         // contact.seesMe = ... silently fails
         const newContact = R.set(R.lensProp('seesMe'), false, contact)
         return saveContact(newContact)
       } else {
+        hitError = true
         await response
         .json()
         .then(result => {
@@ -400,13 +455,24 @@ export function ContactsScreen({ navigation, route }) {
     .then(() => {
       return utility.loadContacts(appSlice, appStore, dbConnection)
     })
+    .catch(e => {
+      hitError = true
+      setActionErrors(errors => R.concat(errors, [e]))
+    })
+
+    setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
+    return hitError
   }
 
   /**
     Register them on the server
+
+    Note that this could be called for one or as part of a bulk call.
    */
   const register = async (contact: Contact) => {
+    let hitError = false
     setLoadingAction2(R.set(R.lensProp(contact.did), true, loadingAction2))
+
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(id0)
     const signer = didJwt.SimpleSigner(id0.keys[0].privateKeyHex)
@@ -419,7 +485,7 @@ export function ContactsScreen({ navigation, route }) {
     }
     const vcJwt: string = await didJwt.createJWT(utility.vcPayload(claimRegister), { issuer: id0.did, signer })
 
-    return fetch(endorserApiServer + '/api/claim', {
+    fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -427,7 +493,6 @@ export function ContactsScreen({ navigation, route }) {
       },
       body: JSON.stringify({ jwtEncoded: vcJwt })
     }).then(async response => {
-      setLoadingAction2(R.set(R.lensProp(contact.did), false, loadingAction2))
       if (response.status === 201) {
         if (!contact.registered) {
           const conn = await dbConnection
@@ -435,6 +500,7 @@ export function ContactsScreen({ navigation, route }) {
           utility.loadContacts(appSlice, appStore, dbConnection)
         }
       } else {
+        hitError = true
         await response
         .json()
         .then(result => {
@@ -452,6 +518,21 @@ export function ContactsScreen({ navigation, route }) {
         })
       }
     })
+    .catch(e => {
+      hitError = true
+      setActionErrors(errors => R.concat(errors, [e]))
+    })
+
+    setLoadingAction2(R.set(R.lensProp(contact.did), false, loadingAction2))
+    return hitError
+  }
+
+  const userRequestedOneRegister = async (contact: Contact) => {
+    const hitError = await register(contact)
+    if (hitError) {
+      setQuickMessage('Got an error during registration. Check messages at top.')
+      setTimeout(() => { setQuickMessage(null) }, 2000)
+    }
   }
 
   const deleteContact = async (did) => {
@@ -564,9 +645,12 @@ export function ContactsScreen({ navigation, route }) {
           )}
 
           {actionErrors.length > 0 ? (
-            <View style={{ marginBottom: 20 }}>
+            <View style={{ borderWidth: 1, marginTop: 20, padding: 10 }}>
+              <Text style={{ textAlign: 'right' }} >
+                <Icon name="close" onPress={() => setActionErrors([])} />
+              </Text>
               <Text style={{ color: 'red' }}>Errors and Warnings:</Text>
-              <Text>{ "- " + actionErrors.join("\n- ") }</Text>
+              <Text style={{ padding: 5 }}>{ "- " + actionErrors.join("\n- ") }</Text>
             </View>
           ) : (
             <View />
@@ -754,7 +838,7 @@ export function ContactsScreen({ navigation, route }) {
 
                 <TouchableHighlight
                   style={styles.saveButton}
-                  onPress={() => createContactFromDataState() }
+                  onPress={() => userRequestedCreateContactFromDataState() }
                 >
                   <Text>Save</Text>
                 </TouchableHighlight>
@@ -987,7 +1071,7 @@ export function ContactsScreen({ navigation, route }) {
                       ?
                         <Button
                           title={`Register`}
-                          onPress={() => { register(contact) }}
+                          onPress={() => { userRequestedOneRegister(contact) }}
                         />
                       :
                         <View />
