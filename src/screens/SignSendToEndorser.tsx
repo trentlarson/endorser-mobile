@@ -84,12 +84,10 @@ export function SignCredentialScreen({ navigation, route }) {
       }
     })
     .then(json => {
-      console.log('Got Endorser server result', json)
       setEndorserIds(R.update(index, json))
       return json
     })
     .catch(err => {
-      console.log('Got error sending to ' + endorserApiServer, err)
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... but got error sending to " + endorserApiServer + " " + err}))
       setOneResultMessage(index, "Got error trying to send " + claimNumber(index) + ". The logs may tell more.")
     })

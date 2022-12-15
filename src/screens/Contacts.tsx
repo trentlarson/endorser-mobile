@@ -135,33 +135,32 @@ export function ContactsScreen({ navigation, route }) {
     }
   }
 
-  const userRequestedCreateContactFromDataState = async () => {
+  const singleCreateContactFromDataState = async () => {
     return createContactFromData(contactDid, contactName, contactPubKeyBase64)
-    .then((result) => {
-      let resultMessage = null
-      let hitError = false
+    .then(async result => {
       if (result) {
+
+        setContactDid('')
+        setContactName('')
+        setContactPubKeyBase64('')
+        setInputContactData(false)
+
+        let resultMessage = null
+        let hitError = false
         resultMessage = 'Added ' + (result.name ? result.name : '(but without a name)')
         if (wantsToBeVisible) {
-          hitError = allowToSeeMe(result) || hitError
+          hitError = await allowToSeeMe(result) || hitError
         }
         if (wantsToRegister) {
-          hitError = register(result) || hitError
+          hitError = await register(result) || hitError
         }
         utility.loadContacts(appSlice, appStore, dbConnection)
+        resultMessage += hitError ? '\nSee top for other errors.' : ''
+        setQuickMessage(resultMessage)
+        setTimeout(() => { setQuickMessage(null) }, 2000)
+      } else {
+        // not sure if contact was created, but spec isn't clear
       }
-      if (resultMessage != null || hitError) {
-        let fullMessage = resultMessage || ''
-        fullMessage += hitError ? ' See registration error at top.' : ''
-        setQuickMessage(fullMessage)
-        setTimeout(() => { setQuickMessage(null) }, 5000)
-      }
-    })
-    .finally(() => {
-      setContactDid('')
-      setContactName('')
-      setContactPubKeyBase64('')
-      setInputContactData(false)
     })
   }
 
@@ -178,33 +177,30 @@ export function ContactsScreen({ navigation, route }) {
     }
   }
 
-  const createContactFromUrlState = async () => {
+  const singleCreateContactFromUrlState = async () => {
     return createContactFromUrl(contactUrl)
-    .then((result) => {
-      let resultMessage = null
-      let hitError = false
+    .then(async result => {
       if (result) {
+
+        setContactUrl(null)
+        setInputContactUrl(false)
+
+        let resultMessage = null
+        let hitError = false
         resultMessage = 'Added ' + (result.name ? result.name : '(but without a name)')
         if (wantsToBeVisible) {
-          hitError = allowToSeeMe(result) || hitError
+          hitError = await allowToSeeMe(result) || hitError
         }
         if (wantsToRegister) {
-          hitError = register(result) || hitError
+          hitError = await register(result) || hitError
         }
         utility.loadContacts(appSlice, appStore, dbConnection)
-        if (resultMessage != null || hitError) {
-          let fullMessage = resultMessage || ''
-          fullMessage += hitError ? ' See registration error at top.' : ''
-          setQuickMessage(fullMessage)
-          setTimeout(() => { setQuickMessage(null) }, 5000)
-        }
+        resultMessage += hitError ? '\nSee top for other errors.' : ''
+        setQuickMessage(fullMessage)
+        setTimeout(() => { setQuickMessage(null) }, 2000)
       } else {
         // not sure if contact was created, but spec isn't clear
       }
-    })
-    .finally(() => {
-      setContactUrl(null)
-      setInputContactUrl(false)
     })
   }
 
@@ -296,7 +292,7 @@ export function ContactsScreen({ navigation, route }) {
     let result = await createContactsFromThisCsvText(contactsCsvText)
     setSaving(false)
     if (result.messages) {
-      setActionErrors(result.messages)
+      setActionErrors(errors => R.concat(errors, [result.messages]))
     }
     setContactsCsvText('')
     setWantsCsvText(false)
@@ -304,19 +300,20 @@ export function ContactsScreen({ navigation, route }) {
 
   const createContactsFromThisCsvUrl = async (url) => {
     return fetch(url, { cache: "no-cache" })
-    .then(response => {
+    .then(async response => {
+      const text = await response.text()
       if (response.status !== 200) {
-        throw Error('There was an error from the server trying to retrieve contacts.')
+        throw Error('There was an error from the server trying to retrieve contacts: ' + text)
       }
-      return response.text()
+      return text
     }).then(async result => {
       const createResult = await createContactsFromThisCsvText(result)
       if (createResult.messages) {
-        setActionErrors(createResult.messages)
+        setActionErrors(errors => R.concat(errors, [createResult.messages]))
       }
     })
     .catch((err) => {
-      setActionErrors(R.concat(R.__, ['Got an error retrieving contacts: ' + err]))
+      setActionErrors(errors => R.concat(errors, ['Got an error retrieving contacts: ' + err]))
     })
   }
 
@@ -342,12 +339,13 @@ export function ContactsScreen({ navigation, route }) {
         "Content-Type": "application/json",
         "Uport-Push-Token": token,
       }
-    }).then(response => {
+    }).then(async response => {
       if (response.status === 200) {
         return response.json()
       } else {
         hitError = true
-        throw Error('There was an error from the server trying to check visibility.')
+        const error = await response.text()
+        throw Error('There was an error from the server trying to check visibility: ' + error)
       }
     }).then(result => {
       // contact.seesMe = ... silently fails
@@ -364,6 +362,14 @@ export function ContactsScreen({ navigation, route }) {
 
     setLoadingAction(R.set(R.lensProp(contact.did), false, loadingAction))
     return hitError
+  }
+
+  const singleCheckVisibility = async (contact: Contact) => {
+    const hitError = await checkVisibility(contact)
+    if (hitError) {
+      setQuickMessage('Visibility Check Error!\nSee messages at the top.')
+      setTimeout(() => { setQuickMessage(null) }, 2000)
+    }
   }
 
   /**
@@ -416,6 +422,14 @@ export function ContactsScreen({ navigation, route }) {
     return hitError
   }
 
+  const singleAllowToSeeMe = async (contact: Contact) => {
+    const hitError = await allowToSeeMe(contact)
+    if (hitError) {
+      setQuickMessage('Visibility Error!\nSee messages at the top.')
+      setTimeout(() => { setQuickMessage(null) }, 2000)
+    }
+  }
+
   /**
     similar to allowToSeeMe & checkVisibility
    */
@@ -425,7 +439,7 @@ export function ContactsScreen({ navigation, route }) {
 
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(id0)
-    fetch(endorserApiServer + '/api/report/cannotSeeMe', {
+    await fetch(endorserApiServer + '/api/report/cannotSeeMe', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -464,6 +478,14 @@ export function ContactsScreen({ navigation, route }) {
     return hitError
   }
 
+  const singleDisallowToSeeMe = async (contact: Contact) => {
+    const hitError = await disallowToSeeMe(contact)
+    if (hitError) {
+      setQuickMessage('Hiding Error!\nSee messages at the top.')
+      setTimeout(() => { setQuickMessage(null) }, 2000)
+    }
+  }
+
   /**
     Register them on the server
 
@@ -485,7 +507,7 @@ export function ContactsScreen({ navigation, route }) {
     }
     const vcJwt: string = await didJwt.createJWT(utility.vcPayload(claimRegister), { issuer: id0.did, signer })
 
-    fetch(endorserApiServer + '/api/claim', {
+    await fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -527,10 +549,10 @@ export function ContactsScreen({ navigation, route }) {
     return hitError
   }
 
-  const userRequestedOneRegister = async (contact: Contact) => {
+  const singleRegister = async (contact: Contact) => {
     const hitError = await register(contact)
     if (hitError) {
-      setQuickMessage('Got an error during registration. Check messages at top.')
+      setQuickMessage('Registration Error!\nSee messages at the top.')
       setTimeout(() => { setQuickMessage(null) }, 2000)
     }
   }
@@ -664,7 +686,10 @@ export function ContactsScreen({ navigation, route }) {
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 { saving ? (
-                  <ActivityIndicator color="#00ff00" />
+                  <View>
+                    <Text>Saving...</Text>
+                    <ActivityIndicator color="#00ff00" />
+                  </View>
                 ) : (
                   <View>
 
@@ -729,7 +754,10 @@ export function ContactsScreen({ navigation, route }) {
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 { saving ? (
-                  <ActivityIndicator color="#00ff00" />
+                  <View>
+                    <Text>Saving...</Text>
+                    <ActivityIndicator color="#00ff00" />
+                  </View>
                 ) : (
                   <View>
 
@@ -838,7 +866,7 @@ export function ContactsScreen({ navigation, route }) {
 
                 <TouchableHighlight
                   style={styles.saveButton}
-                  onPress={() => userRequestedCreateContactFromDataState() }
+                  onPress={() => singleCreateContactFromDataState() }
                 >
                   <Text>Save</Text>
                 </TouchableHighlight>
@@ -885,7 +913,7 @@ export function ContactsScreen({ navigation, route }) {
 
                 <TouchableHighlight
                   style={styles.saveButton}
-                  onPress={() => createContactFromUrlState() }
+                  onPress={() => singleCreateContactFromUrlState() }
                 >
                   <Text>Save</Text>
                 </TouchableHighlight>
@@ -992,7 +1020,9 @@ export function ContactsScreen({ navigation, route }) {
                 {/*----------------------------------------------------------------*/}
                 <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '100%', padding: 5 }}/>
                 <Text>All Contacts</Text>
-                <Button title="Export All to Clipboard (CSV)" onPress={copyContactsToClipboard} />
+                <View style={{ padding: 10 }}>
+                  <Button title="Export All to Clipboard (CSV)" onPress={copyContactsToClipboard} />
+                </View>
               </View>
             : <View/>
           }
@@ -1017,8 +1047,10 @@ export function ContactsScreen({ navigation, route }) {
                 </Text>
                 {
                   loadingAction[contact.did] || loadingAction2[contact.did]
-                  ? <ActivityIndicator color="#00ff00" />
-                  : <View style={styles.centeredView}>
+                  ?
+                    <ActivityIndicator color="#00ff00" />
+                  :
+                    <View style={styles.centeredView}>
                     {
                       (id0 && contact.did === id0.did)
                       ?
@@ -1029,12 +1061,12 @@ export function ContactsScreen({ navigation, route }) {
                           <View>
                             <Button style={{ textAlign: 'center' }}
                               title={`Can ${contact.name || 'They'} See Your Activity?`}
-                              onPress={() => {checkVisibility(contact)}}
+                              onPress={() => {singleCheckVisibility(contact)}}
                             />
                             <View style={{ marginTop: 5 }}/>
                             <Button
                               title="Make Yourself Visible"
-                              onPress={() => {allowToSeeMe(contact)}}
+                              onPress={() => {singleAllowToSeeMe(contact)}}
                             />
                           </View>
                         :
@@ -1046,17 +1078,17 @@ export function ContactsScreen({ navigation, route }) {
                               contact.seesMe
                               ? <Button
                                 title="Hide Yourself"
-                                onPress={() => {disallowToSeeMe(contact)}}
+                                onPress={() => {singleDisallowToSeeMe(contact)}}
                               />
                               : <Button
                                 title="Make Yourself Visible"
-                                onPress={() => {allowToSeeMe(contact)}}
+                                onPress={() => {singleAllowToSeeMe(contact)}}
                               />
                             }
                             <View style={{ marginTop: 5 }}/>
                             <Button
                               title={`(Double-Check Visibility)`}
-                              onPress={() => {checkVisibility(contact)}}
+                              onPress={() => {singleCheckVisibility(contact)}}
                             />
                           </View>
                     }
@@ -1071,7 +1103,7 @@ export function ContactsScreen({ navigation, route }) {
                       ?
                         <Button
                           title={`Register`}
-                          onPress={() => { userRequestedOneRegister(contact) }}
+                          onPress={() => { singleRegister(contact) }}
                         />
                       :
                         <View />
@@ -1111,7 +1143,7 @@ export function ContactsScreen({ navigation, route }) {
                     deleteContact(confirmDeleteContact)
                     setConfirmDeleteContact(null)
                     setQuickMessage('Deleted')
-                    setTimeout(() => { setQuickMessage(null) }, 1500)
+                    setTimeout(() => { setQuickMessage(null) }, 1000)
                   }}
                 >
                   <Text>Yes</Text>
