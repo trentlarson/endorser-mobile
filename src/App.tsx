@@ -36,6 +36,7 @@ import { ContactsScreen } from './screens/Contacts'
 import { ContractFormScreen } from './screens/ContractForm'
 import { ExportIdentityScreen, ImportIdentityScreen } from "./screens/ExportImportIdentity";
 import { InitializeScreen } from './screens/Initialize'
+import { LogsScreen } from './screens/Logs'
 import { MyCredentialsScreen } from './screens/MyCredentials'
 import { MyGivenScreen } from './screens/MyGiven'
 import { MyOffersScreen } from './screens/MyOffers'
@@ -165,6 +166,7 @@ function SettingsStackScreen() {
       <SettingsStack.Screen name={utility.HELP_SCREEN_NAV} component={HelpScreen} />
       <SettingsStack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
       <SettingsStack.Screen name="Initialize" component={InitializeScreen} />
+      <SettingsStack.Screen name="Logs" component={LogsScreen} />
       <SettingsStack.Screen name="Notification Permissions" component={NotificationPermissionsScreen} />
     </SettingsStack.Navigator>
   )

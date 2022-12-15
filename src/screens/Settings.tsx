@@ -17,19 +17,6 @@ import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_
 import { agent, dbConnection } from "../veramo/setup"
 import { styles } from './style'
 
-const logDatabaseTable = (tableName, maxId) => async () => {
-  let query = 'SELECT * FROM ' + tableName
-  if (maxId) {
-    query += ' ORDER BY id DESC LIMIT 1'
-  }
-  const conn = await dbConnection
-  const data = await conn.manager.query(query)
-  if (tableName === 'settings') {
-    data[0]['mnemEncrBase64'] = 'HIDDEN'
-  }
-  appStore.dispatch(appSlice.actions.addLog({log: true, msg: "\nContents of table \"" + tableName + "\":\n" + JSON.stringify(data)}))
-}
-
 export function SettingsScreen({navigation}) {
 
   const [confirmDeleteLastIdentifier, setConfirmDeleteLastIdentifier] = useState<boolean>(false)
@@ -523,7 +510,7 @@ export function SettingsScreen({navigation}) {
               style={{ color: 'blue' }}
               onPress={() => navigation.navigate(utility.HELP_SCREEN_NAV)}
             >
-              Help
+              See Help
             </Text>
 
             <CheckBox
@@ -543,6 +530,13 @@ export function SettingsScreen({navigation}) {
                   onPress={() => navigation.navigate('Notification Permissions')}
                 >
                   Check Permissions
+                </Text>
+
+                <Text
+                  style={{ color: 'blue' }}
+                  onPress={() => navigation.navigate('Logs')}
+                >
+                  See Logs
                 </Text>
 
                 <View style={{ marginTop: 10 }}/>
@@ -632,38 +626,6 @@ export function SettingsScreen({navigation}) {
                   <View/>
                 )}
 
-                <Button
-                  title='Log Contact Table'
-                  onPress={logDatabaseTable('contact')}
-                />
-                <View style={{ marginTop: 5 }}/>
-                <Button
-                  title='Log Identifier Table'
-                  onPress={logDatabaseTable('identifier')}
-                />
-                <View style={{ marginTop: 5 }}/>
-                <Button
-                  title='Log Key Table'
-                  onPress={logDatabaseTable('key')}
-                />
-                <View style={{ marginTop: 5 }}/>
-                <Button
-                  title='Log All Private Data'
-                  onPress={logDatabaseTable('privateData')}
-                />
-                <View style={{ marginTop: 5 }}/>
-                <Button
-                  title='Log Latest Private Datum'
-                  onPress={logDatabaseTable('privateData', true)}
-                />
-                <View style={{ marginTop: 5 }}/>
-                <Button
-                  title='Log Settings Table'
-                  onPress={logDatabaseTable('settings')}
-                />
-
-                <Text>Log</Text>
-                <Text selectable={true}>{ logMessageSelector }</Text>
               </View>
             ) : (
               <View/>
