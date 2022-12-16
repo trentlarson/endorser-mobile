@@ -17,6 +17,15 @@ import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_
 import { agent, dbConnection } from "../veramo/setup"
 import { styles } from './style'
 
+interface RateLimits {
+  doneClaimsThisWeek: string;
+  doneRegistrationsThisMonth: string;
+  maxClaimsPerWeek: string;
+  maxRegistrationsPerMonth: string;
+  nextMonthBeginDateTime: string;
+  nextWeekBeginDateTime: string;
+}
+
 export function SettingsScreen({navigation}) {
 
   const [confirmDeleteLastIdentifier, setConfirmDeleteLastIdentifier] = useState<boolean>(false)
@@ -31,6 +40,8 @@ export function SettingsScreen({navigation}) {
   const [inputName, setInputName] = useState<string>('')
   const [lastNotifiedClaimId, setLastNotifiedClaimId] = useState<string>(appStore.getState().settings.lastNotifiedClaimId)
   const [lastViewedClaimId, setLastViewedClaimId] = useState<string>(appStore.getState().settings.lastViewedClaimId)
+  const [limits, setLimits] = useState<RateLimits>(null)
+  const [limitsMessage, setLimitsMessage] = useState<string>('')
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
   const [qrJwts, setQrJwts] = useState<Record<string,string>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
@@ -192,6 +203,30 @@ export function SettingsScreen({navigation}) {
 
     setLastNotifiedClaimId(value)
     setLastViewedClaimId(value)
+  }
+
+  const checkLimits = async () => {
+    const endorserApiServer = appStore.getState().settings.apiServer
+    const token = await utility.accessToken(identifiersSelector[0])
+    await fetch(endorserApiServer + '/api/report/rateLimits', {
+      headers: {
+        "Content-Type": "application/json",
+        "Uport-Push-Token": token,
+      }
+    }).then(async response => {
+      if (response.status === 200) {
+        const result = await response.json()
+        setLimits(result)
+        setLimitsMessage('')
+      } else {
+        setLimitsMessage('Could not retrieve your limits. You may not be registered, in which case you need to ask an existing user to help you. See logs for details.')
+        const text = await response.text()
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got bad result retrieving limits. " + text}))
+      }
+    }).catch(e => {
+      setLimitsMessage('There was an error retrieving your limits. See logs for details.')
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error retrieving limits. " + e}))
+    })
   }
 
   // Check for existing identifers on load and set them to state
@@ -513,6 +548,43 @@ export function SettingsScreen({navigation}) {
               See Help
             </Text>
 
+            {
+              identifiersSelector.length == 0
+              ?
+                <View/>
+              :
+                <View>
+                  <Text
+                    style={{ color: 'blue' }}
+                    onPress={checkLimits}
+                  >
+                    Check your registration and claim limits.
+                  </Text>
+                  {
+                    limits == null
+                    ?
+                      <View/>
+                    :
+                      <View style={{ padding: 10 }}>
+                        <Text style>
+                          You have done {limits.doneClaimsThisWeek} claims out of {limits.maxClaimsPerWeek} for this week. Your claims counter resets at: {R.replace('T', ' ', limits.nextWeekBeginDateTime)}
+                        </Text>
+                        <Text>
+                          You have done {limits.doneRegistrationsThisMonth} registrations out of {limits.maxRegistrationsPerMonth} for this month. Your registrations counter resets at: {R.replace('T', ' ', limits.nextMonthBeginDateTime)}
+                        </Text>
+                      </View>
+                  }
+                  <Text style={{ padding: 10 }}>{limitsMessage}</Text>
+                </View>
+            }
+
+            <View style={{ marginTop: 10 }}/>
+            <Text
+              style={{ color: 'blue' }}
+              onPress={() => navigation.navigate(utility.HELP_SCREEN_NAV)}
+            >
+            </Text>
+
             <CheckBox
               title='Advanced Mode'
               checked={isInAdvancedMode}
@@ -568,8 +640,6 @@ export function SettingsScreen({navigation}) {
                   />
                 </View>
 
-                <Button title="Reload App" onPress={() => DevSettings.reload()} />
-
                 <CheckBox
                   title='Test Mode'
                   checked={isInTestMode}
@@ -620,6 +690,9 @@ export function SettingsScreen({navigation}) {
                       onChangeText={storeLastViewedClaimId}
                       style={{borderWidth: 1}}
                     />
+
+                    <View style={{ marginTop: 5 }}/>
+                    <Button title="Reload App" onPress={() => DevSettings.reload()} />
 
                   </View>
                 ) : (
