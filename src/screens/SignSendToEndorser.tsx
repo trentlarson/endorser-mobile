@@ -41,6 +41,7 @@ export function SignCredentialScreen({ navigation, route }) {
     return appStore.getState().viewServer + '/reportClaim?claimId=' + endorserId
   }
 
+  // Set the message for this index in the result-messages array
   const setOneResultMessage = (index, message) => {
     setResultMessages(R.update(index, message))
   }
@@ -90,7 +91,7 @@ export function SignCredentialScreen({ navigation, route }) {
     })
     .catch(err => {
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... but got error sending to " + endorserApiServer + " " + err}))
-      setOneResultMessage(index, "Got error trying to send " + claimNumber(index) + ". The logs may tell more.")
+      setOneResultMessage(index, "Got error trying to send " + claimNumber(index) + ". The logs (near the bottom of Help) may tell more.")
     })
     .finally(() => {
       setFetching(R.update(index, false))
@@ -184,7 +185,7 @@ export function SignCredentialScreen({ navigation, route }) {
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Signed, and finished storing data remotely & locally. Server result: " + JSON.stringify(sentResult)}))
         return sentResult
       } else {
-        setOneResultMessage(index, "Successfully signed " + claimNumber(index) + " but did not record any server result.")
+        // expect that some result message is already set
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Signed, and finished storing data locally. Server result: " + JSON.stringify(sentResult)})) // sentResult can be undefined for errors
       }
 
@@ -240,13 +241,13 @@ export function SignCredentialScreen({ navigation, route }) {
                                 title="Success!"
                                 onPress={() => {
                                   Linking.openURL(endorserViewLink(endorserIds[index])).catch(err => {
-                                    setOneResultMessage(index, 'Sorry, something went wrong trying to let you browse the record on the Endorser server. ' + err)
+                                    setOneResultMessage(index, 'Sorry, something went wrong trying to show you the record on the Endorser server. ' + err)
                                   })
                                 }}
                               />
                             </View>
                           ) : ( /* fetched && !endorserId */
-                            <Text>Got response from the Endorser server but something went wrong.  You could look at the logs and check your data.  If it's all good, there may be an error at the Endorser server.</Text>
+                            <Text>Got response from the Endorser server but something went wrong. The logs (near the bottom of Help) may show more info.</Text>
                           )
                         ) : ( /* !fetched */
                           fetching[index] ? (

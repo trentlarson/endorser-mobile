@@ -219,7 +219,7 @@ export function SettingsScreen({navigation}) {
         setLimits(result)
         setLimitsMessage('')
       } else {
-        setLimitsMessage('Could not retrieve your limits. You may not be registered, in which case you need to ask an existing user to help you. See logs for details.')
+        setLimitsMessage('Could not retrieve your limits. You may not be registered, in which case you need to ask an existing user to help you. See logs (near the bottom of Help) for details.')
         const text = await response.text()
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got bad result retrieving limits. " + text}))
       }
