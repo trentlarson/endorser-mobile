@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.3.111] - 2022-12-16
+## [6.3.112] - 2022-12-17
 
 ### Fixed
 - Enhance error messages, especially for claim and registration limits.
