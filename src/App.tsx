@@ -75,7 +75,7 @@ const BottomTab = createBottomTabNavigator();
 const HOME_SCREEN_TITLE = HANDY_APP ? 'Goodlaw Signatures' : 'Community Endorser'
 function BottomTabs() {
   return (
-    <BottomTab.Navigator>
+    <BottomTab.Navigator screenOptions={{ tabBarHideOnKeyboard: true }}>
       <BottomTab.Screen name={utility.CLAIMS_HOME_SCREEN_NAV} component={ClaimsStackScreen}
         options={{
           headerTitle: HOME_SCREEN_TITLE,

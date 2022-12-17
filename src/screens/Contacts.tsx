@@ -29,7 +29,6 @@ export function ContactsScreen({ navigation, route }) {
   const [editContactIndex, setEditContactIndex] = useState<number>(null)
   const [editContactName, setEditContactName] = useState<string>(null)
   const [finishedImport, setFinishedImport] = useState<boolean>(false)
-  const [id0, setId0] = useState<Identifier>()
   const [inputContactData, setInputContactData] = useState<boolean>(false)
   const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
@@ -333,7 +332,7 @@ export function ContactsScreen({ navigation, route }) {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
 
     const endorserApiServer = appStore.getState().settings.apiServer
-    const token = await utility.accessToken(id0)
+    const token = await utility.accessToken(allIdentifiers[0])
     await fetch(endorserApiServer + '/api/report/canDidExplicitlySeeMe?did=' + encodeURIComponent(contact.did), {
       headers: {
         "Content-Type": "application/json",
@@ -382,7 +381,7 @@ export function ContactsScreen({ navigation, route }) {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
 
     const endorserApiServer = appStore.getState().settings.apiServer
-    const token = await utility.accessToken(id0)
+    const token = await utility.accessToken(allIdentifiers[0])
     await fetch(endorserApiServer + '/api/report/canSeeMe', {
       method: 'POST',
       headers: {
@@ -438,7 +437,7 @@ export function ContactsScreen({ navigation, route }) {
     setLoadingAction(R.set(R.lensProp(contact.did), true, loadingAction))
 
     const endorserApiServer = appStore.getState().settings.apiServer
-    const token = await utility.accessToken(id0)
+    const token = await utility.accessToken(allIdentifiers[0])
     await fetch(endorserApiServer + '/api/report/cannotSeeMe', {
       method: 'POST',
       headers: {
@@ -496,16 +495,16 @@ export function ContactsScreen({ navigation, route }) {
     setLoadingAction2(R.set(R.lensProp(contact.did), true, loadingAction2))
 
     const endorserApiServer = appStore.getState().settings.apiServer
-    const token = await utility.accessToken(id0)
-    const signer = didJwt.SimpleSigner(id0.keys[0].privateKeyHex)
+    const token = await utility.accessToken(allIdentifiers[0])
+    const signer = didJwt.SimpleSigner(allIdentifiers[0].keys[0].privateKeyHex)
     const claimRegister = {
       "@context": "https://schema.org",
       "@type": "RegisterAction",
-      agent: { did: id0.did },
+      agent: { did: allIdentifiers[0].did },
       object: SERVICE_ID,
       participant: { did: contact.did },
     }
-    const vcJwt: string = await didJwt.createJWT(utility.vcPayload(claimRegister), { issuer: id0.did, signer })
+    const vcJwt: string = await didJwt.createJWT(utility.vcPayload(claimRegister), { issuer: allIdentifiers[0].did, signer })
 
     await fetch(endorserApiServer + '/api/claim', {
       method: 'POST',
@@ -566,7 +565,6 @@ export function ContactsScreen({ navigation, route }) {
   useFocusEffect(
     React.useCallback(() => {
       if (allIdentifiers[0]) {
-        setId0(allIdentifiers[0])
 
         async function setQr() {
           const url = await utility.contactJwtForPayload(
@@ -1052,64 +1050,74 @@ export function ContactsScreen({ navigation, route }) {
                   :
                     <View style={styles.centeredView}>
                     {
-                      (id0 && contact.did === id0.did)
+                      allIdentifiers[0] == null
                       ?
-                        <View><Text>You can always see your own activity on the Endorser server.</Text></View>
+                        <View/>
                       :
-                        R.isNil(contact.seesMe)
+                        (contact.did === allIdentifiers[0].did)
                         ?
-                          <View>
-                            <Button style={{ textAlign: 'center' }}
-                              title={`Can ${contact.name || 'They'} See Your Activity?`}
-                              onPress={() => {singleCheckVisibility(contact)}}
-                            />
-                            <View style={{ marginTop: 5 }}/>
-                            <Button
-                              title="Make Yourself Visible"
-                              onPress={() => {singleAllowToSeeMe(contact)}}
-                            />
-                          </View>
+                          <View><Text>You can always see your own activity on the Endorser server.</Text></View>
                         :
-                          <View>
-                            <Text style={{ textAlign: 'center' }}>
-                              { `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity on the Endorser server.` }
-                            </Text>
-                            {
-                              contact.seesMe
-                              ? <Button
-                                title="Hide Yourself"
-                                onPress={() => {singleDisallowToSeeMe(contact)}}
+                          R.isNil(contact.seesMe)
+                          ?
+                            <View>
+                              <Button style={{ textAlign: 'center' }}
+                                title={`Can ${contact.name || 'They'} See Your Activity?`}
+                                onPress={() => {singleCheckVisibility(contact)}}
                               />
-                              : <Button
-                                title="Make Yourself Visible"
-                                onPress={() => {singleAllowToSeeMe(contact)}}
-                              />
-                            }
-                            <View style={{ marginTop: 5 }}/>
-                            <Button
-                              title={`(Double-Check Visibility)`}
-                              onPress={() => {singleCheckVisibility(contact)}}
-                            />
-                          </View>
+                              <View style={{ marginTop: 5 }}/>
+                             <Button
+                               title="Make Yourself Visible"
+                               onPress={() => {singleAllowToSeeMe(contact)}}
+                             />
+                           </View>
+                         :
+                           <View>
+                             <Text style={{ textAlign: 'center' }}>
+                               { `${contact.name} can${contact.seesMe ?'' : 'not'} see your activity on the Endorser server.` }
+                             </Text>
+                             {
+                               contact.seesMe
+                               ? <Button
+                                 title="Hide Yourself"
+                                 onPress={() => {singleDisallowToSeeMe(contact)}}
+                               />
+                               : <Button
+                                 title="Make Yourself Visible"
+                                 onPress={() => {singleAllowToSeeMe(contact)}}
+                               />
+                             }
+                             <View style={{ marginTop: 5 }}/>
+                             <Button
+                               title={`(Double-Check Visibility)`}
+                               onPress={() => {singleCheckVisibility(contact)}}
+                             />
+                           </View>
                     }
-                    <View style={{ marginTop: 5 }}/>
-                    <Text>
-                      { id0 && contact.did === id0.did ? 'You' : contact.name }
-                      &nbsp;
-                      { contact.registered ? (id0 && contact.did === id0.did ? 'are' : 'is') : 'might not be' } registered on the server.
-                    </Text>
                     {
-                      !contact.registered
+                      allIdentifiers[0] == null
                       ?
-                        <Button
-                          title={`Register`}
-                          onPress={() => { singleRegister(contact) }}
-                        />
+                        <View/>
                       :
-                        <View />
+                        <View style={{ marginTop: 5 }}>
+                          <Text>
+                            { contact.did === allIdentifiers[0].did ? 'You' : contact.name }
+                            &nbsp;
+                            { contact.registered ? (allIdentifiers[0] && contact.did === allIdentifiers[0].did ? 'are' : 'is') : 'might not be' } registered on the server.
+                          </Text>
+                          {
+                            !contact.registered
+                            ?
+                              <Button
+                                title={`Register`}
+                                onPress={() => { singleRegister(contact) }}
+                              />
+                            :
+                              <View />
+                          }
+                        </View>
                     }
-                    <View style={{ marginTop: 20 }}/>
-                  </View>
+                    </View>
                 }
                 <View style={styles.centeredView}>
                   <Button title={'Delete'} onPress={() => setConfirmDeleteContact(contact.did)}/>
