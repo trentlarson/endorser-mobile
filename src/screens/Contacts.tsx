@@ -562,23 +562,23 @@ export function ContactsScreen({ navigation, route }) {
     utility.loadContacts(appSlice, appStore, dbConnection)
   }
 
+  const retrieveContactUrl = async () => {
+    return utility.contactJwtForPayload(
+      DEFAULT_ENDORSER_VIEW_SERVER,
+      allIdentifiers[0],
+      appStore.getState().settings.name
+    )
+  }
+
+  const generateContactUrl = async () => {
+    const url = await retrieveContactUrl()
+    setMyContactUrl(url)
+    setShowMyQr(!showMyQr)
+  }
+
   useFocusEffect(
     React.useCallback(() => {
-      if (allIdentifiers[0]) {
-
-        async function setQr() {
-          const url = await utility.contactJwtForPayload(
-            DEFAULT_ENDORSER_VIEW_SERVER,
-            allIdentifiers[0],
-            appStore.getState().settings.name
-          )
-          setMyContactUrl(url)
-        }
-        setQr()
-      }
-
       utility.loadContacts(appSlice, appStore, dbConnection)
-
     }, [])
   )
 
@@ -983,7 +983,7 @@ export function ContactsScreen({ navigation, route }) {
 
               <Text
                 style={{ color: 'blue', ...styles.centeredText }}
-                onPress={() => copyToClipboard(myContactUrl)}
+                onPress={async () => copyToClipboard(await retrieveContactUrl())}
               >
                 Copy Your URL to the Clipboard
               </Text>
@@ -991,7 +991,7 @@ export function ContactsScreen({ navigation, route }) {
               <View style={{ padding: 10 }} />
               <Text
                 style={{ color: 'blue', ...styles.centeredText }}
-                onPress={() => setShowMyQr(!showMyQr)}
+                onPress={() => generateContactUrl()}
               >
                 { (showMyQr ? "Hide" : "Show") + " Your URL in a QR Code" }
               </Text>
