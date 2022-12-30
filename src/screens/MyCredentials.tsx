@@ -19,6 +19,7 @@ export function MyCredentialsScreen({ navigation }) {
   const [outstandingPerCurrency, setOutstandingPerCurrency] = useState<Record<string,Record>>({})
   const [outstandingPerInvoice, setOutstandingPerInvoice] = useState<Record<string,Record>>({})
   const [paidPerCurrency, setPaidPerCurrency] = useState<Record<string,Record>>({})
+  const [quickMessage, setQuickMessage] = useState<string>(null)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState(null)
   const [showSearchInfoModal, setShowSearchInfoModal] = useState(false)
@@ -38,12 +39,16 @@ export function MyCredentialsScreen({ navigation }) {
         "Content-Type": "application/json",
         "Uport-Push-Token": token,
       }
-    }).then(response => {
+    }).then(async response => {
       setLoading(false)
       if (response.status !== 200) {
-        throw Error('There was an error from the server.')
+        const text = await response.text()
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Unsuccessful results for personal search. " + text}))
+        setQuickMessage('Request error. See logs for more info.')
+        setTimeout(() => { setQuickMessage(null) }, 2000)
+      } else {
+        return response.json()
       }
-      return response.json()
     }).then(results => {
       setSearchResults(results)
       setNumStrangesAndUnknowns(0)
@@ -70,17 +75,25 @@ export function MyCredentialsScreen({ navigation }) {
         "Content-Type": "application/json",
         "Uport-Push-Token": token,
       }
-    }).then(response => {
+    }).then(async response => {
       if (response.status !== 200) {
-        throw Error('There was a low-level error from the server.')
-      }
-      return response.json()
-    }).then(results => {
-      if (results.data) {
-        return results
+        const text = await response.text()
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Unsuccessful result code for personal transactions. " + text}))
+
+        setQuickMessage('Request error. See logs for more info.')
+        setTimeout(() => { setQuickMessage(null) }, 2000)
       } else {
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Unsuccessful results for searchEndorserForTransactions: " + JSON.stringify(results)}))
-        throw Error(results.error || 'The server got an error. (For details, see the log on the Settings page.)')
+        return response.json()
+      }
+    }).then(results => {
+      if (results != null) {
+        if (results.data) {
+          return results
+        } else {
+          appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Unsuccessful results for personal transactions: " + JSON.stringify(results)}))
+          setQuickMessage('Request error. See logs for more info.')
+          setTimeout(() => { setQuickMessage(null) }, 2000)
+        }
       }
     })
   }
@@ -92,7 +105,7 @@ export function MyCredentialsScreen({ navigation }) {
     let nextBefore
     do {
       let nextResults = await moreTransactions(nextBefore)
-      if (nextResults.data) {
+      if (nextResults && nextResults.data) {
         allResults = allResults.concat(nextResults.data)
         setLoadedNumber(allResults.length)
         nextBefore = nextResults.hitLimit ? nextResults.data[nextResults.data.length - 1].id : undefined
@@ -186,6 +199,19 @@ export function MyCredentialsScreen({ navigation }) {
                       </View>
                     </View>
                   </Modal>
+
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={!!quickMessage}
+                  >
+                    <View style={styles.centeredView}>
+                      <View style={styles.modalView}>
+                        <Text>{ quickMessage }</Text>
+                      </View>
+                    </View>
+                  </Modal>
+
                   <TextInput
                     autoCapitalize={'none'}
                     value={searchTerm}
