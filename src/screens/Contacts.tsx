@@ -195,7 +195,7 @@ export function ContactsScreen({ navigation, route }) {
         }
         utility.loadContacts(appSlice, appStore, dbConnection)
         resultMessage += hitError ? '\nSee top for other errors.' : ''
-        setQuickMessage(fullMessage)
+        setQuickMessage(resultMessage)
         setTimeout(() => { setQuickMessage(null) }, 2000)
       } else {
         // not sure if contact was created, but spec isn't clear
