@@ -98,11 +98,11 @@ We've fixed the `use_flipper` call in ios/Podfile for some platforms. But if it 
 
 - Got "The emulator process for avd ... was killed"? Try this (in ~/Library/Android/sdk/emulator or %HOME%\AppData\Local\Android\Sdk\emulator): `./emulator -list-avds` and then `./emulator -avd Pixel_XL_API_30` (or whatever AVD you have)
 
-- Got "No emulators found as an output of `emulator -list-avds`". Follow previous step.
+- Got "No emulators found as an output of `emulator -list-avds`"? Follow previous step.
 
 - Got "CMake '???' found in PATH did not match requested version '3.6.0'."? Install cmake in Android Studio -> Preferences -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools. Any 3.6 version should do, though when I did this more recently I had to install 3.10.2
 
-- Got "SDK location not found. Define location with an ANDROID_SDK_ROOT environment variable or by setting the sdk.dir path in your project's local properties file at '???/android/local.properties'." Put the line "sdk.dir=" with that ANDROID_SDK_ROOT setting, eg. /Users/trent/Library/Android/sdk (because just setting the environment variable doesn't always work).
+- Got "SDK location not found. Define location with an ANDROID_SDK_ROOT environment variable or by setting the sdk.dir path in your project's local properties file at '???/android/local.properties'."? Put the line "sdk.dir=" with that ANDROID_SDK_ROOT setting, eg. /Users/trent/Library/Android/sdk (because just setting the environment variable doesn't always work).
 
 - Got "InstallException: Unknown failure: cmd: Can't find service: package"? Try running the command again (in case the emulator wasn't fully started).
 
@@ -134,10 +134,11 @@ Unable to lookup in current state: Shutdown
 
 Switch to the Simulator app, choose "File" and "Open Simulator" and choose one to run.
 
+- Sometimes the emulator loses external network access. Try a Cold Boot Now (usually via Android Studio).
+
 - During the upload to Apple, you may get errors like "could not find the service with interface (com.apple.transporter.osgi.TransporterService)" or "resource download failed: com.fasterxml.jackson.core.jackson-core". They indicate some network error so just try again.
 
 - During "bundle exec fastlane beta", you might see a message of "Could not find fastlane-2.210.1, CFPropertyList-3.0.5... in any of the sources". Try "bundle install".
-
 
 
 
@@ -188,6 +189,7 @@ Manually
 
   - Submit a claim. Run search for this individual's claims, and then for all claims.
   - As a second, third, & fourth user, check that they cannot see the claim details.
+  - As a second, third, & fourth user, check that they can see claim presentation from first.
 
   - As the second and third user, share contact info.
   - As the initial user, allow the second and third user to see them.
