@@ -17,10 +17,26 @@ export function ReportScreen({ navigation }) {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
   const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
+  const [showAcceptConfirmations, setShowAcceptConfirmations] = useState(false)
   const [showAcceptsOnly, setShowAcceptsOnly] = useState(false)
   const [showClaimsWithoutDids, setShowClaimsWithoutDids] = useState(false)
 
   const identifiers = useSelector((state) => state.identifiers || [])
+
+  // return list component for the text of all AcceptAction claims
+  const AcceptList = ({acceptRecords}) => {
+    return (
+      <View>
+        {
+          acceptRecords.map(accept => (
+            <View style={{ flex: 1, flexDirection: 'row' }} key={accept.id}>
+              <Text style={{ borderWidth: 1, padding: 10, width: "80%" }}>{ accept.claim.object }</Text>
+            </View>
+          ))
+        }
+      </View>
+    )
+  }
 
   const filteredResultOutput = (results) => {
     // assuming results is an array
@@ -34,8 +50,14 @@ export function ReportScreen({ navigation }) {
       : filteredResults0
     if (results.length > 0 && filteredResults1.length === 0) {
       return <Text>There are results but they include IDs not visible to you. (Use checkboxes to show more claims.)</Text>
+    } else if (showAcceptsOnly && showAcceptConfirmations) {
+      return <AcceptList acceptRecords={filteredResults1} />
     } else {
-      return <YamlFormat source={ filteredResults1 } navigation={navigation} afterItemCss={styles.line} />
+      return (
+        <ScrollView horizontal={ true }>{/* horizontal scrolling for long string values */}
+          <YamlFormat source={ filteredResults1 } navigation={navigation} afterItemCss={styles.line} />
+        </ScrollView>
+      )
     }
   }
 
@@ -83,105 +105,119 @@ export function ReportScreen({ navigation }) {
 
   return (
     <SafeAreaView>
-      <ScrollView horizontal={ true }>{/* horizontal scrolling for long string values */}
-        <ScrollView>{/* vertical scrolling */}
-          <View style={{ padding: 20 }}>
-            <View style={{ marginTop: 20 }} />
-            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search All
-              {
-                (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
-                 || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
-                 ? " - Custom Servers"
-                 : ""
-              }
-            </Text>
-            <TextInput
-              autoCapitalize={'none'}
-              value={searchTerm}
-              onChangeText={setSearchTerm}
-              editable
-              style={{ borderWidth: 1 }}
-            />
-            <Text>
-              Examples:&nbsp;
-              <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('programming') }}>programming</Text>,&nbsp;
-              <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('Training') }}>Training</Text>,&nbsp;
-              <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('JoinAction') }}>JoinAction</Text>
-            </Text>
-            <View style={{ marginTop: 10 }} />
-            <Text>
-              <Text style={{ color: 'blue' }} onPress={() => { setSelectFromContacts(true) }}>Select a Contact</Text>
-            </Text>
+      <ScrollView>{/* vertical scrolling */}
+        <View style={{ padding: 20 }}>
+          <View style={{ marginTop: 20 }} />
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search All
             {
-              loadingSearch
-              ?
-                <ActivityIndicator color="#00ff00" />
-              :
-                <View style={{ marginTop: 20 }}>
-                  <Button
-                    title="Search"
-                    onPress={() => searchEndorser({ searchTerm: searchTerm })}
-                  />
-                  {
-                    searchTerm && searchTerm.length === 26
-                    ?
-                      <Button
-                        title="Find by ID"
-                        onPress={() => searchEndorser({ claimId: searchTerm })}
-                      />
-                    :
-                      <View />
-                  }
-                  <Text style={{ color: 'red' }}>{searchError}</Text>
-
-                  <Text style={{ padding: 10 }}>(Only retrieves the 50 most recent matching claims.)</Text>
-
-                  {
-                    searchResults == null
-                    ? <Text/>
-                    : searchResults.length == 0
-                      ? <Text>No results.</Text>
-                      : <View>
-                          <CheckBox
-                            title='Show claims without visible IDs.'
-                            checked={showClaimsWithoutDids}
-                            onPress={() => setShowClaimsWithoutDids(!showClaimsWithoutDids)}
-                          />
-                          <CheckBox
-                            title='Show only accepted pledges.'
-                            checked={showAcceptsOnly}
-                            onPress={() => setShowAcceptsOnly(!showAcceptsOnly)}
-                          />
-
-                          { filteredResultOutput(searchResults) }
-                        </View>
-                  }
-                </View>
+              (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
+               || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
+               ? " - Custom Servers"
+               : ""
             }
-          </View>
-          { identifiers.length > 0
-            ?
-              <View style={{ padding: 20 }}>
-                <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Yours</Text>
-                <Button
-                  title="Search"
-                  onPress={() => navigation.navigate('Your Credentials')}
-                />
-              </View>
-            :
-              <View/>
-          }
+          </Text>
+          <TextInput
+            autoCapitalize={'none'}
+            value={searchTerm}
+            onChangeText={setSearchTerm}
+            editable
+            style={{ borderWidth: 1 }}
+          />
+          <Text>
+            Examples:&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('programming') }}>programming</Text>,&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('Training') }}>Training</Text>,&nbsp;
+            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('JoinAction') }}>JoinAction</Text>
+          </Text>
+          <View style={{ marginTop: 10 }} />
+          <Text>
+            <Text style={{ color: 'blue' }} onPress={() => { setSelectFromContacts(true) }}>Select a Contact</Text>
+          </Text>
 
           {
-            selectFromContacts
-            ? <ContactSelectModal
-                cancel={ () => { setSelectFromContacts(false) } }
-                proceed={ (did) => { setSearchTerm(did); setSelectFromContacts(false) }}
-            />
-            : <View/>
+            loadingSearch
+            ?
+              <ActivityIndicator color="#00ff00" />
+            :
+              <View style={{ marginTop: 20 }}>
+                <Button
+                  title="Search"
+                  onPress={() => searchEndorser({ searchTerm: searchTerm })}
+                />
+                {
+                  searchTerm && searchTerm.length === 26
+                  ?
+                    <Button
+                      title="Find by ID"
+                      onPress={() => searchEndorser({ claimId: searchTerm })}
+                    />
+                  :
+                    <View />
+                }
+                <Text style={{ color: 'red' }}>{searchError}</Text>
+
+                <Text style={{ padding: 10 }}>(Only retrieves the 50 most recent matching claims.)</Text>
+
+                {
+                  searchResults == null
+                  ? <Text/>
+                  : searchResults.length == 0
+                    ? <Text>No results.</Text>
+                    : <View>
+                        <CheckBox
+                          title='Show claims without visible IDs.'
+                          checked={showClaimsWithoutDids}
+                          onPress={() => setShowClaimsWithoutDids(!showClaimsWithoutDids)}
+                        />
+                        <CheckBox
+                          title='Show only accepted pledges.'
+                          checked={showAcceptsOnly}
+                          onPress={() => {
+                            setShowAcceptConfirmations(false)
+                            setShowAcceptsOnly(!showAcceptsOnly)
+                          }}
+                        />
+                        {
+                          showAcceptsOnly
+                          ?
+                            <CheckBox
+                              title='Show confirmations of pledges.'
+                              checked={showAcceptConfirmations}
+                              onPress={() => setShowAcceptConfirmations(!showAcceptConfirmations)}
+                            />
+                          :
+                            <View />
+                        }
+
+                        { filteredResultOutput(searchResults) }
+                      </View>
+                }
+              </View>
           }
 
-        </ScrollView>
+        </View>
+        { identifiers.length > 0
+          ?
+            <View style={{ padding: 20 }}>
+              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Yours</Text>
+              <Button
+                title="Search"
+                onPress={() => navigation.navigate('Your Credentials')}
+              />
+            </View>
+          :
+            <View/>
+        }
+
+        {
+          selectFromContacts
+          ? <ContactSelectModal
+              cancel={ () => { setSelectFromContacts(false) } }
+              proceed={ (did) => { setSearchTerm(did); setSelectFromContacts(false) }}
+          />
+          : <View/>
+        }
+
       </ScrollView>
     </SafeAreaView>
   )
