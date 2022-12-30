@@ -13,24 +13,82 @@ import { styles } from './style'
 export function ReportScreen({ navigation }) {
 
   const [loadingSearch, setLoadingSearch] = useState<boolean>(false)
+  const [confirmLoading, setConfirmLoading] = useState<Array<boolean>>({})
+  const [confirms, setConfirms] = useState<Array<number>>({})
   const [searchError, setSearchError] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState<string>('')
-  const [searchResults, setSearchResults] = useState()
+  const [searchResults, setSearchResults] = useState<Array<utility.EndorserRecord>>()
   const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
-  const [showAcceptConfirmations, setShowAcceptConfirmations] = useState(false)
-  const [showAcceptsOnly, setShowAcceptsOnly] = useState(false)
-  const [showClaimsWithoutDids, setShowClaimsWithoutDids] = useState(false)
+  const [showAcceptConfirmations, setShowAcceptConfirmations] = useState<boolean>(false)
+  const [showAcceptsOnly, setShowAcceptsOnly] = useState<boolean>(false)
+  const [showClaimsWithoutDids, setShowClaimsWithoutDids] = useState<boolean>(false)
 
   const identifiers = useSelector((state) => state.identifiers || [])
 
+  const retrieveConfirms = async (claimId, claimIssuerDid) => {
+    setConfirmLoading(conLoad => R.set(R.lensProp(claimId), true, conLoad))
+
+    const url = appStore.getState().settings.apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + encodeURIComponent(claimId)
+    const userToken = await utility.accessToken(identifiers[0])
+    await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Uport-Push-Token": userToken
+    }})
+    .then(async response => {
+      if (response.status === 200) {
+        return response.json()
+      } else {
+        const bodyText = await response.text()
+        throw ('While retrieving confirmations, got bad response status of ' + response.status + ' and body: ' + bodyText)
+      }
+    })
+    .then(result => {
+      // result is object with key 'result'
+      // ... with value an array of DIDs who confirmed who I can see, potentially some HIDDEN
+      if (result.result) {
+        const resultOthers = R.reject(did => did === claimIssuerDid, result.result)
+        setConfirms(cons => R.set(R.lensProp(claimId), resultOthers.length, cons))
+      } else {
+        throw ('While retrieving confirmations, got bad result: ' + JSON.stringify(result))
+      }
+    })
+    .catch(err => {
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Problem accessing confirmation data: " + err}))
+      setSearchError('Could not access confirmation data. See logs.')
+    })
+    .finally(() => {
+      setConfirmLoading(conLoad => R.set(R.lensProp(claimId), false, conLoad))
+    })
+  }
+
   // return list component for the text of all AcceptAction claims
   const AcceptList = ({acceptRecords}) => {
+    // 'acceptRecords' is array of utility.EndorserRecord
     return (
       <View>
         {
           acceptRecords.map(accept => (
-            <View style={{ flex: 1, flexDirection: 'row' }} key={accept.id}>
-              <Text style={{ borderWidth: 1, padding: 10, width: "80%" }}>{ accept.claim.object }</Text>
+            <View style={{ borderWidth: 1, flex: 1, flexDirection: 'row' }} key={accept.id}>
+              <Text style={{ padding: 10, width: "80%" }}>{ accept.claim.object }</Text>
+              <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', padding: 5, width: '20%' }}>
+              {
+                confirmLoading[accept.id]
+                ?
+                  <ActivityIndicator color="#00ff00" />
+                :
+                  confirms[accept.id] != null
+                  ?
+                    <Text style={{ textAlign: 'center' }}>{confirms[accept.id]}</Text>
+                  :
+                    <Text
+                      onPress={() => retrieveConfirms(accept.id, accept.issuer) }
+                      style={{ color: 'blue', textAlign: 'center' }}
+                    >
+                      See Other Confirms
+                    </Text>
+              }
+              </View>
             </View>
           ))
         }
@@ -84,7 +142,7 @@ export function ReportScreen({ navigation }) {
       }).then(async response => {
         setLoadingSearch(false)
         if (response.status !== 200) {
-          let bodyText = await response.text()
+          const bodyText = await response.text()
           throw Error('There was an error from the server with code ' + response.status + ' and body: ' + bodyText)
         }
         return response.json()
