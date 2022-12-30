@@ -66,11 +66,13 @@ export function ReportScreen({ navigation }) {
         setSearchResults(correctResults)
         setSearchError('')
       }).catch(err => {
-        console.log(err)
-        setSearchError('There was a problem searching.')
+        setLoadingSearch(false)
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Problem during search: " + err}))
+        setSearchError('There was a problem searching. See logs for more info.')
       })
     } else {
       console.log('The call to searchEndorser needs searchTerm or claimId in param, but got', param)
+      setSearchError('No search criteria was supplied.')
     }
   }
 
@@ -101,15 +103,16 @@ export function ReportScreen({ navigation }) {
               <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('Training') }}>Training</Text>,&nbsp;
               <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('JoinAction') }}>JoinAction</Text>
             </Text>
+            <View style={{ marginTop: 10 }} />
             <Text>
-              <Text style={{ color: 'blue' }} onPress={() => { setSelectFromContacts(true) }}>Search a Contact</Text>
+              <Text style={{ color: 'blue' }} onPress={() => { setSelectFromContacts(true) }}>Select a Contact</Text>
             </Text>
             {
               loadingSearch
               ?
                 <ActivityIndicator color="#00ff00" />
               :
-                <View>
+                <View style={{ marginTop: 20 }}>
                   <Button
                     title="Search"
                     onPress={() => searchEndorser({ searchTerm: searchTerm })}
