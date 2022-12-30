@@ -337,7 +337,7 @@ function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView>
-      <ScrollView>
+      <ScrollView style={{ padding: 10 }}>
         {
         loading
         ?
@@ -509,7 +509,7 @@ function AppHandyHomeScreen({ navigation }) {
 
   return (
     <SafeAreaView>
-      <ScrollView>
+      <ScrollView style={{ padding: 10 }}>
         {
         loading
         ?
