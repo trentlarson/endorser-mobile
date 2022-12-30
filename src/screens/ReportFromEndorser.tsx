@@ -17,20 +17,25 @@ export function ReportScreen({ navigation }) {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
   const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
+  const [showAcceptsOnly, setShowAcceptsOnly] = useState(false)
   const [showClaimsWithoutDids, setShowClaimsWithoutDids] = useState(false)
 
   const identifiers = useSelector((state) => state.identifiers || [])
 
   const filteredResultOutput = (results) => {
     // assuming results is an array
-    const filteredResults =
+    const filteredResults0 =
       showClaimsWithoutDids
       ? results
       : R.filter(utility.containsNonHiddenDid, results)
-    if (results.length > 0 && filteredResults.length === 0) {
-      return <Text>There are results but they include IDs not visible to you.</Text>
+    const filteredResults1 =
+      showAcceptsOnly
+      ? R.filter(full => utility.isAccept(full.claim), filteredResults0)
+      : filteredResults0
+    if (results.length > 0 && filteredResults1.length === 0) {
+      return <Text>There are results but they include IDs not visible to you. (Use checkboxes to show more claims.)</Text>
     } else {
-      return <YamlFormat source={ filteredResults } navigation={navigation} afterItemCss={styles.line} />
+      return <YamlFormat source={ filteredResults1 } navigation={navigation} afterItemCss={styles.line} />
     }
   }
 
@@ -142,7 +147,12 @@ export function ReportScreen({ navigation }) {
                             checked={showClaimsWithoutDids}
                             onPress={() => setShowClaimsWithoutDids(!showClaimsWithoutDids)}
                           />
-                          
+                          <CheckBox
+                            title='Show only accepted pledges.'
+                            checked={showAcceptsOnly}
+                            onPress={() => setShowAcceptsOnly(!showAcceptsOnly)}
+                          />
+
                           { filteredResultOutput(searchResults) }
                         </View>
                   }
