@@ -4,10 +4,11 @@ import { ActivityIndicator, Button, FlatList, Item, SafeAreaView, ScrollView, Te
 import { CheckBox } from 'react-native-elements'
 import { useSelector } from 'react-redux'
 
-import { styles } from './style'
 import * as utility from '../utility/utility'
 import { YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
+import { ContactSelectModal } from './ContactSelect'
+import { styles } from './style'
 
 export function ReportScreen({ navigation }) {
 
@@ -15,6 +16,7 @@ export function ReportScreen({ navigation }) {
   const [searchError, setSearchError] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState()
+  const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
   const [showClaimsWithoutDids, setShowClaimsWithoutDids] = useState(false)
 
   const identifiers = useSelector((state) => state.identifiers || [])
@@ -99,6 +101,9 @@ export function ReportScreen({ navigation }) {
               <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('Training') }}>Training</Text>,&nbsp;
               <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('JoinAction') }}>JoinAction</Text>
             </Text>
+            <Text>
+              <Text style={{ color: 'blue' }} onPress={() => { setSelectFromContacts(true) }}>Search a Contact</Text>
+            </Text>
             {
               loadingSearch
               ?
@@ -153,6 +158,16 @@ export function ReportScreen({ navigation }) {
             :
               <View/>
           }
+
+          {
+            selectFromContacts
+            ? <ContactSelectModal
+                cancel={ () => { setSelectFromContacts(false) } }
+                proceed={ (did) => { setSearchTerm(did); setSelectFromContacts(false) }}
+            />
+            : <View/>
+          }
+
         </ScrollView>
       </ScrollView>
     </SafeAreaView>
