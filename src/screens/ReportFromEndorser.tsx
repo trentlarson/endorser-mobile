@@ -104,7 +104,7 @@ export function ReportScreen({ navigation }) {
       : R.filter(utility.containsNonHiddenDid, results)
     const filteredResults1 =
       showAcceptsOnly
-      ? R.filter(full => utility.isAccept(full.claim), filteredResults0)
+      ? R.filter(full => utility.isAccept(full.claim) && typeof full.claim.object == 'string', filteredResults0)
       : filteredResults0
     if (results.length > 0 && filteredResults1.length === 0) {
       return <Text>There are results but they include IDs not visible to you. (Use checkboxes to show more claims.)</Text>
