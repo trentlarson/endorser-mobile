@@ -20,6 +20,7 @@ export function ReportScreen({ navigation }) {
   const [searchResults, setSearchResults] = useState<Array<utility.EndorserRecord>>()
   const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
   const [showAcceptConfirmations, setShowAcceptConfirmations] = useState<boolean>(false)
+  const [showAcceptTotals, setShowAcceptTotals] = useState<boolean>(false)
   const [showAcceptsOnly, setShowAcceptsOnly] = useState<boolean>(false)
   const [showClaimsWithoutDids, setShowClaimsWithoutDids] = useState<boolean>(false)
 
@@ -96,6 +97,28 @@ export function ReportScreen({ navigation }) {
     )
   }
 
+  // return list component for the text of all AcceptAction claims
+  const AcceptAggregateList = ({acceptRecords}) => {
+    // 'acceptRecords' is array of utility.EndorserRecord
+    const pledgesByPledge = R.groupBy(rec => rec.claim.object, acceptRecords)
+    const pledgeArrays = R.sortBy(arr => -arr.length, R.values(pledgesByPledge))
+    return (
+      <View>
+        <Text>Note that these are only from the most recent pledges.</Text>
+        {
+          pledgeArrays.map(pledges => (
+            <View style={{ borderWidth: 1, flex: 1, flexDirection: 'row' }} key={pledges[0].claim.object}>
+              <Text style={{ padding: 10, width: "90%" }}>{ pledges[0].claim.object }</Text>
+              <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', padding: 5, width: '10%' }}>
+                <Text style={{ textAlign: 'center' }}>{"" + pledges.length}</Text>
+              </View>
+            </View>
+          ))
+        }
+      </View>
+    )
+  }
+
   const filteredResultOutput = (results) => {
     // assuming results is an array
     const filteredResults0 =
@@ -110,6 +133,8 @@ export function ReportScreen({ navigation }) {
       return <Text>There are results but they include IDs not visible to you. (Use checkboxes to show more claims.)</Text>
     } else if (showAcceptsOnly && showAcceptConfirmations) {
       return <AcceptList acceptRecords={filteredResults1} />
+    } else if (showAcceptsOnly && showAcceptTotals) {
+      return <AcceptAggregateList acceptRecords={filteredResults1} />
     } else {
       return (
         <ScrollView horizontal={ true }>{/* horizontal scrolling for long string values */}
@@ -231,18 +256,32 @@ export function ReportScreen({ navigation }) {
                           title='Show only accepted pledges.'
                           checked={showAcceptsOnly}
                           onPress={() => {
-                            setShowAcceptConfirmations(false)
                             setShowAcceptsOnly(!showAcceptsOnly)
+                            setShowAcceptConfirmations(false)
+                            setShowAcceptTotals(false)
                           }}
                         />
                         {
                           showAcceptsOnly
                           ?
-                            <CheckBox
-                              title='Show confirmations of pledges.'
-                              checked={showAcceptConfirmations}
-                              onPress={() => setShowAcceptConfirmations(!showAcceptConfirmations)}
-                            />
+                            <View style={{ marginLeft: 30 }}>
+                              <CheckBox
+                                title='Show confirmations of pledges.'
+                                checked={showAcceptConfirmations}
+                                onPress={() => {
+                                  setShowAcceptConfirmations(!showAcceptConfirmations)
+                                  setShowAcceptTotals(false)
+                                }}
+                              />
+                              <CheckBox
+                                title='Show most popular pledges.'
+                                checked={showAcceptTotals}
+                                onPress={() => {
+                                  setShowAcceptTotals(!showAcceptTotals)
+                                  setShowAcceptConfirmations(false)
+                                }}
+                              />
+                            </View>
                           :
                             <View />
                         }
