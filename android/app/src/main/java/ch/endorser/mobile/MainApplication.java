@@ -13,9 +13,12 @@ import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
+import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
+import com.rt2zz.reactnativecontacts.ReactNativeContacts;
 import java.util.concurrent.TimeUnit;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainApplication extends Application implements ReactApplication {
@@ -30,9 +33,14 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
           @SuppressWarnings("UnnecessaryLocalVariable")
-          List<ReactPackage> packages = new PackageList(this).getPackages();
-          // Packages that cannot be autolinked yet can be added manually here, for example:
-          // packages.add(new MyReactNativePackage());
+          // Packages that cannot be autolinked yet can be added manually here.
+          List<ReactPackage> packages =
+              Arrays.<ReactPackage>asList(
+                                          new MainReactPackage(),
+                                          new ReactNativeContacts());
+          // possible alternative:
+          //List<ReactPackage> packages = new PackageList(this).getPackages();
+          //packages.add(new ReactNativeContacts());
           return packages;
         }
 

@@ -45,6 +45,8 @@
 	<string>Scan the QR codes of friends to import as contacts</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	<key>NSContactsUsageDescription</key>
+	<string>Link to your main contacts</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>FontAwesome.ttf</string>

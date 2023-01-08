@@ -5,6 +5,7 @@ import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
+import Contacts from 'react-native-contacts';
 import { CheckBox } from 'react-native-elements'
 import QRCode from "react-native-qrcode-svg"
 import Icon from 'react-native-vector-icons/FontAwesome'
@@ -1050,6 +1051,7 @@ export function ContactsScreen({ navigation, route }) {
                   :
                     <View style={styles.centeredView}>
                     {
+                      /* visibilty */
                       allIdentifiers[0] == null
                       ?
                         <View/>
@@ -1095,6 +1097,7 @@ export function ContactsScreen({ navigation, route }) {
                            </View>
                     }
                     {
+                      /* registration */
                       allIdentifiers[0] == null
                       ?
                         <View/>
@@ -1119,6 +1122,9 @@ export function ContactsScreen({ navigation, route }) {
                     }
                     </View>
                 }
+                <View style={styles.centeredView}>
+                    <Button title={'Link'} onPress={async () => {console.log(await Contacts.getContactsMatchingString('Stuff'))}}/>
+                </View>
                 <View style={styles.centeredView}>
                   <Button title={'Delete'} onPress={() => setConfirmDeleteContact(contact.did)}/>
                 </View>

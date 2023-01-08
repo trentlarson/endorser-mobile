@@ -2853,6 +2853,7 @@ __metadata:
     react-native-background-fetch: ^4.1.1
     react-native-camera: ^3.42.0
     react-native-clean-project: ^3.4.0
+    react-native-contacts: ^7.0.5
     react-native-crypto: ^2.2.0
     react-native-elements: ^3.2.0
     react-native-gesture-handler: ^1.9.0
@@ -10407,6 +10408,15 @@ fsevents@^2.1.2:
   bin:
     react-native-clean-project: source/index.js
   checksum: 0404d1c2b4a7da55b8ab3513ad158735647a6549fa3f8b61a2b758b0c0c7266e8e0a059ef4e4608d2497fabad1973e3f36aa134ebd8aa2a28156c41209d1a171
+  languageName: node
+  linkType: hard
+
+"react-native-contacts@npm:^7.0.5":
+  version: 7.0.5
+  resolution: "react-native-contacts@npm:7.0.5"
+  peerDependencies:
+    react-native: ">=0.64.0"
+  checksum: 083096a3c7903443b7f395ad0bdff330fa62ef8f88e9cdfff1b09d55372a5274436f6636d5207999c8cb4fe3772345be57fe4aa9f301441710bbc7d36345cbdb
   languageName: node
   linkType: hard
 
