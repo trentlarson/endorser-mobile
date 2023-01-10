@@ -780,6 +780,8 @@ export function ConstructCredentialScreen({ navigation }) {
     const [endTime, setEndTime] = useState<string>(null)
     const [planDescription, setPlanDescription] = useState<string>(null)
     const [planIdentifier, setPlanIdentifier] = useState<string>(null)
+    const [planImageUrl, setPlanImageUrl] = useState<string>(null)
+    const [planName, setPlanName] = useState<string>(null)
     const [resultDescription, setResultDescription] = useState<string>(null)
     const [resultIdentifier, setResultIdentifier] = useState<string>(null)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
@@ -790,8 +792,8 @@ export function ConstructCredentialScreen({ navigation }) {
       // yes, this may throw an error
       const isoEndTime = endTime && new Date(endTime).toISOString()
 
-      if (!planDescription && !resultDescription) {
-        Alert.alert('You must describe either the plan or the result.')
+      if (!planName && !resultDescription) {
+        Alert.alert('You must give either a name or a result.')
       } else {
         let result = {
           "@context": "https://schema.org",
@@ -804,12 +806,17 @@ export function ConstructCredentialScreen({ navigation }) {
         result.description = planDescription || undefined
         result.endTime = isoEndTime || undefined
         result.identifier = planId
+        result.image = planImageUrl || undefined
+        result.name = planName || undefined
 
-        const resultId = resultIdentifier || crypto.randomBytes(16).toString('hex')
+        let resultId = resultIdentifier
+        if (resultDescription != null && resultIdentifier == null) {
+          resultId = crypto.randomBytes(16).toString('hex')
+        }
 
         result.result = {
           "@type": "CreativeWork",
-          identifier: resultId,
+          identifier: resultId || undefined,
           description: resultDescription || undefined
         }
 
@@ -862,12 +869,34 @@ export function ConstructCredentialScreen({ navigation }) {
                 </View>
 
                 <View style={{ padding: 5 }}>
+                  <Text>Name</Text>
+                  <TextInput
+                    value={planName}
+                    onChangeText={setPlanName}
+                    editable
+                    multiline={false}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
                   <Text>Description of Plan</Text>
                   <TextInput
                     value={planDescription}
                     onChangeText={setPlanDescription}
                     editable
                     multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Image (URL)</Text>
+                  <TextInput
+                    value={planImageUrl}
+                    onChangeText={setPlanImageUrl}
+                    editable
+                    multiline={false}
                     style={{ borderWidth: 1 }}
                   />
                 </View>

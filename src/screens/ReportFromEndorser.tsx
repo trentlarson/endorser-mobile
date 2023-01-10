@@ -177,7 +177,7 @@ export function ReportScreen({ navigation }) {
         setSearchError('')
       }).catch(err => {
         setLoadingSearch(false)
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Problem during search: " + err}))
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Problem during search at " + appStore.getState().settings.apiServer + '/api/claim' + urlSuffix + " Error: " + err}))
         setSearchError('There was a problem searching. See logs for more info.')
       })
     } else {
