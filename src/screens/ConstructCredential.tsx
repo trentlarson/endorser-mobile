@@ -40,7 +40,9 @@ const INITIAL_UNIT_BUTTONS: RadioButtonProps[] = [{
 }]
 const INITIAL_SELECTED_BUTTON = R.find(R.prop('selected'), INITIAL_UNIT_BUTTONS)
 
-export function ConstructCredentialScreen({ navigation }) {
+export function ConstructCredentialScreen({ navigation, route }) {
+
+  const { incomingClaim } = route.params || {}
 
   const [askForClaimInfo, setAskForClaimInfo] = useState<boolean>(false)
   const [askForGaveInfo, setAskForGaveInfo] = useState<boolean>(false)
@@ -60,6 +62,11 @@ export function ConstructCredentialScreen({ navigation }) {
     const getSettings = async () => {
       if (settings && (settings.mnemEncrBase64 || settings.mnemonic)) {
         setHasMnemonic(true)
+      }
+      if (incomingClaim != null) {
+        if (utility.isOffer(incomingClaim)) {
+          setAskForOfferInfo(true)
+        }
       }
     }
     getSettings()
@@ -1225,10 +1232,12 @@ export function ConstructCredentialScreen({ navigation }) {
   function OfferModal(props) {
 
     const [agentId, setAgentId] = useState<string>(props.userId)
-    const [amountStr, setAmountStr] = useState<number>('')
+    const [amountStr, setAmountStr] = useState<string>('')
     const [description, setDescription] = useState<string>(null)
     const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
+    const [parentIdentifier, setParentIdentifier] = useState<string>('')
+    const [parentType, setParentType] = useState<string>('')
     const [recipientId, setRecipientId] = useState<string>(null)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
@@ -1250,6 +1259,27 @@ export function ConstructCredentialScreen({ navigation }) {
       setUnit(selectedButton.value)
     }
 
+    useEffect(() => {
+      const incomingOffer = utility.isOffer(incomingClaim) ? incomingClaim : {}
+      if (utility.isOffer(incomingClaim)) {
+        if (incomingOffer.offeredBy) {
+          setAgentId(incomingOffer.offeredBy)
+        }
+        if (incomingOffer.includesObject && incomingOffer.includesObject['@type'] === 'TypeAndQuantityNode') {
+          setAmountStr(incomingOffer.includesObject.amountOfThisGood)
+          setIsSpecificAmount(true)
+          setUnit(incomingOffer.includesObject.unitCode)
+        }
+        if (incomingOffer.itemOffered) {
+          setDescription(incomingOffer.itemOffered.description)
+          if (incomingOffer.itemOffered.isPartOf) {
+            setParentType(incomingOffer.itemOffered.isPartOf['@type'])
+            setParentIdentifier(incomingOffer.itemOffered.isPartOf.identifier)
+          }
+        }
+      }
+    }, [])
+
     function possiblyFinish(proceedToFinish) {
 
       // An embedded item is useful for later reference (via identifier).
@@ -1269,35 +1299,46 @@ export function ConstructCredentialScreen({ navigation }) {
           offeredBy: { identifier: agentId },
         }
 
-        result.description = description || undefined
+        if (description || parentIdentifier) {
+          result.itemOffered = { '@type': 'CreativeWork' }
+          if (description) {
+            result.itemOffered.description = description
+          }
+          if (parentIdentifier) {
+            result.itemOffered.isPartOf = {
+              '@type': parentType,
+              identifier: parentIdentifier
+            }
+          }
+        }
 
-        result.itemOffered =
-          !isSpecificAmount
-          ? undefined
-          : {
-            // TypeAndQuantityNode
+        if (isSpecificAmount) {
+          result.includesObject = {
+
+            '@type': 'TypeAndQuantityNode',
 
             amountOfThisGood: Number(amountStr),
 
             /**
-              These units are typically in currency or time.
+               These units are typically in currency or time.
 
-              Units for currencies are described in multiple places at schema.org:
-              https://schema.org/currency
-              https://schema.org/priceCurrency
-              https://schema.org/price
+               Units for currencies are described in multiple places at schema.org:
+               https://schema.org/currency
+               https://schema.org/priceCurrency
+               https://schema.org/price
 
-              We've chosen HUR from UN/CEFACT for the length of time.
-              Alternatively, units for time at schema.org can be in ISO 8601 format.
-            **/
+               We've chosen HUR from UN/CEFACT for the length of time.
+               Time units can be in ISO 8601 format for schema.org but we don't handle that (yet).
+             **/
             unitCode: unit,
           }
+        }
 
         result.recipient = recipientId ? { identifier: recipientId } : undefined
 
-        result.termsOfService = termsOfService ? termsOfService : undefined
+        result.description = termsOfService || undefined
 
-        result.validThrough = validThrough ? validThrough : undefined
+        result.validThrough = validThrough || undefined
 
         proceedToFinish(result)
       }
@@ -1383,7 +1424,18 @@ export function ConstructCredentialScreen({ navigation }) {
                 </View>
 
                 <View style={{ padding: 5 }}>
-                  <Text>Description</Text>
+                  <Text>Parent Identifier</Text>
+                  <TextInput
+                    value={parentIdentifier}
+                    onChangeText={setParentIdentifier}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Description of Offering</Text>
                   <TextInput
                     value={description}
                     onChangeText={setDescription}

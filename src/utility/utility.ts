@@ -29,6 +29,7 @@ const HIDDEN_DID = 'did:none:HIDDEN'
 export const DEFAULT_ANDROID_CHANNEL_ID = 'default-channel'
 export const ENDORSER_JWT_URL_LOCATION = '/contact?jwt='
 export const REPLACE_USER_DID_STRING = 'PUT_USER_DID'
+export const SCHEMA_ORG_CONTEXT = 'https://schema.org'
 export const UPORT_JWT_PREFIX = 'https://id.uport.me/req/'
 
 export const ANDROID_FEED_ACTION = 'default' // only 'default' will launch the app if background / terminated on android
@@ -58,16 +59,24 @@ export const isHiddenDid = (did) => {
   return did === HIDDEN_DID
 }
 
+export const isAccept = (claim) => {
+  return claim && claim['@context'] === SCHEMA_ORG_CONTEXT && claim['@type'] === 'AcceptAction'
+}
+
 export const isContract = (claim) => {
   return claim && claim['@context'] === 'http://purl.org/cerif/frapo' && claim['@type'] === 'Contract'
 }
 
-export const isAccept = (claim) => {
-  return claim && claim['@context'] === 'https://schema.org' && claim['@type'] === 'AcceptAction'
-}
-
 export const isContractAccept = (claim) => {
   return isAccept(claim) && claim.object && isContract(claim.object)
+}
+
+export const isOffer = (claim) => {
+  return claim && claim['@context'] === SCHEMA_ORG_CONTEXT && claim['@type'] === 'Offer'
+}
+
+export const isPlanAction = (claim) => {
+  return claim && claim['@context'] === SCHEMA_ORG_CONTEXT && claim['@type'] === 'PlanAction'
 }
 
 /**
@@ -403,7 +412,7 @@ export const contactJwtForPayload = async (viewServer, identifier, name) => {
 
 export const bvcClaim = (did: string, startTime: string) => {
   return {
-    '@context': 'https://schema.org',
+    '@context': SCHEMA_ORG_CONTEXT,
     '@type': 'JoinAction',
     agent: {
       did: did,
@@ -512,8 +521,6 @@ const objectToYamlString = (obj, indentLevel) => {
  **/
 export const countTransactions = (wrappedClaims, userDid: string) => {
 
-  const SCHEMA_ORG = 'https://schema.org'
-
   // add up any promised amount or time values
   let allPaid = [];     // full claim details
   let allPromised = []; // full claim details
@@ -532,7 +539,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
     const claimType = claim['@type']
     if (!claimType) { idsOfUnknowns.push(jwtEntry.id); continue; }
 
-    if (claimContext === SCHEMA_ORG && claimType === 'Offer') {
+    if (claimContext === SCHEMA_ORG_CONTEXT && claimType === 'Offer') {
       if (!claim.offeredBy && !claim.seller) { idsOfStranges.push(jwtEntry.id); continue; }
       if ((claim.offeredBy && claim.offeredBy.identifier !== userDid)
           || (claim.seller && claim.seller.identifier !== userDid)) {
@@ -565,7 +572,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
       totalCurrencyPromised[currency] = (totalCurrencyPromised[currency] || 0) + amount
       allPromised = allPromised.concat([jwtEntry]);
 
-    } else if (claimContext === SCHEMA_ORG && claimType === 'GiveAction') {
+    } else if (claimContext === SCHEMA_ORG_CONTEXT && claimType === 'GiveAction') {
       if (!claim.agent || claim.agent.identifier !== userDid) {
         // just double-checking that this user really is the giver
         idsOfStranges.push(jwtEntry.id); continue;

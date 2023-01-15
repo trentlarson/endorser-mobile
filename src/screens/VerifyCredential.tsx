@@ -191,6 +191,18 @@ export function VerifyCredentialScreen({ navigation, route }) {
     return accept
   }
 
+  const proceedToEditOffer = (origClaim) => {
+    const offerClaim = {
+      '@context': utility.SCHEMA_ORG_CONTEXT,
+      '@type': 'Offer',
+      itemOffered: {
+        '@type': 'CreativeWork',
+        isPartOf: { '@type': origClaim['@type'], identifier: origClaim.identifier }
+      }
+    }
+    navigation.navigate('Create Credential', { incomingClaim: offerClaim })
+  }
+
   useFocusEffect(
     React.useCallback(() => {
       async function verifyAll() {
@@ -433,6 +445,26 @@ export function VerifyCredentialScreen({ navigation, route }) {
           :
             <View />
           }
+          {/* end actions on private data */}
+
+          {
+          utility.isPlanAction(credentialSubject)
+          ?
+            <View>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>Planned Activity</Text>
+              <View style={{ padding: 10 }} />
+              <Text
+                style={{ color: 'blue', ...styles.centeredText }}
+                onPress={() => proceedToEditOffer(credentialSubject) }
+              >
+                Offer help with this activity
+              </Text>
+              <View style={{ padding: 10 }} />
+            </View>
+          :
+            <View />
+          }
+          {/* end actions on plans */}
 
           {/*----------------------------------------------------------------*/}
           <View style={styles.line} />

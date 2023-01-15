@@ -34,7 +34,8 @@ import { ConstructCredentialScreen } from './screens/ConstructCredential'
 import { ContactImportScreen } from './screens/ContactImportScan.tsx'
 import { ContactsScreen } from './screens/Contacts'
 import { ContractFormScreen } from './screens/ContractForm'
-import { ExportIdentityScreen, ImportIdentityScreen } from "./screens/ExportImportIdentity";
+import { EditCredentialScreen } from './screens/EditCredential';
+import { ExportIdentityScreen, ImportIdentityScreen } from './screens/ExportImportIdentity'
 import { InitializeScreen } from './screens/Initialize'
 import { LogsScreen } from './screens/Logs'
 import { MyCredentialsScreen } from './screens/MyCredentials'
@@ -126,6 +127,7 @@ function ClaimsStackScreen() {
       <ClaimsStack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
       <ClaimsStack.Screen name="Contract Form" component={ContractFormScreen} />
       <ClaimsStack.Screen name="Create Credential" component={ConstructCredentialScreen} />
+      <ClaimsStack.Screen name="Edit Credential" component={EditCredentialScreen} />
       <ClaimsStack.Screen name="Import Seed Phrase" component={ImportIdentityScreen} />
       <ClaimsStack.Screen name="Initialize" component={InitializeScreen} />
       <ClaimsStack.Screen name="Present Credential" component={PresentCredentialScreen} />

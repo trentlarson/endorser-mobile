@@ -9,7 +9,7 @@ import * as utility from '../utility/utility'
 import { YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 
-export function EditCredentialTextScreen({ navigation, route }) {
+export function EditCredentialScreen({ navigation, route }) {
 
   let { credentialSubject, privateFields } = route.params
 
@@ -85,16 +85,6 @@ export function EditCredentialTextScreen({ navigation, route }) {
                 }
               </Text>
               <View>
-                {
-                  claimArrayStr ? (
-                    <View>
-                      <Text>Hit 'sign' if the Details below are good.</Text>
-                    </View>
-                  ) : ( /* !claimArrayStr */
-                    <Text>No claim found.  Go back and try again.</Text>
-                  )
-                }
-
                 <View>
                   <View style={{ padding: 5 }} />
                   {
@@ -104,7 +94,7 @@ export function EditCredentialTextScreen({ navigation, route }) {
                     :
                       <View>
                         <Button
-                          title={'Sign'}
+                          title={'Review & Sign'}
                           onPress={() =>
                             navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
                               credentialSubject: JSON.parse(claimArrayStr),
