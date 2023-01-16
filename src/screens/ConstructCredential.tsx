@@ -4,7 +4,7 @@ import * as didJwt from 'did-jwt'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { Alert, Button, FlatList, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Button, FlatList, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
 import RadioGroup, {RadioButtonProps} from 'react-native-radio-buttons-group'
 import { useSelector } from 'react-redux'
@@ -785,6 +785,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     const [agentId, setAgentId] = useState<string>(props.userId)
     const [endTime, setEndTime] = useState<string>(null)
+    const [hasConflictingPlanId, setHasConflictingPlanId] = useState<boolean>(false)
+    const [loadingPlanId, setLoadingPlanId] = useState<boolean>(false)
     const [planDescription, setPlanDescription] = useState<string>(null)
     const [planIdentifier, setPlanIdentifier] = useState<string>(null)
     const [planImageUrl, setPlanImageUrl] = useState<string>(null)
@@ -807,12 +809,10 @@ export function ConstructCredentialScreen({ navigation, route }) {
           "@type": "PlanAction",
         }
 
-        const planId = planIdentifier || crypto.randomBytes(16).toString('hex')
-
         result.agent = agentId ? { identifier: agentId } : undefined
         result.description = planDescription || undefined
         result.endTime = isoEndTime || undefined
-        result.identifier = planId
+        result.identifier = planIdentifier
         result.image = planImageUrl || undefined
         result.name = planName || undefined
 
@@ -830,6 +830,71 @@ export function ConstructCredentialScreen({ navigation, route }) {
         proceedToFinish(result)
       }
     }
+
+    const retrieveServerPlanByExternalId = (planId) => {
+      setLoadingPlanId(true)
+      return new Promise(async (resolve, reject) => {
+        const endorserApiServer = appStore.getState().settings.apiServer
+        const token = await utility.accessToken(identifiers[0])
+        fetch(endorserApiServer + '/api/ext/plan/' + planId, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+          },
+        })
+        .then(resp => {
+          console.log('resp.status',resp.status)
+          if (resp.status === 200) {
+            setHasConflictingPlanId(true)
+          } else {
+            setHasConflictingPlanId(false)
+          }
+          return resp.text()
+        })
+        .then(text => {
+          //console.log('Got response body for project lookup: ', text)
+        })
+        .catch(err => {
+          appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Got error checking for project: " + err}))
+          Alert.alert('Got an error checking for that plan ID. See logs for more info.')
+        })
+        .finally(() => {
+          setLoadingPlanId(false)
+          resolve()
+        })
+      })
+    }
+
+    const updateAndCheckPlanIdentifier = (planId) => {
+      setPlanIdentifier(planId)
+      retrieveServerPlanByExternalId(planId)
+    }
+
+    useEffect(() => {
+      const planId = crypto.randomBytes(16).toString('hex')
+      setPlanIdentifier(planId)
+      retrieveServerPlanByExternalId(planId)
+
+      const incomingOffer = utility.isOffer(incomingClaim) ? incomingClaim : {}
+      if (utility.isOffer(incomingClaim)) {
+        if (incomingOffer.offeredBy) {
+          setAgentId(incomingOffer.offeredBy)
+        }
+        if (incomingOffer.includesObject && incomingOffer.includesObject['@type'] === 'TypeAndQuantityNode') {
+          setAmountStr(incomingOffer.includesObject.amountOfThisGood)
+          setIsSpecificAmount(true)
+          setUnit(incomingOffer.includesObject.unitCode)
+        }
+        if (incomingOffer.itemOffered) {
+          setPlanDescription(incomingOffer.itemOffered.description)
+          if (incomingOffer.itemOffered.isPartOf) {
+            setParentType(incomingOffer.itemOffered.isPartOf['@type'])
+            setParentIdentifier(incomingOffer.itemOffered.isPartOf.identifier)
+          }
+        }
+      }
+    }, [])
 
     return (
       <Modal
@@ -921,9 +986,19 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
                 <View style={{ padding: 5 }}>
                   <Text>ID of Plan</Text>
+                  {
+                    loadingPlanId
+                    ? <ActivityIndicator color="#00ff00" />
+                    : <View />
+                  }
+                  {
+                    hasConflictingPlanId
+                    ? <Text style={{ color: 'red' }}>This project ID is taken.</Text>
+                    : <View />
+                  }
                   <TextInput
                     value={planIdentifier}
-                    onChangeText={setPlanIdentifier}
+                    onChangeText={ newVal => updateAndCheckPlanIdentifier(newVal) }
                     editable
                     multiline={true}
                     style={{ borderWidth: 1 }}
@@ -1259,27 +1334,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
       setUnit(selectedButton.value)
     }
 
-    useEffect(() => {
-      const incomingOffer = utility.isOffer(incomingClaim) ? incomingClaim : {}
-      if (utility.isOffer(incomingClaim)) {
-        if (incomingOffer.offeredBy) {
-          setAgentId(incomingOffer.offeredBy)
-        }
-        if (incomingOffer.includesObject && incomingOffer.includesObject['@type'] === 'TypeAndQuantityNode') {
-          setAmountStr(incomingOffer.includesObject.amountOfThisGood)
-          setIsSpecificAmount(true)
-          setUnit(incomingOffer.includesObject.unitCode)
-        }
-        if (incomingOffer.itemOffered) {
-          setDescription(incomingOffer.itemOffered.description)
-          if (incomingOffer.itemOffered.isPartOf) {
-            setParentType(incomingOffer.itemOffered.isPartOf['@type'])
-            setParentIdentifier(incomingOffer.itemOffered.isPartOf.identifier)
-          }
-        }
-      }
-    }, [])
-
     function possiblyFinish(proceedToFinish) {
 
       // An embedded item is useful for later reference (via identifier).
@@ -1343,6 +1397,27 @@ export function ConstructCredentialScreen({ navigation, route }) {
         proceedToFinish(result)
       }
     }
+
+    useEffect(() => {
+      const incomingOffer = utility.isOffer(incomingClaim) ? incomingClaim : {}
+      if (utility.isOffer(incomingClaim)) {
+        if (incomingOffer.offeredBy) {
+          setAgentId(incomingOffer.offeredBy)
+        }
+        if (incomingOffer.includesObject && incomingOffer.includesObject['@type'] === 'TypeAndQuantityNode') {
+          setAmountStr(incomingOffer.includesObject.amountOfThisGood)
+          setIsSpecificAmount(true)
+          setUnit(incomingOffer.includesObject.unitCode)
+        }
+        if (incomingOffer.itemOffered) {
+          setDescription(incomingOffer.itemOffered.description)
+          if (incomingOffer.itemOffered.isPartOf) {
+            setParentType(incomingOffer.itemOffered.isPartOf['@type'])
+            setParentIdentifier(incomingOffer.itemOffered.isPartOf.identifier)
+          }
+        }
+      }
+    }, [])
 
     return (
       <Modal
