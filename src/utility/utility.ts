@@ -615,7 +615,7 @@ export const retrieveClaims = async (endorserApiServer, identifier, afterId, bef
   const token = await accessToken(identifier)
   const afterQuery = afterId == null ? '' : '&afterId=' + afterId
   const beforeQuery = beforeId == null ? '' : '&beforeId=' + beforeId
-  return fetch(endorserApiServer + '/api/reportAll/claims?' + afterQuery + beforeQuery, {
+  return fetch(endorserApiServer + '/api/v2/report/claims?' + afterQuery + beforeQuery, {
     method: 'GET',
     headers: {
       "Content-Type": "application/json",
