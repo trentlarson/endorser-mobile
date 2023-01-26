@@ -232,11 +232,22 @@ export function VerifyCredentialScreen({ navigation, route }) {
               "Content-Type": "application/json",
               "Uport-Push-Token": userToken
             }})
-            .then(response => {
+            .then(async response => {
               if (response.status === 200) {
                 return response.json()
               } else {
-                throw ('While retrieving full claim, got bad response status of ' + response.status)
+                const text = await response.text()
+                let bodyText =
+                  'While retrieving full claim, got bad response status of ' + response.status
+                  + ' with text ' + text
+                let userMessage = null
+                // if the body is JSON, maybe we can show something more helpful
+                try {
+                  userMessage = JSON.parse(text).error?.message
+                } catch (e) {
+                  // continue and just use generic text
+                }
+                throw { userMessage: userMessage, bodyText: text }
               }
             })
             .then((result: utility.EndorserRecord) => {
@@ -257,8 +268,12 @@ export function VerifyCredentialScreen({ navigation, route }) {
               }
             })
             .catch(e => {
-              console.log('Something went wrong trying to access JWT data from Endorser server.', e)
-              setVerifyError('Could not access full proof from Endorser server.')
+              appStore.dispatch(appSlice.actions.addLog({
+                log: true,
+                msg: "Something went wrong trying to access full JWT data from Endorser server. " + JSON.stringify(e)
+              }))
+              const message = e.userMessage || 'Could not access the full proof from Endorser server.'
+              setVerifyError(message + ' The logs may show more info.')
             })
         }
 
@@ -332,18 +347,31 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
             setEndorserId(foundEndorserId)
 
-            const url = appStore.getState().settings.apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + encodeURIComponent(foundEndorserId)
+            const url =
+              appStore.getState().settings.apiServer
+              + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + encodeURIComponent(foundEndorserId)
             const userToken = await utility.accessToken(identifiers[0])
             await fetch(url, {
               headers: {
                 "Content-Type": "application/json",
                 "Uport-Push-Token": userToken
               }})
-              .then(response => {
+              .then(async response => {
                 if (response.status === 200) {
                   return response.json()
                 } else {
-                  throw ('While retrieving confirmations, got bad response status of ' + response.status)
+                  const text = await response.text()
+                  let bodyText =
+                    'While retrieving confirmations, got bad response status of ' + response.status
+                    + ' with text ' + text
+                  let userMessage = null
+                  // if the body is JSON, maybe we can show something more helpful
+                  try {
+                    userMessage = JSON.parse(text).error?.message
+                  } catch (e) {
+                    // continue and just use generic text
+                  }
+                  throw { userMessage: userMessage, bodyText: text }
                 }
               })
               .then(result => {
@@ -355,8 +383,12 @@ export function VerifyCredentialScreen({ navigation, route }) {
                 setVisibleTo(result.resultVisibleToDids || [])
               })
               .catch(e => {
-                console.log('Something went wrong trying to access confirmation data.', e)
-                setConfirmError('Could not access confirmation data.')
+                appStore.dispatch(appSlice.actions.addLog({
+                  log: true,
+                  msg: "Something went wrong trying to access confirmation data. " + JSON.stringify(e)
+                }))
+                const message = e.userMessage || 'Could not access confirmation data.'
+                setConfirmError(message + ' The logs may show more info.')
               })
 
           }
