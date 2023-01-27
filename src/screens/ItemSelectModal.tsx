@@ -1,12 +1,11 @@
 import React from 'react'
-import { Alert, FlatList, Modal, Text, TouchableHighlight, View } from 'react-native'
-import { useSelector } from 'react-redux'
+import { FlatList, Modal, Text, TouchableHighlight, View } from 'react-native'
 
 import { styles } from './style'
 
-export function ContactSelectModal(props) {
+export function ItemSelectModal(props) {
 
-  const allContacts = useSelector((state) => state.contacts || [])
+  const allItems = props.list
 
   return (
     <Modal
@@ -16,21 +15,21 @@ export function ContactSelectModal(props) {
     >
       <View style={styles.modalView}>
         <FlatList
-          data={allContacts}
-          keyExtractor={item => item.did}
+          data={allItems}
+          keyExtractor={item => item}
           renderItem={data =>
             <TouchableHighlight
               style={styles.saveButton}
-              onPress={ () => props.proceed(data.item.did) }
+              onPress={ () => props.proceed(data.item) }
             >
-              <Text>{data.item.name}</Text>
+              <Text>{data.item}</Text>
             </TouchableHighlight>
           }
           ListEmptyComponent={
-            <Text>You Have No Contacts</Text>
+            <Text>No Items Available</Text>
           }
           ListHeaderComponent={
-            <Text>Choose A Contact</Text>
+            <Text>Choose One</Text>
           }
         />
 

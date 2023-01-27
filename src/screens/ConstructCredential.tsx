@@ -10,6 +10,7 @@ import RadioGroup, {RadioButtonProps} from 'react-native-radio-buttons-group'
 import { useSelector } from 'react-redux'
 
 import { ContactSelectModal } from './ContactSelect'
+import { ItemSelectModal } from './ItemSelectModal'
 import { styles } from './style'
 import { onboarding } from '../data/onboarding'
 import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
@@ -429,7 +430,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     function loanOrCreditClaimFromInputs() {
       return loanOrCreditClaim(
-        crypto.randomBytes(16).toString('hex'), // 128 bits seems OK
+        crypto.randomBytes(16).toString('hex'), // 128 bits seems OK; might consider ULIDs
         props.providerId,
         recipientId,
         Number(amountStr),
@@ -821,10 +822,12 @@ export function ConstructCredentialScreen({ navigation, route }) {
           resultId = crypto.randomBytes(16).toString('hex')
         }
 
-        result.result = {
-          "@type": "CreativeWork",
-          identifier: resultId || undefined,
-          description: resultDescription || undefined
+        if (resultId) {
+          result.result = {
+            "@type": "CreativeWork",
+            identifier: resultId || undefined,
+            description: resultDescription || undefined
+          }
         }
 
         proceedToFinish(result)
@@ -870,31 +873,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
       setPlanIdentifier(planId)
       retrieveServerPlanByExternalId(planId)
     }
-
-    useEffect(() => {
-      const planId = crypto.randomBytes(16).toString('hex')
-      setPlanIdentifier(planId)
-      retrieveServerPlanByExternalId(planId)
-
-      const incomingOffer = utility.isOffer(incomingClaim) ? incomingClaim : {}
-      if (utility.isOffer(incomingClaim)) {
-        if (incomingOffer.offeredBy) {
-          setAgentId(incomingOffer.offeredBy)
-        }
-        if (incomingOffer.includesObject && incomingOffer.includesObject['@type'] === 'TypeAndQuantityNode') {
-          setAmountStr(incomingOffer.includesObject.amountOfThisGood)
-          setIsSpecificAmount(true)
-          setUnit(incomingOffer.includesObject.unitCode)
-        }
-        if (incomingOffer.itemOffered) {
-          setPlanDescription(incomingOffer.itemOffered.description)
-          if (incomingOffer.itemOffered.isPartOf) {
-            setParentType(incomingOffer.itemOffered.isPartOf['@type'])
-            setParentIdentifier(incomingOffer.itemOffered.isPartOf.identifier)
-          }
-        }
-      }
-    }, [])
 
     return (
       <Modal
@@ -1231,6 +1209,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                           onChangeText={setAmountStr}
                           editable
                           style={{ borderWidth: 1 }}
+                          width={ 50 }
                         />
                       </View>
 
@@ -1308,13 +1287,17 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     const [agentId, setAgentId] = useState<string>(props.userId)
     const [amountStr, setAmountStr] = useState<string>('')
-    const [description, setDescription] = useState<string>(null)
     const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
+    const [isItemDescribed, setIsItemDescribed] = useState<boolean>(false)
+    const [itemDescription, setItemDescription] = useState<string>(null)
+    const [itemType, setItemType] = useState<string>('CreativeWork')
     const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
     const [parentIdentifier, setParentIdentifier] = useState<string>('')
+    const [parentInfoReadOnly, setParentInfoReadOnly] = useState<boolean>(false)
     const [parentType, setParentType] = useState<string>('')
     const [recipientId, setRecipientId] = useState<string>(null)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
+    const [selectItemType, setSelectItemType] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
     const [termsOfService, setTermsOfService] = useState<string>('')
     const [transferAllowed, setTransferAllowed] = useState<boolean>(false)
@@ -1323,6 +1306,10 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [validThrough, setValidThrough] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
 
     const allContacts = useSelector((state) => state.contacts || [])
+
+    function toggleIsItemDescribed() {
+      setIsItemDescribed(!isItemDescribed)
+    }
 
     function toggleIsSpecificAmount() {
       setIsSpecificAmount(!isSpecificAmount)
@@ -1338,26 +1325,36 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
       // An embedded item is useful for later reference (via identifier).
       // Other apps may choose to use price & priceCurrency.
-      if (!isSpecificAmount && !description) {
-        Alert.alert('You must describe the offering or give a specific amount.')
+      if (isItemDescribed && !itemDescription) {
+        Alert.alert('You must describe your offer.')
       } else if (isSpecificAmount && (!amountStr || !unit)) {
-        Alert.alert('You must give a specific amount and unit.')
+        Alert.alert('You must declare a specific amount and unit.')
       } else if (isSpecificAmount && isNaN(Number(amountStr))) {
-        Alert.alert('You must give a valid numeric amount.')
+        Alert.alert('You must declare a valid numeric amount.')
+      } else if (!isSpecificAmount && !itemDescription) {
+        Alert.alert('You must describe your offer or give a specific amount.')
       } else {
         let result = {
           "@context": "https://schema.org",
           "@type": "Offer",
-          identifier: crypto.randomBytes(16).toString('hex'),
           numberOfTransfersAllowed: multipleTransfersAllowed ? Number.MAX_SAFE_INTEGER : (transferAllowed ? 1 : 0),
           offeredBy: { identifier: agentId },
         }
 
-        if (description || parentIdentifier) {
-          result.itemOffered = { '@type': 'CreativeWork' }
-          if (description) {
-            result.itemOffered.description = description
+        if (itemDescription || parentIdentifier) {
+          result.itemOffered = { '@type': itemType }
+          result.itemOffered.description = itemDescription || undefined
+          if (parentIdentifier) {
+            result.itemOffered.isPartOf = {
+              '@type': parentType,
+              identifier: parentIdentifier
+            }
           }
+        }
+
+        if (itemDescription || parentIdentifier) {
+          result.itemOffered = { '@type': itemType }
+          result.itemOffered.description = itemDescription || undefined
           if (parentIdentifier) {
             result.itemOffered.isPartOf = {
               '@type': parentType,
@@ -1410,10 +1407,16 @@ export function ConstructCredentialScreen({ navigation, route }) {
           setUnit(incomingOffer.includesObject.unitCode)
         }
         if (incomingOffer.itemOffered) {
-          setDescription(incomingOffer.itemOffered.description)
+          if (incomingOffer.itemOffered['@type']) {
+            setItemType(incomingOffer.itemOffered['@type'])
+          } else if (incomingOffer.itemOffered.isPartOf) {
+            // no type was given, so we'll assume something
+            setItemType('CreativeWork')
+          }
           if (incomingOffer.itemOffered.isPartOf) {
             setParentType(incomingOffer.itemOffered.isPartOf['@type'])
             setParentIdentifier(incomingOffer.itemOffered.isPartOf.identifier)
+            setParentInfoReadOnly(true)
           }
         }
       }
@@ -1442,6 +1445,18 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 ? <ContactSelectModal
                     cancel={ () => { setSelectRecipientFromContacts(false) } }
                     proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
+                  />
+                : <View/>
+              }
+              {
+                selectItemType
+                ? <ItemSelectModal
+                    list={ ['Creative Work', 'Event', 'Menu Item', 'Product', 'Service', 'Trip'] }
+                    cancel={ () => { setSelectItemType(false) } }
+                    proceed={ (type) => {
+                      setItemType(type.replace(' ', ''))
+                      setSelectItemType(false)
+                    }}
                   />
                 : <View/>
               }
@@ -1498,41 +1513,60 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   }
                 </View>
 
+                {
+                  parentInfoReadOnly
+                  ? <Text style={{ padding: 5 }}>Contributes To A (Type): {parentType}</Text>
+                  : <View/>
+                }
+
                 <View style={{ padding: 5 }}>
-                  <Text>Parent Identifier</Text>
+                  <Text>Contributes to Initiative (ID)</Text>
                   <TextInput
                     value={parentIdentifier}
                     onChangeText={setParentIdentifier}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Description of Offering</Text>
-                  <TextInput
-                    value={description}
-                    onChangeText={setDescription}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Terms, Conditions, Limitations, etc</Text>
-                  <TextInput
-                    value={termsOfService}
-                    onChangeText={setTermsOfService}
-                    editable
-                    multiline={true}
+                    editable={ !parentInfoReadOnly }
                     style={{ borderWidth: 1 }}
                   />
                 </View>
 
                 <CheckBox
-                  title='This is a specific amount.'
+                  title='You will describe your offering.'
+                  checked={isItemDescribed}
+                  onPress={toggleIsItemDescribed}
+                />
+
+                {
+                  isItemDescribed
+                  ?
+                    <View>
+                      <Text style={{ padding: 5 }}>
+                        Offering Type: { utility.capitalizeAndInsertSpacesBeforeCaps(itemType) }
+                        &nbsp;&nbsp;
+                        <TouchableHighlight
+                          style={styles.moreButton}
+                          onPress={() => setSelectItemType(true)}
+                        >
+                          <Text>Change</Text>
+                        </TouchableHighlight>
+                      </Text>
+
+                      <View style={{ padding: 5 }}>
+                        <Text>Offering Description</Text>
+                        <TextInput
+                          value={itemDescription}
+                          onChangeText={setItemDescription}
+                          editable={true}
+                          multiline={true}
+                          style={{ borderWidth: 1 }}
+                        />
+                      </View>
+                    </View>
+                  :
+                    <View />
+                }
+
+                <CheckBox
+                  title='You will declare a specific amount.'
                   checked={isSpecificAmount}
                   onPress={toggleIsSpecificAmount}
                 />
@@ -1541,24 +1575,25 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   isSpecificAmount ? (
                     <View>
                       <View style={{ padding: 5 }}>
-                        <Text>Amount</Text>
-                        <TextInput
-                          value={amountStr}
-                          onChangeText={setAmountStr}
-                          editable
-                          style={{ borderWidth: 1 }}
-                        />
-                      </View>
-
-                      <View style={{ padding: 5 }}>
-                        <Text>Unit</Text>
-                        <TextInput
-                          value={unit}
-                          onChangeText={setUnit}
-                          editable
-                          style={{ borderWidth: 1 }}
-                          width={ 50 }
-                        />
+                        <View style={{ flexDirection: 'row', justifyContent: "center" }}>
+                          <Text>Amount      Unit</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: "center" }}>
+                          <TextInput
+                            value={amountStr}
+                            onChangeText={setAmountStr}
+                            editable
+                            style={{ borderWidth: 1 }}
+                            width={ 50 }
+                          />
+                          <TextInput
+                            value={unit}
+                            onChangeText={setUnit}
+                            editable
+                            style={{ borderWidth: 1 }}
+                            width={ 50 }
+                          />
+                        </View>
                         {
                           (R.find(R.prop('selected'), unitButtons).value == '') ? (
                             <Text>
@@ -1582,13 +1617,24 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 }
 
                 <View style={{ padding: 5 }}>
-                  <Text>Valid Through</Text>
+                  <Text>Valid Through Date</Text>
                   <TextInput
                     value={validThrough}
                     onChangeText={setValidThrough}
                     editable
                     style={{ borderWidth: 1 }}
                   />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                    <Text>Terms, Conditions, Limitations, etc</Text>
+                    <TextInput
+                      value={termsOfService}
+                      onChangeText={setTermsOfService}
+                      editable
+                      multiline={true}
+                      style={{ borderWidth: 1 }}
+                    />
                 </View>
 
                 <View style={{ padding: 5 }}>
