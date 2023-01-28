@@ -1352,17 +1352,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
           }
         }
 
-        if (itemDescription || parentIdentifier) {
-          result.itemOffered = { '@type': itemType }
-          result.itemOffered.description = itemDescription || undefined
-          if (parentIdentifier) {
-            result.itemOffered.isPartOf = {
-              '@type': parentType,
-              identifier: parentIdentifier
-            }
-          }
-        }
-
         if (isSpecificAmount) {
           result.includesObject = {
 
@@ -1407,13 +1396,13 @@ export function ConstructCredentialScreen({ navigation, route }) {
           setUnit(incomingOffer.includesObject.unitCode)
         }
         if (incomingOffer.itemOffered) {
-          if (incomingOffer.itemOffered['@type']) {
-            setItemType(incomingOffer.itemOffered['@type'])
-          } else if (incomingOffer.itemOffered.isPartOf) {
-            // no type was given, so we'll assume something
-            setItemType('CreativeWork')
-          }
+          const incomingItemType = incomingOffer.itemOffered['@type']
+          setItemType(incomingItemType)
           if (incomingOffer.itemOffered.isPartOf) {
+            if (!incomingItemType) {
+              // no type was given, so we'll assume something
+              setItemType('CreativeWork')
+            }
             setParentType(incomingOffer.itemOffered.isPartOf['@type'])
             setParentIdentifier(incomingOffer.itemOffered.isPartOf.identifier)
             setParentInfoReadOnly(true)

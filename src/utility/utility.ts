@@ -229,7 +229,8 @@ export const claimSpecialDescription = (claim, identifiers, contacts) => {
 
   } else if (type === "Tenure") {
     var polygon = claim.spatialUnit.geo.polygon
-    return didInContext(claim.party.did, identifiers, contacts) + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
+    return didInContext(claim.party.did, identifiers, contacts)
+      + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
   }
   return null
 }
@@ -451,7 +452,8 @@ export const checkPubKeyBase64 = (oldKeyBase64) => {
 }
 
 /**
- @return results of Settings.uportJwtPayload: { iat: number, iss: string (DID), own: { name, publicEncKey (base64-encoded key) } }
+ @return results of Settings.uportJwtPayload:
+   { iat: number, iss: string (DID), own: { name, publicEncKey (base64-encoded key) } }
  */
 export const getContactPayloadFromJwtUrl = (jwtUrlText: string) => {
   let jwtText = jwtUrlText
@@ -514,7 +516,8 @@ const objectToYamlString = (obj, indentLevel) => {
  * - idsOfStranges are recognized claims (ie. Offer, GiveAction) but missing some necessary fields
  * - idsOfUnknowns are unrecognized claims (ie. not Offer or GiveAction)
  * - outstandingCurrencyTotals is a map of currency code to outstanding amount promised
- * - outstandingInvoiceTotals is a map of invoice ID (ie. offerId or recipient.identifier) to outstanding amount promised
+ * - outstandingInvoiceTotals is a map of
+ *     invoice ID (ie. offerId or recipient.identifier) to outstanding amount promised
  * - totalCurrencyPaid is a map of currency code to amount paid
  * - totalCurrencyPromised is a map of currency code to total amount promised
  *
@@ -530,7 +533,11 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
   let outstandingInvoiceTotals = {} // map of invoice ID to outstanding amount promised
   let totalCurrencyPaid = {} // map of currency code to amount paid
   let totalCurrencyPromised = {} // map of currency code to total amount promised
-  const wrappedClaims2 = wrappedClaims.sort((j1, j2) => DateTime.fromISO(j1.issuedAt.replace(" ", "T")).toMillis() - DateTime.fromISO(j2.issuedAt.replace(" ", "T")).toMillis())
+  const wrappedClaims2 =
+    wrappedClaims.sort((j1, j2) =>
+      DateTime.fromISO(j1.issuedAt.replace(" ", "T")).toMillis()
+      - DateTime.fromISO(j2.issuedAt.replace(" ", "T")).toMillis()
+    )
   for (jwtEntry of wrappedClaims2) {
     const claim = jwtEntry.claim;
     if (!claim) { idsOfUnknowns.push(jwtEntry.id); continue; }
@@ -545,7 +552,13 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
           || (claim.seller && claim.seller.identifier !== userDid)) {
         idsOfStranges.push(jwtEntry.id); continue;
       }
-      const node = claim.itemOffered
+
+      let node = claim.includesObject
+      if (!node && claim.itemOffered?.amountOfThisGood) {
+        // this is the case for some legacy Offer entries on endorser.ch
+        node = claim.itemOffered
+      }
+
       if (!node) { idsOfStranges.push(jwtEntry.id); continue; }
       const amount = node.amountOfThisGood
       if (isNaN(amount)) { idsOfStranges.push(jwtEntry.id); continue; }
@@ -560,7 +573,8 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
           // ... but we probably won't test for this because it shouldn't be defined behavior
           if (outstandingInvoiceTotals[invoiceNum]) {
             // so if there is a previous invoice, we'll undo that one from the totals
-            outstandingCurrencyTotals[currency] = (outstandingCurrencyTotals[currency] || 0) - outstandingInvoiceTotals[invoiceNum]
+            outstandingCurrencyTotals[currency] =
+              (outstandingCurrencyTotals[currency] || 0) - outstandingInvoiceTotals[invoiceNum]
           }
 
           outstandingInvoiceTotals[invoiceNum] = amount
@@ -602,7 +616,11 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
     }
   }
 
-  return { allPaid, allPromised, idsOfStranges, idsOfUnknowns, outstandingCurrencyTotals, outstandingInvoiceTotals, totalCurrencyPaid, totalCurrencyPromised }
+  return {
+    allPaid, allPromised, idsOfStranges, idsOfUnknowns,
+    outstandingCurrencyTotals, outstandingInvoiceTotals,
+    totalCurrencyPaid, totalCurrencyPromised
+  }
 
 }
 

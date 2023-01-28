@@ -129,8 +129,9 @@ export function MyCredentialsScreen({ navigation }) {
         promised.claim.identifier
         || (promised.claim.recipient && promised.claim.recipient.identifier)
       if (accounting.outstandingInvoiceTotals[invoiceNum] > 0
-          && promised.claim.itemOffered) {
-        let node = promised.claim.itemOffered
+          // itemOffered is for some legacy Offers in Endorser.ch
+          && (promised.claim.includesObject || promised.claim.itemOffered?.unitCode)) {
+        let node = promised.claim.includesObject
         outPerCur[node.unitCode] = (outPerCur[node.unitCode] || []).concat([promised])
       }
     }
@@ -364,7 +365,7 @@ export function MyCredentialsScreen({ navigation }) {
                                         agent: { identifier: identifiers[0].did },
                                         offerId: data.item.claim.identifier,
                                         recipient: data.item.claim.recipient,
-                                        object: data.item.claim.itemOffered,
+                                        object: data.item.claim.itemOffered || data.item.claim.includesObject,
                                       }
                                     })
                                   }

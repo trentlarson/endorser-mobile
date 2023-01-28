@@ -23,17 +23,26 @@ export function MyOffersScreen({ navigation, route }) {
         ListEmptyComponent={<Text>None</Text>}
         renderItem={(data) => {
           let label, recipient
-          if (data.item.claim.recipient) {
+          if (data.item.claim?.recipient) {
             label = "Recipient"
             recipient = utility.didInContext(data.item.claim.recipient.identifier, allIdentifiers, allContacts)
           } else {
             label = "Invoice"
-            recipient = data.item.claim.identifier
+            recipient = data.item.claim?.identifier
           }
           return (
             <View>
-              <Text>{ data.item.claim.itemOffered.amountOfThisGood } to { label } { recipient }</Text>
-              <Text style={{ color: 'blue' }} onPress={() => navigation.navigate('Verify Credential', { wrappedClaim: data.item })}>See Details</Text>
+              <Text>
+                {/* The itemOffered version is for some legacy Offers on the endorser.ch ledger. */}
+                { data.item.claim?.includesObject?.amountOfThisGood || data.item.claim?.itemOffered?.amountOfThisGood }
+                &nbsp;to { label } { recipient }
+              </Text>
+              <Text
+                style={{ color: 'blue' }}
+                onPress={() => navigation.navigate('Verify Credential', { wrappedClaim: data.item })}
+              >
+                See Details
+              </Text>
             </View>
           )
         }}
