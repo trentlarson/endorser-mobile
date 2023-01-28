@@ -342,7 +342,7 @@ export function MyCredentialsScreen({ navigation }) {
 
               {
                 showDetails
-                ? <YamlFormat source={ datum.claim || datum } navigation={navigation} />
+                ? <YamlFormat source={ datum } navigation={ navigation } showActions={ showActions } />
                 : <View />
               }
             </View>
