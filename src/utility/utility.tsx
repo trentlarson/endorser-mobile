@@ -73,7 +73,7 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
  * navigation (optional) is the navigation object (used to provide links to verify cred, etc)
  * afterItemCss (optional) is CSS to add to add after each item
  */
-export const YamlFormat = ({ source, navigation, afterItemCss }) => {
+export const YamlFormat = ({ source, navigation, afterItemCss, showActions }) => {
 
   const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [didsForLinkedModal, setDidsForLinkedModal] = useState<Array<string>>(null)
@@ -161,13 +161,14 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
     finalSource = [ source ]
     hideActions = true
   }
+  const finalShowActions = showActions || !hideActions
   return (
     <View>
       {
         finalSource.map((item: utility.EndorserRecord, index) =>
           <View key={ index } style={{ marginLeft: 5 }}>
             {
-              hideActions
+              !finalShowActions
               ?
                 <View />
               :

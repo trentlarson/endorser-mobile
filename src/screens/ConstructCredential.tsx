@@ -1530,7 +1530,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 </View>
 
                 <CheckBox
-                  title='You will describe your offering.'
+                  title='Describe your offering.'
                   checked={isItemDescribed}
                   onPress={toggleIsItemDescribed}
                 />
@@ -1566,7 +1566,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 }
 
                 <CheckBox
-                  title='You will declare a specific amount.'
+                  title='Declare a specific amount.'
                   checked={isSpecificAmount}
                   onPress={toggleIsSpecificAmount}
                 />

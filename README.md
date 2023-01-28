@@ -206,13 +206,13 @@ Manually
 
 - On an actual device (remember the table-name fiasco!)
   - Android
-    - Must use Play Store to release to internal testing (because migrations fiasco wasn't caught when connected)
+    - Must use Play Store to release to internal testing (because migrations fiasco wasn't caught when connected directly to the device).
     - To work with different versions, increment versionCode in different clones of the repo (built from scratch), and test in Internal Testing with alternating builds & uploads.
   - iOS
-    - TestFlight is recommended (though potentially OK to use Xcode, since it would have caught the migrations fiasco)
+    - TestFlight is recommended (though potentially OK to use Xcode, since it would have caught the migrations fiasco).
 
-  - Install then create or import
-  - Notification permissions: new install messaging, accepted, declined then accepted, turned off in settings then accepted, ensure user knows when off
+  - Install then create or import.
+  - Notification permissions: new install messaging, accepted, declined then accepted, turned off in settings then accepted, ensure user knows when off.
 
 
 

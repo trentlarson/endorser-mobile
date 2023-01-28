@@ -25,7 +25,9 @@ export function ReportFeedScreen({ navigation }) {
   const updateFeed = async () => {
     setLoadingRecent(true)
 
-    await utility.retrieveClaims(appStore.getState().settings.apiServer, identifiers[0], feedPreviousLastId, thisSessionsOldestFeedId)
+    await utility.retrieveClaims(
+      appStore.getState().settings.apiServer, identifiers[0], feedPreviousLastId, thisSessionsOldestFeedId
+    )
     .then(async results => {
       if (results.data.length > 0) {
         setFeedData(previousData => previousData.concat(results.data))
@@ -37,7 +39,11 @@ export function ReportFeedScreen({ navigation }) {
         if (!settings.lastViewedClaimId
             || newLastViewedId > settings.lastViewedClaimId) {
           const conn = await dbConnection
-          await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { lastNotifiedClaimId: newLastViewedId, lastViewedClaimId: newLastViewedId })
+          await conn.manager.update(
+            Settings,
+            MASTER_COLUMN_VALUE,
+            { lastNotifiedClaimId: newLastViewedId, lastViewedClaimId: newLastViewedId }
+          )
 
           settings.lastNotifiedClaimId = newLastViewedId
           settings.lastViewedClaimId = newLastViewedId

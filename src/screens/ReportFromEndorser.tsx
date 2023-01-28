@@ -149,7 +149,12 @@ export function ReportScreen({ navigation }) {
           <FlatList
             data={filteredResults1}
             renderItem={datum =>
-              <YamlFormat source={ datum.item } navigation={navigation} afterItemCss={styles.line} />
+              <YamlFormat
+                source={ datum.item }
+                navigation={ navigation }
+                afterItemCss={ styles.line }
+                showActions={true}
+              />
             }
           >
           </FlatList>
