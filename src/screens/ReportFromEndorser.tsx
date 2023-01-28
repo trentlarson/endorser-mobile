@@ -29,7 +29,10 @@ export function ReportScreen({ navigation }) {
   const retrieveConfirms = async (claimId, claimIssuerDid) => {
     setConfirmLoading(conLoad => R.set(R.lensProp(claimId), true, conLoad))
 
-    const url = appStore.getState().settings.apiServer + '/api/report/issuersWhoClaimedOrConfirmed?claimId=' + encodeURIComponent(claimId)
+    const url =
+      appStore.getState().settings.apiServer
+      + '/api/report/issuersWhoClaimedOrConfirmed?claimId='
+      + encodeURIComponent(claimId)
     const userToken = await utility.accessToken(identifiers[0])
     await fetch(url, {
       headers: {
@@ -41,7 +44,10 @@ export function ReportScreen({ navigation }) {
         return response.json()
       } else {
         const bodyText = await response.text()
-        throw ('While retrieving confirmations, got bad response status of ' + response.status + ' and body: ' + bodyText)
+        throw (
+          'While retrieving confirmations, got bad response status of ' + response.status
+          + ' and body: ' + bodyText
+        )
       }
     })
     .then(result => {
@@ -130,7 +136,9 @@ export function ReportScreen({ navigation }) {
       ? R.filter(full => utility.isAccept(full.claim) && typeof full.claim.object == 'string', filteredResults0)
       : filteredResults0
     if (results.length > 0 && filteredResults1.length === 0) {
-      return <Text>There are results but they include IDs not visible to you. (Use checkboxes to show more claims.)</Text>
+      return (
+        <Text>There are results but they include IDs not visible to you. (Use checkboxes to show more claims.)</Text>
+      )
     } else if (showAcceptsOnly && showAcceptConfirmations) {
       return <AcceptList acceptRecords={filteredResults1} />
     } else if (showAcceptsOnly && showAcceptTotals) {
@@ -138,7 +146,13 @@ export function ReportScreen({ navigation }) {
     } else {
       return (
         <ScrollView horizontal={ true }>{/* horizontal scrolling for long string values */}
-          <YamlFormat source={ filteredResults1 } navigation={navigation} afterItemCss={styles.line} />
+          <FlatList
+            data={filteredResults1}
+            renderItem={datum =>
+              <YamlFormat source={ datum.item } navigation={navigation} afterItemCss={styles.line} />
+            }
+          >
+          </FlatList>
         </ScrollView>
       )
     }
@@ -177,7 +191,11 @@ export function ReportScreen({ navigation }) {
         setSearchError('')
       }).catch(err => {
         setLoadingSearch(false)
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Problem during search at " + appStore.getState().settings.apiServer + '/api/claim' + urlSuffix + " Error: " + err}))
+        appStore.dispatch(appSlice.actions.addLog({
+          log: true,
+          msg: "Problem during search at " + appStore.getState().settings.apiServer
+             + '/api/claim' + urlSuffix + " Error: " + err}
+        ))
         setSearchError('There was a problem searching. See logs for more info.')
       })
     } else {
