@@ -141,11 +141,12 @@ export function MyCredentialsScreen({ navigation }) {
     for (promised of accounting.allPromised) {
       const invoiceNum =
         promised.claim.identifier
-        || (promised.claim.recipient && promised.claim.recipient.identifier)
+        || (promised.claim.recipient?.identifier)
       if (accounting.outstandingInvoiceTotals[invoiceNum] > 0
           // itemOffered is for some legacy Offers in Endorser.ch
           && (promised.claim.includesObject || promised.claim.itemOffered?.unitCode)) {
-        let node = promised.claim.includesObject
+        // itemOffered is for some legacy Offers in Endorser.ch
+        let node = promised.claim.includesObject || promised.claim.itemOffered
         outPerCur[node.unitCode] = (outPerCur[node.unitCode] || []).concat([promised])
       }
     }
