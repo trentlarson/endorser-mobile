@@ -35,7 +35,8 @@ export function ScanPresentationScreen({ navigation }) {
     const lastChar = qrText && qrText.slice(-1)
     if (qrText.length < 30
         && lastChar != '}' /* This is just in case we're really at the end*/) {
-      // this happens a lot, where it scans a large barcode as a short code, typically 8 numeric digits and classified as a "Product""
+      // this happens a lot, where it scans a large barcode as a short code,
+      // typically 8 numeric digits and classified as a "Product"
       setScanError(true)
     } else {
 
@@ -312,7 +313,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
               && verifiedResponse.payload.vc.credentialSubject) {
             setCredentialSubject(verifiedResponse.payload.vc.credentialSubject)
             if (vcObj.credentialSubject) {
-              setCredentialSubjectsMatch(R.equals(vcObj.credentialSubject, verifiedResponse.payload.vc.credentialSubject))
+              setCredentialSubjectsMatch(
+                R.equals(vcObj.credentialSubject, verifiedResponse.payload.vc.credentialSubject)
+              )
             } else {
               // nothing to compare to, so don't say it doesn't match
               setCredentialSubjectsMatch(true)
@@ -519,7 +522,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
               }
             </Text>
             {
-              visibleIdList.map(did => <Text key={did} selectable={true}>* { utility.didInContext(did, identifiers, allContacts) }</Text>)
+              visibleIdList.map(did =>
+                <Text key={did} selectable={true}>* { utility.didInfo(did, identifiers, allContacts) }</Text>
+              )
             }
           </View>
 
@@ -534,13 +539,22 @@ export function VerifyCredentialScreen({ navigation, route }) {
               }
             </Text>
             {
-              visibleTo.map(did => <Text key={did} style={{ color: 'blue', fontSize: 11 }} selectable={true} onPress={() => setDidForVisibleModal(did)}>* {did}</Text>)
+              visibleTo.map(did =>
+                <Text key={did} style={{ color: 'blue', fontSize: 11 }} selectable={true}
+                      onPress={() => setDidForVisibleModal(did)}
+                >
+                  * {did}
+                </Text>
+              )
             }
           </View>
           {
             endorserId && (visibleIdList.length > 0 || visibleTo.length > 0)
             ? <View style={{ padding: 5 }}>
-                <Text>To get more details, send this claim ID to one of those people and ask them to search for more information:</Text>
+                <Text>
+                    To get more details, send this claim ID to one of those people and ask them
+                    &nbsp;to search for more information:
+                </Text>
                 <Text style={{ padding: 10 }} selectable={true}>{ endorserId }</Text>
               </View>
             : <View />
@@ -549,7 +563,10 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
           {/* Now show number hidden. */}
           <View style={{ padding: 5 }}>
-            <Text>{ 'There are ' + (numHidden > 0 ? 'confirmations by ' + numHidden : 'no confirmations by anyone') + ' outside your network.' }</Text>
+            <Text>
+              { 'There are ' + (numHidden > 0 ? 'confirmations by ' + numHidden : 'no confirmations by anyone')
+                + ' outside your network.' }
+            </Text>
           </View>
 
 
@@ -565,7 +582,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
               <View>
                 <View style={{ flex: 1, flexDirection: 'row' }}>
                   <Text style={{ width: '30%' }}>Issuer</Text>
-                  <Text style={{ width: '70%' }} selectable={true}>{ utility.didInContext(issuer, identifiers, allContacts) }</Text>
+                  <Text style={{ width: '70%' }} selectable={true}>
+                    { utility.didInfo(issuer, identifiers, allContacts) }
+                  </Text>
                 </View>
                 {
                   credentialSubject

@@ -49,7 +49,7 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text>
-            { utility.didInContext(didForVisibility, allIdentifiers, allContacts) }
+            { utility.didInfo(didForVisibility, allIdentifiers, allContacts) }
           </Text>
           <TouchableHighlight
             style={styles.cancelButton}
@@ -189,7 +189,7 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
                   const contact = R.find(con => con.did === did, allContacts)
                   return (
                     <Text key={ did } style={{ padding: 10 }} selectable={true}>
-                      { utility.didInContext(did, identifiers, allContacts) }
+                      { utility.didInfo(did, identifiers, allContacts) }
                     </Text>
                   )
                 })
@@ -228,16 +228,13 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
   const [showMore, setShowMore] = useState<boolean>(false)
 
   const identifiers = useSelector((state) => state.identifiers || [])
+  const contacts = useSelector((state) => state.contacts || [])
 
   const isUser = did => did === identifiers[0].did
 
   const removeSchemaContext = obj => obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
 
-  const summary =
-    utility.claimSummary(
-      source,
-      isUser(source.issuer) ? '' : ' (by someone else)'
-    )
+  const summary = utility.claimSpecialDescription(source, identifiers, contacts)
 
   return (
     <View>

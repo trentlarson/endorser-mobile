@@ -25,7 +25,7 @@ export function MyOffersScreen({ navigation, route }) {
           let label, recipient
           if (data.item.claim?.recipient) {
             label = "Recipient"
-            recipient = utility.didInContext(data.item.claim.recipient.identifier, allIdentifiers, allContacts)
+            recipient = utility.didInfo(data.item.claim.recipient.identifier, allIdentifiers, allContacts)
           } else {
             label = "Invoice"
             recipient = data.item.claim?.identifier

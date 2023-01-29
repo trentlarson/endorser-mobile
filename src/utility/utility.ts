@@ -167,40 +167,33 @@ export const firstAndLast3OfDid = (did) => {
   return firstAndLast3(lastChars)
 }
 
-const UNKNOWN_CONTACT = "Not in Contacts"
+const UNKNOWN_CONTACT = "Unknown Person"
 
 // always returns text; if unknown then UNKNOWN_CONTACT
-function didInfo(did, identifiers, contacts) {
+export function didInfo(did, identifiers, contacts) {
   const myId = R.find(i => i.did === did, identifiers)
   if (myId) {
-    return "you"
+    return "You"
   } else {
     const contact = R.find(c => c.did === did, contacts)
     if (contact) {
-      return contact.name == null ? "(no name)" : contact.name
+      return contact.name || "(no name)"
     } else {
       return UNKNOWN_CONTACT
     }
   }
 }
 
-export function didInContext(did, identifiers, contacts) {
-  let shortName = didInfo(did, identifiers, contacts)
-  let visibleDid = shortName === UNKNOWN_CONTACT ? did : firstAndLast3OfDid(did)
-  return shortName + (visibleDid ? " (" + visibleDid + ")" : "")
-}
-
 /**
  return readable summary of claim if possible
- extraTitle is optional
  **/
-export const claimSummary = (claim, extraTitle) => {
+const claimSummary = (claim) => {
   if (claim.claim) {
     // probably a Verified Credential
     claim = claim.claim
   }
-  let type = claim['@type'] || 'UnknownType'
-  return capitalizeAndInsertSpacesBeforeCaps(type) + (extraTitle || '')
+  let type = claim['@type'] || 'UnknownAction'
+  return capitalizeAndInsertSpacesBeforeCaps(type)
 }
 
 /**
@@ -216,23 +209,27 @@ export const claimSpecialDescription = (claim, identifiers, contacts) => {
   const type = claim['@type'] || 'UnknownType'
 
   if (type === "JoinAction") {
-    const contactInfo = didInContext(claim.agent.did, identifiers, contacts)
+    const contactInfo = didInfo(claim.agent.did, identifiers, contacts)
+
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
     eventOrganizer = eventOrganizer || "";
     let eventName = claim.event && claim.event.name;
     eventName = eventName ? " " + eventName : "";
     let fullEvent = eventOrganizer + eventName;
-    fullEvent = fullEvent ? " at " + fullEvent : "";
+    fullEvent = fullEvent ? " attended the " + fullEvent : "";
+
     let eventDate = claim.event && claim.event.startTime;
     eventDate = eventDate ? " at " + eventDate : "";
     return contactInfo + fullEvent + eventDate;
 
   } else if (type === "Tenure") {
     var polygon = claim.spatialUnit.geo.polygon
-    return didInContext(claim.party.did, identifiers, contacts)
+    return didInfo(claim.party.did, identifiers, contacts)
       + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
+
+  } else {
+    return claimSummary(claim, contacts)
   }
-  return null
 }
 
 export const accessToken = async (identifier) => {

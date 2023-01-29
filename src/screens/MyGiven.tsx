@@ -25,7 +25,7 @@ export function MyGivenScreen({ navigation, route }) {
           let label, recipient
           if (data.item.claim.recipient) {
             label = "Recipient"
-            recipient = utility.didInContext(data.item.claim.recipient.identifier, allIdentifiers, allContacts)
+            recipient = utility.didInfo(data.item.claim.recipient.identifier, allIdentifiers, allContacts)
           } else if (data.item.claim.identifier) {
             label = "Invoice"
             recipient = data.item.claim.identifier

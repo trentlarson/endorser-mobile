@@ -147,23 +147,22 @@ export function ConfirmOthersScreen({ navigation }) {
             <TouchableOpacity
               style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
             >
-              {/* Why does any CheckBox in here show the startup errors in the UI when you start the app, eg "Please provide SecretBox to the KeyStore"? Those errors are in the console on every run, but they only show in the UI when I put a CheckBox in this screen.
-              <Text>{ utility.claimSummary(data.item) }</Text>
+              <Text>
+                {
+                  utility.claimSpecialDescription(
+                    data.item,
+                    appStore.getState().identifiers || [],
+                    appStore.getState().contacts || []
+                  )
+                }
+              </Text>
               <CheckBox
-                title={ <YamlFormat source={ data.item.claim || data.item } navigation={ navigation } /> }
+                title="Select"
                 checked={!!selectedClaimsToConfirm[data.item.id.toString()]}
                 onPress={() => { toggleSelectedClaim(data.item) }}
               />
-              */}
               <Text onPress={() => { toggleSelectedClaim(data.item) }}>
-                <Text>{ utility.claimSummary(data.item) + "\n" }</Text>
-                <Text>{
-                  utility.claimSpecialDescription(data.item, appStore.getState().identifiers || [], appStore.getState().contacts || [])
-                  || <YamlFormat source={ data.item.claim || data.item } navigation={ navigation } />
-                  }
-                </Text>
-                { "\n" }
-                <Text style={{ color: "blue" }}>{ selectedClaimsToConfirm[data.item.id.toString()] ? "(unselect)" : "(select)" }</Text>
+                <YamlFormat source={ data.item.claim || data.item } navigation={ navigation } />
               </Text>
             </TouchableOpacity>
           }

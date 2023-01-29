@@ -1141,7 +1141,7 @@ export function ContactsScreen({ navigation, route }) {
                   {"\n\n"}
                   If they can see your activity, you may want to hide yourself first. (Double-check visibilty to be sure.)
 
-                  { "\n\n" + utility.didInContext(confirmDeleteContact, allIdentifiers, allContacts) }
+                  { "\n\n" + utility.didInfo(confirmDeleteContact, allIdentifiers, allContacts) }
                 </Text>
 
                 <View style={{ padding: 5 }}/>
