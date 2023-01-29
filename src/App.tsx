@@ -1,5 +1,8 @@
 // Created from the setup in https://veramo.io/docs/guides/react_native
 
+// Pull in the shims (BEFORE importing ethers)
+// from https://docs.ethers.org/v5/cookbook/react-native/
+import '@ethersproject/shims'
 import 'react-native-gesture-handler'
 import 'reflect-metadata'
 

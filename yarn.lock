@@ -1345,6 +1345,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ethersproject/shims@npm:^5.7.0":
+  version: 5.7.0
+  resolution: "@ethersproject/shims@npm:5.7.0"
+  checksum: 155509537b8ff813d10a1ef660e23f7091cfcbc9abc36c01131b0ba7da2e8e93fc15964267c4fd3caf0a157ba75782b56b4f01172ae092234079870362bf1126
+  languageName: node
+  linkType: hard
+
 "@ethersproject/signing-key@npm:^5.1.0, @ethersproject/signing-key@npm:^5.7.0":
   version: 5.7.0
   resolution: "@ethersproject/signing-key@npm:5.7.0"
@@ -2812,6 +2819,7 @@ __metadata:
     "@babel/plugin-proposal-decorators": ^7.12.12
     "@babel/runtime": ^7.8.4
     "@ethersproject/hdnode": ^5.0.9
+    "@ethersproject/shims": ^5.7.0
     "@notifee/react-native": ^5.3.0
     "@react-native-community/clipboard": ^1.5.1
     "@react-native-community/eslint-config": ^1.1.0

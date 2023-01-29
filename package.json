@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ethersproject/hdnode": "^5.0.9",
+    "@ethersproject/shims": "^5.7.0",
     "@notifee/react-native": "^5.3.0",
     "@react-native-community/clipboard": "^1.5.1",
     "@react-native-masked-view/masked-view": "^0.2.7",
