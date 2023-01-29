@@ -14,7 +14,7 @@ import { styles } from './style'
  **/
 export function NotificationPermissionsScreen() {
 
-  const FINISHED_MESSAGE = 'Finished.'
+  const FINISHED_MESSAGE = 'Finished'
 
   const lastCheckText =
     appStore.getState().settings.lastDailyTaskTime
@@ -114,6 +114,35 @@ export function NotificationPermissionsScreen() {
           <View style={{ marginTop: 20 }} />
 
           <View>
+
+            <Text style={{ marginBottom: 20 }}>
+              <Text style={{ fontWeight: 'bold' }}>Status:</Text>
+              &nbsp;
+              {
+                canNotify == null
+                ?
+                <Text>Unsure whether you will get notifications.</Text>
+                :
+                  canNotify == false
+                  ?
+                  isBlocked
+                  ?
+                    <Text>
+                      Notifications are blocked.
+                      To be notified of new activity, you must enable them in your phone settings.&nbsp;
+                      <Text style={{ color: 'blue' }} onPress={ openPhoneSettings }>
+                        Click here to enable Notifications in your phone settings.
+                      </Text>
+                    </Text>
+                    :
+                    // canNotify == false && !isBlocked
+                    <Text>You will not get notifications.</Text>
+                  :
+                    // canNotify must be true
+                    <Text>You will get notifications.</Text>
+              }
+            </Text>
+
             <Text>This app can notify you if people make commitments or confirmations of interest.</Text>
             <View style={{ marginTop: 10 }} />
             <Text>If you're not getting notifications:</Text>
@@ -136,30 +165,6 @@ export function NotificationPermissionsScreen() {
             </View>
           </View>
 
-          <Text style={{ marginTop: 20 }}>Status:&nbsp;
-          {
-            canNotify == null
-            ?
-              <Text>Unsure whether you will get notifications.</Text>
-            :
-              canNotify == false
-              ? 
-                isBlocked
-                ?
-                  <Text>Notifications are blocked. To be notified of new activity, you must enable them in your phone settings.&nbsp;
-                    <Text style={{ color: 'blue' }} onPress={ openPhoneSettings }
-                    >
-                      Click here to enable Notifications in your phone settings.
-                    </Text>
-                  </Text>
-                :
-                  // canNotify == false && !isBlocked
-                  <Text>You will not get notifications.</Text>
-              :
-                // canNotify must be true
-                <Text>You will get notifications.</Text>
-          }
-          </Text>
           <Text>Last Check: { lastCheckText }</Text>
 
           {
@@ -168,8 +173,10 @@ export function NotificationPermissionsScreen() {
             : <View />
           }
 
-          <Text style={{ marginTop: 20 }}>Actions</Text>
+          <Text style={{ fontWeight: 'bold', marginTop: 20 }}>Actions</Text>
           <View style={{ marginLeft: 10}}>
+
+            <Text>After running these actions, you may see more detail in the logs.</Text>
 
             {
               !canNotify
@@ -184,7 +191,7 @@ export function NotificationPermissionsScreen() {
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ checkSettingsAndReport }>
               Double-check your settings in this app.
             </Text>
-            <Text style={{ marginLeft: 10 }}>This may change the Status above.</Text>
+            <Text style={{ marginLeft: 10 }}>You might fix the Status above by doing this.</Text>
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ openPhoneSettings }>
               Enable or disable Notifications in your phone settings.
@@ -198,7 +205,7 @@ export function NotificationPermissionsScreen() {
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ runDailyCheck }>
               Run daily background check.
             </Text>
-            <Text style={{ marginLeft: 10 }}>This should show '{FINISHED_MESSAGE}', then -- only if you have items in your feed -- it should create a notification.</Text>
+            <Text style={{ marginLeft: 10 }}>You should see '{FINISHED_MESSAGE}', then -- only if you have items in your feed -- you should see a new notification.</Text>
             <Text style={{ marginLeft: 20, padding: 10 }}>Note that you can force an item in your feed by decrementing the Last Notified Claim ID in Advanced Test Mode in Settings.</Text>
 
             <Text style={{ color: 'blue', marginTop: 20 }} onPress={ toggleToKill }>

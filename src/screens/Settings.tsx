@@ -548,6 +548,14 @@ export function SettingsScreen({navigation}) {
               See Help
             </Text>
 
+            <View style={{ marginTop: 10 }} />
+            <Text
+              style={{ color: 'blue' }}
+              onPress={() => navigation.navigate('Notification Permissions')}
+            >
+                Check Notification Permissions
+            </Text>
+
             {
               identifiersSelector.length == 0
               ?
@@ -555,10 +563,10 @@ export function SettingsScreen({navigation}) {
               :
                 <View>
                   <Text
-                    style={{ color: 'blue' }}
+                    style={{ color: 'blue', marginTop: 10 }}
                     onPress={checkLimits}
                   >
-                    Check your registration and claim limits.
+                    Check Registration and Claim Limits
                   </Text>
                   {
                     limits == null
@@ -578,13 +586,6 @@ export function SettingsScreen({navigation}) {
                 </View>
             }
 
-            <View style={{ marginTop: 10 }}/>
-            <Text
-              style={{ color: 'blue' }}
-              onPress={() => navigation.navigate(utility.HELP_SCREEN_NAV)}
-            >
-            </Text>
-
             <CheckBox
               title='Advanced Mode'
               checked={isInAdvancedMode}
@@ -595,14 +596,6 @@ export function SettingsScreen({navigation}) {
             isInAdvancedMode
             ? (
               <View>
-
-                <View style={{ marginTop: 10 }}/>
-                <Text
-                  style={{ color: 'blue' }}
-                  onPress={() => navigation.navigate('Notification Permissions')}
-                >
-                  Check Permissions
-                </Text>
 
                 <Text
                   style={{ color: 'blue' }}
