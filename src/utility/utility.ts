@@ -42,6 +42,14 @@ export const REVIEW_SIGN_SCREEN_NAV = 'Review & Sign' // be sure to 'navigation.
 
 const merkler = new MerkleTools({ hashType: 'sha256' })
 
+export function currencyShortWordForCode(unitCode) {
+  return unitCode === 'HUR' ? 'hours' : unitCode
+}
+
+export function displayAmount(code, amt) {
+  return '' + amt + ' ' + currencyShortWordForCode(code)
+}
+
 export function isDid(value) {
   return value && value.startsWith("did:") && (value.substring(5).indexOf(":") > -1)
 }
@@ -104,7 +112,7 @@ export const constructAccept = (agent, pledge) => {
 // insert a space in front of any capital letters (and capitalize first letter, just in case)
 // return '' for null or undefined input
 export const capitalizeAndInsertSpacesBeforeCaps = (text) =>{
-  return !text ? '' : text[0].toUpperCase() + text.substr(1).replace(/([A-Z])/g, ' $1')
+  return !text ? 'Something Unknown' : text[0].toUpperCase() + text.substr(1).replace(/([A-Z])/g, ' $1')
 }
 
 // return true for any nested string where func(input) === true
@@ -169,7 +177,9 @@ export const firstAndLast3OfDid = (did) => {
 
 const UNKNOWN_CONTACT = "Unknown Person"
 
-// always returns text; if unknown then UNKNOWN_CONTACT
+/**
+  always returns text; if unknown then it's UNKNOWN_CONTACT
+ **/
 export function didInfo(did, identifiers, contacts) {
   const myId = R.find(i => i.did === did, identifiers)
   if (myId) {
@@ -197,18 +207,28 @@ const claimSummary = (claim) => {
 }
 
 /**
- return readable description of claim if possible
+ return readable description of claim if possible, as a past-tense action
+
  identifiers is a list of objects with a 'did' field, each representhing the user
  contacts is a list of objects with a 'did' field for others and a 'name' field for their name
  **/
-export const claimSpecialDescription = (claim, identifiers, contacts) => {
+export const claimSpecialDescription = (record, identifiers, contacts) => {
+  const claim = record.claim
   if (claim.claim) {
-    // probably a Verified Credential
+    // it's probably a Verified Credential
     claim = claim.claim
   }
+
+  const issuer = didInfo(record.issuer, identifiers, contacts)
   const type = claim['@type'] || 'UnknownType'
 
-  if (type === "JoinAction") {
+  if (type === "AgreeAction") {
+    return issuer + " agreed with a " + capitalizeAndInsertSpacesBeforeCaps(claim.object?.type)
+
+  } else if (isAccept(claim)) {
+    return issuer + " accepted a " + capitalizeAndInsertSpacesBeforeCaps(claim.object?.type)
+
+  } else if (type === "JoinAction") {
     const contactInfo = didInfo(claim.agent.did, identifiers, contacts)
 
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
@@ -222,10 +242,21 @@ export const claimSpecialDescription = (claim, identifiers, contacts) => {
     eventDate = eventDate ? " at " + eventDate : "";
     return contactInfo + fullEvent + eventDate;
 
+  } else if (isOffer(claim)) {
+    const contactInfo = didInfo(record.issuer, identifiers, contacts)
+    let offering = ""
+    if (claim.includesObject) {
+      offering += displayAmount(claim.includesObject.unitCode, claim.includesObject.amountOfThisGood)
+    }
+    if (claim.itemOffered?.description) {
+      offering += " to " + claim.itemOffered?.description
+    }
+    return contactInfo + " offered " + offering
+
   } else if (type === "Tenure") {
-    var polygon = claim.spatialUnit.geo.polygon
-    return didInfo(claim.party.did, identifiers, contacts)
-      + " holding [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
+    const contactInfo = didInfo(claim.party.did, identifiers, contacts)
+    const polygon = claim.spatialUnit?.geo?.polygon || ""
+    return contactInfo + " claimed [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
 
   } else {
     return claimSummary(claim, contacts)

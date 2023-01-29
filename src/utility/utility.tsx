@@ -221,6 +221,21 @@ export const YamlFormat = ({ source, navigation, afterItemCss }) => {
  */
 export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, afterItemCss }) => {
 
+  const outstandingInvoiceAmount = (claimMaybeWithIdOrRecipient) => {
+    if (!outstandingPerInvoice) {
+      return ""
+    } else {
+      if (outstandingPerInvoice[source.claim.identifier] > 0
+          || outstandingPerInvoice[source.claim.recipient && source.claim.recipient.identifier] > 0) {
+        return "(Not Fully Paid)"
+      } else if (finalOutstandingPerInvoice[source.claim.identifier] === 0
+              || finalOutstandingPerInvoice[source.claim.recipient && source.claim.recipient.identifier] === 0) {
+        return "(All Paid)"
+      } else {
+        return "(Not A Specific Amount)"
+      }
+    }
+  }
   const finalOutstandingPerInvoice = outstandingPerInvoice || {}
 
   const [showActions, setShowActions] = useState<boolean>(false)
@@ -246,17 +261,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
         {
           source.claim['@type'] === 'Offer'
           ?
-            finalOutstandingPerInvoice[source.claim.identifier] > 0
-            || finalOutstandingPerInvoice[source.claim.recipient && source.claim.recipient.identifier] > 0
-            ?
-              <Text>(Not Fully Paid)</Text>
-            :
-              finalOutstandingPerInvoice[source.claim.identifier] === 0
-              || finalOutstandingPerInvoice[source.claim.recipient && source.claim.recipient.identifier] === 0
-              ?
-                <Text>(All Paid)</Text>
-              :
-                <Text>(Not A Specific Amount)</Text>
+            <Text>{ outstandingInvoiceAmount(source.claim) }</Text>
           :
             source.claim['@type'] === 'GiveAction'
             ?

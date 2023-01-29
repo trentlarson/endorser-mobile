@@ -28,10 +28,6 @@ export function MyCredentialsScreen({ navigation }) {
 
   const identifiers = useSelector((state) => state.identifiers || [])
 
-  const displayCurrencyLabel = (curr) => (curr === 'HUR' ? 'hours' : curr)
-
-  const displayAmount = (curr, amt) => '' + amt + ' ' + displayCurrencyLabel(curr)
-
   // Hack because without this it doesn't scroll to the bottom: https://stackoverflow.com/a/67244863/845494
   const screenHeight = Dimensions.get('window').height - 200
 
@@ -255,13 +251,13 @@ export function MyCredentialsScreen({ navigation }) {
                                           navigation.navigate(
                                             'Your Offers',
                                             {
-                                              currencyLabel: displayCurrencyLabel(arr[0]),
+                                              currencyLabel: utility.currencyShortWordForCode(arr[0]),
                                               offerList: outstandingPerCurrency[arr[0]],
                                             }
                                           )
                                         }
                                       >
-                                        {displayAmount(arr[0], arr[1])}
+                                        {utility.displayAmount(arr[0], arr[1])}
                                       </Text>,
                                     R.toPairs(totalCurrenciesOutstanding)
                                   )
@@ -286,13 +282,13 @@ export function MyCredentialsScreen({ navigation }) {
                                           navigation.navigate(
                                             'Your Given',
                                             {
-                                              currencyLabel: displayCurrencyLabel(arr[0]),
+                                              currencyLabel: utility.currencyShortWordForCode(arr[0]),
                                               givenList: paidPerCurrency[arr[0]],
                                             }
                                           )
                                         }
                                       >
-                                        {displayAmount(arr[0], arr[1])}
+                                        {utility.displayAmount(arr[0], arr[1])}
                                       </Text>,
                                     R.toPairs(totalCurrenciesPaid)
                                   )
