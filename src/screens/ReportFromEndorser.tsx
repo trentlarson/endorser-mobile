@@ -319,9 +319,9 @@ export function ReportScreen({ navigation }) {
         { identifiers.length > 0
           ?
             <View style={{ padding: 20 }}>
-              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Yours</Text>
+              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Only Yours</Text>
               <Button
-                title="Search"
+                title="Search..."
                 onPress={() => navigation.navigate('Your Credentials')}
               />
             </View>

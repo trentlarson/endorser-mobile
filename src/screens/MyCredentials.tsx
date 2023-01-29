@@ -21,7 +21,7 @@ export function MyCredentialsScreen({ navigation }) {
   const [paidPerCurrency, setPaidPerCurrency] = useState<Record<string,Record>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [searchTerm, setSearchTerm] = useState<string>('')
-  const [searchResults, setSearchResults] = useState<any>(null)
+  const [searchResults, setSearchResults] = useState<Array<any>>(null)
   const [showSearchInfoModal, setShowSearchInfoModal] = useState<boolean>(false)
   const [totalCurrenciesOutstanding, setTotalCurrenciesOutstanding] = useState<Record<string,number>>({})
   const [totalCurrenciesPaid, setTotalCurrenciesPaid] = useState<Record<string,number>>({})
@@ -37,6 +37,7 @@ export function MyCredentialsScreen({ navigation }) {
 
   const searchEndorserForString = async () => {
     setLoading(true)
+    setLoadedNumber(0)
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(identifiers[0])
     const searchParam = searchTerm ? '&claimContents=' + encodeURIComponent(searchTerm) : ''
@@ -143,16 +144,16 @@ export function MyCredentialsScreen({ navigation }) {
     setOutstandingPerInvoice(accounting.outstandingInvoiceTotals)
 
     let outPerCur = {}
-    for (promised of accounting.allPromised) {
+    for (let committed of accounting.allPromised) {
       const invoiceNum =
-        promised.claim.identifier
-        || (promised.claim.recipient?.identifier)
+        committed.claim.identifier
+        || (committed.claim.recipient?.identifier)
       if (accounting.outstandingInvoiceTotals[invoiceNum] > 0
           // itemOffered is for some legacy Offers in Endorser.ch
-          && (promised.claim.includesObject || promised.claim.itemOffered?.unitCode)) {
+          && (committed.claim.includesObject || committed.claim.itemOffered?.unitCode)) {
         // itemOffered is for some legacy Offers in Endorser.ch
-        let node = promised.claim.includesObject || promised.claim.itemOffered
-        outPerCur[node.unitCode] = (outPerCur[node.unitCode] || []).concat([promised])
+        let node = committed.claim.includesObject || committed.claim.itemOffered
+        outPerCur[node.unitCode] = (outPerCur[node.unitCode] || []).concat([committed])
       }
     }
     setOutstandingPerCurrency(outPerCur)
@@ -175,7 +176,7 @@ export function MyCredentialsScreen({ navigation }) {
         <ScrollView horizontal={ true }>{/* horizontal scrolling for long string values */}
 
           <View style={{ padding: 20, height: screenHeight }}>
-            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search</Text>
+            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Only Yours</Text>
             {
               loading
               ?
@@ -186,59 +187,37 @@ export function MyCredentialsScreen({ navigation }) {
               :
                 <View>
 
-                  <Text>
-                    Filter (optional)
-                    &nbsp;
-                    <Icon name="info-circle" onPress={() => setShowSearchInfoModal(true)} />
-                  </Text>
-                  <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={!!showSearchInfoModal}
-                  >
-                    <View style={styles.centeredView}>
-                      <View style={styles.modalView}>
-                        <Text>This only retrieves the 50 most recent matches.</Text>
-                        <TouchableHighlight
-                          onPress={() => {
-                            setShowSearchInfoModal(false)
-                          }}
-                        >
-                          <Text>Close</Text>
-                        </TouchableHighlight>
+                  {
+                    searchResults != null
+                    ?
+                      <View />
+                    :
+                      <View>
+                        <Text>
+                            Filter (optional)
+                            &nbsp;
+                            <Icon name="info-circle" onPress={() => setShowSearchInfoModal(true)} />
+                        </Text>
+
+                        <TextInput
+                          autoCapitalize={'none'}
+                          value={searchTerm}
+                          onChangeText={setSearchTerm}
+                          editable
+                          style={{ borderWidth: 1 }}
+                        />
+                        <Button
+                          title="Search About You"
+                          onPress={searchEndorserForString}
+                        />
+
+                        <View style={{ padding: 5 }} />
+                        <Button
+                          title="Retrieve All Your Transactional Claims"
+                          onPress={searchEndorserForTransactions}
+                        />
                       </View>
-                    </View>
-                  </Modal>
-
-                  <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={!!quickMessage}
-                  >
-                    <View style={styles.centeredView}>
-                      <View style={styles.modalView}>
-                        <Text>{ quickMessage }</Text>
-                      </View>
-                    </View>
-                  </Modal>
-
-                  <TextInput
-                    autoCapitalize={'none'}
-                    value={searchTerm}
-                    onChangeText={setSearchTerm}
-                    editable
-                    style={{ borderWidth: 1 }}
-                  />
-                  <Button
-                    title="Search About You"
-                    onPress={searchEndorserForString}
-                  />
-
-                  <View style={{ padding: 5 }} />
-                  <Button
-                    title="Retrieve All Your Transactional Claims"
-                    onPress={searchEndorserForTransactions}
-                  />
+                  }
 
                   <FlatList
                     data={searchResults}
@@ -249,7 +228,12 @@ export function MyCredentialsScreen({ navigation }) {
                       <View>
                         {
                           searchResults != null
-                          ? <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Matching Claims</Text>
+                          ? <View style={{ marginBottom: 10 }}>
+                              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+                                Matching Claims
+                              </Text>
+                              <Text>(Showing the most recent 50.)</Text>
+                            </View>
                           : <Text />
                         }
 
@@ -340,6 +324,41 @@ export function MyCredentialsScreen({ navigation }) {
                       />
                     }
                   />
+
+
+
+
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={!!showSearchInfoModal}
+                  >
+                    <View style={styles.centeredView}>
+                      <View style={styles.modalView}>
+                        <Text>This only retrieves the 50 most recent matches.</Text>
+                        <TouchableHighlight
+                          onPress={() => {
+                            setShowSearchInfoModal(false)
+                          }}
+                        >
+                          <Text>Close</Text>
+                        </TouchableHighlight>
+                      </View>
+                    </View>
+                  </Modal>
+
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={!!quickMessage}
+                  >
+                    <View style={styles.centeredView}>
+                      <View style={styles.modalView}>
+                        <Text>{ quickMessage }</Text>
+                      </View>
+                    </View>
+                  </Modal>
+
                 </View>
             }
           </View>
