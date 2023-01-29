@@ -174,15 +174,6 @@ export const YamlFormat = ({ source, navigation, afterItemCss, showActions }) =>
                 <View />
               :
                 <View>
-                  <Text
-                    style={{ color: 'blue' }}
-                    onPress={() => navigation.navigate(
-                      'Verify Credential',
-                      { wrappedClaim: item }
-                    )}
-                  >
-                    Check
-                  </Text>
                   {
                     utility.isContract(item.claim) || utility.isContractAccept(item.claim)
                     ?
@@ -202,31 +193,6 @@ export const YamlFormat = ({ source, navigation, afterItemCss, showActions }) =>
                         }}
                       >
                         Accept Contract
-                      </Text>
-                    :
-                      <View />
-                  }
-                  {
-                    item.claimType === 'DonateAction'
-                    || item.claim && item.claim['@type'] === 'DonateAction'
-                    ?
-                      <Text
-                        style={{ color: 'blue' }}
-                        onPress={() => navigation.push(
-                          utility.REVIEW_SIGN_SCREEN_NAV,
-                          { credentialSubject:
-                            { '@context': 'https://schema.org',
-                              '@type': 'GiveAction',
-                              agent: item.claim.agent,
-                              recipient: item.claim.recipient,
-                              identifier: item.claim.identifier,
-                              price: item.claim.price,
-                              priceCurrency: item.claim.priceCurrency,
-                            }
-                          }
-                        )}
-                      >
-                        Record as Paid
                       </Text>
                     :
                       <View />
@@ -398,73 +364,36 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                 <View />
               :
                 <View style={{ flexDirection: 'row' }}>
-                {
-                  <Pressable
-                    style={{ padding: 10 }}
-                    onPress={ () => navigation.navigate('Verify Credential', { wrappedClaim: source }) }
-                  >
-                    <Text style={{ color: "blue" }}>Check it</Text>
-                  </Pressable>
-                }
 
                 {
-                  utility.containsHiddenDid(source)
+                  isUser(source.issuer)
+                  && (source.claim['@type'] === 'DonateAction'
+                      || source.claim['@type'] === 'Offer')
                   ?
-                    <View />
-                  :
-                    <Pressable
-                      style={{ padding: 10 }}
-                      onPress={ () =>
-                        navigation.navigate('Present Credential', { fullClaim: source })
-                      }
-                    >
-                      <Text style={{ color: "blue" }}>Present it</Text>
-                    </Pressable>
-                }
-
-                {
-                  isUser(source.issuer) && source.claim['@type'] === 'Offer'
-                  ?
-                  <View>
-                    <Pressable
-                      style={{ padding: 10 }}
-                      onPress={ () =>
-                        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                          credentialSubject: {
-                            "@context": "https://schema.org",
-                            "@type": "GiveAction",
-                            agent: { identifier: identifiers[0].did },
-                            offerId: source.claim.identifier,
-                            recipient: source.claim.recipient,
-                            object: source.claim.itemOffered || source.claim.includesObject,
-                          }
-                        })
-                      }
-                    >
-                      <Text style={{ color: "blue" }}>Mark as given</Text>
-                    </Pressable>
-                  </View>
-                  :
-                  <View />
-                }
-
-                {
-                  !isUser(source.issuer) && source.claim['@type'] != 'AgreeAction'
-                  ?
-                    <Pressable
-                      style={{ padding: 10 }}
-                      onPress={ () =>
-                        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                          credentialSubjects: {
-                            "@context": "https://schema.org",
-                            "@type": "AgreeAction",
-                            object: removeSchemaContext(source.claim),
-                          }
-                        })
-                      }
-                    >
-                      <Text style={{ color: "blue" }}>Agree</Text>
-                    </Pressable>
+                    <View style={{ flexDirection: 'row' }}>
+                      <Icon
+                        name="circle"
+                        style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10, marginTop: 10 }}
+                      />
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () =>
+                          navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
+                            credentialSubject: {
+                              "@context": "https://schema.org",
+                              "@type": "GiveAction",
+                              agent: { identifier: identifiers[0].did },
+                              identifier: item.claim.identifier,
+                              offerId: source.claim.identifier,
+                              object: source.claim.itemOffered || source.claim.includesObject,
+                              recipient: source.claim.recipient,
+                            }
+                          })
+                        }
+                      >
+                        <Text style={{ color: "blue" }}>Mark as given</Text>
+                      </Pressable>
+                    </View>
                   :
                     <View />
                 }
@@ -474,23 +403,98 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                   && (source.claim['@type'] === 'LoanOrCredit'
                      || source.claim['@type'] === 'GiveAction')
                   ?
-                    <Pressable
-                      style={{ padding: 10 }}
-                      onPress={ () =>
-                        navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                          credentialSubject: {
-                            "@context": "https://schema.org",
-                            "@type": "TakeAction",
-                            agent: { identifier: identifiers[0].did },
-                            object: removeSchemaContext(source.claim),
-                          }
-                        })
-                      }
-                    >
-                      <Text style={{ color: "blue" }}>Take</Text>
-                    </Pressable>
+                    <View style={{ flexDirection: 'row' }}>
+                      <Icon
+                        name="circle"
+                        style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10, marginTop: 10 }}
+                      />
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () =>
+                          navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
+                            credentialSubject: {
+                              "@context": "https://schema.org",
+                              "@type": "TakeAction",
+                              agent: { identifier: identifiers[0].did },
+                              object: removeSchemaContext(source.claim),
+                            }
+                          })
+                        }
+                      >
+                        <Text style={{ color: "blue" }}>Take</Text>
+                      </Pressable>
+                    </View>
                   :
                     <View />
+                }
+
+                {
+                  !isUser(source.issuer)
+                  && source.claim['@type'] != 'AgreeAction' // you Agree to the original
+                  && source.claim['@type'] != 'Contract' // you Accept
+                  && source.claim['@type'] != 'Offer' // you Give
+                  && source.claim['@type'] != 'PlanAction' // you Give or Offer
+                  && source.claim['@type'] != 'Project' // you Give or Offer
+                  && source.claim['@type'] != 'RegisterAction'
+                  ?
+                    <View style={{ flexDirection: 'row' }}>
+                      <Icon
+                        name="circle"
+                        style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10, marginTop: 10 }}
+                      />
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () =>
+                          navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
+                            credentialSubjects: {
+                              "@context": "https://schema.org",
+                              "@type": "AgreeAction",
+                              object: removeSchemaContext(source.claim),
+                            }
+                          })
+                        }
+                      >
+                        <Text style={{ color: "blue" }}>Agree</Text>
+                      </Pressable>
+                    </View>
+                  :
+                    <View />
+                }
+
+                {
+                  <View style={{ flexDirection: 'row' }}>
+                    <Icon
+                      name="circle"
+                      style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10, marginTop: 10 }}
+                    />
+                    <Pressable
+                      style={{ padding: 10 }}
+                      onPress={ () => navigation.navigate('Verify Credential', { wrappedClaim: source }) }
+                    >
+                      <Text style={{ color: "blue" }}>Check it</Text>
+                    </Pressable>
+                  </View>
+                }
+
+                {
+                  utility.containsHiddenDid(source)
+                  ?
+                    <View />
+                  :
+                    <View style={{ flexDirection: 'row' }}>
+                      <Icon
+                        name="circle"
+                        style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10, marginTop: 10 }}
+                      />
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () =>
+                          navigation.navigate('Present Credential', { fullClaim: source })
+                        }
+                      >
+                        <Text style={{ color: "blue" }}>Present it</Text>
+                      </Pressable>
+                    </View>
                 }
 
                 </View>
