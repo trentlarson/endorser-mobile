@@ -5,7 +5,7 @@ import { CheckBox } from 'react-native-elements'
 import { useSelector } from 'react-redux'
 
 import * as utility from '../utility/utility'
-import { YamlFormat } from '../utility/utility.tsx'
+import { RenderOneRecord } from '../utility/utility.tsx'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 import { ContactSelectModal } from './ContactSelect'
 import { styles } from './style'
@@ -149,11 +149,10 @@ export function ReportScreen({ navigation }) {
           <FlatList
             data={filteredResults1}
             renderItem={datum =>
-              <YamlFormat
+              <RenderOneRecord
                 source={ datum.item }
                 navigation={ navigation }
                 afterItemCss={ styles.line }
-                showActions={true}
               />
             }
           >

@@ -6,7 +6,6 @@ import { CheckBox } from "react-native-elements"
 
 import { onboarding } from '../data/onboarding'
 import * as utility from '../utility/utility'
-import { YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 
 export function EditCredentialScreen({ navigation, route }) {

@@ -68,13 +68,13 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
 
 
 /**
- * Render each claim with links to take actions.
+ * Render each claim.
  *
  * source is any object or array
  * navigation (optional) is the navigation object (used to provide links to verify cred, etc)
  * afterItemCss (optional) is CSS to add to add after each item
  */
-export const YamlFormat = ({ source, navigation, afterItemCss, showActions }) => {
+export const YamlFormat = ({ source, navigation, afterItemCss }) => {
 
   const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [didsForLinkedModal, setDidsForLinkedModal] = useState<Array<string>>(null)
@@ -151,77 +151,17 @@ export const YamlFormat = ({ source, navigation, afterItemCss, showActions }) =>
   }
 
   let finalSource = source
-  let hideActions = false
-  if (!navigation) {
-    hideActions = true
-  }
   if (source == null) {
     finalSource = []
   } else if (!Array.isArray(source)) {
-    // it's a single item, so we'll hide the actions
     finalSource = [ source ]
-    hideActions = true
   }
-  const finalShowActions = showActions || !hideActions
   return (
     <View>
       {
         finalSource.map((item: utility.EndorserRecord, index) =>
           <View key={ index } style={{ marginLeft: 10 }}>
-            {
-              !finalShowActions
-              ?
-                <View />
-              :
-                <View>
-                  {
-                    utility.isContract(item.claim) || utility.isContractAccept(item.claim)
-                    ?
-                      <Text
-                        style={{ color: 'blue' }}
-                        onPress={() => {
-                          contract = utility.isContract(item.claim) ? item.claim : item.claim.object
-                          return navigation.push(
-                            utility.REVIEW_SIGN_SCREEN_NAV,
-                            {
-                              credentialSubject: utility.constructAccept(
-                                identifiers[0],
-                                utility.constructContract(contract.contractFormIpfsCid, contract.fields)
-                              )
-                            }
-                          )
-                        }}
-                      >
-                        Accept Contract
-                      </Text>
-                    :
-                      <View />
-                  }
-                  {
-                    item.claimType !== 'AgreeAction'
-                    ?
-                      <Text
-                        style={{ color: 'blue' }}
-                        onPress={() => navigation.push(
-                          utility.REVIEW_SIGN_SCREEN_NAV,
-                          { credentialSubject:
-                            { '@context': 'https://schema.org',
-                              '@type': 'AgreeAction',
-                              object: item.claim,
-                            }
-                          }
-                        )}
-                      >
-                        Agree / Confirm
-                      </Text>
-                    :
-                      <View />
-                  }
-                </View>
-            }
-
             <Text>- </Text>{ objectToYamlReactRecur(item, item.id) }
-
             <View style={ afterItemCss || {} } />
           </View>
         )
@@ -274,7 +214,9 @@ export const YamlFormat = ({ source, navigation, afterItemCss, showActions }) =>
 /**
  * Render each claim with links to take actions and expand details.
  *
- * source is any utility.EndorserRecord
+ * source is any utility.EndorserRecord (required)
+ * navigation is the standard navigation (required)
+ * outstandingPerInvoice (optional) is for transaction lists
  * afterItemCss (optional) is CSS to add to add after each item
  */
 export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, afterItemCss }) => {
@@ -294,7 +236,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
   const summary =
     utility.claimSummary(
       source,
-      isUser(source.issuer) ? '' : ' (issued by someone else)'
+      isUser(source.issuer) ? '' : ' (by someone else)'
     )
 
   return (
@@ -365,25 +307,50 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
               :
                 <View style={{ flexDirection: 'row' }}>
 
-                {
+                { /** Accept a Contract **/
+
+                  utility.isContract(source.claim) || utility.isContractAccept(source.claim)
+                  ?
+                    <View style={{ flexDirection: 'row', padding: 10 }}>
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
+                      <Text
+                        style={{ color: 'blue' }}
+                        onPress={() => {
+                          contract = utility.isContract(source.claim) ? source.claim : source.claim.object
+                          return navigation.push(
+                            utility.REVIEW_SIGN_SCREEN_NAV,
+                            {
+                              credentialSubject: utility.constructAccept(
+                                identifiers[0],
+                                utility.constructContract(contract.contractFormIpfsCid, contract.fields)
+                              )
+                            }
+                          )
+                        }}
+                      >
+                        Accept Contract
+                      </Text>
+                    </View>
+                  :
+                    <View />
+                }
+
+                { /** Give a Donate **/
+
                   isUser(source.issuer)
                   && (source.claim['@type'] === 'DonateAction'
                       || source.claim['@type'] === 'Offer')
                   ?
-                    <View style={{ flexDirection: 'row' }}>
-                      <Icon
-                        name="circle"
-                        style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10, marginTop: 10 }}
-                      />
+                    <View style={{ flexDirection: 'row', padding: 10 }}>
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
                       <Pressable
-                        style={{ padding: 10 }}
                         onPress={ () =>
                           navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
                             credentialSubject: {
                               "@context": "https://schema.org",
                               "@type": "GiveAction",
                               agent: { identifier: identifiers[0].did },
-                              identifier: item.claim.identifier,
+                              identifier: source.claim.identifier,
                               offerId: source.claim.identifier,
                               object: source.claim.itemOffered || source.claim.includesObject,
                               recipient: source.claim.recipient,
@@ -398,16 +365,14 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     <View />
                 }
 
-                {
+                { /** Take a Give **/
+
                   !isUser(source.issuer)
                   && (source.claim['@type'] === 'LoanOrCredit'
                      || source.claim['@type'] === 'GiveAction')
                   ?
-                    <View style={{ flexDirection: 'row' }}>
-                      <Icon
-                        name="circle"
-                        style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10, marginTop: 10 }}
-                      />
+                    <View style={{ flexDirection: 'row', padding: 10 }}>
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
                       <Pressable
                         style={{ padding: 10 }}
                         onPress={ () =>
@@ -428,7 +393,8 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     <View />
                 }
 
-                {
+                { /** Agree to a... lmost anything **/
+
                   !isUser(source.issuer)
                   && source.claim['@type'] != 'AgreeAction' // you Agree to the original
                   && source.claim['@type'] != 'Contract' // you Accept
@@ -437,13 +403,9 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                   && source.claim['@type'] != 'Project' // you Give or Offer
                   && source.claim['@type'] != 'RegisterAction'
                   ?
-                    <View style={{ flexDirection: 'row' }}>
-                      <Icon
-                        name="circle"
-                        style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10, marginTop: 10 }}
-                      />
+                    <View style={{ flexDirection: 'row', padding: 10 }}>
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
                       <Pressable
-                        style={{ padding: 10 }}
                         onPress={ () =>
                           navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
                             credentialSubjects: {
@@ -461,14 +423,11 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     <View />
                 }
 
-                {
-                  <View style={{ flexDirection: 'row' }}>
-                    <Icon
-                      name="circle"
-                      style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10, marginTop: 10 }}
-                    />
+                { /** Check Cred **/
+
+                  <View style={{ flexDirection: 'row', padding: 10 }}>
+                    <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
                     <Pressable
-                      style={{ padding: 10 }}
                       onPress={ () => navigation.navigate('Verify Credential', { wrappedClaim: source }) }
                     >
                       <Text style={{ color: "blue" }}>Check it</Text>
@@ -476,18 +435,15 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                   </View>
                 }
 
-                {
+                { /** Present Cred **/
+
                   utility.containsHiddenDid(source)
                   ?
                     <View />
                   :
-                    <View style={{ flexDirection: 'row' }}>
-                      <Icon
-                        name="circle"
-                        style={{ fontWeight: 'bold', marginLeft: 10, marginRight: 10, marginTop: 10 }}
-                      />
+                    <View style={{ flexDirection: 'row', padding: 10 }}>
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
                       <Pressable
-                        style={{ padding: 10 }}
                         onPress={ () =>
                           navigation.navigate('Present Credential', { fullClaim: source })
                         }

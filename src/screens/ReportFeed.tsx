@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux'
 import { styles } from './style'
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from '../utility/utility'
-import { YamlFormat } from '../utility/utility.tsx'
+import { RenderOneRecord } from '../utility/utility.tsx'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 import { dbConnection } from "../veramo/setup"
 
@@ -34,7 +34,7 @@ export function ReportFeedScreen({ navigation }) {
         setFeedHitLimit(results.hitLimit)
         setThisSessionsOldestFeedId(results.data[results.data.length - 1].id)
 
-        newLastViewedId = results.data[0].id
+        const newLastViewedId = results.data[0].id
         const settings = classToPlain(appStore.getState().settings)
         if (!settings.lastViewedClaimId
             || newLastViewedId > settings.lastViewedClaimId) {
@@ -83,7 +83,7 @@ export function ReportFeedScreen({ navigation }) {
           keyExtractor={ item => item.id }
           initialNumToRender={ 10 }
           renderItem={ data => (
-            <YamlFormat source={ [data.item] } navigation={navigation} afterItemCss={styles.line} />
+            <RenderOneRecord source={ data.item } navigation={navigation} afterItemCss={styles.line} />
           )}
           style={{ borderWidth: 1, height: feedData.length > 0 ? 500 : 60 }}
           ListFooterComponent={(
