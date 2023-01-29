@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux'
 
 import { styles } from './style'
 import * as utility from '../utility/utility'
-import { YamlFormat } from '../utility/utility.tsx'
+import { RenderOneRecord, YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
 
@@ -22,18 +22,11 @@ export function MyCredentialsScreen({ navigation }) {
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState<any>(null)
-  const [showActions, setShowActions] = useState<boolean>(false)
-  const [showDetails, setShowDetails] = useState<boolean>(false)
-  const [showMore, setShowMore] = useState<boolean>(false)
   const [showSearchInfoModal, setShowSearchInfoModal] = useState<boolean>(false)
   const [totalCurrenciesOutstanding, setTotalCurrenciesOutstanding] = useState<Record<string,number>>({})
   const [totalCurrenciesPaid, setTotalCurrenciesPaid] = useState<Record<string,number>>({})
 
   const identifiers = useSelector((state) => state.identifiers || [])
-
-  const isUser = did => did === identifiers[0].did
-
-  const removeSchemaContext = obj => obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
 
   const displayCurrencyLabel = (curr) => (curr === 'HUR' ? 'hours' : curr)
 
@@ -83,16 +76,25 @@ export function MyCredentialsScreen({ navigation }) {
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(identifiers[0])
     let maybeMoreBeforeQuery = prevId == null ? '' : '&beforeId=' + prevId
-    return fetch(endorserApiServer + '/api/v2/report/claimsForIssuerWithTypes?claimTypes=' + encodeURIComponent(JSON.stringify(["GiveAction","Offer"])) + maybeMoreBeforeQuery, {
-      method: 'GET',
-      headers: {
-        "Content-Type": "application/json",
-        "Uport-Push-Token": token,
+    return fetch(
+      endorserApiServer
+        + '/api/v2/report/claimsForIssuerWithTypes?claimTypes='
+        + encodeURIComponent(JSON.stringify(["GiveAction","Offer"]))
+        + maybeMoreBeforeQuery,
+      {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json",
+          "Uport-Push-Token": token,
+        }
       }
-    }).then(async response => {
+    ).then(async response => {
       if (response.status !== 200) {
         const text = await response.text()
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Unsuccessful result code for personal transactions. " + text}))
+        appStore.dispatch(appSlice.actions.addLog({
+          log: true,
+          msg: "Unsuccessful result code for personal transactions. " + text
+        }))
 
         setQuickMessage('Request error. See logs for more info.')
         setTimeout(() => { setQuickMessage(null) }, 2000)
@@ -104,7 +106,10 @@ export function MyCredentialsScreen({ navigation }) {
         if (results.data) {
           return results
         } else {
-          appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Unsuccessful results for personal transactions: " + JSON.stringify(results)}))
+          appStore.dispatch(appSlice.actions.addLog({
+            log: true,
+            msg: "Unsuccessful results for personal transactions: " + JSON.stringify(results)
+          }))
           setQuickMessage('Request error. See logs for more info.')
           setTimeout(() => { setQuickMessage(null) }, 2000)
         }
@@ -162,198 +167,6 @@ export function MyCredentialsScreen({ navigation }) {
     setPaidPerCurrency(paidPerCur)
 
     setSearchTerm('')
-  }
-
-  const renderOneItem = (datum: utility.EndorserRecord) => {
-    const summary =
-      utility.claimSummary(
-        datum,
-        isUser(datum.issuer) ? '' : ' (issued by someone else)'
-      )
-
-    return (
-      <View>
-
-        <Text selectable={true}>{ summary }</Text>
-
-        <View style={{ flexDirection: 'row' }}>
-          <View style={{ marginLeft: 30 }}>
-          {
-            datum.claim['@type'] === 'Offer'
-            ?
-              outstandingPerInvoice[datum.claim.identifier] > 0
-              || outstandingPerInvoice[datum.claim.recipient && datum.claim.recipient.identifier] > 0
-              ?
-                <Text>(Not Fully Paid)</Text>
-              :
-                outstandingPerInvoice[datum.claim.identifier] === 0
-                || outstandingPerInvoice[datum.claim.recipient && datum.claim.recipient.identifier] === 0
-                ?
-                  <Text>(All Paid)</Text>
-                :
-                  <Text>(Not A Specific Amount)</Text>
-            :
-              datum.claim['@type'] === 'GiveAction'
-              ?
-                <Text>(Paid)</Text>
-              :
-                <View />
-          }
-          </View>
-
-          <View style={{ marginLeft: 5 }}>
-            {
-              showMore
-              ?
-                <Icon
-                  name="chevron-down"
-                  onPress={() => setShowMore(prev => !prev)}
-                  style={{ color: 'blue' }}
-                />
-              :
-                <Text onPress={() => setShowMore(prev => !prev)}>
-                  <Icon name="chevron-right" style={{ color: 'blue' }} />
-                  ...
-                </Text>
-            }
-          </View>
-        </View>
-
-        {
-          showMore
-          ?
-            <View>
-              <View style={{ flexDirection: 'row', padding: 5 }}>
-                <Text
-                  style={{ color: "blue" }}
-                  onPress={() => setShowActions(prev => !prev )}
-                >
-                   { showActions ? "Hide" : "Show" } Actions
-                </Text>
-              </View>
-
-              {
-                !showActions
-                ?
-                  <View />
-                :
-                  <View style={{ flexDirection: 'row' }}>
-                  {
-                    <Pressable
-                      style={{ padding: 10 }}
-                      onPress={ () => navigation.navigate('Verify Credential', { wrappedClaim: datum }) }
-                    >
-                      <Text style={{ color: "blue" }}>Check it</Text>
-                    </Pressable>
-                  }
-
-                  {
-                    <Pressable
-                      style={{ padding: 10 }}
-                      onPress={ () =>
-                        navigation.navigate('Present Credential', { fullClaim: datum })
-                      }
-                    >
-                      <Text style={{ color: "blue" }}>Present it</Text>
-                    </Pressable>
-                  }
-
-                  {
-                    isUser(datum.issuer) && datum.claim['@type'] === 'Offer'
-                    ?
-                    <View>
-                      <Pressable
-                        style={{ padding: 10 }}
-                        onPress={ () =>
-                          navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                            credentialSubject: {
-                              "@context": "https://schema.org",
-                              "@type": "GiveAction",
-                              agent: { identifier: identifiers[0].did },
-                              offerId: datum.claim.identifier,
-                              recipient: datum.claim.recipient,
-                              object: datum.claim.itemOffered || datum.claim.includesObject,
-                            }
-                          })
-                        }
-                      >
-                        <Text style={{ color: "blue" }}>Mark as given</Text>
-                      </Pressable>
-                    </View>
-                    :
-                    <View />
-                  }
-
-                  {
-                    !isUser(datum.issuer) && datum.claim['@type'] != 'AgreeAction'
-                    ?
-                      <Pressable
-                        style={{ padding: 10 }}
-                        onPress={ () =>
-                          navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                            credentialSubjects: {
-                              "@context": "https://schema.org",
-                              "@type": "AgreeAction",
-                              object: removeSchemaContext(datum.claim),
-                            }
-                          })
-                        }
-                      >
-                        <Text style={{ color: "blue" }}>Agree</Text>
-                      </Pressable>
-                    :
-                      <View />
-                  }
-
-                  {
-                    !isUser(datum.issuer)
-                    && (datum.claim['@type'] === 'LoanOrCredit'
-                       || datum.claim['@type'] === 'GiveAction')
-                    ?
-                      <Pressable
-                        style={{ padding: 10 }}
-                        onPress={ () =>
-                          navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                            credentialSubject: {
-                              "@context": "https://schema.org",
-                              "@type": "TakeAction",
-                              agent: { identifier: identifiers[0].did },
-                              object: removeSchemaContext(datum.claim),
-                            }
-                          })
-                        }
-                      >
-                        <Text style={{ color: "blue" }}>Take</Text>
-                      </Pressable>
-                    :
-                      <View />
-                  }
-
-                  </View>
-              }
-
-              <View style={{ flexDirection: 'row', padding: 5 }}>
-                <Text
-                  style={{ color: "blue" }}
-                  onPress={() => setShowDetails(prev => !prev )}
-                >
-                  { showDetails ? "Hide" : "Show" } Details
-                </Text>
-              </View>
-
-              {
-                showDetails
-                ? <YamlFormat source={ datum } navigation={ navigation } showActions={ showActions } />
-                : <View />
-              }
-            </View>
-          :
-            <View />
-        }
-
-        <View style={styles.line} />
-      </View>
-    )
   }
 
   return (
@@ -506,7 +319,10 @@ export function MyCredentialsScreen({ navigation }) {
 
                         {
                           (numStrangesAndUnknowns > 0)
-                          ? <Text>{numStrangesAndUnknowns} of these claims {numStrangesAndUnknowns === 1 ? "does" : "do"} not have specific, measurable info.</Text>
+                          ? <Text>
+                              {numStrangesAndUnknowns} of these claims
+                              &nbsp;{numStrangesAndUnknowns === 1 ? "does" : "do"} not have specific, measurable info.
+                            </Text>
                           : <View />
                         }
 
@@ -514,9 +330,15 @@ export function MyCredentialsScreen({ navigation }) {
                       </View>
                     }
 
-                    ListFooterComponent={<View style={{ marginBottom: 200}}>{/* Without this, bottom tabs hide the bottom. */}</View>}
+                    ListFooterComponent={
+                      <View style={{ marginBottom: 200}}>{/* Without this, bottom tabs hide the bottom. */}</View>
+                    }
 
-                    renderItem={ data => renderOneItem(data.item) }
+                    renderItem={ data =>
+                      <RenderOneRecord
+                        source={data.item} navigation={navigation} outstandingPerInvoice={outstandingPerInvoice}
+                      />
+                    }
                   />
                 </View>
             }
