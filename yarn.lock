@@ -2856,6 +2856,7 @@ __metadata:
     react-native-crypto: ^2.2.0
     react-native-elements: ^3.2.0
     react-native-gesture-handler: ^1.9.0
+    react-native-get-random-values: ^1.8.0
     react-native-headless-task-worker: ^1.0.0
     react-native-permissions: 3.0.0
     react-native-qrcode-scanner: ^1.5.3
@@ -5993,6 +5994,13 @@ __metadata:
     parse-node-version: ^1.0.0
     time-stamp: ^1.0.0
   checksum: 41babd235d3627e577eff6e6a3ef637462094833d51ed026f71a5366b4f5cf4a69c4f0d79061f676662fcaddf997b32b49022b8ac2eedf3c737098f6d392bd07
+  languageName: node
+  linkType: hard
+
+"fast-base64-decode@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "fast-base64-decode@npm:1.0.0"
+  checksum: 1c775e5214ee7f3cf027018983eb628b0000f3141cfbcfa2b40b714a45a35efa7a98c0cdf114d83df37e7abdeb1606c404139f7678ccc97895a9da8b6e86ec2c
   languageName: node
   linkType: hard
 
@@ -10459,6 +10467,17 @@ fsevents@^2.1.2:
     invariant: ^2.2.4
     prop-types: ^15.7.2
   checksum: b452ca78bccd25ca8b195812642dc8f61c204fe7b5e2ee2904fbdfc58708b0e59e148ac96e44ef0ffe2e9968ff386d346b9a3cc4c5f72e0979efe73d1011c362
+  languageName: node
+  linkType: hard
+
+"react-native-get-random-values@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "react-native-get-random-values@npm:1.8.0"
+  dependencies:
+    fast-base64-decode: ^1.0.0
+  peerDependencies:
+    react-native: ">=0.56"
+  checksum: 679574c7fad346b56506874b22342d52b4a93144801ef4c9aa7f1feb014a6fed27bfe2636d3ae1c94a1d7f28f2cb50acc701688003cc8058f1e40164dc60725d
   languageName: node
   linkType: hard
 
