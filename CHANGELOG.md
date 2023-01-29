@@ -12,7 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.3.112] - 2022-12-17
+## [6.3.112] - 2023-01-29
+
+### Added
+- Collapsed details & actions for lists of claims, and better descriptions.
+- Added more details to input in Plans & Projects.
+- Match the updated schema for Plans & Projects.
 
 ### Fixed
 - Enhance error messages, especially for claim and registration limits.
