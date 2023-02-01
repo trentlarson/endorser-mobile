@@ -201,6 +201,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
         isPartOf: { '@type': origClaim['@type'], identifier: origClaim.identifier }
       }
     }
+    if (!origClaim.identifier && wrappedClaim?.handleId) {
+      offerClaim.itemOffered.isPartOf.identifier = wrappedClaim.handleId
+    }
     navigation.navigate('Create Credential', { incomingClaim: offerClaim })
   }
 
@@ -400,9 +403,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
         {
           // this retrieves any private data
           let contractClaim
-          if (vcObj && utility.isContractAccept(vcObj)) {
+          if (utility.isContractAccept(vcObj)) {
             contractClaim = vcObj.object
-          } else if (wrappedClaim && utility.isContractAccept(wrappedClaim.claim)) {
+          } else if (utility.isContractAccept(wrappedClaim?.claim)) {
             contractClaim = wrappedClaim.claim.object
           }
           if (contractClaim) {

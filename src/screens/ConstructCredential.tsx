@@ -813,7 +813,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
         result.agent = agentId ? { identifier: agentId } : undefined
         result.description = planDescription || undefined
         result.endTime = isoEndTime || undefined
-        result.identifier = planIdentifier
+        result.identifier = planIdentifier || undefined
         result.image = planImageUrl || undefined
         result.name = planName || undefined
 
@@ -1368,7 +1368,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                https://schema.org/price
 
                We've chosen HUR from UN/CEFACT for the length of time.
-               Time units can be in ISO 8601 format for schema.org but we don't handle that (yet).
+               Time units can be in ISO 8601 format for schema.org but we don't use that (yet).
              **/
             unitCode: unit,
           }

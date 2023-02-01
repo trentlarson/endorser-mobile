@@ -93,7 +93,7 @@ export function MyCredentialsScreen({ navigation }) {
           msg: "Unsuccessful result code for personal transactions. " + text
         }))
 
-        setQuickMessage('Request error. See logs for more info.')
+        setQuickMessage('Request status error. See logs for more info.')
         setTimeout(() => { setQuickMessage(null) }, 2000)
       } else {
         return response.json()
@@ -107,10 +107,18 @@ export function MyCredentialsScreen({ navigation }) {
             log: true,
             msg: "Unsuccessful results for personal transactions: " + JSON.stringify(results)
           }))
-          setQuickMessage('Request error. See logs for more info.')
+          setQuickMessage('Request results error. See logs for more info.')
           setTimeout(() => { setQuickMessage(null) }, 2000)
         }
       }
+    }).catch(e => {
+      appStore.dispatch(appSlice.actions.addLog({
+        log: true,
+        msg: "Unsuccessful result code for personal transactions. " + JSON.stringify(e)
+      }))
+
+      setQuickMessage('Request error. See logs for more info.')
+      setTimeout(() => { setQuickMessage(null) }, 2000)
     })
   }
 

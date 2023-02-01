@@ -6,7 +6,6 @@ import * as utility from '../utility/utility'
 import { agent, dbConnection } from '../veramo/setup'
 
 const checkServer = (killToggle) => async (taskData) => {
-  console.log('Starting background JavaScript with data', taskData)
   try {
 
     const startDate = new Date()

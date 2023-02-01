@@ -246,12 +246,12 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
     const contactInfo = didInfo(record.issuer, identifiers, contacts)
     let offering = ""
     if (claim.includesObject) {
-      offering += displayAmount(claim.includesObject.unitCode, claim.includesObject.amountOfThisGood)
+      offering += " " + displayAmount(claim.includesObject.unitCode, claim.includesObject.amountOfThisGood)
     }
     if (claim.itemOffered?.description) {
       offering += " to " + claim.itemOffered?.description
     }
-    return contactInfo + " offered " + offering
+    return contactInfo + " offered" + offering
 
   } else if (type === "Tenure") {
     const contactInfo = didInfo(claim.party.did, identifiers, contacts)
