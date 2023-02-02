@@ -22,6 +22,13 @@ export class EndorserRecord {
   jwtEncoded?: string // this may not be accessible by the current user/endpoint and thus may not be in result data
 }
 
+export class SignedSentResults {
+  credential: object // the full credential (should always exist)
+  jwt: string // signed JWT (should always exist)
+  message: string // success or failure message (should always exist)
+  serverId: string // may be missing if none was sent or there was an error
+}
+
 // This is used to check for hidden info.
 // See https://github.com/trentlarson/endorser-ch/blob/0cb626f803028e7d9c67f095858a9fc8542e3dbd/server/api/services/util.js#L6
 const HIDDEN_DID = 'did:none:HIDDEN'

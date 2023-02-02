@@ -69,29 +69,39 @@ export function SignCredentialScreen({ navigation, route }) {
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got server status " + resp.status + "..."}))
       if (resp.ok) {
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished the send to Endorser server."}))
-        return resp.json()
+        const json = await resp.json()
+        return { serverId: json }
       } else {
         const text = await resp.text()
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished with error text: " + text}))
+        let resultMessage
         try {
           const json = JSON.parse(text)
           const moreInfo =
             (json && json.error && json.error.message)
             || "Got failure response trying to send " + claimNumber(index) + ". " + text
+          resultMessage = moreInfo
           setOneResultMessage(index, moreInfo)
         } catch (e) {
-          setOneResultMessage(index, "Got unexpected type of response trying to send " + claimNumber(index) + ". " + text)
+          resultMessage = "Got unexpected type of response trying to send " + claimNumber(index) + ". " + text
+          setOneResultMessage(index, resultMessage)
         }
-        return undefined // to signal no good ID
+        return { message: resultMessage } // to signal no good ID
       }
     })
-    .then(json => {
-      setEndorserIds(R.update(index, json))
-      return json
+    .then(resultJson => {
+      setEndorserIds(R.update(index, resultJson.serverId))
+      return resultJson
     })
     .catch(err => {
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... but got error sending to " + endorserApiServer + " " + err}))
-      setOneResultMessage(index, "Got error trying to send " + claimNumber(index) + ". The logs (near the bottom of Help) may tell more.")
+      appStore.dispatch(appSlice.actions.addLog({
+        log: false,
+        msg: "... but got error sending to " + endorserApiServer + " " + err
+      }))
+      const resultMessage =
+        "Got error trying to send " + claimNumber(index) + ". The logs (near the bottom of Help) may tell more."
+      setOneResultMessage(index, resultMessage)
+      return { message: resultMessage }
     })
     .finally(() => {
       setFetching(R.update(index, false))
@@ -121,20 +131,30 @@ export function SignCredentialScreen({ navigation, route }) {
     const alg = undefined // defaults to 'ES256K', more standardized but harder to verify vs ES256K-R
     const vcJwt: string = await didJwt.createJWT(utility.vcPayload(vcClaim),{ alg, issuer: did, signer })
     setJwts(R.update(index, vcJwt))
-    setOneResultMessage(index, "Successfully signed " + claimNumber(index) + ".")
+    let resultMessage = "Successfully signed " + claimNumber(index) + "."
+    setOneResultMessage(index, resultMessage)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
     if (sendToEndorser) {
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... now sending JWT to server..."}))
       const sentResult = await sendToEndorserSite(vcJwt, index)
-      appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... finished the signing & sending with result: " + JSON.stringify(sentResult) + "..."}))
+      appStore.dispatch(appSlice.actions.addLog({
+        log: false,
+        msg: "... finished the signing & sending with result: " + JSON.stringify(sentResult) + "..."
+      }))
+      sentResult.credential = credSubj
+      if (!sentResult.message) {
+        sentResult.message = resultMessage
+      }
       return sentResult
     } else {
-      setOneResultMessage(index, "Successfully signed " + claimNumber(index) + ". Did not share it to any server.")
+      const partialResultMessage = "Successfully signed " + claimNumber(index) + ". Did not share it to any server."
+      setOneResultMessage(index, partialResultMessage)
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... so we're done."}))
+      return { credential: credSubj, message: partialResultMessage, jwt: vcJwt }
     }
   }
 
-  async function saveSignSend(cred, index) {
+  async function saveSignSend(cred, index): utility.SignedSentResults {
     try {
       let privateDataId
       if (privateFields[index]) {
@@ -180,30 +200,44 @@ export function SignCredentialScreen({ navigation, route }) {
         )
       }
 
-      if (sentResult) {
-        setOneResultMessage(index, "Successfully signed " + claimNumber(index) + " and sent it to the server.")
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Signed, and finished storing data remotely & locally. Server result: " + JSON.stringify(sentResult)}))
-        return sentResult
+      if (sentResult.serverId) {
+        const resultMessage = "Successfully signed " + claimNumber(index) + " and sent it to the server."
+        setOneResultMessage(index, resultMessage)
+        appStore.dispatch(appSlice.actions.addLog({
+          log: true,
+          msg: "Signed, and finished storing data remotely & locally. Server result: " + JSON.stringify(sentResult)
+        }))
+        sentResult.message = resultMessage
       } else {
         // expect that some result message is already set
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Signed, and finished storing data locally. Server result: " + JSON.stringify(sentResult)})) // sentResult can be undefined for errors
+        appStore.dispatch(appSlice.actions.addLog({
+          log: true,
+          // sentResult can be undefined for errors
+          msg: "Signed, and finished storing data locally. Server result: " + JSON.stringify(sentResult)
+        }))
+
       }
+      return sentResult
 
     } catch (e) {
-      setOneResultMessage(index, "Something failed in the signing or sending of " + claimNumber(index) + ".")
+      const resultMessage = "Something failed in the signing or sending of " + claimNumber(index) + "."
+      setOneResultMessage(index, resultMessage)
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
       // I have seen cases where each of these give different, helpful info.
       console.log('Error storing / signing / sending claim, 1:', e)
       console.log('Error storing / signing / sending claim, 2: ' + e)
       console.log('Error storing / signing / sending claim, 3:', e.toString())
+
+      return { message: resultMessage }
     }
   }
 
   useFocusEffect(
     React.useCallback(() => {
       const doActions = async () => {
-        return finalCredSubjs.map((cred, index) => saveSignSend(cred, index))
+        Promise.all(finalCredSubjs.map((cred, index) => saveSignSend(cred, index)))
+        .then((results) => navigation.replace('Sent Signature Results', { results }))
       }
       doActions()
     }, [finalCredSubjs])
@@ -241,13 +275,21 @@ export function SignCredentialScreen({ navigation, route }) {
                                 title="Success!"
                                 onPress={() => {
                                   Linking.openURL(endorserViewLink(endorserIds[index])).catch(err => {
-                                    setOneResultMessage(index, 'Sorry, something went wrong trying to show you the record on the Endorser server. ' + err)
+                                    setOneResultMessage(
+                                      index,
+                                      'Sorry, something went wrong trying to show you the record'
+                                      + ' on the Endorser server. '
+                                      + err
+                                    )
                                   })
                                 }}
                               />
                             </View>
                           ) : ( /* fetched && !endorserId */
-                            <Text>Got response from the Endorser server but something went wrong. The logs (near the bottom of Help) may show more info.</Text>
+                            <Text>
+                              Got response from the Endorser server but something went wrong.
+                              The logs (near the bottom of Help) may show more info.
+                            </Text>
                           )
                         ) : ( /* !fetched */
                           fetching[index] ? (

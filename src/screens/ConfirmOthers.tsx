@@ -1,7 +1,9 @@
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, Button, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import {
+  ActivityIndicator, Alert, Button, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View
+} from 'react-native'
 import { CheckBox } from "react-native-elements"
 
 import { styles } from './style'
@@ -38,11 +40,18 @@ export function ConfirmOthersScreen({ navigation }) {
 
       const endorserApiServer = appStore.getState().settings.apiServer
       const token = await utility.accessToken(ids[0])
-      return fetch(endorserApiServer + '/api/claim/?issuedAt_greaterThanOrEqualTo=' + encodeURIComponent(loadMoreStartingStr) + "&issuedAt_lessThan=" + encodeURIComponent(loadMoreEndingStr) + "&excludeConfirmations=true", {
-        headers: {
-          "Content-Type": "application/json",
-          "Uport-Push-Token": token,
-        }})
+      return fetch(
+        endorserApiServer + '/api/claim/?'
+        + 'issuedAt_greaterThanOrEqualTo=' + encodeURIComponent(loadMoreStartingStr)
+        + '&issuedAt_lessThan=' + encodeURIComponent(loadMoreEndingStr)
+        + '&excludeConfirmations=true',
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Uport-Push-Token": token,
+          }
+        }
+      )
         .then(response => response.json())
         .then(async (data) => {
           const dataWithoutHidden = R.reject(utility.containsHiddenDid, data)

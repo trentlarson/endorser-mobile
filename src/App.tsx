@@ -52,6 +52,7 @@ import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
 import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
 import { SettingsScreen } from "./screens/Settings";
+import { SignatureResultsScreen } from './screens/SignatureResults'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
 
 
@@ -141,6 +142,7 @@ function ClaimsStackScreen() {
       <ClaimsStack.Screen name={utility.REVIEW_SIGN_SCREEN_NAV} component={ReviewToSignCredentialScreen} />
       <ClaimsStack.Screen name="Scan Content" component={ScanAnythingScreen} />
       <ClaimsStack.Screen name="Scan Presentation" component={ScanPresentationScreen} />
+      <ClaimsStack.Screen name="Sent Signature Results" component={SignatureResultsScreen} />
       <ClaimsStack.Screen name="Signature Results" component={SignCredentialScreen} />
       <ClaimsStack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
       <ClaimsStack.Screen name="Your Credentials" component={MyCredentialsScreen} />
