@@ -2,7 +2,7 @@
 import * as didJwt from 'did-jwt'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Button, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -23,13 +23,7 @@ export function SignCredentialScreen({ navigation, route }) {
 
   const numCreds = finalCredSubjs.length
 
-  // return a space & claim number (1-based) for the index (0-based), or '' if there's only one
-  const claimNumber = (index, upperCase) => {
-    let claimText = upperCase ? 'Claim' : 'claim'
-    return claimText + (numCreds === 1 ? '' : ' #' + (index+1))
-  }
-
-  const initialMessages = R.times((n) => 'Not finished with ' + claimNumber(n) + '.', numCreds)
+  const initialMessages = R.times((n) => 'Not finished with ' + utility.claimNumberText(n, numCreds) + '.', numCreds)
 
   const [endorserIds, setEndorserIds] = useState<Array<string>>(R.times(() => null, numCreds))
   const [fetched, setFetched] = useState<Array<boolean>>(R.times(() => false, numCreds))
@@ -79,11 +73,12 @@ export function SignCredentialScreen({ navigation, route }) {
           const json = JSON.parse(text)
           const moreInfo =
             (json && json.error && json.error.message)
-            || "Got failure response trying to send " + claimNumber(index) + ". " + text
+            || "Got failure response trying to send " + utility.claimNumberText(index, numCreds) + ". " + text
           resultMessage = moreInfo
           setOneResultMessage(index, moreInfo)
         } catch (e) {
-          resultMessage = "Got unexpected type of response trying to send " + claimNumber(index) + ". " + text
+          resultMessage =
+            "Got unexpected type of response trying to send " + utility.claimNumberText(index, numCreds) + ". " + text
           setOneResultMessage(index, resultMessage)
         }
         return { message: resultMessage } // to signal no good ID
@@ -99,7 +94,8 @@ export function SignCredentialScreen({ navigation, route }) {
         msg: "... but got error sending to " + endorserApiServer + " " + err
       }))
       const resultMessage =
-        "Got error trying to send " + claimNumber(index) + ". The logs (near the bottom of Help) may tell more."
+        "Got error trying to send " + utility.claimNumberText(index, numCreds)
+        + ". The logs (near the bottom of Help) may tell more."
       setOneResultMessage(index, resultMessage)
       return { message: resultMessage }
     })
@@ -131,7 +127,7 @@ export function SignCredentialScreen({ navigation, route }) {
     const alg = undefined // defaults to 'ES256K', more standardized but harder to verify vs ES256K-R
     const vcJwt: string = await didJwt.createJWT(utility.vcPayload(vcClaim),{ alg, issuer: did, signer })
     setJwts(R.update(index, vcJwt))
-    let resultMessage = "Successfully signed " + claimNumber(index) + "."
+    let resultMessage = "Successfully signed " + utility.claimNumberText(index, numCreds) + "."
     setOneResultMessage(index, resultMessage)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created signed JWT..."}))
     if (sendToEndorser) {
@@ -142,12 +138,14 @@ export function SignCredentialScreen({ navigation, route }) {
         msg: "... finished the signing & sending with result: " + JSON.stringify(sentResult) + "..."
       }))
       sentResult.credential = credSubj
+      sentResult.jwt = vcJwt
       if (!sentResult.message) {
         sentResult.message = resultMessage
       }
       return sentResult
     } else {
-      const partialResultMessage = "Successfully signed " + claimNumber(index) + ". Did not share it to any server."
+      const partialResultMessage =
+        "Successfully signed " + utility.claimNumberText(index, numCreds) + ". Did not share it to any server."
       setOneResultMessage(index, partialResultMessage)
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... so we're done."}))
       return { credential: credSubj, message: partialResultMessage, jwt: vcJwt }
@@ -201,7 +199,8 @@ export function SignCredentialScreen({ navigation, route }) {
       }
 
       if (sentResult.serverId) {
-        const resultMessage = "Successfully signed " + claimNumber(index) + " and sent it to the server."
+        const resultMessage =
+          "Successfully signed " + utility.claimNumberText(index, numCreds) + " and sent it to the server."
         setOneResultMessage(index, resultMessage)
         appStore.dispatch(appSlice.actions.addLog({
           log: true,
@@ -220,7 +219,8 @@ export function SignCredentialScreen({ navigation, route }) {
       return sentResult
 
     } catch (e) {
-      const resultMessage = "Something failed in the signing or sending of " + claimNumber(index) + "."
+      const resultMessage =
+        "Something failed in the signing or sending of " + utility.claimNumberText(index, numCreds) + "."
       setOneResultMessage(index, resultMessage)
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error in SignSendToEndorser.signAndSend: " + e}))
 
@@ -236,6 +236,10 @@ export function SignCredentialScreen({ navigation, route }) {
   useFocusEffect(
     React.useCallback(() => {
       const doActions = async () => {
+
+        // Doing this dance with SignatureResults page because otherwise coming
+        // back here (eg. via bottom tab) will cause duplicate sends.
+
         Promise.all(finalCredSubjs.map((cred, index) => saveSignSend(cred, index)))
         .then((results) => navigation.replace('Sent Signature Results', { results }))
       }
@@ -249,12 +253,10 @@ export function SignCredentialScreen({ navigation, route }) {
         <View style={{ padding: 20 }}>
           { identifier ? (
             <View>
-              <Text style={{ fontSize: 30, fontWeight: 'bold', marginBottom: 10 }}>
-                Sign
+              <Text>
                 {
-                  (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
-                   || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
-                   ? " - Custom Servers"
+                  (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER)
+                   ? "Custom Servers"
                    : ""
                 }
               </Text>
@@ -263,27 +265,14 @@ export function SignCredentialScreen({ navigation, route }) {
                 {
                   resultMessages.map((message, index) => (
                     <View style={{ height: 75 }} key={ index }>
+                      {/** enforcing height because otherwise heights change on events which is jarring **/}
                       <Text>{ message }</Text>
 
                       {
                         fetched[index] ? (
                           endorserIds[index] ? (
                             <View>
-                              <Text>Endorser ID</Text>
-                              <Text style={{ textAlign: "center" }} selectable={true}>{ endorserIds[index] }</Text>
-                              <Button
-                                title="Success!"
-                                onPress={() => {
-                                  Linking.openURL(endorserViewLink(endorserIds[index])).catch(err => {
-                                    setOneResultMessage(
-                                      index,
-                                      'Sorry, something went wrong trying to show you the record'
-                                      + ' on the Endorser server. '
-                                      + err
-                                    )
-                                  })
-                                }}
-                              />
+                              <Text style={{ textAlign: "center" }}>Endorser Id { endorserIds[index] }</Text>
                             </View>
                           ) : ( /* fetched && !endorserId */
                             <Text>
@@ -309,40 +298,6 @@ export function SignCredentialScreen({ navigation, route }) {
               </View>
 
               <View style={{ marginTop: 20 }} />
-              <View>
-
-                {
-                  finalCredSubjs.map((origCred, index) => (
-                    <View style={{ marginTop: 30 }} key={index}>
-                      <Text style={{ fontSize: 20 }}>{ claimNumber(index, true) }</Text>
-
-                      <Text style={{ marginTop: 10, marginBottom: 5 }}>Original Details</Text>
-                      <Text style={{ fontSize: 11 }}>Signed As:</Text>
-                      <Text style={{ fontSize: 11 }}>{identifier.did}</Text>
-                      <TextInput
-                        editable={false}
-                        multiline={true}
-                        style={{ borderWidth: 1, height: 300 }}
-                      >
-                        { JSON.stringify(origCred, null, 2) }
-                      </TextInput>
-
-                      <View>
-                        <View style={{ marginTop: 10 }} />
-                        <Text>JWT with Signature</Text>
-                        <TextInput
-                          editable={false}
-                          multiline={true}
-                          style={{ borderWidth: 1, height: 300 }}
-                        >
-                          { jwts[index] }
-                        </TextInput>
-                      </View>
-
-                    </View>
-                  ))
-                }
-              </View>
             </View>
           ) : (
             <Text>You must create an identifier (under Settings).</Text>

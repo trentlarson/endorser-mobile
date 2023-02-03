@@ -75,10 +75,7 @@ export function ScanAnythingScreen({ navigation, route }) {
                       return navigation.navigate(nextScreen, nextData)
                     }}
                   />
-                  <QRCode
-                    value={JSON.stringify(SAMPLE_MULTIPLE_CREDENTIALS)}
-                    size={300}
-                  />
+                  <QRCode value={JSON.stringify(SAMPLE_MULTIPLE_CREDENTIALS)} size={300} />
                 </View>
               :
                 <View />

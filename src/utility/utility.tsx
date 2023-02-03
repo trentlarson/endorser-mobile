@@ -71,10 +71,9 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
  * Render each claim.
  *
  * source is any object or array
- * navigation (optional) is the navigation object (used to provide links to verify cred, etc)
  * afterItemCss (optional) is CSS to add to add after each item
  */
-export const YamlFormat = ({ source, navigation, afterItemCss }) => {
+export const YamlFormat = ({ source, afterItemCss }) => {
 
   const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [didsForLinkedModal, setDidsForLinkedModal] = useState<Array<string>>(null)
@@ -484,3 +483,4 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
     </View>
   )
 }
+

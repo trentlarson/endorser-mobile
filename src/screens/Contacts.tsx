@@ -2,7 +2,7 @@ import { classToPlain } from 'class-transformer'
 import * as didJwt from 'did-jwt'
 import * as Papa from 'papaparse'
 import * as R from 'ramda'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { ActivityIndicator, Alert, Button, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native'
 import Clipboard from '@react-native-community/clipboard'
 import { CheckBox } from 'react-native-elements'
@@ -999,10 +999,7 @@ export function ContactsScreen({ navigation, route }) {
                 showMyQr
                 ?
                   <View style={{ marginBottom: 10, ...styles.centeredView}}>
-                    <QRCode
-                      value={myContactUrl}
-                      size={300}
-                    />
+                    <QRCode value={myContactUrl} size={300} />
                   </View>
                 :
                   <View/>

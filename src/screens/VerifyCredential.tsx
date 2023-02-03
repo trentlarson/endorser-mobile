@@ -130,10 +130,7 @@ export function ScanPresentationScreen({ navigation }) {
                   title='Fake & Invalid 777'
                   onPress={() => onSuccessfulQrText(id28_777Bad)}
                 />
-                <QRCode
-                  value={id19_333Pres}
-                  size={300}
-                />
+                <QRCode value={id19_333Pres} size={300} />
               </View>
             : <View/>
           }
@@ -469,10 +466,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
                 showMyQr
                 ?
                   <View style={{ marginBottom: 10, ...styles.centeredView}}>
-                    <QRCode
-                      value={JSON.stringify(CONTRACT_ACCEPT)}
-                      size={300}
-                    />
+                    <QRCode value={JSON.stringify(CONTRACT_ACCEPT)} size={300} />
                   </View>
                 :
                   <View/>

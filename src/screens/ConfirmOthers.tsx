@@ -140,7 +140,7 @@ export function ConfirmOthersScreen({ navigation }) {
               <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Confirm</Text>
               <Text style={{ color: 'red' }}>{loadError}</Text>
               <Button
-                title="Finish..."
+                title="Proceed to Sign"
                 onPress={ setConfirmations }
               />
               <View style={styles.line}/>
@@ -190,7 +190,7 @@ export function ConfirmOthersScreen({ navigation }) {
               }
               <View style={{ marginTop: 10 }}/>
               <Button
-                title="Finish..."
+                title="Proceed to Sign"
                 onPress={ setConfirmations }
               />
             </View>

@@ -138,7 +138,7 @@ export function PresentCredentialScreen({ navigation, route }) {
                     <TextInput
                       editable={false}
                       multiline={true}
-                      style={{ borderWidth: 1, height: 300 }}
+                      style={{ borderWidth: 1 }}
                     >
                       { JSON.stringify(JSON.parse(fullPrezStr), null, 2) }
                     </TextInput>

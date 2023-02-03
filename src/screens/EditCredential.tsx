@@ -137,7 +137,7 @@ export function EditCredentialScreen({ navigation, route }) {
                   <Text>Private Fields (cannot be edited)</Text>
                   <TextInput
                     multiline={true}
-                    style={{ borderWidth: 1, height: 300 }}
+                    style={{ borderWidth: 1 }}
                     editable={false}
                   >
                     { formatClaimJson(PRIVATE_FIELDS) }

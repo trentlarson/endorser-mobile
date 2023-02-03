@@ -122,6 +122,12 @@ export const capitalizeAndInsertSpacesBeforeCaps = (text) =>{
   return !text ? 'Something Unknown' : text[0].toUpperCase() + text.substr(1).replace(/([A-Z])/g, ' $1')
 }
 
+// return a space & claim number (1-based) for the index (0-based), or '' if there's only one
+export const claimNumberText = (index, total, upperCase) => {
+  let claimText = upperCase ? 'Claim' : 'claim'
+  return claimText + (total === 1 ? '' : ' #' + (index+1))
+}
+
 // return true for any nested string where func(input) === true
 function testRecursivelyOnString(func, input) {
 

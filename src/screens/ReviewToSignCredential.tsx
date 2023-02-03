@@ -143,12 +143,10 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
         <View style={{ padding: 20 }}>
           { id0 ? (
             <View>
-              <Text style={{ fontSize: 30, fontWeight: 'bold', marginBottom: 10 }}>
-                Review
+              <Text>
                 {
-                  (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
-                   || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)
-                   ? " - Custom Servers"
+                  (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER)
+                   ? "Custom Servers"
                    : ""
                 }
               </Text>
@@ -247,7 +245,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                 <TextInput
                   editable={false}
                   multiline={true}
-                  style={{ borderWidth: 1, height: 300 }}
+                  style={{ borderWidth: 1 }}
                 >
                     { formatClaimJson(CLAIM_ARRAY) }
                 </TextInput>
@@ -256,7 +254,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                 <TextInput
                   editable={false}
                   multiline={true}
-                  style={{ borderWidth: 1, height: 300 }}
+                  style={{ borderWidth: 1 }}
                 >
                     { formatClaimJson(PRIVATE_FIELDS) }
                 </TextInput>
