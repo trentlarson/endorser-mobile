@@ -799,11 +799,24 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const allContacts = useSelector((state) => state.contacts || [])
 
     function possiblyFinish(proceedToFinish) {
-      // yes, this may throw an error
-      const isoEndTime = endTime && new Date(endTime).toISOString()
+
+      // note that the last error is what is shown
+      let failureMessage
+
+      let isoEndTime
+      try {
+        isoEndTime = endTime && new Date(endTime).toISOString()
+      } catch (e) {
+        failureMessage = 'This is not an ISO date: ' + endTime
+      }
 
       if (!planName && !resultDescription) {
-        Alert.alert('You must give either a name or a result.')
+        failureMessage = 'You must give either a name or a result.'
+      }
+
+      if (failureMessage) {
+        Alert.alert(failureMessage)
+
       } else {
         let result = {
           "@context": "https://schema.org",
