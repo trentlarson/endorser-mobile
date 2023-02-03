@@ -134,7 +134,7 @@ android {
         missingDimensionStrategy 'react-native-camera', 'general'
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 113
-        versionName "6.4.0"
+        versionName "6.4.113"
         multiDexEnabled true
     }
     splits {

@@ -12,15 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.3.112] - 2023-01-29
+## [6.4.113] - 2023-02-02
 
 ### Added
 - Collapsed details & actions for lists of claims, and better descriptions.
 - Added more details to input in Plans & Projects.
 - Match the updated schema for Plans & Projects.
+- Enhance error messages, especially for claim and registration limits.
 
 ### Fixed
-- Enhance error messages, especially for claim and registration limits.
+- Don't resumbit to server when tabbing back to result page.
 - Fix display elements for no identifier or new identifier.
 
 
