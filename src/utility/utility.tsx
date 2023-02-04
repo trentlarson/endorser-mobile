@@ -409,7 +409,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                       <Pressable
                         onPress={ () =>
                           navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                            credentialSubjects: {
+                            credentialSubject: {
                               "@context": "https://schema.org",
                               "@type": "AgreeAction",
                               object: removeSchemaContext(source.claim),
