@@ -277,7 +277,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
               <Icon
                 name="chevron-down"
                 onPress={() => setShowMore(prev => !prev)}
-                style={{ color: 'blue', marginBottom: 5 }}
+                style={{ color: 'blue', fontSize: 20, marginBottom: 10 }}
               />
             :
               <Text onPress={() => setShowMore(prev => !prev)}>
@@ -292,21 +292,8 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
         showMore
         ?
           <View>
-            <View style={{ flexDirection: 'row', padding: 10 }}>
-              <Text
-                style={{ color: "blue" }}
-                onPress={() => setShowActions(prev => !prev )}
-              >
-                 { showActions ? "Hide" : "Show" } Actions
-              </Text>
-            </View>
-
             {
-              !showActions
-              ?
-                <View />
-              :
-                <View style={{ flexDirection: 'row' }}>
+              <View style={{ flexDirection: 'row' }}>
 
                 { /** Accept a Contract **/
 
@@ -454,7 +441,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     </View>
                 }
 
-                </View>
+              </View>
             }
 
             <View style={{ flexDirection: 'row', padding: 10 }}>
