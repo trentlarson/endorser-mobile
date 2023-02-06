@@ -230,6 +230,8 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
       } else if (finalOutstandingPerInvoice[source.claim.identifier] === 0
               || finalOutstandingPerInvoice[source.claim.recipient && source.claim.recipient.identifier] === 0) {
         return "(All Paid)"
+      } else if (source.claim.includesObject?.amountOfThisGood) {
+        return "(Some Amount)"
       } else {
         return "(Not A Specific Amount)"
       }
@@ -332,19 +334,24 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     <View style={{ flexDirection: 'row', padding: 10 }}>
                       <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
                       <Pressable
-                        onPress={ () =>
+                        onPress={ () => {
+                          const giveAction = {
+                            "@context": "https://schema.org",
+                            "@type": "GiveAction",
+                            agent: { identifier: identifiers[0].did },
+                            offerId: source.claim.identifier,
+                            recipient: source.claim.recipient,
+                          }
+                          if (source.claim.includesObject) {
+                            giveAction.object = source.claim.includesObject
+                            giveAction.itemOffered = source.claim.itemOffered
+                          } else {
+                            giveAction.object = source.claim.itemOffered
+                          }
                           navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                            credentialSubject: {
-                              "@context": "https://schema.org",
-                              "@type": "GiveAction",
-                              agent: { identifier: identifiers[0].did },
-                              identifier: source.claim.identifier,
-                              offerId: source.claim.identifier,
-                              object: source.claim.itemOffered || source.claim.includesObject,
-                              recipient: source.claim.recipient,
-                            }
+                            credentialSubject: giveAction
                           })
-                        }
+                        }}
                       >
                         <Text style={{ color: "blue" }}>Mark as given</Text>
                       </Pressable>
@@ -389,7 +396,6 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                   && source.claim['@type'] != 'Offer' // you Give
                   && source.claim['@type'] != 'PlanAction' // you Give or Offer
                   && source.claim['@type'] != 'Project' // you Give or Offer
-                  && source.claim['@type'] != 'RegisterAction'
                   ?
                     <View style={{ flexDirection: 'row', padding: 10 }}>
                       <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />

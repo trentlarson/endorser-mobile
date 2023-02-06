@@ -1052,6 +1052,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     const [agentId, setAgentId] = useState<string>(props.userId)
     const [amountStr, setAmountStr] = useState<number>('')
+    const [invoiceIdentifier, setInvoiceIdentifier] = useState<string>('')
     const [description, setDescription] = useState<string>(null)
     const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
     const [objectGiven, setObjectGiven] = useState<string>(null)
@@ -1075,7 +1076,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     function possiblyFinish(proceedToFinish) {
       if (!isSpecificAmount && !objectGiven) {
-        Alert.alert('You must indicate the object given.')
+        Alert.alert('You must give an object or an amount.')
       } else if (isSpecificAmount && (!amountStr || !unit)) {
         Alert.alert('You must give a specific amount and unit.')
       } else if (isSpecificAmount && isNaN(Number(amountStr))) {
@@ -1085,6 +1086,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
           "@context": "https://schema.org",
           "@type": "GiveAction",
         }
+
+        result.identifier = invoiceIdentifier == '' || invoiceIdentifier == null ? undefined : invoiceIdentifier
 
         result.object =
           !isSpecificAmount
@@ -1187,6 +1190,15 @@ export function ConstructCredentialScreen({ navigation, route }) {
                       </TouchableHighlight>
                     : <View />
                   }
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Invoice (ID)</Text>
+                  <TextInput
+                    value={invoiceIdentifier}
+                    onChangeText={setInvoiceIdentifier}
+                    style={{ borderWidth: 1 }}
+                  />
                 </View>
 
                 {
@@ -1300,6 +1312,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     const [agentId, setAgentId] = useState<string>(props.userId)
     const [amountStr, setAmountStr] = useState<string>('')
+    const [invoiceIdentifier, setInvoiceIdentifier] = useState<string>(crypto.randomBytes(16).toString('hex'))
     const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
     const [isItemDescribed, setIsItemDescribed] = useState<boolean>(false)
     const [itemDescription, setItemDescription] = useState<string>(null)
@@ -1350,6 +1363,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
         let result = {
           "@context": "https://schema.org",
           "@type": "Offer",
+          identifier: invoiceIdentifier == '' || invoiceIdentifier == null ? undefined : invoiceIdentifier,
           numberOfTransfersAllowed: multipleTransfersAllowed ? Number.MAX_SAFE_INTEGER : (transferAllowed ? 1 : 0),
           offeredBy: { identifier: agentId },
         }
@@ -1398,10 +1412,14 @@ export function ConstructCredentialScreen({ navigation, route }) {
     }
 
     useEffect(() => {
-      const incomingOffer = utility.isOffer(incomingClaim) ? incomingClaim : {}
       if (utility.isOffer(incomingClaim)) {
+        const incomingOffer = incomingClaim
         if (incomingOffer.offeredBy) {
-          setAgentId(incomingOffer.offeredBy)
+          // should be a person with an identifier property (though sometimes it's been a raw DID)
+          setAgentId(incomingOffer.offeredBy.identifier || incoming.offeredBy)
+        }
+        if (incomingOffer.identifier) {
+          setInvoiceId(incomingOffer.identifier)
         }
         if (incomingOffer.includesObject && incomingOffer.includesObject['@type'] === 'TypeAndQuantityNode') {
           setAmountStr(incomingOffer.includesObject.amountOfThisGood)
@@ -1513,6 +1531,15 @@ export function ConstructCredentialScreen({ navigation, route }) {
                       </TouchableHighlight>
                     : <View />
                   }
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Invoice (ID)</Text>
+                  <TextInput
+                    value={invoiceIdentifier}
+                    onChangeText={setInvoiceIdentifier}
+                    style={{ borderWidth: 1 }}
+                  />
                 </View>
 
                 {

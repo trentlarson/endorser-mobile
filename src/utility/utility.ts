@@ -146,7 +146,7 @@ function testRecursivelyOnString(func, input) {
       }
     } else {
       // it's an array
-      for (value of input) {
+      for (const value of input) {
         if (testRecursivelyOnString(func, value)) {
           return true
         }
@@ -579,7 +579,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
       DateTime.fromISO(j1.issuedAt.replace(" ", "T")).toMillis()
       - DateTime.fromISO(j2.issuedAt.replace(" ", "T")).toMillis()
     )
-  for (jwtEntry of wrappedClaims2) {
+  for (const jwtEntry of wrappedClaims2) {
     const claim = jwtEntry.claim;
     if (!claim) { idsOfUnknowns.push(jwtEntry.id); continue; }
     const claimContext = claim['@context']
@@ -605,7 +605,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
       if (isNaN(amount)) { idsOfStranges.push(jwtEntry.id); continue; }
       const currency = node.unitCode
       if (!currency) { idsOfStranges.push(jwtEntry.id); continue; }
-      const invoiceNum = claim.identifier || (claim.recipient && claim.recipient.identifier)
+      const invoiceNum = claim.identifier || claim.recipient?.identifier
 
       if (!claim.validThrough || DateTime.fromISO(claim.validThrough) > DateTime.local()) {
         // this is still outstanding
@@ -722,7 +722,7 @@ export const fieldKeysInOrder: Array<string> = (contractText) => {
 export const fieldsInsertionOrdered: Array<string> = (contractText, fieldValues) => {
   const fieldKeys = fieldKeysInOrder(contractText)
   const result = {}
-  for (let key of fieldKeys) {
+  for (const key of fieldKeys) {
     if (fieldValues[key]) {
       result[key] = fieldValues[key]
     }
@@ -739,7 +739,7 @@ export const valuesMerkleRootHex = (dataObj) => {
   const values = R.values(dataObj).map(R.trim)
 
   //merkler.addLeaves(values, true) // works when I run in the tests but not in emulator!? "Error: Bad hex value"
-  for (value of values) {
+  for (const value of values) {
     //merkler.addLeaf(value, true) // works when I run in the tests but not in emulator!? "Error: Bad hex value"
     merkler.addLeaf(sha256HexOfString(value))
   }
@@ -755,7 +755,7 @@ export const valuesMerkleRootHex = (dataObj) => {
  **/
 export const contractPrefix = (fields) => {
   let prefix = '---\n'
-  for (key of R.keys(fields)) {
+  for (const key of R.keys(fields)) {
     let value = fields[key]
     value = value.trim()
     if (value.match('\n')) {

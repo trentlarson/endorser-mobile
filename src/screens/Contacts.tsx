@@ -54,7 +54,7 @@ export function ContactsScreen({ navigation, route }) {
 
   let contactFields = [];
   const sampleContact = new Contact()
-  for (let field in sampleContact) {
+  for (const field in sampleContact) {
     if (sampleContact.hasOwnProperty(field)) {
       contactFields = R.concat(contactFields, [field])
     }
@@ -212,7 +212,7 @@ export function ContactsScreen({ navigation, route }) {
       let contacts: Array<Contact> = []
       let showingTrimmedMessage = false
       const parsed = Papa.parse(csvText, {dynamicTyping: true, skipEmptyLines: true})
-      for (let contactArray of parsed.data) {
+      for (const contactArray of parsed.data) {
         // each contactArray has the fields detected for one row of input
         if (contactArray.length === 0) {
           // quietly skip blank rows
@@ -224,7 +224,7 @@ export function ContactsScreen({ navigation, route }) {
           messages = R.concat(messages, ['Skipped first row with "' + contactFields[0] + '" field of "' + contactFields[0] + '". If you really want to include that, make a header row.'])
         } else {
           const contact = new Contact()
-          for (let col = 0; col < contactFields.length; col++) {
+          for (const col = 0; col < contactFields.length; col++) {
             if (col < contactArray.length) {
               let value = contactArray[col]
               if (typeof value === 'string') {

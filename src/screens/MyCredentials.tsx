@@ -16,6 +16,7 @@ export function MyCredentialsScreen({ navigation }) {
   const [loadedNumber, setLoadedNumber] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
   const [numStrangesAndUnknowns, setNumStrangesAndUnknowns] = useState<number>(0)
+  const [maybeMore, setMaybeMore] = useState<boolean>(false)
   const [outstandingPerCurrency, setOutstandingPerCurrency] = useState<Record<string,Record>>({})
   const [outstandingPerInvoice, setOutstandingPerInvoice] = useState<Record<string,Record>>({})
   const [paidPerCurrency, setPaidPerCurrency] = useState<Record<string,Record>>({})
@@ -55,6 +56,7 @@ export function MyCredentialsScreen({ navigation }) {
       }
     }).then(results => {
       setSearchResults(results)
+      setMaybeMore(true)
       setNumStrangesAndUnknowns(0)
       setOutstandingPerCurrency({})
       setOutstandingPerInvoice({})
@@ -139,6 +141,7 @@ export function MyCredentialsScreen({ navigation }) {
     setLoading(false)
     const displayResults = R.reverse(allResults) // we will keep the convention of reverse chronological order
     setSearchResults(displayResults)
+    setMaybeMore(false)
 
     const accounting = utility.countTransactions(allResults, identifiers[0].did)
     setTotalCurrenciesOutstanding(accounting.outstandingCurrencyTotals)
@@ -148,7 +151,7 @@ export function MyCredentialsScreen({ navigation }) {
     setOutstandingPerInvoice(accounting.outstandingInvoiceTotals)
 
     let outPerCur = {}
-    for (let committed of accounting.allPromised) {
+    for (const committed of accounting.allPromised) {
       const invoiceNum =
         committed.claim.identifier
         || (committed.claim.recipient?.identifier)
@@ -163,7 +166,7 @@ export function MyCredentialsScreen({ navigation }) {
     setOutstandingPerCurrency(outPerCur)
 
     let paidPerCur = {}
-    for (paid of accounting.allPaid) {
+    for (const paid of accounting.allPaid) {
       if (paid.claim.object) {
         let node = paid.claim.object
         paidPerCur[node.unitCode] = (paidPerCur[node.unitCode] || []).concat([paid])
@@ -236,7 +239,7 @@ export function MyCredentialsScreen({ navigation }) {
                               <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
                                 Matching Claims
                               </Text>
-                              <Text>(Showing the most recent 50.)</Text>
+                              <Text>{ maybeMore ? "(Showing the most recent, up to 50.)" : "" }</Text>
                             </View>
                           : <Text />
                         }

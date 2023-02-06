@@ -50,7 +50,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
 
         // add hashes for fields if they're missing
         // note that they may have come through via a scan of a Contract or a Contract AcceptAction
-        for (subj of credSubjArray) {
+        for (const subj of credSubjArray) {
           const hasContractAndPrivateFields = utility.isContract(subj) && subj.fields
           const hasContractAcceptAndPrivateFields = utility.isContractAccept(subj) && subj.object.fields
           if (hasContractAndPrivateFields || hasContractAcceptAndPrivateFields) {
@@ -81,7 +81,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
         }
 
         // set agent for an Accept if not this person already
-        for (subj of credSubjArray) {
+        for (const subj of credSubjArray) {
           if (utility.isAccept(subj)
               && (!subj.agent || subj.agent.identifier !== id0.did)) {
             subj.agent = { identifier: id0.did }
@@ -92,7 +92,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
         const allFinalPrivateFields = []
 
         // now separate any private data from shared-ledger data
-        for (subj of credSubjArray) {
+        for (const subj of credSubjArray) {
           if (utility.isContract(subj)) {
             const strippedContract = R.clone(subj)
             const erasedPrivates = R.clone(subj.fields)
