@@ -296,6 +296,8 @@ To Release:
     - `cd ios; bundle exec fastlane beta; cd ..`
       - Note that the upload fails if you didn't already create a release in App Store Connect.
     - This takes about 30 minutes. The upload takes about 10 at the end; there's no prompt after requesting the 6-digit code.
+      - If 2FA is a problem, try https://github.com/fastlane/fastlane/blob/master/spaceship/docs/Authentication.md#auto-select-sms-via-spaceship_2fa_sms_default_phone_number
+
     - After entering the 6-digit code (in about 18 minutes), it should say "Login Successful". It failed when I was on a VPN... maybe because I hadn't created the version in the App Store yet.
   - Submit the release for review (by filling in the "What's New" and "Notes"), and after they approve the review then you can test in TestFlight or release.
     - Double-check that it's submitted for review: it should say "Waiting for Review". (choose the app, click App Review on the side, choose it from Ready For Review list, and hit "Submit to App Review". Just clicking "Add to Review" on the first screen isn't enough.)
