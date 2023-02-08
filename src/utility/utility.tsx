@@ -335,21 +335,22 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                       <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
                       <Pressable
                         onPress={ () => {
-                          const giveAction = {
+                          // record one each for itemOffered & includesObject if they exist
+                          const giveActionForm = {
                             "@context": "https://schema.org",
                             "@type": "GiveAction",
                             agent: { identifier: identifiers[0].did },
                             offerId: source.claim.identifier,
                             recipient: source.claim.recipient,
                           }
-                          if (source.claim.includesObject) {
-                            giveAction.object = source.claim.includesObject
-                            giveAction.itemOffered = source.claim.itemOffered
-                          } else {
-                            giveAction.object = source.claim.itemOffered
-                          }
+                          const items = [source.claim.includesObject, source.claim.itemOffered]
+                          const offered = R.filter(i => i != null, items)
+                          const giveActions = R.map(
+                            item => R.set(R.lensProp('object'), item, R.clone(giveActionForm)),
+                            offered
+                          )
                           navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                            credentialSubject: giveAction
+                            credentialSubject: giveActions
                           })
                         }}
                       >
