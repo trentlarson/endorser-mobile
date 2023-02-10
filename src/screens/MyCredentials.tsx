@@ -13,13 +13,13 @@ import { agent } from '../veramo/setup'
 
 export function MyCredentialsScreen({ navigation }) {
 
+  const [currencyEntriesOutstanding, setCurrencyEntriesOutstanding] = useState<Record<String,Array<any>>>({})
+  const [currencyEntriesPaid, setCurrencyEntriesPaid] = useState<Record<String,Array<any>>>({})
   const [loadedNumber, setLoadedNumber] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(false)
   const [numStrangesAndUnknowns, setNumStrangesAndUnknowns] = useState<number>(0)
   const [maybeMore, setMaybeMore] = useState<boolean>(false)
-  const [outstandingPerCurrency, setOutstandingPerCurrency] = useState<Record<string,Record>>({})
   const [outstandingPerInvoice, setOutstandingPerInvoice] = useState<Record<string,Record>>({})
-  const [paidPerCurrency, setPaidPerCurrency] = useState<Record<string,Record>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [searchResults, setSearchResults] = useState<Array<any>>(null)
@@ -57,10 +57,11 @@ export function MyCredentialsScreen({ navigation }) {
     }).then(results => {
       setSearchResults(results)
       setMaybeMore(true)
+
+      setCurrencyEntriesOutstanding({})
+      setCurrencyEntriesPaid({})
       setNumStrangesAndUnknowns(0)
-      setOutstandingPerCurrency({})
       setOutstandingPerInvoice({})
-      setPaidPerCurrency({})
       setTotalCurrenciesOutstanding({})
       setTotalCurrenciesPaid({})
     })
@@ -144,35 +145,12 @@ export function MyCredentialsScreen({ navigation }) {
     setMaybeMore(false)
 
     const accounting = utility.countTransactions(allResults, identifiers[0].did)
+    setCurrencyEntriesOutstanding(accounting.outstandingCurrencyEntries)
+    setCurrencyEntriesPaid(accounting.paidCurrencyEntries)
     setTotalCurrenciesOutstanding(accounting.outstandingCurrencyTotals)
     setTotalCurrenciesPaid(accounting.totalCurrencyPaid)
     setNumStrangesAndUnknowns(accounting.idsOfStranges.length + accounting.idsOfUnknowns.length)
-
     setOutstandingPerInvoice(accounting.outstandingInvoiceTotals)
-
-    let outPerCur = {}
-    for (const committed of accounting.allPromised) {
-      const invoiceNum =
-        committed.claim.identifier
-        || (committed.claim.recipient?.identifier)
-      if (accounting.outstandingInvoiceTotals[invoiceNum] > 0
-          // itemOffered is for some legacy Offers in Endorser.ch
-          && (committed.claim.includesObject || committed.claim.itemOffered?.unitCode)) {
-        // itemOffered is for some legacy Offers in Endorser.ch
-        let node = committed.claim.includesObject || committed.claim.itemOffered
-        outPerCur[node.unitCode] = (outPerCur[node.unitCode] || []).concat([committed])
-      }
-    }
-    setOutstandingPerCurrency(outPerCur)
-
-    let paidPerCur = {}
-    for (const paid of accounting.allPaid) {
-      if (paid.claim.object) {
-        let node = paid.claim.object
-        paidPerCur[node.unitCode] = (paidPerCur[node.unitCode] || []).concat([paid])
-      }
-    }
-    setPaidPerCurrency(paidPerCur)
 
     setSearchTerm('')
   }
@@ -263,7 +241,7 @@ export function MyCredentialsScreen({ navigation }) {
                                             'Your Offers',
                                             {
                                               currencyLabel: utility.currencyShortWordForCode(arr[0]),
-                                              offerList: outstandingPerCurrency[arr[0]],
+                                              offerList: currencyEntriesOutstanding[arr[0]],
                                             }
                                           )
                                         }
@@ -294,7 +272,7 @@ export function MyCredentialsScreen({ navigation }) {
                                             'Your Given',
                                             {
                                               currencyLabel: utility.currencyShortWordForCode(arr[0]),
-                                              givenList: paidPerCurrency[arr[0]],
+                                              givenList: currencyEntriesPaid[arr[0]],
                                             }
                                           )
                                         }
@@ -322,7 +300,7 @@ export function MyCredentialsScreen({ navigation }) {
                     }
 
                     ListFooterComponent={
-                      <View style={{ marginBottom: 200}}>{/* Without this, bottom tabs hide the bottom. */}</View>
+                      <View style={{ marginBottom: 100}}>{/* Without this, bottom tabs hide the bottom. */}</View>
                     }
 
                     renderItem={ data =>

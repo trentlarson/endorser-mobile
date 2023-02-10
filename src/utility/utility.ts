@@ -558,7 +558,7 @@ const objectToYamlString = (obj, indentLevel) => {
  * - idsOfUnknowns are unrecognized claims (ie. not Offer or GiveAction)
  * - outstandingCurrencyTotals is a map of currency code to outstanding amount promised
  * - outstandingInvoiceTotals is a map of
- *     invoice ID (ie. offerId or recipient.identifier) to outstanding amount promised
+ *     invoice ID (ie. references.identifier or recipient.identifier) to outstanding amount promised
  * - totalCurrencyPaid is a map of currency code to amount paid
  * - totalCurrencyPromised is a map of currency code to total amount promised
  *
@@ -570,8 +570,14 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
   let allPromised = []; // full claim details
   let idsOfStranges = [];
   let idsOfUnknowns = [];
+  // map of currency code to array of [outstanding invoice (offer) ID, full entry]
+  // and note that there is likely one "undefined" invoice ID for all those without an invoice
+  let outstandingCurrencyEntries = {}
   let outstandingCurrencyTotals = {} // map of currency code to outstanding amount promised
   let outstandingInvoiceTotals = {} // map of invoice ID to outstanding amount promised
+  // map of currency code to array of [paid invoice ID, full entry]
+  // and note that there is likely one "undefined" invoice ID for all those without an invoice
+  let paidCurrencyEntries = {}
   let totalCurrencyPaid = {} // map of currency code to amount paid
   let totalCurrencyPromised = {} // map of currency code to total amount promised
   const wrappedClaims2 =
@@ -595,7 +601,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
       }
 
       let node = claim.includesObject
-      if (!node && claim.itemOffered?.amountOfThisGood) {
+      if (!node?.amountOfThisGood && claim.itemOffered?.amountOfThisGood) {
         // this is the case for some legacy Offer entries on endorser.ch
         node = claim.itemOffered
       }
@@ -620,7 +626,12 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
 
           outstandingInvoiceTotals[invoiceNum] = amount
         }
-        // with or without an invoice number, it's outstanding
+        // with or without an invoice number, it's outstanding in this currency
+        // ... but first: remove any previous one
+        outstandingCurrencyEntries[currency] =
+          R.reject(entryPair => entryPair[0] == invoiceNum, outstandingCurrencyEntries[currency] || [])
+        outstandingCurrencyEntries[currency] =
+          (outstandingCurrencyEntries[currency] || []).concat([[invoiceNum, jwtEntry]])
         outstandingCurrencyTotals[currency] = (outstandingCurrencyTotals[currency] || 0) + amount
       }
 
@@ -638,15 +649,20 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
       if (isNaN(amount)) { idsOfStranges.push(jwtEntry.id); continue; }
       const currency = node.unitCode
       if (!currency) { idsOfStranges.push(jwtEntry.id); continue; }
-      const invoiceNum = claim.offerId || (claim.recipient && claim.recipient.identifier)
+      const invoiceNum = claim.references?.identifier || claim.recipient?.identifier
 
       if (invoiceNum && outstandingInvoiceTotals[invoiceNum]) {
         // only decrement the promise if there's a tie to a known invoice or recipient
         const amountPaid = Math.min(amount, outstandingInvoiceTotals[invoiceNum])
         outstandingInvoiceTotals[invoiceNum] = outstandingInvoiceTotals[invoiceNum] - amountPaid
+        if (outstandingInvoiceTotals[invoiceNum] == 0) { // if already undefined then we can skip
+          outstandingCurrencyEntries[currency] =
+            R.reject(entryPair => entryPair[0] == invoiceNum, outstandingCurrencyEntries[currency] || [])
+        }
         outstandingCurrencyTotals[currency] = outstandingCurrencyTotals[currency] - amountPaid
       }
 
+      paidCurrencyEntries[currency] = (paidCurrencyEntries[currency] || []).concat([[invoiceNum, jwtEntry]])
       totalCurrencyPaid[currency] = (totalCurrencyPaid[currency] || 0) + amount
 
       allPaid = allPaid.concat([jwtEntry]);
@@ -659,7 +675,8 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
 
   return {
     allPaid, allPromised, idsOfStranges, idsOfUnknowns,
-    outstandingCurrencyTotals, outstandingInvoiceTotals,
+    outstandingCurrencyEntries, outstandingCurrencyTotals, outstandingInvoiceTotals,
+    paidCurrencyEntries,
     totalCurrencyPaid, totalCurrencyPromised
   }
 

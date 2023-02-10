@@ -8,7 +8,7 @@ export function MyOffersScreen({ navigation, route }) {
 
   const {
     currencyLabel,
-    offerList, // list of containers of claims
+    offerList, // list of two-element array: [invoice ID & full claim entry]
   } = route.params
 
   const allIdentifiers = useSelector((state) => state.identifiers || [])
@@ -19,34 +19,39 @@ export function MyOffersScreen({ navigation, route }) {
       <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Outstanding Promised { currencyLabel }</Text>
       <FlatList
         data={offerList}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item[0] || "undefined"} // those without ID or recipient will have a key of undefined
+        style={{ padding: 10 }}
         ListEmptyComponent={<Text>None</Text>}
         renderItem={(data) => {
           let label, recipient
-          if (data.item.claim?.recipient) {
+          if (data.item[1].claim?.recipient) {
             label = "Recipient"
-            recipient = utility.didInfo(data.item.claim.recipient.identifier, allIdentifiers, allContacts)
-          } else {
+            recipient = utility.didInfo(data.item[1].claim.recipient.identifier, allIdentifiers, allContacts)
+          } else if (data.item[1].claim?.identifier) {
             label = "Invoice"
-            recipient = data.item.claim?.identifier
+            recipient = data.item[1].claim.identifier
+          } else {
+            label = "No Specific Recipient or Invoice"
+            recipient = ""
           }
           return (
             <View>
               <Text>
-                {/* The itemOffered version is for some legacy Offers on the endorser.ch ledger. */}
-                { data.item.claim?.includesObject?.amountOfThisGood || data.item.claim?.itemOffered?.amountOfThisGood }
+                { data.item[1].claim.includesObject.amountOfThisGood }
                 &nbsp;to { label } { recipient }
               </Text>
               <Text
                 style={{ color: 'blue' }}
-                onPress={() => navigation.navigate('Verify Credential', { wrappedClaim: data.item })}
+                onPress={() => navigation.navigate('Verify Credential', { wrappedClaim: data.item[1] })}
               >
                 See Details
               </Text>
             </View>
           )
         }}
-        style={{ padding: 10 }}
+        ListFooterComponent={
+          <View style={{ marginBottom: 100}}>{/* Without this, bottom tabs hide the bottom. */}</View>
+        }
       />
     </SafeAreaView>
   )

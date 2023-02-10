@@ -220,17 +220,23 @@ export const YamlFormat = ({ source, afterItemCss }) => {
  */
 export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, afterItemCss }) => {
 
-  const outstandingInvoiceAmount = (claimMaybeWithIdOrRecipient) => {
+  const outstandingInvoiceAmount = (offerMaybeWithIdOrRecipient) => {
     if (!outstandingPerInvoice) {
       return ""
     } else {
-      if (outstandingPerInvoice[source.claim.identifier] > 0
-          || outstandingPerInvoice[source.claim.recipient && source.claim.recipient.identifier] > 0) {
+      if (outstandingPerInvoice[offerMaybeWithIdOrRecipient.identifier] > 0
+          ||
+          outstandingPerInvoice[
+            offerMaybeWithIdOrRecipient.recipient && offerMaybeWithIdOrRecipient.recipient.identifier
+          ] > 0) {
         return "(Not Fully Paid)"
-      } else if (finalOutstandingPerInvoice[source.claim.identifier] === 0
-              || finalOutstandingPerInvoice[source.claim.recipient && source.claim.recipient.identifier] === 0) {
+      } else if (finalOutstandingPerInvoice[offerMaybeWithIdOrRecipient.identifier] === 0
+                 ||
+                 finalOutstandingPerInvoice[
+                   offerMaybeWithIdOrRecipient.recipient && offerMaybeWithIdOrRecipient.recipient.identifier
+                 ] === 0) {
         return "(All Paid)"
-      } else if (source.claim.includesObject?.amountOfThisGood) {
+      } else if (offerMaybeWithIdOrRecipient.includesObject?.amountOfThisGood) {
         return "(Some Amount)"
       } else {
         return "(Not A Specific Amount)"
@@ -325,23 +331,28 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     <View />
                 }
 
-                { /** Give a Donate **/
+                { /** Give to fulfill an Offer **/
 
                   isUser(source.issuer)
-                  && (source.claim['@type'] === 'DonateAction'
-                      || source.claim['@type'] === 'Offer')
+                  && (source.claim['@type'] === 'Offer')
                   ?
                     <View style={{ flexDirection: 'row', padding: 10 }}>
                       <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
                       <Pressable
                         onPress={ () => {
                           // record one each for itemOffered & includesObject if they exist
+                          // and set the 'object' in each one containing those contents
                           const giveActionForm = {
                             "@context": "https://schema.org",
                             "@type": "GiveAction",
                             agent: { identifier: identifiers[0].did },
-                            offerId: source.claim.identifier,
                             recipient: source.claim.recipient,
+                          }
+                          if (source.claim.identifier) {
+                            giveActionForm.references = {
+                              "@type": source.claim['@type'],
+                              identifier: source.claim.identifier,
+                            }
                           }
                           const items = [source.claim.includesObject, source.claim.itemOffered]
                           const offered = R.filter(i => i != null, items)

@@ -1087,7 +1087,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
           "@type": "GiveAction",
         }
 
-        result.identifier = invoiceIdentifier == '' || invoiceIdentifier == null ? undefined : invoiceIdentifier
+        result.identifier = invoiceIdentifier || undefined
 
         result.object =
           !isSpecificAmount

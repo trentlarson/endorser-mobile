@@ -8,7 +8,7 @@ export function MyGivenScreen({ navigation, route }) {
 
   const {
     currencyLabel,
-    givenList, // list of containers of claims
+    givenList, // list of two-element array: [invoice ID & full claim entry]
   } = route.params
 
   const allIdentifiers = useSelector((state) => state.identifiers || [])
@@ -19,24 +19,29 @@ export function MyGivenScreen({ navigation, route }) {
       <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Given { currencyLabel }</Text>
       <FlatList
         data={givenList}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item[0] || "undefined"} // those without ID or recipient will have a key of undefined
         ListEmptyComponent={<Text>None</Text>}
         renderItem={(data) => {
           let label, recipient
-          if (data.item.claim.recipient) {
+          if (data.item[1].claim.recipient) {
             label = "Recipient"
-            recipient = utility.didInfo(data.item.claim.recipient.identifier, allIdentifiers, allContacts)
-          } else if (data.item.claim.identifier) {
+            recipient = utility.didInfo(data.item[1].claim.recipient.identifier, allIdentifiers, allContacts)
+          } else if (data.item[1].claim.references?.identifier) {
             label = "Invoice"
-            recipient = data.item.claim.identifier
+            recipient = data.item[1].claim.references.identifier
           } else {
-            label = "Unknown Recipient"
+            label = "No Specific Recipient or Invoice"
             recipient = ""
           }
           return (
             <View>
-              <Text>{ data.item.claim.object.amountOfThisGood } to { label } { recipient }</Text>
-              <Text style={{ color: 'blue' }} onPress={() => navigation.navigate('Verify Credential', { wrappedClaim: data.item })}>See Details</Text>
+              <Text>{ data.item[1].claim.object.amountOfThisGood } to { label } { recipient }</Text>
+              <Text
+                style={{ color: 'blue' }}
+                onPress={() => navigation.navigate('Verify Credential', { wrappedClaim: data.item[1] })}
+              >
+                See Details
+              </Text>
             </View>
           )
         }}
