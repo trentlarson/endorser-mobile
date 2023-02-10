@@ -12,7 +12,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.4.113] - 2023-02-02
+## [6.4.117] - 2023-02-09
+
+### Changed
+- Schema change: Offer.offeredBy from string to object with 'identifier' property.
+- Schema change: Offer.orderId renamed to 'references' and changed from string object with 'identifier' property.
+
+### Fixed
+- Adjust Offer and GiveAction data and display.
+- Gather valid data for Agree links.
+
+### Deleted
+- Removed the marker to transfer offers.
+
+
+
+
+## [6.4.113] - 2023-02-02 - 6720ae87db490965d4db4a253b7003f211b7ec8a
 
 ### Added
 - Collapsed details & actions for lists of claims, and better descriptions.
