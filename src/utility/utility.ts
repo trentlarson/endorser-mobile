@@ -49,12 +49,12 @@ export const REVIEW_SIGN_SCREEN_NAV = 'Review & Sign' // be sure to 'navigation.
 
 const merkler = new MerkleTools({ hashType: 'sha256' })
 
-export function currencyShortWordForCode(unitCode) {
-  return unitCode === 'HUR' ? 'hours' : unitCode
+export function currencyShortWordForCode(unitCode, single) {
+  return unitCode === 'HUR' ? (single ? 'hour' : 'hours') : unitCode
 }
 
 export function displayAmount(code, amt) {
-  return '' + amt + ' ' + currencyShortWordForCode(code)
+  return '' + amt + ' ' + currencyShortWordForCode(code, amt === 1)
 }
 
 export function isDid(value) {

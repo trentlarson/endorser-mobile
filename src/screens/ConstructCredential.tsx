@@ -1317,7 +1317,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [isItemDescribed, setIsItemDescribed] = useState<boolean>(false)
     const [itemDescription, setItemDescription] = useState<string>(null)
     const [itemType, setItemType] = useState<string>('CreativeWork')
-    const [multipleTransfersAllowed, setMultipleTransfersAllowed] = useState<boolean>(false)
     const [parentIdentifier, setParentIdentifier] = useState<string>('')
     const [parentInfoReadOnly, setParentInfoReadOnly] = useState<boolean>(false)
     const [parentType, setParentType] = useState<string>('')
@@ -1326,7 +1325,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [selectItemType, setSelectItemType] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
     const [termsOfService, setTermsOfService] = useState<string>('')
-    const [transferAllowed, setTransferAllowed] = useState<boolean>(false)
     const [unit, setUnit] = useState<string>(INITIAL_SELECTED_BUTTON && INITIAL_SELECTED_BUTTON.value)
     const [unitButtons, setUnitButtons] = useState<RadioButtonProps[]>(INITIAL_UNIT_BUTTONS)
     const [validThrough, setValidThrough] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
@@ -1364,7 +1362,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
           "@context": "https://schema.org",
           "@type": "Offer",
           identifier: invoiceIdentifier == '' || invoiceIdentifier == null ? undefined : invoiceIdentifier,
-          numberOfTransfersAllowed: multipleTransfersAllowed ? Number.MAX_SAFE_INTEGER : (transferAllowed ? 1 : 0),
           offeredBy: { identifier: agentId },
         }
 
@@ -1664,22 +1661,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
                       multiline={true}
                       style={{ borderWidth: 1 }}
                     />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <CheckBox
-                    title='Transfer Allowed'
-                    checked={transferAllowed}
-                    onPress={() => {setTransferAllowed(!transferAllowed)}}
-                  />
-                  <View style={{ padding: 5, display: (transferAllowed ? 'flex' : 'none') }}>
-                    <CheckBox
-                      title='Multiple Transfers Allowed'
-                      checked={multipleTransfersAllowed}
-                      onPress={() => {setMultipleTransfersAllowed(!multipleTransfersAllowed)}}
-                      visible={transferAllowed}
-                    />
-                  </View>
                 </View>
 
                 <View style={{ padding: 10 }} />
