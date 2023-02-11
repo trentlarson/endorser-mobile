@@ -1415,6 +1415,19 @@ export function ConstructCredentialScreen({ navigation, route }) {
           }
         }
 
+        if (isRequiringOffers) {
+          if (minOffersStr) {
+            result.requiresOffers = Number(minOffersStr)
+          }
+          if (minOffersAmountStr) {
+            result.requiresOffersTotal = {
+              '@type': 'TypeAndQuantityNode',
+              amountOfThisGood: Number(minOffersAmountStr),
+              unitCode: unit,
+            }
+          }
+        }
+
         result.recipient = recipientId ? { identifier: recipientId } : undefined
 
         result.description = termsOfService || undefined
