@@ -236,10 +236,21 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
   const type = claim['@type'] || 'UnknownType'
 
   if (type === "AgreeAction") {
-    return issuer + " agreed with a " + capitalizeAndInsertSpacesBeforeCaps(claim.object?.type)
+    const type = claim.object && claim.object["@type"]
+    return issuer + " agreed with a " + capitalizeAndInsertSpacesBeforeCaps(type)
 
   } else if (isAccept(claim)) {
-    return issuer + " accepted a " + capitalizeAndInsertSpacesBeforeCaps(claim.object?.type)
+    const type = claim.object && claim.object["@type"]
+    return issuer + " accepted a " + capitalizeAndInsertSpacesBeforeCaps(type)
+
+  } else if (type === "GiveAction") {
+    const gaveAmount =
+      claim.object?.amountOfThisGood
+      ? " " + displayAmount(claim.object.unitCode, claim.object.amountOfThisGood)
+      : claim.object && claim.object["@type"]
+        ? " " + capitalizeAndInsertSpacesBeforeCaps(claim.object["@type"])
+        : ""
+    return issuer + " gave" + gaveAmount
 
   } else if (type === "JoinAction") {
     const contactInfo = didInfo(claim.agent.did, identifiers, contacts)
@@ -262,7 +273,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
       offering += " " + displayAmount(claim.includesObject.unitCode, claim.includesObject.amountOfThisGood)
     }
     if (claim.itemOffered?.description) {
-      offering += " to " + claim.itemOffered?.description
+      offering += " to: " + claim.itemOffered?.description
     }
     return contactInfo + " offered" + offering
 

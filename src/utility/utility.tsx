@@ -226,15 +226,11 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
     } else {
       if (outstandingPerInvoice[offerMaybeWithIdOrRecipient.identifier] > 0
           ||
-          outstandingPerInvoice[
-            offerMaybeWithIdOrRecipient.recipient && offerMaybeWithIdOrRecipient.recipient.identifier
-          ] > 0) {
-        return "(Not Fully Paid)"
+          outstandingPerInvoice[offerMaybeWithIdOrRecipient.recipient?.identifier] > 0) {
+        return "(Not All Paid)"
       } else if (finalOutstandingPerInvoice[offerMaybeWithIdOrRecipient.identifier] === 0
                  ||
-                 finalOutstandingPerInvoice[
-                   offerMaybeWithIdOrRecipient.recipient && offerMaybeWithIdOrRecipient.recipient.identifier
-                 ] === 0) {
+                 finalOutstandingPerInvoice[offerMaybeWithIdOrRecipient.recipient?.identifier] === 0) {
         return "(All Paid)"
       } else if (offerMaybeWithIdOrRecipient.includesObject?.amountOfThisGood) {
         return "(Some Amount)"
@@ -270,11 +266,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
           ?
             <Text>{ outstandingInvoiceAmount(source.claim) }</Text>
           :
-            source.claim['@type'] === 'GiveAction'
-            ?
-              <Text>(Paid)</Text>
-            :
-              <View />
+            <View />
         }
         </View>
 
