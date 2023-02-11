@@ -349,7 +349,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                             recipient: source.claim.recipient,
                           }
                           if (source.claim.identifier) {
-                            giveActionForm.references = {
+                            giveActionForm.fulfills = {
                               "@type": source.claim['@type'],
                               identifier: source.claim.identifier,
                             }

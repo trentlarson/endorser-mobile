@@ -26,9 +26,9 @@ export function MyGivenScreen({ navigation, route }) {
           if (data.item[1].claim.recipient) {
             label = "Recipient"
             recipient = utility.didInfo(data.item[1].claim.recipient.identifier, allIdentifiers, allContacts)
-          } else if (data.item[1].claim.references?.identifier) {
-            label = "Invoice"
-            recipient = data.item[1].claim.references.identifier
+          } else if (data.item[1].claim.fulfills?.identifier) {
+            label = utility.capitalizeAndInsertSpacesBeforeCaps(data.item[1].claim.fulfills['@type'])
+            recipient = data.item[1].claim.fulfills.identifier
           } else {
             label = "No Specific Recipient or Invoice"
             recipient = ""

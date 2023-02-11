@@ -116,8 +116,8 @@ export const constructAccept = (agent, pledge) => {
   }
 }
 
-// insert a space in front of any capital letters (and capitalize first letter, just in case)
-// return '' for null or undefined input
+// insert a space before any capital letters except the initial letter (and capitalize initial letter, just in case)
+// return 'Something Unknown' for null or undefined input
 export const capitalizeAndInsertSpacesBeforeCaps = (text) =>{
   return !text ? 'Something Unknown' : text[0].toUpperCase() + text.substr(1).replace(/([A-Z])/g, ' $1')
 }
@@ -558,7 +558,7 @@ const objectToYamlString = (obj, indentLevel) => {
  * - idsOfUnknowns are unrecognized claims (ie. not Offer or GiveAction)
  * - outstandingCurrencyTotals is a map of currency code to outstanding amount promised
  * - outstandingInvoiceTotals is a map of
- *     invoice ID (ie. references.identifier or recipient.identifier) to outstanding amount promised
+ *     invoice ID (ie. fulfills.identifier or recipient.identifier) to outstanding amount promised
  * - totalCurrencyPaid is a map of currency code to amount paid
  * - totalCurrencyPromised is a map of currency code to total amount promised
  *
@@ -649,7 +649,7 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
       if (isNaN(amount)) { idsOfStranges.push(jwtEntry.id); continue; }
       const currency = node.unitCode
       if (!currency) { idsOfStranges.push(jwtEntry.id); continue; }
-      const invoiceNum = claim.references?.identifier || claim.recipient?.identifier
+      const invoiceNum = claim.fulfills?.identifier || claim.recipient?.identifier
 
       if (invoiceNum && outstandingInvoiceTotals[invoiceNum]) {
         // only decrement the promise if there's a tie to a known invoice or recipient
