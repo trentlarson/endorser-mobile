@@ -1313,10 +1313,13 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [agentId, setAgentId] = useState<string>(props.userId)
     const [amountStr, setAmountStr] = useState<string>('')
     const [invoiceIdentifier, setInvoiceIdentifier] = useState<string>(crypto.randomBytes(16).toString('hex'))
+    const [isRequiringOffers, setIsRequiringOffers] = useState<boolean>(false)
     const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
     const [isItemDescribed, setIsItemDescribed] = useState<boolean>(false)
     const [itemDescription, setItemDescription] = useState<string>(null)
     const [itemType, setItemType] = useState<string>('CreativeWork')
+    const [minOffersStr, setMinOffersStr] = useState<number>(0)
+    const [minOffersAmountStr, setMinOffersAmountStr] = useState<number>(0)
     const [parentIdentifier, setParentIdentifier] = useState<string>('')
     const [parentInfoReadOnly, setParentInfoReadOnly] = useState<boolean>(false)
     const [parentType, setParentType] = useState<string>('')
@@ -1339,6 +1342,10 @@ export function ConstructCredentialScreen({ navigation, route }) {
       setIsSpecificAmount(!isSpecificAmount)
     }
 
+    function toggleIsRequiringOffers() {
+      setIsRequiringOffers(!isRequiringOffers)
+    }
+
     function setUnitSelection(buttons) {
       setUnitButtons(buttons)
       const selectedButton = R.find(R.prop('selected'), buttons)
@@ -1353,10 +1360,20 @@ export function ConstructCredentialScreen({ navigation, route }) {
         Alert.alert('You must describe your offer.')
       } else if (isSpecificAmount && (!amountStr || !unit)) {
         Alert.alert('You must declare a specific amount and unit.')
-      } else if (isSpecificAmount && isNaN(Number(amountStr))) {
+      } else if (isSpecificAmount && (!amountStr || !isFinite(amountStr))) {
         Alert.alert('You must declare a valid numeric amount.')
       } else if (!isSpecificAmount && !itemDescription) {
         Alert.alert('You must describe your offer or give a specific amount.')
+      } else if (isRequiringOffers && !(minOffersStr || (minOffersAmountStr && unit))) {
+        Alert.alert('For minimums, give a number of offers or a total amount & units.')
+      } else if (isRequiringOffers && minOffersStr && !isFinite(minOffersStr)) {
+        Alert.alert('For a minimum number of offers, must choose a valid number.')
+      } else if (isRequiringOffers && minOffersStr && Number(minOffersStr) <= 0) {
+        Alert.alert('For a minimum number of offers, must choose a positive number.')
+      } else if (isRequiringOffers && minOffersAmountStr && !isFinite(minOffersAmountStr)) {
+        Alert.alert('For a minimum amount in offers, must choose a valid number.')
+      } else if (isRequiringOffers && minOffersAmountStr && Number(minOffersAmountStr) <= 0) {
+        Alert.alert('For a minimum amount in offers, must choose a positive number.')
       } else {
         let result = {
           "@context": "https://schema.org",
@@ -1556,11 +1573,10 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 </View>
 
                 <CheckBox
-                  title='Describe your offering.'
+                  title='Describe your offering'
                   checked={isItemDescribed}
                   onPress={toggleIsItemDescribed}
                 />
-
                 {
                   isItemDescribed
                   ?
@@ -1592,11 +1608,10 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 }
 
                 <CheckBox
-                  title='Declare a specific amount.'
+                  title='Declare a specific amount'
                   checked={isSpecificAmount}
                   onPress={toggleIsSpecificAmount}
                 />
-
                 {
                   isSpecificAmount ? (
                     <View>
@@ -1615,13 +1630,13 @@ export function ConstructCredentialScreen({ navigation, route }) {
                           <TextInput
                             value={unit}
                             onChangeText={setUnit}
-                            editable
+                            editable={ !R.find(R.prop('selected'), unitButtons).value }
                             style={{ borderWidth: 1 }}
                             width={ 50 }
                           />
                         </View>
                         {
-                          (R.find(R.prop('selected'), unitButtons).value == '') ? (
+                          (!R.find(R.prop('selected'), unitButtons).value) ? (
                             <Text>
                               You can see the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://www.xe.com/iso4217.php')}>codes for currencies here</Text> and the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('http://wiki.goodrelations-vocabulary.org/Documentation/UN/CEFACT_Common_Codes')}>codes for other units here</Text>.
                             </Text>
@@ -1652,15 +1667,54 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   />
                 </View>
 
+                <CheckBox
+                  title='Require offer minimums'
+                  checked={isRequiringOffers}
+                  onPress={toggleIsRequiringOffers}
+                />
+                {
+                  isRequiringOffers ? (
+                    <View>
+                      <View style={{ padding: 5 }}>
+                        <View style={{ flexDirection: 'row' }}>
+                          <TextInput
+                            value={minOffersStr}
+                            onChangeText={setMinOffersStr}
+                            editable
+                            style={{ borderWidth: 1 }}
+                            width={ 25 }
+                          />
+                          <Text> or more other offers</Text>
+                        </View>
+                      </View>
+
+                      <View style={{ padding: 5 }}>
+                        <View style={{ flexDirection: 'row' }}>
+                          <TextInput
+                            value={minOffersAmountStr}
+                            onChangeText={setMinOffersAmountStr}
+                            editable
+                            style={{ borderWidth: 1 }}
+                            width={ 40 }
+                          />
+                          <Text> or more { utility.currencyShortWordForCode(unit) } in other offers</Text>
+                        </View>
+                      </View>
+                    </View>
+                  ) : (
+                    <View/>
+                  )
+                }
+
                 <View style={{ padding: 5 }}>
-                    <Text>Terms, Conditions, Limitations, etc</Text>
-                    <TextInput
-                      value={termsOfService}
-                      onChangeText={setTermsOfService}
-                      editable
-                      multiline={true}
-                      style={{ borderWidth: 1 }}
-                    />
+                  <Text>Terms, Conditions, Limitations, etc</Text>
+                  <TextInput
+                    value={termsOfService}
+                    onChangeText={setTermsOfService}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
                 </View>
 
                 <View style={{ padding: 10 }} />
