@@ -12,11 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.4.117] - 2023-02-09
+## [6.4.118] - 2023-02-10 - f461d0e7639591ec106b3a1dd1a30713e43e2caa
 
 ### Changed
 - Schema change: Offer.offeredBy from string to object with 'identifier' property.
-- Schema change: Offer.orderId renamed to 'references' and changed from string object with 'identifier' property.
+- Schema change: Offer.orderId renamed to 'fulfills' and changed from string to object with 'identifier' property.
 
 ### Fixed
 - Adjust Offer and GiveAction data and display.
