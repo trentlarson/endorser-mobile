@@ -117,9 +117,13 @@ export const constructAccept = (agent, pledge) => {
 }
 
 // insert a space before any capital letters except the initial letter (and capitalize initial letter, just in case)
-// return 'Something Unknown' for null or undefined input
-export const capitalizeAndInsertSpacesBeforeCaps = (text) =>{
-  return !text ? 'Something Unknown' : text[0].toUpperCase() + text.substr(1).replace(/([A-Z])/g, ' $1')
+// return "unknown" message for null or undefined input
+export const capitalizeAndInsertSpacesBeforeCaps = (text) => {
+  return (
+    !text
+      ? 'something not known' // to differentiate from "something unknown" below
+      : 'a ' + text[0].toUpperCase() + text.substr(1).replace(/([A-Z])/g, ' $1')
+  )
 }
 
 // return a space & claim number (1-based) for the index (0-based), or '' if there's only one
@@ -211,11 +215,18 @@ export function didInfo(did, identifiers, contacts) {
  return readable summary of claim if possible
  **/
 const claimSummary = (claim) => {
+  if (!claim) {
+    // to differentiate from "something not known" above
+    return 'something unknown'
+  }
   if (claim.claim) {
     // probably a Verified Credential
     claim = claim.claim
   }
-  let type = claim['@type'] || 'UnknownAction'
+  if (Array.isArray(claim)) {
+    return 'multiple claims'
+  }
+  let type = claim['@type']
   return capitalizeAndInsertSpacesBeforeCaps(type)
 }
 
@@ -236,21 +247,17 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
   const type = claim['@type'] || 'UnknownType'
 
   if (type === "AgreeAction") {
-    const type = claim.object && claim.object["@type"]
-    return issuer + " agreed with a " + capitalizeAndInsertSpacesBeforeCaps(type)
+    return issuer + " agreed with " + claimSummary(claim.object)
 
   } else if (isAccept(claim)) {
-    const type = claim.object && claim.object["@type"]
-    return issuer + " accepted a " + capitalizeAndInsertSpacesBeforeCaps(type)
+    return issuer + " accepted " + claimSummary(claim.object)
 
   } else if (type === "GiveAction") {
     const gaveAmount =
       claim.object?.amountOfThisGood
-      ? " " + displayAmount(claim.object.unitCode, claim.object.amountOfThisGood)
-      : claim.object && claim.object["@type"]
-        ? " " + capitalizeAndInsertSpacesBeforeCaps(claim.object["@type"])
-        : ""
-    return issuer + " gave" + gaveAmount
+      ? displayAmount(claim.object.unitCode, claim.object.amountOfThisGood)
+      : claimSummary(claim.object)
+    return issuer + " gave " + gaveAmount
 
   } else if (type === "JoinAction") {
     // agent.did is for legacy data, before March 2023
@@ -285,7 +292,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
     return contactInfo + " claimed [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
 
   } else {
-    return claimSummary(claim, contacts)
+    return issuer + " declared " + claimSummary(claim, contacts)
   }
 }
 
