@@ -932,7 +932,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 </View>
 
                 <View style={{ padding: 5 }}>
-                  <Text>Name</Text>
+                  <Text>Plan Name</Text>
                   <TextInput
                     value={planName}
                     onChangeText={setPlanName}
@@ -943,7 +943,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 </View>
 
                 <View style={{ padding: 5 }}>
-                  <Text>Description of Plan</Text>
+                  <Text>Plan Description</Text>
                   <TextInput
                     value={planDescription}
                     onChangeText={setPlanDescription}

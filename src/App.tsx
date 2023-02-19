@@ -127,7 +127,6 @@ function ClaimsStackScreen() {
       <ClaimsStack.Screen name="All Claims" component={homeScreen}
         options={{ header: () => APP_IMAGE }}
       />
-
       <ClaimsStack.Screen name="Confirm Others" component={ConfirmOthersScreen} />
       <ClaimsStack.Screen name="Contract Form" component={ContractFormScreen} />
       <ClaimsStack.Screen name="Create Credential" component={ConstructCredentialScreen} />
