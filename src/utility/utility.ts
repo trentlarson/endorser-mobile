@@ -253,7 +253,8 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
     return issuer + " gave" + gaveAmount
 
   } else if (type === "JoinAction") {
-    const contactInfo = didInfo(claim.agent.did, identifiers, contacts)
+    // agent.did is for legacy data, before March 2023
+    const contactInfo = didInfo(claim.agent.identifier || claim.agent.did, identifiers, contacts)
 
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
     eventOrganizer = eventOrganizer || "";
@@ -278,7 +279,8 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
     return contactInfo + " offered" + offering
 
   } else if (type === "Tenure") {
-    const contactInfo = didInfo(claim.party.did, identifiers, contacts)
+    // party.did is for legacy data, before March 2023
+    const contactInfo = didInfo(claim.party.identifier || claim.party.did, identifiers, contacts)
     const polygon = claim.spatialUnit?.geo?.polygon || ""
     return contactInfo + " claimed [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
 
@@ -397,7 +399,8 @@ const claimSubject = (claim) => {
   } else if (claim['@type'] === "GiveAction") {
     return claim.agent && claim.agent.identifier
   } else if (claim['@type'] === "JoinAction") {
-    return claim.agent && claim.agent.did
+    // agent.did is for legacy data, before March 2023
+    return claim.agent && (claim.agent.identifier || claim.agent.did)
   } else if (claim['@type'] === "LoanOrCredit") {
     return claim.recipient && claim.recipient.identifier
   } else if (claim['@type'] === "Offer") {
@@ -409,9 +412,11 @@ const claimSubject = (claim) => {
   } else if (claim['@type'] === "PlanAction") {
     return claim.agent && claim.agent.identifier
   } else if (claim['@type'] === "RegisterAction") {
-    return claim.participant && claim.participant.did
+    // participant.did is for legacy data, before March 2023
+    return claim.participant && (claim.participant.identifier || claim.participant.did)
   } else if (claim['@type'] === "Tenure") {
-    return claim.party && claim.party.did
+    // party.did is for legacy data, before March 2023
+    return claim.party && (claim.party.identifier || claim.party.did)
   }
   return null
 }
@@ -468,7 +473,7 @@ export const bvcClaim = (did: string, startTime: string) => {
     '@context': SCHEMA_ORG_CONTEXT,
     '@type': 'JoinAction',
     agent: {
-      did: did,
+      identifier: did,
     },
     event: {
       organizer: {
