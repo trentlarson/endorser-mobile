@@ -1226,42 +1226,43 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
                 {
                   isSpecificAmount ? (
-                    <View>
-                      <View style={{ padding: 5 }}>
-                        <Text>Amount</Text>
-                        <TextInput
-                          value={amountStr}
-                          onChangeText={setAmountStr}
-                          editable
-                          style={{ borderWidth: 1 }}
-                          width={ 50 }
-                        />
-                      </View>
-
-                      <View style={{ padding: 5 }}>
-                        <Text>Unit</Text>
-                        <TextInput
-                          value={unit}
-                          onChangeText={setUnit}
-                          editable
-                          style={{ borderWidth: 1 }}
-                          width={ 50 }
-                        />
-                        {
-                          (R.find(R.prop('selected'), unitButtons).value == '') ? (
-                            <Text>
-                              You can see the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://www.xe.com/iso4217.php')}>codes for currencies here</Text> and the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('http://wiki.goodrelations-vocabulary.org/Documentation/UN/CEFACT_Common_Codes')}>codes for other units here</Text>.
-                            </Text>
-                          ) : (
-                            <View/>
-                          )
-                        }
+                    <View style={{ padding: 5 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: "center" }}>
+                        <View>
+                          <Text>Amount      Unit</Text>
+                          <View style={{ flexDirection: 'row', justifyContent: "center" }}>
+                            <TextInput
+                              value={amountStr}
+                              onChangeText={setAmountStr}
+                              editable
+                              style={{ borderWidth: 1 }}
+                              height={ 40 }
+                              width={ 50 }
+                            />
+                            <TextInput
+                              value={unit}
+                              onChangeText={setUnit}
+                              editable={ !R.find(R.prop('selected'), unitButtons).value }
+                              style={{ borderWidth: 1 }}
+                              height={ 40 }
+                              width={ 50 }
+                            />
+                          </View>
+                        </View>
                         <RadioGroup
-                          layout='row'
                           radioButtons={unitButtons}
                           onPress={setUnitSelection}
                         />
                       </View>
+                      {
+                        (R.find(R.prop('selected'), unitButtons).value == '') ? (
+                          <Text>
+                              You can see the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://www.xe.com/iso4217.php')}>codes for currencies here</Text> and the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('http://wiki.goodrelations-vocabulary.org/Documentation/UN/CEFACT_Common_Codes')}>codes for other units here</Text>.
+                          </Text>
+                        ) : (
+                          <View/>
+                        )
+                      }
 
                     </View>
                   ) : (
@@ -1627,43 +1628,43 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 />
                 {
                   isSpecificAmount ? (
-                    <View>
-                      <View style={{ padding: 5 }}>
-                        <View style={{ flexDirection: 'row', justifyContent: "center" }}>
+                    <View style={{ padding: 5 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: "center" }}>
+                        <View>
                           <Text>Amount      Unit</Text>
+                          <View style={{ flexDirection: 'row', justifyContent: "center" }}>
+                            <TextInput
+                              value={amountStr}
+                              onChangeText={setAmountStr}
+                              editable
+                              style={{ borderWidth: 1 }}
+                              height={ 40 }
+                              width={ 50 }
+                            />
+                            <TextInput
+                              value={unit}
+                              onChangeText={setUnit}
+                              editable={ !R.find(R.prop('selected'), unitButtons).value }
+                              style={{ borderWidth: 1 }}
+                              height={ 40 }
+                              width={ 50 }
+                            />
+                          </View>
                         </View>
-                        <View style={{ flexDirection: 'row', justifyContent: "center" }}>
-                          <TextInput
-                            value={amountStr}
-                            onChangeText={setAmountStr}
-                            editable
-                            style={{ borderWidth: 1 }}
-                            width={ 50 }
-                          />
-                          <TextInput
-                            value={unit}
-                            onChangeText={setUnit}
-                            editable={ !R.find(R.prop('selected'), unitButtons).value }
-                            style={{ borderWidth: 1 }}
-                            width={ 50 }
-                          />
-                        </View>
-                        {
-                          (!R.find(R.prop('selected'), unitButtons).value) ? (
-                            <Text>
-                              You can see the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://www.xe.com/iso4217.php')}>codes for currencies here</Text> and the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('http://wiki.goodrelations-vocabulary.org/Documentation/UN/CEFACT_Common_Codes')}>codes for other units here</Text>.
-                            </Text>
-                          ) : (
-                            <View/>
-                          )
-                        }
                         <RadioGroup
-                          layout='row'
                           radioButtons={unitButtons}
                           onPress={setUnitSelection}
                         />
                       </View>
-
+                      {
+                        (!R.find(R.prop('selected'), unitButtons).value) ? (
+                          <Text>
+                              You can see the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('https://www.xe.com/iso4217.php')}>codes for currencies here</Text> and the <Text style={{ color: 'blue' }} onPress={() => Linking.openURL('http://wiki.goodrelations-vocabulary.org/Documentation/UN/CEFACT_Common_Codes')}>codes for other units here</Text>.
+                          </Text>
+                        ) : (
+                          <View/>
+                        )
+                      }
                     </View>
                   ) : (
                     <View/>
