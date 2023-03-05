@@ -78,6 +78,9 @@ export const appSlice = createSlice({
     setIdentifiers: (state, contents: Payload<Array<IIdentifier>>) => {
       state.identifiers = contents.payload
     },
+    setLastDailyTaskTime: (state) => {
+      state.settings.lastDailyTaskTime = new Date().toISOString()
+    },
     setSettings: (state, contents: Payload<Settings>) => {
       state.settings = contents.payload
     },

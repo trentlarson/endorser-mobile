@@ -16,20 +16,26 @@ export function NotificationPermissionsScreen() {
 
   const FINISHED_MESSAGE = 'Finished'
 
-  const lastCheckText =
-    appStore.getState().settings.lastDailyTaskTime
-    ? appStore.getState().settings.lastDailyTaskTime.replace("T", " ").replace("Z", " UTC")
-    : 'not run yet'
-
   const [canNotify, setCanNotify] = useState<boolean>()
   const [isBlocked, setIsBlocked] = useState<boolean>()
+  const [lastCheckText, setLastCheckText] = useState<string>()
   const [someError, setSomeError] = useState<string>()
   const [quickMessage, setQuickMessage] = useState<string>(null)
 
   const checkSettings = async () => {
+
+    setLastCheckText(
+      appStore.getState().settings.lastDailyTaskTime
+      ? appStore.getState().settings.lastDailyTaskTime.replace("T", " ").replace("Z", " UTC")
+      : 'not run yet'
+    )
+
     const storedSettings = await notifee.getNotificationSettings()
     const channelBlocked = await notifee.isChannelBlocked(utility.DEFAULT_ANDROID_CHANNEL_ID)
-    appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Notification settings: " + JSON.stringify(storedSettings) + " && " + channelBlocked}))
+    appStore.dispatch(appSlice.actions.addLog({
+      log: true,
+      msg: "Notification settings: " + JSON.stringify(storedSettings) + " && " + channelBlocked
+    }))
 
     let isAuthorized = false
     if (storedSettings.authorizationStatus === AuthorizationStatus.DENIED || channelBlocked) {
@@ -42,7 +48,10 @@ export function NotificationPermissionsScreen() {
       setCanNotify(null)
     }
 
-    appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Notifications are" + (isAuthorized ? "" : " not") + " authorized."}))
+    appStore.dispatch(appSlice.actions.addLog({
+      log: true,
+      msg: "Notifications are" + (isAuthorized ? "" : " not") + " authorized."
+    }))
   }
 
   const checkSettingsAndReport = async () => {
@@ -66,7 +75,11 @@ export function NotificationPermissionsScreen() {
   const openPhoneSettings = () => {
     openSettings()
     .then(() => setSomeError(null))
-    .catch(() => setSomeError("Got an error opening your phone Settings. To enable notifications manually, go to your phone 'Settings' app and then select 'Notifications' and then choose this app and turn them on."))
+    .catch(() => setSomeError(
+      "Got an error opening your phone Settings. To enable notifications"
+      + " manually, go to your phone 'Settings' app and then select"
+      + " 'Notifications' and then choose this app and turn them on."
+    ))
   }
 
   const killToggle = utility.Toggle()
@@ -74,6 +87,12 @@ export function NotificationPermissionsScreen() {
   const runDailyCheck = async () => {
     const task = require('../utility/backgroundTask')(killToggle)
     const result = await task()
+
+    appStore.dispatch(appSlice.actions.setLastDailyTaskTime())
+    setLastCheckText(() =>
+      appStore.getState().settings.lastDailyTaskTime.replace("T", " ").replace("Z", " UTC")
+    )
+
     setQuickMessage(FINISHED_MESSAGE)
     setTimeout(() => { setQuickMessage(null) }, 1000)
     if (result) {
