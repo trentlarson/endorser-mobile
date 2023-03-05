@@ -69,7 +69,7 @@ export function MyCredentialsScreen({ navigation }) {
 
   /**
    * return Promise of
-   *   jwts: array of JWT objects
+   *   data: array of JWT objects
    *   hitLimit: boolean telling whether there may be more
    */
   const moreTransactions = async (prevId) => {
@@ -288,11 +288,17 @@ export function MyCredentialsScreen({ navigation }) {
 
                         {
                           (numStrangesAndUnknowns > 0)
-                          ? <Text>
-                              {numStrangesAndUnknowns} of these claims
-                              &nbsp;{numStrangesAndUnknowns === 1 ? "does" : "do"} not have specific, measurable info.
-                            </Text>
-                          : <View />
+                          ?
+                            <View>
+                              <View style={styles.line} />
+                              <Text>
+                                {numStrangesAndUnknowns} of these claims
+                                {numStrangesAndUnknowns === 1 ? " does" : " do"}
+                                &nbsp;not have measurable info.
+                              </Text>
+                            </View>
+                          :
+                            <View />
                         }
 
                         <View style={styles.line} />

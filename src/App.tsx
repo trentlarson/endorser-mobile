@@ -8,8 +8,12 @@ import 'reflect-metadata'
 
 import { classToPlain } from 'class-transformer'
 import notifee, { AuthorizationStatus, EventType, TriggerType } from '@notifee/react-native';
+import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { Button, Image, Linking, Modal, NativeModules, Platform, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import {
+  ActivityIndicator, Button, Image, Linking, Modal, NativeModules, Platform,
+  SafeAreaView, ScrollView, Text, View
+} from 'react-native'
 import { requestNotifications } from 'react-native-permissions'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/FontAwesome'
@@ -217,13 +221,17 @@ const logNative = () => {
 
 function HomeScreen({ navigation }) {
 
+  const [feedCounts, setFeedCounts] = useState({})
   const [initError, setInitError] = useState<string>()
-  const [loading, setLoading] = useState<boolean>(true)
+  const [loadingInitial, setLoadingInitial] = useState<boolean>(true)
+  const [loadingSubfeeds, setLoadingSubfeeds] = useState<boolean>(true)
   const [needsNotificationsAuthorized, setNeedsNotificationsAuthorized] = useState<boolean>(false)
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
   const [quickMessage, setQuickMessage] = useState<string>(null)
+  const [setupFinished, setSetupFinished] = useState<boolean>(false)
 
   const allIdentifiers = useSelector((state) => state.identifiers)
+  const allContacts = useSelector((state) => state.contacts || [])
   const settings = useSelector((state) => state.settings)
 
   /** see pressedInBackground usage below
@@ -271,7 +279,7 @@ function HomeScreen({ navigation }) {
           setOldMnemonic(true)
         }
 
-        setLoading(false)
+        setLoadingInitial(false)
 
 
 
@@ -330,22 +338,137 @@ function HomeScreen({ navigation }) {
         //// Let user know their status
         await checkNotify()
 
+
+
+
+
+        setSetupFinished(true)
+
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
-        setInitError('Something went wrong during initialization. Kindly send us the logs (near the bottom of Help).')
+        setInitError(
+          'Something went wrong during initialization.'
+          + ' Kindly send us the logs (near the bottom of Help).'
+        )
       }
-
 
     }
     getIdentifiers()
   }, [])
 
+  // Load feed from external data
+  useEffect(() => {
+    const loadFeedSummary = () => {
+      if (setupFinished) {
+        utility.countClaimsOfInterest(
+          allContacts,
+          settings.apiServer,
+          allIdentifiers[0],
+          settings.lastViewedClaimId
+        ).then(result => {
+          //console.log('Finished loading claims of interest:', result)
+          setFeedCounts(result)
+          setLoadingSubfeeds(false)
+        })
+      }
+    }
+    loadFeedSummary()
+  }, [setupFinished])
+
   return (
     <SafeAreaView>
       <ScrollView style={{ padding: 10 }}>
+
+        <ScrollView style={{ borderWidth: 1, height: 100 }}>
         {
-        loading
+          loadingSubfeeds
+          ? (
+            <View>
+              <Text>Checking for Activity by Your Friends...</Text>
+              <ActivityIndicator color="#00ff00"/>
+            </View>
+          ) : (
+            (R.sum(R.values(feedCounts)) == 0)
+            ? (
+              <View>
+                <Text>No Recent Activity by Your Friends</Text>
+              </View>
+            ) : (
+              <View style={{ marginBottom: 30 }}>
+                <Text style={{ fontWeight: 'bold' }}>New Activity by Your Friends</Text>
+                {
+                  feedCounts.contactGives
+                  ?
+                  <Text
+                    style={{ padding: 10, color: "blue" }}
+                    onPress={() =>
+                      navigation.navigate(utility.REPORT_FEED_SCREEN_NAV, { subfeed: "GiveAction" } )
+                    }
+                  >
+                    { feedCounts.contactGives }
+                    &nbsp;
+                    Give{ feedCounts.contactGives == 1 ? "" : "s"}
+                  </Text>
+                  :
+                  <View />
+                }
+                {
+                  feedCounts.contactOffers
+                  ?
+                  <Text
+                    style={{ padding: 10, color: "blue" }}
+                    onPress={() =>
+                      navigation.navigate(utility.REPORT_FEED_SCREEN_NAV, { subfeed: "Offer" } )
+                    }
+                  >
+                    { feedCounts.contactOffers }
+                    &nbsp;
+                    Offer{ feedCounts.contactOffers == 1 ? "" : "s"}
+                  </Text>
+                  :
+                  <View />
+                }
+                {
+                  feedCounts.contactPlans
+                  ?
+                  <Text
+                    style={{ padding: 10, color: "blue" }}
+                    onPress={() =>
+                      navigation.navigate(utility.REPORT_FEED_SCREEN_NAV, { subfeed: "PlanAction" } )
+                    }
+                  >
+                    { feedCounts.contactPlans }
+                    &nbsp;
+                    Plan{ feedCounts.contactPlans == 1 ? "" : "s"}
+                  </Text>
+                  :
+                  <View />
+                }
+                {
+                  feedCounts.contactOtherClaims
+                  ?
+                  <Text
+                    style={{ padding: 10, color: "blue" }}
+                    onPress={() =>
+                      navigation.navigate(utility.REPORT_FEED_SCREEN_NAV, { subfeed: "Other" } )
+                    }
+                  >
+                    { feedCounts.contactOtherClaims }
+                    &nbsp;
+                    Other Claim{ feedCounts.contactOtherClaims == 1 ? "" : "s"}
+                  </Text>
+                  :
+                  <View />
+                }
+              </View>
+            )
+          )
+        }
+        </ScrollView>
+
+        {
+        loadingInitial
         ?
           <View style={{ marginTop: '50%', marginLeft: '45%'}}>
             <Text>Loading...</Text>
@@ -486,7 +609,7 @@ function HomeScreen({ navigation }) {
 function AppHandyHomeScreen({ navigation }) {
 
   const [initError, setInitError] = useState<string>()
-  const [loading, setLoading] = useState<boolean>(true)
+  const [loadingInitial, setLoadingInitial] = useState<boolean>(true)
 
   const allIdentifiers = useSelector((state) => state.identifiers)
   const settings = useSelector((state) => state.settings)
@@ -500,7 +623,7 @@ function AppHandyHomeScreen({ navigation }) {
 
         await initializeSettings()
 
-        setLoading(false)
+        setLoadingInitial(false)
 
       } catch (err) {
         console.log('Got error on initial App useEffect:', err)
@@ -517,7 +640,7 @@ function AppHandyHomeScreen({ navigation }) {
     <SafeAreaView>
       <ScrollView style={{ padding: 10 }}>
         {
-        loading
+        loadingInitial
         ?
           <View style={{ marginTop: '50%', marginLeft: '45%'}}>
             <Text>Loading...</Text>

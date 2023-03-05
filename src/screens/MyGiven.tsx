@@ -23,19 +23,26 @@ export function MyGivenScreen({ navigation, route }) {
         ListEmptyComponent={<Text>None</Text>}
         renderItem={(data) => {
           let label, recipient
-          if (data.item[1].claim.recipient) {
+          if (data.item[1].claim.recipient?.identifier) {
             label = "Recipient"
-            recipient = utility.didInfo(data.item[1].claim.recipient.identifier, allIdentifiers, allContacts)
+            recipient =
+              utility.didInfo(data.item[1].claim.recipient.identifier, allIdentifiers, allContacts)
+
           } else if (data.item[1].claim.fulfills?.identifier) {
-            label = utility.capitalizeAndInsertSpacesBeforeCaps(data.item[1].claim.fulfills['@type'])
-            recipient = data.item[1].claim.fulfills.identifier
+            label =
+              utility.capitalizeAndInsertSpacesBeforeCaps(data.item[1].claim.fulfills['@type'])
+            recipient =
+              utility.didInfo(data.item[1].claim.fulfills.identifier, allIdentifiers, allContacts)
+
           } else {
             label = "No Specific Recipient or Invoice"
             recipient = ""
           }
           return (
             <View>
-              <Text>{ data.item[1].claim.object.amountOfThisGood } to { label } { recipient }</Text>
+              <Text>
+                { data.item[1].claim.object.amountOfThisGood } to { label } to { recipient }
+              </Text>
               <Text
                 style={{ color: 'blue' }}
                 onPress={() => navigation.navigate('Verify Credential', { wrappedClaim: data.item[1] })}

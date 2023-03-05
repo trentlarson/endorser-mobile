@@ -213,7 +213,7 @@ export function ReportScreen({ navigation }) {
       <ScrollView>{/* vertical scrolling */}
         <View style={{ padding: 20 }}>
           <View style={{ marginTop: 20 }} />
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search All
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>All
             {
               (appStore.getState().settings.apiServer !== DEFAULT_ENDORSER_API_SERVER
                || appStore.getState().viewServer !== DEFAULT_ENDORSER_VIEW_SERVER)

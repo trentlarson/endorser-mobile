@@ -1379,7 +1379,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
         let result = {
           "@context": "https://schema.org",
           "@type": "Offer",
-          identifier: invoiceIdentifier == '' || invoiceIdentifier == null ? undefined : invoiceIdentifier,
+          identifier:
+            invoiceIdentifier == '' || invoiceIdentifier == null ? undefined : invoiceIdentifier,
           offeredBy: { identifier: agentId },
         }
 

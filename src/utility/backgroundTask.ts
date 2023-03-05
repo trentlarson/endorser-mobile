@@ -30,6 +30,8 @@ const checkServer = (killToggle) => async (taskData) => {
       let lastClaimId = null
       let beforeId = null
       const mustStopTime = startDate.valueOf() + (25 * 1000) // iOS is strict about their 30-second limit
+
+      // note that this might be subsumed by utility.ts loadReduceClaims
       do {
         const nextResults = !id0 ? {} : await utility.retrieveClaims(endorserApiServer, id0, afterId, beforeId)
         if (nextResults.data) {

@@ -4,8 +4,8 @@ import crypto from 'crypto'
 import * as didJwt from 'did-jwt'
 import { DateTime } from 'luxon'
 import MerkleTools from 'merkle-tools'
-import matchAll from 'string.prototype.matchall'
 import * as R from 'ramda'
+import matchAll from 'string.prototype.matchall'
 
 import { Contact } from '../entity/contact'
 
@@ -86,6 +86,10 @@ export const isContractAccept = (claim) => {
   return isAccept(claim) && claim.object && isContract(claim.object)
 }
 
+export const isGiveAction = (claim) => {
+  return claim && claim['@context'] === SCHEMA_ORG_CONTEXT && claim['@type'] === 'GiveAction'
+}
+
 export const isOffer = (claim) => {
   return claim && claim['@context'] === SCHEMA_ORG_CONTEXT && claim['@type'] === 'Offer'
 }
@@ -116,13 +120,23 @@ export const constructAccept = (agent, pledge) => {
   }
 }
 
-// insert a space before any capital letters except the initial letter (and capitalize initial letter, just in case)
-// return "unknown" message for null or undefined input
+// insert a space before any capital letters except the initial letter
+// (and capitalize initial letter, just in case)
 export const capitalizeAndInsertSpacesBeforeCaps = (text) => {
   return (
     !text
+      ? ''
+      : text[0].toUpperCase() + text.substr(1).replace(/([A-Z])/g, ' $1')
+  )
+}
+
+// insert a nice English phrase for this camel-case item
+// return "unknown" message for null or undefined input
+export const helpfulSpacesBeforeCaps = (text) => {
+  return (
+    !text
       ? 'something not known' // to differentiate from "something unknown" below
-      : 'a ' + text[0].toUpperCase() + text.substr(1).replace(/([A-Z])/g, ' $1')
+      : 'a ' + capitalizeAndInsertSpacesBeforeCaps(text)
   )
 }
 
@@ -227,7 +241,7 @@ const claimSummary = (claim) => {
     return 'multiple claims'
   }
   let type = claim['@type']
-  return capitalizeAndInsertSpacesBeforeCaps(type)
+  return helpfulSpacesBeforeCaps(type)
 }
 
 /**
@@ -281,7 +295,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
       offering += " " + displayAmount(claim.includesObject.unitCode, claim.includesObject.amountOfThisGood)
     }
     if (claim.itemOffered?.description) {
-      offering += " to: " + claim.itemOffered?.description
+      offering += ", saying: " + claim.itemOffered?.description
     }
     return contactInfo + " offered" + offering
 
@@ -732,6 +746,108 @@ export const retrieveClaims = async (endorserApiServer, identifier, afterId, bef
       throw Error(results.error || 'The server got an error. (For details, see the log on the Settings page.)')
     }
   })
+}
+
+/**
+   Use the /v2/report/claims endpoint to load & aggregate another set of claims
+
+   reducer is function (prev result object, item array) => new result object
+
+   return an object with these properties:
+     data: new result object, applying reducer to initialObject & loaded claims
+     newBeforeId: server claim result that is earliest (ie last in the set) or
+       null if there are no more left
+ **/
+const loadReduceClaims = async (
+  endorserApiServer, identifier, afterId, beforeId, reducer, initialObject
+) => {
+  const loaded = await retrieveClaims(endorserApiServer, identifier, afterId, beforeId)
+  let result = initialObject
+  if (loaded.data) {
+    for (datum of loaded.data) {
+      result = reducer(result, datum)
+    }
+  }
+  const newBeforeId =
+    loaded.hitLimit ? loaded.data[loaded.data.length - 1].id : null
+  return { data: result, newBeforeId }
+}
+
+export const isGiveOfInterest = (contactDids) => (record) => {
+  return (
+    isGiveAction(record.claim)
+      && (contactDids.includes(record.claim.agent?.identifier)
+        || contactDids.includes(record.claim.recipient?.identifier))
+  )
+}
+
+export const isOfferOfInterest = (contactDids) => (record) => {
+  return (
+    isOffer(record.claim)
+      && (contactDids.includes(record.claim.offeredBy?.identifier)
+        || contactDids.includes(record.claim.recipient?.identifier))
+  )
+}
+
+export const isPlanOfInterest = (contactDids) => (record) => {
+  return (
+    isPlanAction(record.claim)
+      && (contactDids.includes(record.issuer)
+        || contactDids.includes(record.claim.agent?.identifier))
+  )
+}
+
+export const isNonPrimaryClaimOfInterest = (contactDids) => (record) => {
+  return (
+    !isGiveOfInterest(record)
+      && !isOfferOfInterest(record)
+      && !isPlanOfInterest(record)
+      && (contactDids.includes(record.issuer)
+        || contactDids.includes(record.subject))
+  )
+}
+
+const addClaimOfInterest = (contactDids) => (original, entry) => {
+  const contactGives = isGiveOfInterest(contactDids)(entry) ? 1 : 0
+  const contactOffers = isOfferOfInterest(contactDids)(entry) ? 1 : 0
+  const contactPlans = isPlanOfInterest(contactDids)(entry) ? 1 : 0
+  const contactOtherClaims = isNonPrimaryClaimOfInterest(contactDids)(entry) ? 1 : 0
+  return {
+    contactGives: original.contactGives + contactGives,
+    contactOffers: original.contactOffers + contactOffers,
+    contactPlans: original.contactPlans + contactPlans,
+    contactOtherClaims: original.contactOtherClaims + contactOtherClaims,
+  }
+}
+
+/**
+ * return Promise of counts of these claims of interest:
+ * {
+ *   contactGives
+ *   contactOffers
+ *   contactPlans
+ *   contactOtherClaims
+ * }
+ */
+export const countClaimsOfInterest = async (
+  contacts, endorserApiServer, identifier, afterId, beforeId
+) => {
+  const token = await accessToken(identifier)
+  const contactDids = contacts.map(R.prop('did'))
+  const reducer = addClaimOfInterest(contactDids)
+  let nextResult = {
+    data: {
+      contactGives: 0, contactOffers: 0, contactPlans: 0, contactOtherClaims: 0
+    }
+  }
+  do {
+    nextResult =
+      await loadReduceClaims(
+        endorserApiServer, identifier, afterId, beforeId, reducer, nextResult.data
+      )
+    beforeId = nextResult.newBeforeId
+  } while (beforeId)
+  return nextResult.data
 }
 
 /**
