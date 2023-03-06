@@ -42,9 +42,11 @@ export const appSlice = createSlice({
     // it'll be null if we haven't even loaded from the DB yet.
     contacts: null as Array<Contact> | null,
 
-    viewServer: DEFAULT_ENDORSER_VIEW_SERVER,
-
     logMessage: '',
+
+    refreshHomeFeed: false,
+
+    viewServer: DEFAULT_ENDORSER_VIEW_SERVER,
 
     advancedMode: false,
     testMode: false,
@@ -80,6 +82,9 @@ export const appSlice = createSlice({
     },
     setLastDailyTaskTime: (state) => {
       state.settings.lastDailyTaskTime = new Date().toISOString()
+    },
+    setRefreshHomeFeed: (state, contents: Payload<boolean>) => {
+      state.refreshHomeFeed = contents.payload
     },
     setSettings: (state, contents: Payload<Settings>) => {
       state.settings = contents.payload

@@ -20,6 +20,7 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import VersionNumber from 'react-native-version-number'
 import { NavigationContainer, StackActions } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useFocusEffect } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { Provider, useSelector } from 'react-redux'
 
@@ -358,27 +359,35 @@ function HomeScreen({ navigation }) {
     getIdentifiers()
   }, [])
 
+  const loadFeedSummary = async () => {
+    if (setupFinished) {
+      return utility.countClaimsOfInterest(
+        allContacts,
+        settings.apiServer,
+        allIdentifiers[0],
+        settings.lastViewedClaimId
+      ).then(result => {
+        //console.log('Finished loading claims of interest:', result)
+        setFeedCounts(result)
+        setLoadingSubfeeds(false)
+      }).catch(err => {
+        setLoadSubfeedError("" + err)
+        setLoadingSubfeeds(false)
+      })
+    }
+  }
+
   // Load feed from external data
   useEffect(() => {
-    const loadFeedSummary = () => {
-      if (setupFinished) {
-        utility.countClaimsOfInterest(
-          allContacts,
-          settings.apiServer,
-          allIdentifiers[0],
-          settings.lastViewedClaimId
-        ).then(result => {
-          //console.log('Finished loading claims of interest:', result)
-          setFeedCounts(result)
-          setLoadingSubfeeds(false)
-        }).catch(err => {
-          setLoadSubfeedError("" + err)
-          setLoadingSubfeeds(false)
-        })
-      }
-    }
     loadFeedSummary()
   }, [setupFinished])
+
+  useFocusEffect(() => {
+    if (appStore.getState().refreshHomeFeed) {
+      appStore.dispatch(appSlice.actions.setRefreshHomeFeed(false))
+      loadFeedSummary()
+    }
+  })
 
   return (
     <SafeAreaView>
@@ -394,18 +403,20 @@ function HomeScreen({ navigation }) {
           loadingSubfeeds
           ? (
             <View>
-              <Text>Checking for Activity by Your Friends...</Text>
+              <Text>Checking for Activity By or About Your Friends...</Text>
               <ActivityIndicator color="#00ff00"/>
             </View>
           ) : (
             (R.sum(R.values(feedCounts)) == 0)
             ? (
               <View>
-                <Text>No Recent Activity by Your Friends</Text>
+                <Text>No New Activity By or About Your Friends</Text>
               </View>
             ) : (
               <View>
-                <Text style={{ fontWeight: 'bold' }}>New Activity by Your Friends</Text>
+                <Text style={{ fontWeight: 'bold' }}>
+                  New Activity By or About Your Friends
+                </Text>
                 <View style={{ flexDirection: 'row' }}>
                   {
                     feedCounts.contactGives

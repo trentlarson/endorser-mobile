@@ -104,6 +104,7 @@ export function ReportFeedScreen({ navigation, route }) {
           appStore.dispatch(appSlice.actions.setSettings(settings))
         }
 
+        appStore.dispatch(appSlice.actions.setRefreshHomeFeed(true))
       }
     })
     .catch(e => {
@@ -128,7 +129,7 @@ export function ReportFeedScreen({ navigation, route }) {
       <View style={{ padding: 20 }}>
 
       {
-        subfeed
+        !showAllFeed
         ? (
           <View>
             <Text style={{ fontSize: 30, fontWeight: 'bold' }}>
@@ -177,8 +178,6 @@ export function ReportFeedScreen({ navigation, route }) {
           <View />
         )
       }
-
-      <View style={{ marginTop: 20 }} />
 
       {
         showAllFeed
@@ -230,7 +229,7 @@ export function ReportFeedScreen({ navigation, route }) {
             style={{ padding: 10, color: "blue" }}
             onPress={() => { setShowAllFeed(true); updateAllFeed() } }
           >
-            Show Entire Feed & Mark Read
+            Show Entire Feed & Mark Everything Read
           </Text>
         )
       }
