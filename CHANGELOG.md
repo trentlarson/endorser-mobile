@@ -9,13 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Targeted feed showing only gives/offers/plans by those in contact list
+- Schema addition: Offer requiresOffers & requiresOffersTotal for thresholds for an offer
+
 
 
 
 ## [6.4.118] - 2023-02-10 - f461d0e7639591ec106b3a1dd1a30713e43e2caa
 
 ### Changed
-- Schema change: Offer.offeredBy from string to object with 'identifier' property.
+- Schema change: Offer.offeredBy type changed from string to object with 'identifier' property.
 - Schema change: Offer.orderId renamed to 'fulfills' and changed from string to object with 'identifier' property.
 
 ### Fixed
@@ -46,14 +50,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [6.3.108] - 2022-11-21 - 6c7b958d167d73ca0ff568f22c39bbd6270d8b9a
 
 ### Fixed
-- Scanning QR codes for claims and contacts.
+- Scan QR codes for claims and contacts.
 
 
 
 
 ## [6.3.106] - 2022-10-31 - 6d2d8973a917f0243d8b0c4bc5152fc979870326
-
-Unreleased
 
 ### Fixed
 - Contract-parsing error that crashed Android.
@@ -62,8 +64,6 @@ Unreleased
 
 
 ## [6.3.104] - 2022-10-10 - afbc95215ad55c5eb057410c5a3a870796c3920c
-
-Unreleased
 
 ### Added
 - Create contracts with private data.

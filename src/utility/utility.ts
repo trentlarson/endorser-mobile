@@ -6,6 +6,7 @@ import { DateTime } from 'luxon'
 import MerkleTools from 'merkle-tools'
 import * as R from 'ramda'
 import matchAll from 'string.prototype.matchall'
+import { IIdentifier } from '@veramo/core'
 
 import { Contact } from '../entity/contact'
 
@@ -453,7 +454,9 @@ export const vcPayload = (claim: any): JwtCredentialPayload => {
   }
 }
 
-export const createJwt = async (identifier: IIdentifier, payload: any): string => {
+export const createJwt = async (
+  identifier: IIdentifier, payload: any
+): string => {
   const signer = didJwt.SimpleSigner(identifier.keys[0].privateKeyHex)
   const did: string = identifier.did
   return didJwt.createJWT(payload,{ issuer: did, signer })
@@ -773,45 +776,55 @@ const loadReduceClaims = async (
   return { data: result, newBeforeId }
 }
 
-export const isGiveOfInterest = (contactDids) => (record) => {
+/**
+   Take all contacts, return a predicate to check whether a DID is interesting.
+ **/
+export const isDidOfInterestFrom = (
+  userDid: string, allContacts: Array<Contact>
+) => {
+  const contactDids = R.without(userDid, allContacts.map(R.prop('did')))
+  return (did) => contactDids.includes(did)
+}
+
+export const isGiveOfInterest = (didOfInterestChecker) => (record) => {
   return (
     isGiveAction(record.claim)
-      && (contactDids.includes(record.claim.agent?.identifier)
-        || contactDids.includes(record.claim.recipient?.identifier))
+      && (didOfInterestChecker(record.claim.agent?.identifier)
+          || didOfInterestChecker(record.claim.recipient?.identifier))
   )
 }
 
-export const isOfferOfInterest = (contactDids) => (record) => {
+export const isOfferOfInterest = (didOfInterestChecker) => (record) => {
   return (
     isOffer(record.claim)
-      && (contactDids.includes(record.claim.offeredBy?.identifier)
-        || contactDids.includes(record.claim.recipient?.identifier))
+      && (didOfInterestChecker(record.claim.offeredBy?.identifier)
+          || didOfInterestChecker(record.claim.recipient?.identifier))
   )
 }
 
-export const isPlanOfInterest = (contactDids) => (record) => {
+export const isPlanOfInterest = (didOfInterestChecker) => (record) => {
   return (
     isPlanAction(record.claim)
-      && (contactDids.includes(record.issuer)
-        || contactDids.includes(record.claim.agent?.identifier))
+      && (didOfInterestChecker(record.issuer)
+          || didOfInterestChecker(record.claim.agent?.identifier))
   )
 }
 
-export const isNonPrimaryClaimOfInterest = (contactDids) => (record) => {
+export const isNonPrimaryClaimOfInterest = (didOfInterestChecker) => (record) => {
   return (
     !isGiveOfInterest(record)
       && !isOfferOfInterest(record)
       && !isPlanOfInterest(record)
-      && (contactDids.includes(record.issuer)
-        || contactDids.includes(record.subject))
+      && (didOfInterestChecker(record.issuer)
+        || didOfInterestChecker(record.subject))
   )
 }
 
-const addClaimOfInterest = (contactDids) => (original, entry) => {
-  const contactGives = isGiveOfInterest(contactDids)(entry) ? 1 : 0
-  const contactOffers = isOfferOfInterest(contactDids)(entry) ? 1 : 0
-  const contactPlans = isPlanOfInterest(contactDids)(entry) ? 1 : 0
-  const contactOtherClaims = isNonPrimaryClaimOfInterest(contactDids)(entry) ? 1 : 0
+const addClaimOfInterest = (didOfInterestChecker) => (original, entry) => {
+  const contactGives = isGiveOfInterest(didOfInterestChecker)(entry) ? 1 : 0
+  const contactOffers = isOfferOfInterest(didOfInterestChecker)(entry) ? 1 : 0
+  const contactPlans = isPlanOfInterest(didOfInterestChecker)(entry) ? 1 : 0
+  const contactOtherClaims = isNonPrimaryClaimOfInterest(didOfInterestChecker)(entry) ? 1 : 0
   return {
     contactGives: original.contactGives + contactGives,
     contactOffers: original.contactOffers + contactOffers,
@@ -833,8 +846,8 @@ export const countClaimsOfInterest = async (
   contacts, endorserApiServer, identifier, afterId, beforeId
 ) => {
   const token = await accessToken(identifier)
-  const contactDids = contacts.map(R.prop('did'))
-  const reducer = addClaimOfInterest(contactDids)
+  const contactChecker = isDidOfInterestFrom(identifier.did, contacts)
+  const reducer = addClaimOfInterest(contactChecker)
   let nextResult = {
     data: {
       contactGives: 0, contactOffers: 0, contactPlans: 0, contactOtherClaims: 0

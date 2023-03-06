@@ -50,13 +50,14 @@ export function ReportFeedScreen({ navigation, route }) {
     .then(async results => {
       if (results.data.length > 0) {
 
-        const contactDids = allContacts.map(R.prop('did'))
+        const contactChecker =
+          utility.isDidOfInterestFrom(allIdentifiers[0].did, allContacts)
         let subfilter
         switch (subfeed) {
-          case 'GiveAction': subfilter = utility.isGiveOfInterest(contactDids); break;
-          case 'Offer': subfilter = utility.isOfferOfInterest(contactDids); break;
-          case 'PlanAction': subfilter = utility.isPlanOfInterest(contactDids); break;
-          case 'Other': subfilter = utility.isNonPrimaryClaimOfInterest(contactDids); break;
+          case 'GiveAction': subfilter = utility.isGiveOfInterest(contactChecker); break;
+          case 'Offer': subfilter = utility.isOfferOfInterest(contactChecker); break;
+          case 'PlanAction': subfilter = utility.isPlanOfInterest(contactChecker); break;
+          case 'Other': subfilter = utility.isNonPrimaryClaimOfInterest(contactChecker); break;
         }
         const filteredData = R.filter(subfilter, results.data)
         setSubfeedData(previousData => previousData.concat(filteredData))
@@ -139,7 +140,7 @@ export function ReportFeedScreen({ navigation, route }) {
                 : ""
               }
             </Text>
-            <Text style={{ color: 'red' }}>{subfeedError}</Text>
+            <Text style={{ color: 'red' }}>{ subfeedError }</Text>
             <FlatList
               data={ subfeedData }
               keyExtractor={ item => item.id }
@@ -147,22 +148,22 @@ export function ReportFeedScreen({ navigation, route }) {
               renderItem={ data => (
                 <RenderOneRecord
                   source={ data.item }
-                  navigation={navigation}
-                  afterItemCss={styles.line}
+                  navigation={ navigation }
+                  afterItemCss={ styles.line }
                 />
               )}
               style={{ borderWidth: 1, height: subfeedData.length > 0 ? 400 : 60 }}
               ListFooterComponent={(
                 <View>
-                  <ActivityIndicator color="#00ff00" animating={ loadingAllRecent }/>
-                  <View style={{ display: (loadingAllRecent ? "none" : "flex")}}>
-                    <View style={{ display: (subfeedHitLimit ? "flex" : "none")}}>
+                  <ActivityIndicator color="#00ff00" animating={ loadingSubfeedRecent }/>
+                  <View style={{ display: (loadingSubfeedRecent ? "none" : "flex") }}>
+                    <View style={{ display: (subfeedHitLimit ? "flex" : "none") }}>
                       <Button
                         title="Load More"
                         onPress={() => updateSubfeed(subfeed) }
                       />
                     </View>
-                    <View style={{ display: (subfeedHitLimit ? "none" : "flex")}}>
+                    <View style={{ display: (subfeedHitLimit ? "none" : "flex") }}>
                       <Text>
                         You're all caught up.
                       </Text>
@@ -191,7 +192,7 @@ export function ReportFeedScreen({ navigation, route }) {
                  : ""
               }
             </Text>
-            <Text style={{ color: 'red' }}>{feedError}</Text>
+            <Text style={{ color: 'red' }}>{ feedError }</Text>
             <FlatList
               data={ feedData }
               keyExtractor={ item => item.id }
@@ -199,22 +200,22 @@ export function ReportFeedScreen({ navigation, route }) {
               renderItem={ data => (
                 <RenderOneRecord
                   source={ data.item }
-                  navigation={navigation}
-                  afterItemCss={styles.line}
+                  navigation={ navigation }
+                  afterItemCss={ styles.line }
                 />
               )}
               style={{ borderWidth: 1, height: feedData.length > 0 ? 500 : 60 }}
               ListFooterComponent={(
                 <View>
                   <ActivityIndicator color="#00ff00" animating={ loadingAllRecent }/>
-                  <View style={{ display: (loadingAllRecent ? "none" : "flex")}}>
-                    <View style={{ display: (feedHitLimit ? "flex" : "none")}}>
+                  <View style={{ display: (loadingAllRecent ? "none" : "flex") }}>
+                    <View style={{ display: (feedHitLimit ? "flex" : "none") }}>
                       <Button
                         title="Load More"
                         onPress={ updateAllFeed }
                       />
                     </View>
-                    <View style={{ display: (feedHitLimit ? "none" : "flex")}}>
+                    <View style={{ display: (feedHitLimit ? "none" : "flex") }}>
                       <Text>
                         You're all caught up.
                       </Text>
@@ -229,7 +230,7 @@ export function ReportFeedScreen({ navigation, route }) {
             style={{ padding: 10, color: "blue" }}
             onPress={() => { setShowAllFeed(true); updateAllFeed() } }
           >
-            Show Entire Feed
+            Show Entire Feed & Mark Read
           </Text>
         )
       }
