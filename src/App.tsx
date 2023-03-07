@@ -393,104 +393,6 @@ function HomeScreen({ navigation }) {
     <SafeAreaView>
       <ScrollView style={{ padding: 10 }}>
 
-        <ScrollView style={{ borderWidth: 1, height: 100 }}>
-        {
-          loadSubfeedError
-          ? <Text style={{ color: 'red' }}>{ loadSubfeedError }</Text>
-          : <View />
-        }
-        {
-          loadingSubfeeds
-          ? (
-            <View>
-              <Text>Checking for Activity By or About Your Friends...</Text>
-              <ActivityIndicator color="#00ff00"/>
-            </View>
-          ) : (
-            (R.sum(R.values(feedCounts)) == 0)
-            ? (
-              <View>
-                <Text>No New Activity By or About Your Friends</Text>
-              </View>
-            ) : (
-              <View>
-                <Text style={{ fontWeight: 'bold' }}>
-                  New Activity By or About Your Friends
-                </Text>
-                <View style={{ flexDirection: 'row' }}>
-                  {
-                    feedCounts.contactGives
-                    ?
-                    <Text
-                      style={{ padding: 10, color: "blue" }}
-                      onPress={() =>
-                        navigation.navigate(utility.REPORT_FEED_SCREEN_NAV, { subfeed: "GiveAction" } )
-                      }
-                    >
-                      { feedCounts.contactGives }
-                      &nbsp;
-                      Give{ feedCounts.contactGives == 1 ? "" : "s"}
-                    </Text>
-                    :
-                    <View />
-                  }
-                  {
-                    feedCounts.contactOffers
-                    ?
-                    <Text
-                      style={{ padding: 10, color: "blue" }}
-                      onPress={() =>
-                        navigation.navigate(utility.REPORT_FEED_SCREEN_NAV, { subfeed: "Offer" } )
-                      }
-                    >
-                      { feedCounts.contactOffers }
-                      &nbsp;
-                      Offer{ feedCounts.contactOffers == 1 ? "" : "s"}
-                    </Text>
-                    :
-                    <View />
-                  }
-                </View>
-                <View>
-                  {
-                    feedCounts.contactPlans
-                    ?
-                    <Text
-                      style={{ padding: 10, color: "blue" }}
-                      onPress={() =>
-                        navigation.navigate(utility.REPORT_FEED_SCREEN_NAV, { subfeed: "PlanAction" } )
-                      }
-                    >
-                      { feedCounts.contactPlans }
-                      &nbsp;
-                      Plan{ feedCounts.contactPlans == 1 ? "" : "s"}
-                    </Text>
-                    :
-                    <View />
-                  }
-                  {
-                    feedCounts.contactOtherClaims
-                    ?
-                    <Text
-                      style={{ padding: 10, color: "blue" }}
-                      onPress={() =>
-                        navigation.navigate(utility.REPORT_FEED_SCREEN_NAV, { subfeed: "Other" } )
-                      }
-                    >
-                      { feedCounts.contactOtherClaims }
-                      &nbsp;
-                      Other Claim{ feedCounts.contactOtherClaims == 1 ? "" : "s"}
-                    </Text>
-                    :
-                    <View />
-                  }
-                </View>
-              </View>
-            )
-          )
-        }
-        </ScrollView>
-
         {
         loadingInitial
         ?
@@ -515,6 +417,126 @@ function HomeScreen({ navigation }) {
           allIdentifiers != null && allIdentifiers.length > 0
           ? (
             <View>
+
+              <ScrollView style={{ borderWidth: 1, height: 100 }}>
+              {
+                loadSubfeedError
+                ? <Text style={{ color: 'red' }}>{ loadSubfeedError }</Text>
+                : <View />
+              }
+              {
+                loadingSubfeeds
+                ? (
+                  <View>
+                    <Text>Checking for Activity By or About Your Friends...</Text>
+                    <ActivityIndicator color="#00ff00"/>
+                  </View>
+                ) : (
+                  (R.sum(R.values(feedCounts)) == 0)
+                  ? (
+                    <View>
+                      <Text>No New Activity By or About Your Friends</Text>
+                    </View>
+                  ) : (
+                    <View>
+                      <Text style={{ fontWeight: 'bold' }}>
+                        New Activity By or About Your Friends
+                      </Text>
+                      <View style={{ flexDirection: 'row' }}>
+
+                        {/*************** Show Gives of Special Interest */}
+                        {
+                          feedCounts.contactGives
+                          ?
+                          <Text
+                            style={{ padding: 10, color: "blue" }}
+                            onPress={() =>
+                              navigation.navigate(
+                                utility.REPORT_FEED_SCREEN_NAV,
+                                { subfeed: "GiveAction" }
+                              )
+                            }
+                          >
+                            { feedCounts.contactGives }
+                            &nbsp;
+                            Give{ feedCounts.contactGives == 1 ? "" : "s"}
+                          </Text>
+                          :
+                          <View />
+                        }
+
+                        {/*************** Show Offers of Special Interest */}
+                        {
+                          feedCounts.contactOffers
+                          ?
+                          <Text
+                            style={{ padding: 10, color: "blue" }}
+                            onPress={() =>
+                              navigation.navigate(
+                                utility.REPORT_FEED_SCREEN_NAV,
+                                { subfeed: "Offer" }
+                              )
+                            }
+                          >
+                            { feedCounts.contactOffers }
+                             &nbsp;
+                             Offer{ feedCounts.contactOffers == 1 ? "" : "s"}
+                          </Text>
+                          :
+                          <View />
+                        }
+                      </View>
+
+                      {/*************** Show Plans of Special Interest */}
+                      <View>
+                        {
+                          feedCounts.contactPlans
+                          ?
+                          <Text
+                            style={{ padding: 10, color: "blue" }}
+                            onPress={() =>
+                              navigation.navigate(
+                                utility.REPORT_FEED_SCREEN_NAV,
+                                { subfeed: "PlanAction" }
+                              )
+                            }
+                          >
+                            { feedCounts.contactPlans }
+                            &nbsp;
+                            Plan{ feedCounts.contactPlans == 1 ? "" : "s"}
+                          </Text>
+                          :
+                          <View />
+                        }
+
+                        {/*************** Show Other Claims of Special Interest */}
+                        {
+                          feedCounts.contactOtherClaims
+                          ?
+                          <Text
+                            style={{ padding: 10, color: "blue" }}
+                            onPress={() =>
+                              navigation.navigate(
+                                utility.REPORT_FEED_SCREEN_NAV,
+                                { subfeed: "Other" }
+                              )
+                            }
+                          >
+                            { feedCounts.contactOtherClaims }
+                            &nbsp;
+                            Other Claim{ feedCounts.contactOtherClaims == 1 ? "" : "s"}
+                          </Text>
+                          :
+                          <View />
+                        }
+                      </View>
+                    </View>
+                  )
+                )
+              }
+              </ScrollView>
+
+              {/*************** Show Customized Actions */}
               {settings != null && settings.homeScreen === 'BVC'
               ? (
                 <View>
@@ -534,6 +556,8 @@ function HomeScreen({ navigation }) {
               ) : ( // it's not the BVC home screen
                 <View />
               )}
+
+              {/*************** Show Notification Message */}
               {
                 needsNotificationsAuthorized
                 ?
@@ -555,6 +579,8 @@ function HomeScreen({ navigation }) {
                 :
                   <View />
               }
+
+              {/*************** Finally, show all the generic actions */}
               <View style={{ marginTop: 5 }}/>
               <Button
                 title="Claim / Ask / Offer"
