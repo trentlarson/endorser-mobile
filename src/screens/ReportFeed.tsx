@@ -19,6 +19,7 @@ export function ReportFeedScreen({ navigation, route }) {
 
   const subfeed = route.params?.subfeed
 
+  const [clickedSubLoad, setClickedSubLoad] = useState<boolean>(false)
   const [feedData, setFeedData] = useState<utility.EndorserRecord>([])
   const [feedError, setFeedError] = useState<string>()
   const [feedHitLimit, setFeedHitLimit] = useState<boolean>(false)
@@ -159,9 +160,21 @@ export function ReportFeedScreen({ navigation, route }) {
                   <ActivityIndicator color="#00ff00" animating={ loadingSubfeedRecent }/>
                   <View style={{ display: (loadingSubfeedRecent ? "none" : "flex") }}>
                     <View style={{ display: (subfeedHitLimit ? "flex" : "none") }}>
+                      {
+                        clickedSubLoad
+                        ? <Text>
+                            Checked further back in time.
+                            It is possible that there were no matches in that time frame.
+                            There may be more even further in the past.
+                          </Text>
+                        : <View />
+                      }
                       <Button
                         title="Load More"
-                        onPress={() => updateSubfeed(subfeed) }
+                        onPress={() => {
+                          updateSubfeed(subfeed)
+                          setClickedSubLoad(true)
+                        }}
                       />
                     </View>
                     <View style={{ display: (subfeedHitLimit ? "none" : "flex") }}>
