@@ -52,7 +52,7 @@ export function ReportFeedScreen({ navigation, route }) {
       if (results.data.length > 0) {
 
         const contactChecker =
-          utility.isDidOfInterestFrom(allIdentifiers[0].did, allContacts)
+          utility.isDidOfInterestFrom(allContacts, allIdentifiers[0].did)
         let subfilter
         switch (subfeed) {
           case 'GiveAction': subfilter = utility.isGiveOfInterest(contactChecker); break;

@@ -777,36 +777,46 @@ const loadReduceClaims = async (
 }
 
 /**
-   Take all contacts, return a predicate to check whether a DID is interesting.
+   Take contacts, return checker whether a DID is interesting.
+
+   The checker takes two arguments: the potential DID of interest and
+   the record issuer. In all cases, check that the issuer is not me.
  **/
 export const isDidOfInterestFrom = (
-  userDid: string, allContacts: Array<Contact>
+  allContacts: Array<Contact>, userDid: string
 ) => {
-  const contactDids = R.without(userDid, allContacts.map(R.prop('did')))
-  return (did) => contactDids.includes(did)
+  // check for any mentions of myself or my contacts
+  const contactDids = R.concat([userDid], allContacts.map(R.prop('did')))
+  // but don't bother if I was the one who issued the claim
+  return (did, issuerDid) => contactDids.includes(did) && issuerDid != userDid
 }
 
 export const isGiveOfInterest = (didOfInterestChecker) => (record) => {
   return (
     isGiveAction(record.claim)
-      && (didOfInterestChecker(record.claim.agent?.identifier)
-          || didOfInterestChecker(record.claim.recipient?.identifier))
+      && (didOfInterestChecker(record.issuer, record.issuer)
+        || didOfInterestChecker(record.claim.agent?.identifier, record.issuer)
+        || didOfInterestChecker(record.claim.recipient?.identifier, record.issuer)
+      )
   )
 }
 
 export const isOfferOfInterest = (didOfInterestChecker) => (record) => {
   return (
     isOffer(record.claim)
-      && (didOfInterestChecker(record.claim.offeredBy?.identifier)
-          || didOfInterestChecker(record.claim.recipient?.identifier))
+      && (didOfInterestChecker(record.issuer, record.issuer)
+        || didOfInterestChecker(record.claim.offeredBy?.identifier, record.issuer)
+        || didOfInterestChecker(record.claim.recipient?.identifier, record.issuer)
+      )
   )
 }
 
 export const isPlanOfInterest = (didOfInterestChecker) => (record) => {
   return (
     isPlanAction(record.claim)
-      && (didOfInterestChecker(record.issuer)
-          || didOfInterestChecker(record.claim.agent?.identifier))
+      && (didOfInterestChecker(record.issuer, record.issuer)
+        || didOfInterestChecker(record.claim.agent?.identifier, record.issuer)
+      )
   )
 }
 
@@ -815,21 +825,21 @@ export const isNonPrimaryClaimOfInterest = (didOfInterestChecker) => (record) =>
     !isGiveOfInterest(record)
       && !isOfferOfInterest(record)
       && !isPlanOfInterest(record)
-      && (didOfInterestChecker(record.issuer)
-        || didOfInterestChecker(record.subject))
+      && (didOfInterestChecker(record.issuer, record.issuer)
+        || didOfInterestChecker(record.subject, record.issuer))
   )
 }
 
-const addClaimOfInterest = (didOfInterestChecker) => (original, entry) => {
+const addClaimOfInterest = (didOfInterestChecker) => (previous, entry) => {
   const contactGives = isGiveOfInterest(didOfInterestChecker)(entry) ? 1 : 0
   const contactOffers = isOfferOfInterest(didOfInterestChecker)(entry) ? 1 : 0
   const contactPlans = isPlanOfInterest(didOfInterestChecker)(entry) ? 1 : 0
   const contactOtherClaims = isNonPrimaryClaimOfInterest(didOfInterestChecker)(entry) ? 1 : 0
   return {
-    contactGives: original.contactGives + contactGives,
-    contactOffers: original.contactOffers + contactOffers,
-    contactPlans: original.contactPlans + contactPlans,
-    contactOtherClaims: original.contactOtherClaims + contactOtherClaims,
+    contactGives: previous.contactGives + contactGives,
+    contactOffers: previous.contactOffers + contactOffers,
+    contactPlans: previous.contactPlans + contactPlans,
+    contactOtherClaims: previous.contactOtherClaims + contactOtherClaims,
   }
 }
 
@@ -846,7 +856,7 @@ export const countClaimsOfInterest = async (
   contacts, endorserApiServer, identifier, afterId, beforeId
 ) => {
   const token = await accessToken(identifier)
-  const contactChecker = isDidOfInterestFrom(identifier.did, contacts)
+  const contactChecker = isDidOfInterestFrom(contacts, identifier.did)
   const reducer = addClaimOfInterest(contactChecker)
   let nextResult = {
     data: {
