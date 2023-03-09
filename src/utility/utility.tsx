@@ -325,8 +325,9 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
 
                 { /** Give to fulfill an Offer **/
 
-                  isUser(source.issuer)
-                  && (source.claim['@type'] === 'Offer')
+                  (source.claim['@type'] === 'Offer')
+                  && (isUser(source.issuer)
+                      || isUser(source.subject))
                   ?
                     <View style={{ flexDirection: 'row', padding: 10 }}>
                       <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
@@ -337,7 +338,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                           const giveActionForm = {
                             "@context": "https://schema.org",
                             "@type": "GiveAction",
-                            agent: { identifier: identifiers[0].did },
+                            agent: { identifier: source.claim.offeredBy?.identifier },
                             recipient: source.claim.recipient,
                           }
                           if (source.claim.identifier) {
