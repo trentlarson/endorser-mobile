@@ -1094,20 +1094,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
           ? objectGiven
           : {
             // TypeAndQuantityNode
-
             amountOfThisGood: Number(amountStr),
-
-            /**
-              These units are typically in currency or time.
-
-              Units for currencies are described in multiple places at schema.org:
-              https://schema.org/currency
-              https://schema.org/priceCurrency
-              https://schema.org/price
-
-              We've chosen "HUR" from UN/CEFACT for time in hours.
-              (Many other units for time at schema.org are in ISO 8601 duration format.)
-            **/
             unitCode: unit,
           }
 
@@ -1309,6 +1296,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     - proceed function that takes the claim
     - cancel function
    **/
+
   function OfferModal(props) {
 
     const [agentId, setAgentId] = useState<string>(props.userId)
@@ -1397,33 +1385,21 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
         if (isSpecificAmount) {
           result.includesObject = {
-
-            '@type': 'TypeAndQuantityNode',
-
+            // TypeAndQuantityNode
             amountOfThisGood: Number(amountStr),
-
-            /**
-               These units are typically in currency or time.
-
-               Units for currencies are described in multiple places at schema.org:
-               https://schema.org/currency
-               https://schema.org/priceCurrency
-               https://schema.org/price
-
-               We've chosen HUR from UN/CEFACT for the length of time.
-               Time units can be in ISO 8601 format for schema.org but we don't use that (yet).
-             **/
             unitCode: unit,
           }
         }
 
-        if (isRequiringOffers) {
+        if (isRequiringOffers && (minOffersStr || minOffersAmountStr)) {
+          result.actionAccessibilityRequirement = {}
           if (minOffersStr) {
-            result.requiresOffers = Number(minOffersStr)
+            result.actionAccessibilityRequirement.requiresOffers =
+              Number(minOffersStr)
           }
           if (minOffersAmountStr) {
-            result.requiresOffersTotal = {
-              '@type': 'TypeAndQuantityNode',
+            result.actionAccessibilityRequirement.requiresOffersTotal = {
+              // TypeAndQuantityNode
               amountOfThisGood: Number(minOffersAmountStr),
               unitCode: unit,
             }
@@ -1933,10 +1909,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     function constructWitness() {
       return {
-
-        // We might prefer this but the URLs don't resolve.
-        // https://lov.linkeddata.es/dataset/lov/terms?q=appreciate
-
         "@context": "http://purl.org/vocab/bio/0.1/",
         "@type": "Event",
         "agent": { identifier: identifier },
