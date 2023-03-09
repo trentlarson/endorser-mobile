@@ -275,13 +275,13 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
             showMore
             ?
               <Icon
-                name="chevron-down"
+                name="chevron-up"
                 onPress={() => setShowMore(prev => !prev)}
                 style={{ color: 'blue', fontSize: 20, marginBottom: 10 }}
               />
             :
               <Text onPress={() => setShowMore(prev => !prev)}>
-                <Icon name="chevron-right" style={{ color: 'blue' }} />
+                <Icon name="chevron-right" style={{ color: 'blue', fontSize: 12 }} />
                 ...
               </Text>
           }
