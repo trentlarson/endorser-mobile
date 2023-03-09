@@ -717,11 +717,20 @@ export function ContactsScreen({ navigation, route }) {
                       onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                     />
 
-                    <CheckBox
-                      title={ 'Register them on the server.' }
-                      checked={wantsToRegister}
-                      onPress={() => {setWantsToRegister(!wantsToRegister)}}
-                    />
+                    <View style={{ flexDirection: 'row' }}>
+                      <CheckBox
+                        title={ 'Register them on the server.' }
+                        checked={wantsToRegister}
+                        onPress={() => {setWantsToRegister(!wantsToRegister)}}
+                      />
+                      <Icon
+                        name="info-circle"
+                        onPress={() =>
+                          Alert.alert("See your registration limits in the Settings.")
+                        }
+                        size={ 18 }
+                      />
+                    </View>
 
                     <TouchableHighlight
                       style={styles.saveButton}
@@ -784,11 +793,20 @@ export function ContactsScreen({ navigation, route }) {
                       onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                     />
 
-                    <CheckBox
-                      title={ 'Register them on the server.' }
-                      checked={wantsToRegister}
-                      onPress={() => {setWantsToRegister(!wantsToRegister)}}
-                    />
+                    <View style={{ flexDirection: 'row' }}>
+                      <CheckBox
+                        title={ 'Register them on the server.' }
+                        checked={wantsToRegister}
+                        onPress={() => {setWantsToRegister(!wantsToRegister)}}
+                      />
+                      <Icon
+                        name="info-circle"
+                        onPress={() =>
+                          Alert.alert("See your registration limits in the Settings.")
+                        }
+                        size={ 18 }
+                      />
+                    </View>
 
                     <TouchableHighlight
                       style={styles.saveButton}
@@ -856,11 +874,20 @@ export function ContactsScreen({ navigation, route }) {
                   onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                 />
 
-                <CheckBox
-                  title={ 'Register them on the server.' }
-                  checked={wantsToRegister}
-                  onPress={() => {setWantsToRegister(!wantsToRegister)}}
-                />
+                <View style={{ flexDirection: 'row' }}>
+                  <CheckBox
+                    title={ 'Register them on the server.' }
+                    checked={wantsToRegister}
+                    onPress={() => {setWantsToRegister(!wantsToRegister)}}
+                  />
+                  <Icon
+                    name="info-circle"
+                    onPress={() =>
+                      Alert.alert("See your registration limits in the Settings.")
+                    }
+                    size={ 18 }
+                  />
+                </View>
 
                 <TouchableHighlight
                   style={styles.saveButton}
@@ -903,11 +930,20 @@ export function ContactsScreen({ navigation, route }) {
                   onPress={() => {setWantsToBeVisible(!wantsToBeVisible)}}
                 />
 
-                <CheckBox
-                  title={ 'Register them on the server.' }
-                  checked={wantsToRegister}
-                  onPress={() => {setWantsToRegister(!wantsToRegister)}}
-                />
+                <View style={{ flexDirection: 'row' }}>
+                  <CheckBox
+                    title={ 'Register them on the server.' }
+                    checked={wantsToRegister}
+                    onPress={() => {setWantsToRegister(!wantsToRegister)}}
+                  />
+                  <Icon
+                    name="info-circle"
+                    onPress={() =>
+                      Alert.alert("See your registration limits in the Settings.")
+                    }
+                    size={ 18 }
+                  />
+                </View>
 
                 <TouchableHighlight
                   style={styles.saveButton}
@@ -1097,10 +1133,29 @@ export function ContactsScreen({ navigation, route }) {
                         <View/>
                       :
                         <View style={{ marginTop: 5 }}>
-                          <Text>
+                          <Text style={{ marginBottom: 20, marginTop: 20 }}>
                             { contact.did === allIdentifiers[0].did ? 'You' : contact.name }
                             &nbsp;
-                            { contact.registered ? (allIdentifiers[0] && contact.did === allIdentifiers[0].did ? 'are' : 'is') : 'might not be' } registered on the server.
+                            {
+                              contact.registered
+                              ? (allIdentifiers[0] && contact.did === allIdentifiers[0].did ? 'are' : 'is')
+                              : 'might not be'
+                            }
+                            &nbsp;registered on the server.
+                            &nbsp;
+                            {
+                              !contact.registered
+                              ?
+                                <Icon
+                                  name="info-circle"
+                                  onPress={() =>
+                                    Alert.alert("See your registration limits in the Settings.")
+                                  }
+                                  size={ 12 }
+                                />
+                              :
+                                <View />
+                            }
                           </Text>
                           {
                             !contact.registered
