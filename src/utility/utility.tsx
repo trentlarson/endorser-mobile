@@ -210,6 +210,21 @@ export const YamlFormat = ({ source, afterItemCss }) => {
   )
 }
 
+export const proceedToEditOffer = (navigation, origClaim, handleId) => {
+  const offerClaim = {
+    '@context': utility.SCHEMA_ORG_CONTEXT,
+    '@type': 'Offer',
+    itemOffered: {
+      '@type': 'CreativeWork',
+      isPartOf: { '@type': origClaim['@type'], identifier: origClaim.identifier }
+    }
+  }
+  if (!origClaim.identifier && handleId) {
+    offerClaim.itemOffered.isPartOf.identifier = handleId
+  }
+  navigation.navigate('Create Credential', { incomingClaim: offerClaim })
+}
+
 /**
  * Render each claim with links to take actions and expand details.
  *
@@ -365,7 +380,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     <View />
                 }
 
-                { /** Take a Give **/
+                { /** Take a Loan or a Give **/
 
                   !isUser(source.issuer)
                   && (source.claim['@type'] === 'LoanOrCredit'
@@ -387,6 +402,24 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                         }
                       >
                         <Text style={{ color: "blue" }}>Take</Text>
+                      </Pressable>
+                    </View>
+                  :
+                    <View />
+                }
+
+                { /** Offer to help with a Plan **/
+                  source.claim['@type'] === 'PlanAction'
+                  ?
+                    <View style={{ flexDirection: 'row', padding: 10 }}>
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () =>
+                          proceedToEditOffer(navigation, source.claim, source.handleId)
+                        }
+                      >
+                        <Text style={{ color: "blue" }}>Offer Help</Text>
                       </Pressable>
                     </View>
                   :

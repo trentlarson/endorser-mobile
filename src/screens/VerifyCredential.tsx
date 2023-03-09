@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux'
 import { styles } from './style'
 import { PrivateData } from '../entity/privateData'
 import * as utility from '../utility/utility'
-import { VisibleDidModal, YamlFormat } from '../utility/utility.tsx'
+import { proceedToEditOffer, VisibleDidModal, YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
 import { agent, dbConnection, DEFAULT_BASIC_RESOLVER } from '../veramo/setup'
 
@@ -187,21 +187,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
     contract.fieldsMerkle = contractClaim.fieldsMerkle
     const accept = utility.constructAccept(utility.REPLACE_USER_DID_STRING, contract)
     return accept
-  }
-
-  const proceedToEditOffer = (origClaim) => {
-    const offerClaim = {
-      '@context': utility.SCHEMA_ORG_CONTEXT,
-      '@type': 'Offer',
-      itemOffered: {
-        '@type': 'CreativeWork',
-        isPartOf: { '@type': origClaim['@type'], identifier: origClaim.identifier }
-      }
-    }
-    if (!origClaim.identifier && wrappedClaim?.handleId) {
-      offerClaim.itemOffered.isPartOf.identifier = wrappedClaim.handleId
-    }
-    navigation.navigate('Create Credential', { incomingClaim: offerClaim })
   }
 
   useFocusEffect(
@@ -483,11 +468,15 @@ export function VerifyCredentialScreen({ navigation, route }) {
           utility.isPlanAction(credentialSubject)
           ?
             <View>
-              <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>Planned Activity</Text>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 10 }}>
+                Planned Activity
+              </Text>
               <View style={{ padding: 10 }} />
               <Text
                 style={{ color: 'blue', ...styles.centeredText }}
-                onPress={() => proceedToEditOffer(credentialSubject) }
+                onPress={() =>
+                  proceedToEditOffer(navigation, credentialSubject, wrappedClaim?.handleId)
+                }
               >
                 Offer help with this activity
               </Text>
