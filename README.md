@@ -160,7 +160,9 @@ Automatically with: `yarn test`
 
 ... but note:
 
-- The App-test.js fails with "NativeModule.RNPermissions is null" or "Notifee native module not found". I've tried but failed with the recommendation here: https://github.com/zoontek/react-native-permissions#testing-with-jest
+- The App-test.js fails with "NativeModule.RNPermissions is null" or "Notifee
+  native module not found". I've tried but failed with the recommendation here:
+  https://github.com/zoontek/react-native-permissions#testing-with-jest
 
 Manually
 
@@ -171,19 +173,36 @@ Manually
 
 - With an Endorser.ch server
 
-  - Start with no app installed. Change PeriodicWorkRequest time increment in MainApplication.java to 1 MINUTES (then back to DAYS when finished testing).
+  - Start with no app installed. Change PeriodicWorkRequest time increment in
+    MainApplication.java to 1 MINUTES (then back to DAYS when finished testing).
 
   - On a public test server
-    - Run in Test Mode (under Settings & Advanced Mode) and click the button to choose the test server.
+    - Run in Test Mode (under Settings & Advanced Mode) and click the button to
+      choose the test server.
   - On your machine
-    - Run endorser-ch test/test.sh, then copy the endorser-ch-test-local.sqlite3 to endorser-ch-dev.sqlite3, then run the server.
+    - Run endorser-ch test/test.sh, then copy the endorser-ch-test-local.sqlite3
+      to endorser-ch-dev.sqlite3, then run the server.
 
-  - Create an identifier & add name.
+  - Create an identifier.
+
+    - You can import a test user from [here](https://github.com/trentlarson/endorser-ch/blob/master/test/util.js#L73). If paste doesn't work, here are some command-line import for Android:
+
+      - for User #0: `adb shell input text "seminar\ accuse\ mystery\ assist\ delay\ law\ thing\ deal\ image\ undo\ guard\ initial\ shallow\ wrestle\ list\ fragile\ borrow\ velvet\ tomorrow\ awake\ explain\ test\ offer\ control"`
+
+        - This user has large registration and claim limits.
+
+      - for User #1: `adb shell input text "average\ mammal\ spice\ rebuild\ volume\ border\ tail\ bracket\ else\ absent\ sniff\ connect\ praise\ tennis\ twice\ inquiry\ summer\ crawl\ job\ nurse\ sister\ account\ tooth\ follow"`
+
+        - This user has a large number of items in their friend feed.
+
+  - Add your name.
 
   - After a claim:
 
     - On Notification screen, run the daily background check.
-    - Close app (android) or background app (iOS) & see notification of new claims after 15 minutes. (On android, that's the minimum time to start a background task.)
+    - Close app (android) or background app (iOS) & see notification of new
+      claims after 15 minutes. (On android, that's the minimum time to start a
+      background task.)
 
   - As a second user, import via the mnemonic, eg. #3 from endorser-ch test/util.js
 
@@ -194,25 +213,38 @@ Manually
   - As the second and third user, share contact info.
   - As the initial user, allow the second and third user to see them.
   - As the second user, check that they can see the claim details.
-  - As the fourth user, check that they can access people in their network who can get to the claim.
+  - As the fourth user, check that they can access people in their network who
+    can get to the claim.
 
   - As the third user, check that they can confirm the first claim.
-  - As the fourth user, check that they can see people in their network who can get to the confirmation info.
+  - As the fourth user, check that they can see people in their network who can
+    get to the confirmation info.
 
   - As the third user, check that they cannot see the claim details but can see a link.
   - As the second user, submit confirmation.
 
   - Create an Offer, show total outstanding, mark as given, see adjustment of totals.
 
+  - Test visibility of targeted feed (on front page). One way is with test data
+    with almost any user who can see the Gives/Offers/Plans for User #2.
+
 - On an actual device (remember the table-name fiasco!)
+
   - Android
-    - Must use Play Store to release to internal testing (because migrations fiasco wasn't caught when connected directly to the device).
-    - To work with different versions, increment versionCode in different clones of the repo (built from scratch), and test in Internal Testing with alternating builds & uploads.
+    - Must use Play Store to release to internal testing (because migrations
+      fiasco wasn't caught when connected directly to the device).
+    - To work with different versions, increment versionCode in different clones
+      of the repo (built from scratch), and test in Internal Testing with
+      alternating builds & uploads.
+
   - iOS
-    - TestFlight is recommended (though potentially OK to use Xcode, since it would have caught the migrations fiasco).
+    - TestFlight is recommended (though potentially OK to use Xcode, since it
+      would have caught the migrations fiasco).
 
   - Install then create or import.
-  - Notification permissions: new install messaging, accepted, declined then accepted, turned off in settings then accepted, ensure user knows when off.
+  - Notification permissions: new install messaging, accepted, declined then
+    accepted, turned off in settings then accepted, ensure user knows when off.
+
 
 
 
@@ -316,7 +348,9 @@ To Release:
 
 
 
-## Specifications for Contract Hashes
+## Data Design
+
+### Specifications for Contract Hashes
 
 To create the fieldsMerkle:
 
