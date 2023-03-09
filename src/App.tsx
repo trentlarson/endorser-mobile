@@ -428,19 +428,19 @@ function HomeScreen({ navigation }) {
                 loadingSubfeeds
                 ? (
                   <View>
-                    <Text>Checking for Activity By or About Your Friends...</Text>
+                    <Text>Checking for Activity About You or Your Friends...</Text>
                     <ActivityIndicator color="#00ff00"/>
                   </View>
                 ) : (
                   (R.sum(R.values(feedCounts)) == 0)
                   ? (
                     <View>
-                      <Text>No New Activity By or About Your Friends</Text>
+                      <Text>No New Activity About You or Your Friends</Text>
                     </View>
                   ) : (
                     <View>
                       <Text style={{ fontWeight: 'bold' }}>
-                        New Activity By or About Your Friends
+                        New Activity About You or Your Friends
                       </Text>
                       <View style={{ flexDirection: 'row' }}>
 
