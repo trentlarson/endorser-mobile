@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+## [6.5.120] - 2023-03-08 - 27ae1b40b780020dfc1976d62c3a1b0ec4825697
+
 ### Added
 - Targeted feed showing only gives/offers/plans by those in contact list
-- Schema addition: Offer requiresOffers & requiresOffersTotal for thresholds for an offer
+- Schema addition: Offer actionAccessibilityRequirement requiresOffers & requiresOffersTotal for thresholds for an offer
 
 
 
