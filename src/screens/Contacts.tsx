@@ -38,7 +38,7 @@ export function ContactsScreen({ navigation, route }) {
   const [scannedImport, setScannedImport] = useState<string>(null)
   const [showMyQr, setShowMyQr] = useState<boolean>(false)
   const [wantsToBeVisible, setWantsToBeVisible] = useState<boolean>(true)
-  const [wantsToRegister, setWantsToRegister] = useState<boolean>(true)
+  const [wantsToRegister, setWantsToRegister] = useState<boolean>(false)
   const [wantsCsvText, setWantsCsvText] = useState<boolean>(false)
   const [wantsCsvUrl, setWantsCsvUrl] = useState<boolean>(false)
 
