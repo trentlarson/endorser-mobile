@@ -362,12 +362,21 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                               identifier: source.claim.identifier,
                             }
                           }
-                          const items = [source.claim.includesObject, source.claim.itemOffered]
-                          const offered = R.filter(i => i != null, items)
-                          const giveActions = R.map(
-                            item => R.set(R.lensProp('object'), item, R.clone(giveActionForm)),
-                            offered
-                          )
+                          let giveActions = []
+                          if (source.claim.includesObject) {
+                            const objectGive = R.clone(giveActionForm)
+                            objectGive.object = R.clone(source.claim.includesObject)
+                            if (source.claim.itemOffered?.isPartOf) {
+                              objectGive.object.isPartOf =
+                                R.clone(source.claim.itemOffered.isPartOf)
+                            }
+                            giveActions = R.concat(giveActions, [objectGive])
+                          }
+                          if (source.claim.itemOffered) {
+                            const itemGive = R.clone(giveActionForm)
+                            itemGive.object = R.clone(source.claim.itemOffered)
+                            giveActions = R.concat(giveActions, [itemGive])
+                          }
                           navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
                             credentialSubject: giveActions
                           })
