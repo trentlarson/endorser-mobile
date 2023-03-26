@@ -500,9 +500,9 @@ export function ContactsScreen({ navigation, route }) {
     const claimRegister = {
       "@context": "https://schema.org",
       "@type": "RegisterAction",
-      agent: { did: allIdentifiers[0].did },
+      agent: { identifier: allIdentifiers[0].did },
       object: SERVICE_ID,
-      participant: { did: contact.did },
+      participant: { identifier: contact.did },
     }
     const vcJwt: string = await didJwt.createJWT(utility.vcPayload(claimRegister), { issuer: allIdentifiers[0].did, signer })
 
