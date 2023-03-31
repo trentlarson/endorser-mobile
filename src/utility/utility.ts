@@ -17,9 +17,10 @@ export class EndorserRecord {
   subject: string | null
   claimContext: string
   claimType: string
-  claim: object // this is full object from the server, at least in /api/claim?... and /api/claim/ID
-  hashHex: string
-  hashChainHex: string | null // these eventually have an immutable value, but it may be empty for a while after recording
+  claim?: object // this is full object from the server, at least in /api/claim?... and /api/claim/ID
+  handleId: string
+  hashHex?: string
+  hashChainHex?: string | null // these eventually have an immutable value, but it may be empty for a while after recording
   jwtEncoded?: string // this may not be accessible by the current user/endpoint and thus may not be in result data
 }
 
