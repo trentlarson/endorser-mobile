@@ -7,6 +7,19 @@ For the reporting facility, we use the [endorser-ch APIs](https://github.com/tre
 
 
 
+## Dependencies
+
+a la tea.xyz
+
+| Project       | Version   |
+| ------------- | --------- |
+| nodejs.org    | ^16.0.0   |
+| yarnpkg.com   | ^3.1.2    |
+| ruby-lang.org | ^3.1.2    |
+
+... and Java zulu-11.60-19 for Android
+
+
 ## Dev Build & Run
 
 `yarn install`
@@ -139,6 +152,8 @@ Switch to the Simulator app, choose "File" and "Open Simulator" and choose one t
 - During the upload to Apple, you may get errors like "could not find the service with interface (com.apple.transporter.osgi.TransporterService)" or "resource download failed: com.fasterxml.jackson.core.jackson-core". They indicate some network error so just try again.
 
 - During "bundle exec fastlane beta", you might see a message of "Could not find fastlane-2.210.1, CFPropertyList-3.0.5... in any of the sources". Try "bundle install".
+
+- On M1, builds may get: "In .../node_modules/react-native-sodium/libsodium/libsodium-ios/lib/libsodium.a(libsodium_la-aead_chacha20poly1305.o), building for iOS Simulator, but linking in object file built for iOS, file '.../node_modules/react-native-sodium/libsodium/libsodium-ios/lib/libsodium.a' for architecture arm64". Open a terminal "using Rosetta" and run from there. (You may have to check out a clean set of source files.) (I would sure like to find a way to run natively!)
 
 
 
@@ -347,9 +362,15 @@ To Release:
 
 
 
-## Data Design
+## Design
 
-### Specifications for Contract Hashes
+### Interoperability
+
+* Here are some good guidelines for wallet interoperability, which we strive to fulfill: https://mattr.global/resources/articles/wallets-in-the-wild/
+
+
+
+### Data: Specifications for Contract Hashes
 
 To create the fieldsMerkle:
 
