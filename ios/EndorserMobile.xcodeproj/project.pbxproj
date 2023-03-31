@@ -767,6 +767,7 @@
 				DEVELOPMENT_TEAM = GM3FS5JQPH;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = EndorserMobile/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -790,6 +791,7 @@
 				CURRENT_PROJECT_VERSION = 103;
 				DEVELOPMENT_TEAM = GM3FS5JQPH;
 				INFOPLIST_FILE = EndorserMobile/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
