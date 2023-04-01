@@ -156,7 +156,6 @@ function testRecursivelyOnString(func, input) {
 
   } else if (input instanceof Object) {
 
-    var result = []
     if (!Array.isArray(input)) {
       // it's an object
       for (const key in input) {
@@ -175,6 +174,28 @@ function testRecursivelyOnString(func, input) {
     return false
   } else {
     return false
+  }
+}
+
+// return clone of object without any nested *VisibleToDids keys
+export function removeVisibleToDids(input) {
+  if (input instanceof Object) {
+    if (!Array.isArray(input)) {
+      // it's an object
+      const result = {}
+      for (const key in input) {
+        if (!key.endsWith("VisibleToDids")) {
+          result[key] = removeVisibleToDids(R.clone(input[key]))
+        }
+      }
+      return result
+    } else {
+      // it's an array
+      return R.map(removeVisibleToDids, input)
+    }
+    return false
+  } else {
+    return input
   }
 }
 

@@ -14,14 +14,25 @@ test('first and last 3', () => {
   expect(utility.firstAndLast3OfDid('did:ethr:0x000Ee5654b9742f6Fe18ea970e32b97ee2247B51')).toBe('000...B51')
 })
 
+test('move VisibleToDids', () => {
+  expect(utility.removeVisibleToDids(undefined) == null)
+  expect(utility.removeVisibleToDids(3) == 3)
+  expect(utility.removeVisibleToDids("three") =="three")
+  expect(
+    utility.removeVisibleToDids({a:1, bVisibleToDids:["x"], c:[1,2, {cc:3, ccVisibleToDids:4}]}))
+    .toEqual({a:1, c:[1, 2, {cc:3}]})
+})
+
 test('account Offers & Gives', () => {
   const TEST_USER_DID = 'did:none:test-user-0'
   const TEST_USER1_DID = 'did:none:test-user-1'
   const EMPTY_OUTPUT = {
     allPaid: [],
     allPromised: [],
+    outstandingCurrencyEntries: {},
     outstandingCurrencyTotals: {},
     outstandingInvoiceTotals: {},
+    paidCurrencyEntries: {},
     totalCurrencyPaid: {},
     totalCurrencyPromised: {},
     idsOfStranges: [],
@@ -65,46 +76,57 @@ test('account Offers & Gives', () => {
       offeredBy: { identifier: TEST_USER_DID },
     }
   })
+
   outputExp.idsOfStranges = [undefined, 'abc123']
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
   input[1].claim.itemOffered = { amountOfThisGood: 3, unitCode: 'HUR' }
   outputExp.allPromised = [input[1]]
   outputExp.idsOfStranges = [undefined]
+  outputExp.outstandingCurrencyEntries = { "HUR": [[undefined, input[1]]] }
   outputExp.outstandingCurrencyTotals = { "HUR": 3 }
   outputExp.totalCurrencyPromised = { "HUR": 3 }
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
-  const OFFER_ID = '0f21cc1d44412b4ac4cb47973554fd79'
+  const OFFER_2_ID = '0f21cc1d44412b4ac4cb47973554fd79'
   input = input.concat({
     issuedAt: '2022-02-15 18:58:33Z',
     claim: {
       '@context': 'https://schema.org',
       '@type': 'Offer',
-      identifier: OFFER_ID,
+      identifier: OFFER_2_ID,
       itemOffered: { amountOfThisGood: 2, unitCode: 'HUR' },
       offeredBy: { identifier: TEST_USER_DID },
     }
   })
   outputExp.allPromised = [input[1], input[2]]
+  outputExp.outstandingCurrencyEntries = {
+    "HUR": [[undefined, OFFER_1], [OFFER_2_ID, input[2]]]
+  }
   outputExp.outstandingCurrencyTotals = { "HUR": 5 }
   outputExp.outstandingInvoiceTotals = { "0f21cc1d44412b4ac4cb47973554fd79": 2 }
   outputExp.totalCurrencyPromised = { "HUR": 5 }
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
+  const OFFER_3_ID = 'ef56cb471f43cdd024b06baa11a8ce24'
   input = input.concat({
     issuedAt: '2022-02-15 18:58:33Z',
     claim: {
       '@context': 'https://schema.org',
       '@type': 'Offer',
-      identifier: 'ef56cb471f43cdd024b06baa11a8ce24',
+      identifier: OFFER_3_ID,
       itemOffered: { amountOfThisGood: 1, unitCode: 'HUR' },
       offeredBy: { identifier: TEST_USER_DID },
     }
   })
   outputExp.allPromised = [input[1], input[2], input[3]]
+  outputExp.outstandingCurrencyEntries = {
+    "HUR": [[undefined, input[1]], [OFFER_2_ID, input[2]], [OFFER_3_ID, input[3]]]
+  }
   outputExp.outstandingCurrencyTotals = { "HUR": 6 }
-  outputExp.outstandingInvoiceTotals = { "0f21cc1d44412b4ac4cb47973554fd79": 2, "ef56cb471f43cdd024b06baa11a8ce24": 1 }
+  outputExp.outstandingInvoiceTotals = {
+    "0f21cc1d44412b4ac4cb47973554fd79": 2, "ef56cb471f43cdd024b06baa11a8ce24": 1
+  }
   outputExp.totalCurrencyPromised = { "HUR": 6 }
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
@@ -120,8 +142,14 @@ test('account Offers & Gives', () => {
     }
   })
   outputExp.allPromised = [input[1], input[2], input[3], input[4]]
+  outputExp.outstandingCurrencyEntries = {
+    "HUR": [[undefined, input[1]], [OFFER_2_ID, input[2]], [OFFER_3_ID, input[3]]],
+    "BTC": [[TEST_USER1_DID, input[4]]]
+  }
   outputExp.outstandingCurrencyTotals = { "BTC": 1, "HUR": 6 }
-  outputExp.outstandingInvoiceTotals = { "0f21cc1d44412b4ac4cb47973554fd79": 2, "ef56cb471f43cdd024b06baa11a8ce24": 1 }
+  outputExp.outstandingInvoiceTotals = {
+    "0f21cc1d44412b4ac4cb47973554fd79": 2, "ef56cb471f43cdd024b06baa11a8ce24": 1
+  }
   outputExp.outstandingInvoiceTotals[TEST_USER1_DID] = 1
   outputExp.totalCurrencyPromised = { "BTC": 1, "HUR": 6 }
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
@@ -164,6 +192,7 @@ test('account Offers & Gives', () => {
       object: { amountOfThisGood: 1, unitCode: 'HUR' },
     }
   })
+  outputExp.paidCurrencyEntries = { "HUR": [[undefined, input[7]]] }
   outputExp.totalCurrencyPaid = { "HUR": 1 }
   outputExp.allPaid = [input[7]]
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
@@ -174,13 +203,16 @@ test('account Offers & Gives', () => {
       '@context': 'https://schema.org',
       '@type': 'GiveAction',
       agent: { identifier: TEST_USER_DID },
-      offerId: OFFER_ID,
+      offerId: OFFER_2_ID,
       object: { amountOfThisGood: 1, unitCode: 'HUR' },
     }
   })
   outputExp.totalCurrencyPaid = { "HUR": 2 }
-  outputExp.outstandingCurrencyTotals["HUR"] = 5
-  outputExp.outstandingInvoiceTotals[OFFER_ID] = 1
+  outputExp.outstandingCurrencyTotals["HUR"] = 6
+  outputExp.outstandingInvoiceTotals[OFFER_2_ID] = 2
+  outputExp.paidCurrencyEntries = {
+    "HUR": [[undefined, input[7]], [undefined, input[8]]]
+  }
   outputExp.allPaid = [input[7], input[8]]
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
@@ -195,8 +227,11 @@ test('account Offers & Gives', () => {
     }
   })
   outputExp.totalCurrencyPaid = { "HUR": 4 }
-  outputExp.outstandingCurrencyTotals["HUR"] = 5
-  outputExp.outstandingInvoiceTotals[OFFER_ID] = 1
+  outputExp.outstandingCurrencyTotals["HUR"] = 6
+  outputExp.outstandingInvoiceTotals[OFFER_2_ID] = 2
+  outputExp.paidCurrencyEntries = {
+    "HUR": [[undefined, input[7]], [undefined, input[8]], [undefined, input[9]]]
+  }
   outputExp.allPaid = [input[7], input[8], input[9]]
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
@@ -211,6 +246,10 @@ test('account Offers & Gives', () => {
     }
   })
   outputExp.totalCurrencyPaid["BTC"] = 1.5
+  outputExp.paidCurrencyEntries = {
+    "HUR": [[undefined, input[7]], [undefined, input[8]], [undefined, input[9]]],
+    "BTC": [[undefined, input[10]]],
+  }
   outputExp.allPaid = [input[7], input[8], input[9], input[10]]
   expect(utility.countTransactions(input, TEST_USER_DID)).toEqual(outputExp)
 
