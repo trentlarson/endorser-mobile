@@ -408,7 +408,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     const allContacts = useSelector((state) => state.contacts || [])
 
-    function loanOrCreditClaim(txnId: string, providerId: string, recipientId: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
+    function loanOrCreditClaim(providerId: string, recipientId: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
       return {
         "@context": "https://schema.org",
         "@type": "LoanOrCredit",
@@ -424,13 +424,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
         },
         "numberOfTransfersAllowed": transfersAllowed,
         "termsOfService": termsOfService,
-        "identifier": txnId,
       }
     }
 
     function loanOrCreditClaimFromInputs() {
       return loanOrCreditClaim(
-        crypto.randomBytes(16).toString('hex'), // 128 bits seems OK; might consider ULIDs
         props.providerId,
         recipientId,
         Number(amountStr),
@@ -589,7 +587,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     const allContacts = useSelector((state) => state.contacts || [])
 
-    function donateClaim(grantId: string, funderId: string, fundedId: string, price: number, priceCurrency: string, comments: string, expiration: string, termsOfService: string, transfersAllowed: number) {
+    function donateClaim(funderId: string, fundedId: string, price: number, priceCurrency: string, comments: string, expiration: string, termsOfService: string, transfersAllowed: number) {
       return {
         "@context": "https://schema.org",
 
@@ -602,7 +600,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
         "recipient": {
           "identifier": fundedId,
         },
-        "identifier": grantId,
 
         "price": price,
 
@@ -622,7 +619,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     function donateClaimFromInputs() {
       return donateClaim(
-        crypto.randomBytes(16).toString('hex'), // 128 bits seems OK; might consider ULIDs
         props.sponsorId,
         fundedId,
         Number(amountStr),
@@ -830,15 +826,10 @@ export function ConstructCredentialScreen({ navigation, route }) {
         result.image = planImageUrl || undefined
         result.name = planName || undefined
 
-        let resultId = resultIdentifier
-        if (resultDescription != null && resultIdentifier == null) {
-          resultId = crypto.randomBytes(16).toString('hex')
-        }
-
-        if (resultId) {
+        if (resultDescription || resultIdentifier) {
           result.result = {
             "@type": "CreativeWork",
-            identifier: resultId || undefined,
+            identifier: resultIdentifier || undefined,
             description: resultDescription || undefined
           }
         }
@@ -1301,7 +1292,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     const [agentId, setAgentId] = useState<string>(props.userId)
     const [amountStr, setAmountStr] = useState<string>('')
-    const [invoiceIdentifier, setInvoiceIdentifier] = useState<string>(crypto.randomBytes(16).toString('hex'))
+    const [invoiceIdentifier, setInvoiceIdentifier] = useState<string>('')
     const [isRequiringOffers, setIsRequiringOffers] = useState<boolean>(false)
     const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
     const [isItemDescribed, setIsItemDescribed] = useState<boolean>(false)
@@ -1421,12 +1412,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
     useEffect(() => {
       if (utility.isOffer(incomingClaim)) {
         const incomingOffer = incomingClaim
-        if (incomingOffer.offeredBy) {
-          // should be a person with an identifier property (though sometimes it's been a raw DID)
-          setAgentId(incomingOffer.offeredBy.identifier || incoming.offeredBy)
+        if (incomingOffer.offeredBy?.identifier) {
+          setAgentId(incomingOffer.offeredBy.identifier)
         }
         if (incomingOffer.identifier) {
-          setInvoiceId(incomingOffer.identifier)
+          setInvoiceIdentifier(incomingOffer.identifier)
         }
         if (incomingOffer.includesObject && incomingOffer.includesObject['@type'] === 'TypeAndQuantityNode') {
           setAmountStr(incomingOffer.includesObject.amountOfThisGood)
