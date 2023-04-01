@@ -265,19 +265,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
 
   const isUser = did => did === identifiers[0].did
 
-  const removeSchemaContext = obj => obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
-
   const summary = utility.claimSpecialDescription(source, identifiers, contacts)
-
-  const addHandleAsIdIfMissing = (obj, handleId) => {
-    if (!obj.handleId && handleId) {
-      const result = R.clone(obj)
-      result.identifier = handleId
-      return result
-    } else {
-      return obj
-    }
-  }
 
   return (
     <View>
@@ -437,8 +425,10 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                               "@type": "AgreeAction",
                               object:
                                 utility.removeVisibleToDids(
-                                  removeSchemaContext(
-                                    addHandleAsIdIfMissing(source.claim, source.handleId)
+                                  utility.removeSchemaContext(
+                                    utility.addHandleAsIdIfMissing(
+                                      source.claim, source.handleId
+                                    )
                                   )
                                 ),
                             }

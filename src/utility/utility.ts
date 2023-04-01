@@ -177,28 +177,6 @@ function testRecursivelyOnString(func, input) {
   }
 }
 
-// return clone of object without any nested *VisibleToDids keys
-export function removeVisibleToDids(input) {
-  if (input instanceof Object) {
-    if (!Array.isArray(input)) {
-      // it's an object
-      const result = {}
-      for (const key in input) {
-        if (!key.endsWith("VisibleToDids")) {
-          result[key] = removeVisibleToDids(R.clone(input[key]))
-        }
-      }
-      return result
-    } else {
-      // it's an array
-      return R.map(removeVisibleToDids, input)
-    }
-    return false
-  } else {
-    return input
-  }
-}
-
 export const containsHiddenDid = (obj) => {
   return testRecursivelyOnString(str => str === HIDDEN_DID, obj)
 }
@@ -348,6 +326,41 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
 
   } else {
     return issuer + " declared " + claimSummary(claim, contacts)
+  }
+}
+
+export const removeSchemaContext = obj =>
+  obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
+
+export const addHandleAsIdIfMissing = (obj, handleId) => {
+  if (!obj.handleId && handleId) {
+    const result = R.clone(obj)
+    result.identifier = handleId
+    return result
+  } else {
+    return obj
+  }
+}
+
+// return clone of object without any nested *VisibleToDids keys
+export function removeVisibleToDids(input) {
+  if (input instanceof Object) {
+    if (!Array.isArray(input)) {
+      // it's an object
+      const result = {}
+      for (const key in input) {
+        if (!key.endsWith("VisibleToDids")) {
+          result[key] = removeVisibleToDids(R.clone(input[key]))
+        }
+      }
+      return result
+    } else {
+      // it's an array
+      return R.map(removeVisibleToDids, input)
+    }
+    return false
+  } else {
+    return input
   }
 }
 

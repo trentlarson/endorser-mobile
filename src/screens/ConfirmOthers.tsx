@@ -20,7 +20,7 @@ export function ConfirmOthersScreen({ navigation }) {
   const [loadingRecentClaims, setLoadingRecentClaims] = useState<boolean>(false)
   const [recentClaims, setRecentClaims] = useState<Array<any>>([])
   const [recentHiddenCount, setRecentHiddenCount] = useState<number>(0)
-  const [selectedClaimsToConfirm, setSelectedClaimsToConfirm] = useState<Array<number>>([])
+  const [selectedRecordsToConfirm, setSelectedRecordsToConfirm] = useState<Array<string>>([])
   const [showDetails, setShowDetails] = useState<Record<string, boolean>>({})
 
   async function loadRecentClaims(ids) {
@@ -72,10 +72,10 @@ export function ConfirmOthersScreen({ navigation }) {
   function toggleSelectedClaim(claim) {
     const claimIdStr = claim.id.toString()
     const recordVal =
-      selectedClaimsToConfirm[claimIdStr]
+      selectedRecordsToConfirm[claimIdStr]
       ? undefined
       : claim
-    setSelectedClaimsToConfirm(record => R.set(R.lensProp(claimIdStr), recordVal, record))
+    setSelectedRecordsToConfirm(record => R.set(R.lensProp(claimIdStr), recordVal, record))
   }
 
   /**
@@ -100,21 +100,22 @@ export function ConfirmOthersScreen({ navigation }) {
   }
 
   function setConfirmations() {
-    const values = Object.values(selectedClaimsToConfirm)
+    const values = Object.values(selectedRecordsToConfirm)
     if (!anyTrue(values)) {
       Alert.alert("Select a Claim", "In order to confirm, you must select at least one claim.")
     } else {
-      const claims = values.map(R.prop('claim'))
-      const onlyGoodClaims = R.reject(R.isNil, claims)
-      if (onlyGoodClaims.length > 0) {
-        const fullClaims = onlyGoodClaims.map(aClaim => {
-          if (aClaim['@context'] === 'https://schema.org') {
-            aClaim['@context'] = undefined
-          }
+      const onlyGoodRecords = R.reject(R.isNil, values)
+      if (onlyGoodRecords.length > 0) {
+        const fullClaims = onlyGoodRecords.map(record => {
+          const goodClaim = utility.removeSchemaContext(
+            utility.removeVisibleToDids(
+              utility.addHandleAsIdIfMissing(record.claim, record.handleId)
+            )
+          )
           return {
             "@context": "https://schema.org",
             "@type": "AgreeAction",
-            "object": aClaim,
+            "object": goodClaim,
           }
         })
         navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: fullClaims })
@@ -156,12 +157,12 @@ export function ConfirmOthersScreen({ navigation }) {
           keyExtractor={item => item.id.toString()}
           renderItem={data =>
             <TouchableOpacity
-              style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
+              style={ (selectedRecordsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
             >
               <View style={{ flexDirection: 'row' }}>
                 <CheckBox
                   title=""
-                  checked={!!selectedClaimsToConfirm[data.item.id.toString()]}
+                  checked={!!selectedRecordsToConfirm[data.item.id.toString()]}
                   onPress={() => { toggleSelectedClaim(data.item) }}
                 />
                 <Text style={{ marginTop: 20 }}>
