@@ -400,6 +400,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                 }
 
                 { /** Offer to help with a Plan **/
+
                   source.claim['@type'] === 'PlanAction'
                   ?
                     <View style={{ flexDirection: 'row', padding: 10 }}>

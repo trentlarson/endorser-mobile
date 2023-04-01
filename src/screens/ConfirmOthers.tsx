@@ -2,7 +2,7 @@ import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import {
-  ActivityIndicator, Alert, Button, FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View
+  ActivityIndicator, Alert, Button, FlatList, SafeAreaView, ScrollView, Text, TouchableOpacity, View
 } from 'react-native'
 import { CheckBox } from "react-native-elements"
 
@@ -11,6 +11,7 @@ import * as utility from '../utility/utility'
 import { YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
 import { agent, dbConnection } from '../veramo/setup'
+import Icon from "react-native-vector-icons/FontAwesome";
 
 export function ConfirmOthersScreen({ navigation }) {
 
@@ -20,6 +21,7 @@ export function ConfirmOthersScreen({ navigation }) {
   const [recentClaims, setRecentClaims] = useState<Array<any>>([])
   const [recentHiddenCount, setRecentHiddenCount] = useState<number>(0)
   const [selectedClaimsToConfirm, setSelectedClaimsToConfirm] = useState<Array<number>>([])
+  const [showDetails, setShowDetails] = useState<Record<string, boolean>>({})
 
   async function loadRecentClaims(ids) {
     if (ids == null && ids[0] == null) {
@@ -133,7 +135,7 @@ export function ConfirmOthersScreen({ navigation }) {
   return (
     <SafeAreaView>
     <View style={{ padding: 20 }}>
-      <View syle={{ textAlign: 'left' }}>
+      <ScrollView horizontal={ true } style={{ textAlign: 'left' }}>
         <FlatList
           ListHeaderComponent={
             <View>
@@ -156,23 +158,59 @@ export function ConfirmOthersScreen({ navigation }) {
             <TouchableOpacity
               style={ (selectedClaimsToConfirm[data.item.id.toString()] ? styles.itemSelected : {}) }
             >
-              <Text>
+              <View style={{ flexDirection: 'row' }}>
+                <CheckBox
+                  title=""
+                  checked={!!selectedClaimsToConfirm[data.item.id.toString()]}
+                  onPress={() => { toggleSelectedClaim(data.item) }}
+                />
+                <Text style={{ marginTop: 20 }}>
+                  {
+                    utility.claimSpecialDescription(
+                      data.item,
+                      appStore.getState().identifiers || [],
+                      appStore.getState().contacts || []
+                    )
+                  }
+                </Text>
+                <View style={{ marginLeft: 10 }} />
                 {
-                  utility.claimSpecialDescription(
-                    data.item,
-                    appStore.getState().identifiers || [],
-                    appStore.getState().contacts || []
+                  showDetails[data.item.id.toString()]
+                  ? (
+                      <Icon
+                        name="chevron-up"
+                        onPress={() => setShowDetails(
+                          prev => R.set(
+                            R.lensProp(data.item.id.toString()), false, prev
+                          )
+                        )}
+                        style={{ color: 'blue', fontSize: 16, marginTop: 20 }}
+                      />
+                  ) : (
+                      <Icon
+                        name="chevron-down"
+                        onPress={() => setShowDetails(
+                          prev => R.set(
+                            R.lensProp(data.item.id.toString()), true, prev
+                          )
+                        )}
+                        style={{ color: 'blue', fontSize: 20, marginTop: 20 }}
+                      />
                   )
                 }
-              </Text>
-              <CheckBox
-                title="Select"
-                checked={!!selectedClaimsToConfirm[data.item.id.toString()]}
-                onPress={() => { toggleSelectedClaim(data.item) }}
-              />
-              <Text onPress={() => { toggleSelectedClaim(data.item) }}>
-                <YamlFormat source={ data.item.claim || data.item } navigation={ navigation } />
-              </Text>
+              </View>
+              {
+                showDetails[data.item.id.toString()]
+                ? (
+                  <View>
+                    <Text onPress={() => { toggleSelectedClaim(data.item) }}>
+                      <YamlFormat source={ data.item.claim || data.item } navigation={ navigation } />
+                    </Text>
+                  </View>
+                ) : (
+                  <View />
+                )
+              }
             </TouchableOpacity>
           }
           ListFooterComponent={
@@ -196,7 +234,7 @@ export function ConfirmOthersScreen({ navigation }) {
             </View>
           }
         />
-      </View>
+      </ScrollView>
     </View>
     </SafeAreaView>
   )
