@@ -434,7 +434,12 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                             credentialSubject: {
                               "@context": "https://schema.org",
                               "@type": "AgreeAction",
-                              object: removeSchemaContext(addHandleAsIdIfMissing(source.claim, source.handleId)),
+                              object:
+                                utility.removeVisibleToDids(
+                                  removeSchemaContext(
+                                    addHandleAsIdIfMissing(source.claim, source.handleId)
+                                  )
+                                ),
                             }
                           })
                         }
