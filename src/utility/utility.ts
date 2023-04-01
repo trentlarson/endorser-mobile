@@ -285,7 +285,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
 
   } else if (type === "JoinAction") {
     // agent.did is for legacy data, before March 2023
-    const agent = claim.agent?.identifier || claim.agent?.did || claim.issuer
+    const agent = claim.agent?.identifier || claim.agent?.did || record.issuer
     const contactInfo = didInfo(agent, identifiers, contacts)
 
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
@@ -319,7 +319,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
 
   } else if (type === "PlanAction") {
 
-    const claimer = claim.agent?.identifier || claim.issuer
+    const claimer = claim.agent?.identifier || record.issuer
     const claimerInfo = didInfo(claimer, identifiers, contacts)
     return claimerInfo + " announced a project: " + claim.name
 
