@@ -150,7 +150,10 @@ export function ReportScreen({ navigation }) {
           <FlatList
             data={filteredResults1}
             /* fixed height is critical for iOS vertical scroll */
-            style={{ borderWidth: 1, height: 500 }}
+            style={{ borderWidth: 1, height: 400 }}
+            ListHeaderComponent={
+              <Text style={{ padding: 10 }}>(Only retrieved the 50 most recent matching claims.)</Text>
+            }
             renderItem={datum =>
               <RenderOneRecord
                 source={ datum.item }
@@ -224,34 +227,49 @@ export function ReportScreen({ navigation }) {
                : ""
             }
           </Text>
-          <TextInput
-            autoCapitalize={'none'}
-            value={searchTerm}
-            onChangeText={setSearchTerm}
-            editable
-            style={{ borderWidth: 1 }}
-          />
-          <Text>
-            Examples:&nbsp;
-            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('programming') }}>programming</Text>,&nbsp;
-            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('Training') }}>Training</Text>,&nbsp;
-            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('PlanAction') }}>PlanAction</Text>
-          </Text>
-          <View style={{ marginTop: 10 }} />
-          <Text>
-            <Text style={{ color: 'blue' }} onPress={() => { setSelectFromContacts(true) }}>Select a Contact</Text>
-          </Text>
 
           {
             loadingSearch
             ?
               <ActivityIndicator color="#00ff00" />
             :
-              <View style={{ marginTop: 20 }}>
-                <Button
-                  title="Search"
-                  onPress={() => searchEndorser({ searchTerm: searchTerm })}
-                />
+              <View>
+                {
+                  searchResults == null
+                  ?
+                    <View>
+
+                      <TextInput
+                        autoCapitalize={'none'}
+                        value={searchTerm}
+                        onChangeText={setSearchTerm}
+                        editable
+                        style={{ borderWidth: 1 }}
+                      />
+                      <Text>
+                        Examples:&nbsp;
+                        <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('programming') }}>programming</Text>,&nbsp;
+                        <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('Training') }}>Training</Text>,&nbsp;
+                        <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('PlanAction') }}>PlanAction</Text>
+                      </Text>
+                      <View style={{ marginTop: 10 }} />
+                      <Text>
+                        <Text style={{ color: 'blue' }} onPress={() => { setSelectFromContacts(true) }}>Select a Contact</Text>
+                      </Text>
+
+                      <Button
+                        title="Search"
+                        onPress={() => searchEndorser({ searchTerm: searchTerm })}
+                      />
+                    </View>
+                  :
+                    <View>
+                      <Button
+                        title="Reset"
+                        onPress={() => setSearchResults(null)}
+                      />
+                    </View>
+                }
                 {
                   searchTerm && searchTerm.length === 26
                   ?
@@ -263,8 +281,6 @@ export function ReportScreen({ navigation }) {
                     <View />
                 }
                 <Text style={{ color: 'red' }}>{searchError}</Text>
-
-                <Text style={{ padding: 10 }}>(Only retrieves the 50 most recent matching claims.)</Text>
 
                 {
                   searchResults == null

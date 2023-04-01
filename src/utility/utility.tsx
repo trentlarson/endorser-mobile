@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { Button, Modal, Pressable, Text, TouchableHighlight, View } from 'react-native'
+import { Alert, Button, Modal, Pressable, Text, TouchableHighlight, View } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { useSelector } from 'react-redux'
 
@@ -380,14 +380,14 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                           })
                         }}
                       >
-                        <Text style={{ color: "blue" }}>Mark as given</Text>
+                        <Text style={{ color: "blue" }}>Record Given</Text>
                       </Pressable>
                     </View>
                   :
                     <View />
                 }
 
-                { /** Offer to help with a Plan **/
+                { /** Give to or Offer help with a Plan **/
 
                   source.claim['@type'] === 'PlanAction'
                   ?
@@ -395,11 +395,36 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                       <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
                       <Pressable
                         style={{ padding: 10 }}
-                        onPress={ () =>
-                          proceedToEditOffer(navigation, source.claim, source.handleId)
-                        }
+                        onPress={ () => {
+                          if (!source.handleId) {
+                            Alert.alert("You cannot give to a project with no identifier.")
+                          } else {
+                            proceedToEditOffer(navigation, source.claim, source.handleId)
+                          }
+                        }}
                       >
                         <Text style={{ color: "blue" }}>Offer Help</Text>
+                      </Pressable>
+
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () => {
+
+                          if (!source.handleId) {
+                            Alert.alert("You cannot give to a project with no identifier.")
+                            return
+                          }
+
+                          const giveAction = {
+                            "@context": "https://schema.org",
+                            "@type": "GiveAction",
+                            fulfills: { "@type": "PlanAction", identifier: source.handleId},
+                          }
+                          navigation.navigate('Create Credential', { incomingClaim: giveAction })
+                        }}
+                      >
+                        <Text style={{ color: "blue" }}>Record Given</Text>
                       </Pressable>
                     </View>
                   :

@@ -1,6 +1,4 @@
-import crypto from 'crypto'
 import Debug from 'debug'
-import * as didJwt from 'did-jwt'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
@@ -13,11 +11,11 @@ import { ContactSelectModal } from './ContactSelect'
 import { ItemSelectModal } from './ItemSelectModal'
 import { styles } from './style'
 import { onboarding } from '../data/onboarding'
-import { MASTER_COLUMN_VALUE, Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 import { BVCButton } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
-import { agent, dbConnection, HANDY_APP } from '../veramo/setup'
+import { dbConnection, HANDY_APP } from "../veramo/setup";
+import { useFocusEffect } from "@react-navigation/native";
 
 const debug = Debug('endorser-mobile:share-credential')
 
@@ -67,6 +65,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
       if (incomingClaim != null) {
         if (utility.isOffer(incomingClaim)) {
           setAskForOfferInfo(true)
+        } else if (utility.isGiveAction(incomingClaim)) {
+          setAskForGaveInfo(true)
         }
       }
     }
@@ -1036,6 +1036,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
   /**
     props has:
+
     - proceed function that takes the claim
     - cancel function
    **/
@@ -1045,9 +1046,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [amountStr, setAmountStr] = useState<number>('')
     const [invoiceIdentifier, setInvoiceIdentifier] = useState<string>('')
     const [description, setDescription] = useState<string>(null)
+    const [fulfillsId, setFulfillsId] = useState<string>('')
+    const [fulfillsType, setFulfillsType] = useState<string>('')
+    const [isFulfills, setIsFulfills] = useState<boolean>(false)
     const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
-    const [objectGiven, setObjectGiven] = useState<string>(null)
-    const [recipientId, setRecipientId] = useState<string>(null)
+    const [recipientId, setRecipientId] = useState<string>('')
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
     const [unit, setUnit] = useState<string>(INITIAL_SELECTED_BUTTON && INITIAL_SELECTED_BUTTON.value)
@@ -1055,8 +1058,13 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     const allContacts = useSelector((state) => state.contacts || [])
 
+    function toggleIsFulfills() {
+      console.log('toggling fulfills', isFulfills)
+      setIsFulfills((curVal) => !curVal);
+    }
+
     function toggleIsSpecificAmount() {
-      setIsSpecificAmount(!isSpecificAmount)
+      setIsSpecificAmount((curVal) => !curVal);
     }
 
     function setUnitSelection(buttons) {
@@ -1066,8 +1074,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
     }
 
     function possiblyFinish(proceedToFinish) {
-      if (!isSpecificAmount && !objectGiven) {
-        Alert.alert('You must give an object or an amount.')
+      if (!isSpecificAmount && !description) {
+        Alert.alert('You must give an amount or describe it.')
       } else if (isSpecificAmount && (!amountStr || !unit)) {
         Alert.alert('You must give a specific amount and unit.')
       } else if (isSpecificAmount && isNaN(Number(amountStr))) {
@@ -1078,24 +1086,41 @@ export function ConstructCredentialScreen({ navigation, route }) {
           "@type": "GiveAction",
         }
 
-        result.identifier = invoiceIdentifier || undefined
+        result.agent = agentId ? { identifier: agentId } : undefined
 
-        result.object =
-          !isSpecificAmount
-          ? objectGiven
-          : {
+        if (isFulfills) {
+          result.fulfills = {
+            "@type": fulfillsType,
+            identifier: fulfillsId,
+          }
+        } else {
+          result.recipient = recipientId ? { identifier: recipientId } : undefined
+        }
+
+        if (isSpecificAmount) {
+          result.object = {
             // TypeAndQuantityNode
             amountOfThisGood: Number(amountStr),
             unitCode: unit,
           }
 
-        result.agent = agentId ? { identifier: agentId } : undefined
-        result.recipient = recipientId ? { identifier: recipientId } : undefined
+        }
+
+        result.identifier = invoiceIdentifier || undefined
         result.description = description || undefined
         proceedToFinish(result)
       }
     }
 
+    useEffect(() => {
+      if (utility.isGiveAction(incomingClaim)) {
+        if (incomingClaim.fulfills) {
+          setIsFulfills(true)
+          setFulfillsId(incomingClaim.fulfills.identifier)
+          setFulfillsType(incomingClaim.fulfills["@type"])
+        }
+      }
+    }, [])
     return (
       <Modal
         animationType="slide"
@@ -1105,23 +1130,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
         <ScrollView>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-
-              {
-                selectAgentFromContacts
-                ? <ContactSelectModal
-                    cancel={ () => { setSelectAgentFromContacts(false) } }
-                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
-                  />
-                : <View/>
-              }
-              {
-                selectRecipientFromContacts
-                ? <ContactSelectModal
-                    cancel={ () => { setSelectRecipientFromContacts(false) } }
-                    proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
-                  />
-                : <View/>
-              }
 
               <View>
                 <Text style={styles.modalText}>Gave</Text>
@@ -1148,46 +1156,49 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   }
                 </View>
 
-                <View style={{ padding: 5 }}>
-                  <Text>Recipient</Text>
-                  <TextInput
-                    value={recipientId}
-                    onChangeText={setRecipientId}
-                    editable
-                    style={{ borderWidth: 1 }}
-                    autoCapitalize={'none'}
-                    autoCorrect={false}
-                  />
-                  {
-                    allContacts.length > 0
-                    ? <TouchableHighlight
-                        style={styles.moreButton}
-                        onPress={() => setSelectRecipientFromContacts(true)}
-                      >
-                        <Text>Pick</Text>
-                      </TouchableHighlight>
-                    : <View />
-                  }
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Invoice (ID)</Text>
-                  <TextInput
-                    value={invoiceIdentifier}
-                    onChangeText={setInvoiceIdentifier}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
                 {
-                  !isSpecificAmount ? (
+                  !isFulfills
+                  ? (
                     <View style={{ padding: 5 }}>
-                      <Text>Object Given</Text>
+                      <Text>Recipient</Text>
                       <TextInput
-                        value={objectGiven}
-                        onChangeText={setObjectGiven}
+                        value={recipientId}
+                        onChangeText={setRecipientId}
                         editable
-                        multiline={true}
+                        style={{ borderWidth: 1 }}
+                        autoCapitalize={'none'}
+                        autoCorrect={false}
+                      />
+                      {
+                        allContacts.length > 0
+                          ? <TouchableHighlight
+                            style={styles.moreButton}
+                            onPress={() => setSelectRecipientFromContacts(true)}
+                          >
+                            <Text>Pick</Text>
+                          </TouchableHighlight>
+                          : <View />
+                      }
+                    </View>
+                  ) : (
+                    <View />
+                  )
+                }
+                <CheckBox
+                  title='Dedicate to a project or offer'
+                  checked={isFulfills}
+                  onPress={toggleIsFulfills}
+                />
+                {
+                  isFulfills
+                  ? (
+                    <View style={{ padding: 5 }}>
+                      <Text>Project or Offer ID</Text>
+                      <TextInput
+                        value={fulfillsId}
+                        onChangeText={setFulfillsId}
+                        editable
+                        multiline={false}
                         style={{ borderWidth: 1 }}
                       />
                     </View>
@@ -1197,7 +1208,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 }
 
                 <CheckBox
-                  title="I'll specify an amount."
+                  title="Specify an amount"
                   checked={isSpecificAmount}
                   onPress={toggleIsSpecificAmount}
                 />
@@ -1249,12 +1260,21 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 }
 
                 <View style={{ padding: 5 }}>
-                  <Text>Comment</Text>
+                  <Text>Description</Text>
                   <TextInput
                     value={description}
                     onChangeText={setDescription}
                     editable
                     multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Invoice (ID)</Text>
+                  <TextInput
+                    value={invoiceIdentifier}
+                    onChangeText={setInvoiceIdentifier}
                     style={{ borderWidth: 1 }}
                   />
                 </View>
@@ -1274,6 +1294,24 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   <Text>Cancel</Text>
                 </TouchableHighlight>
               </View>
+
+              {
+                selectAgentFromContacts
+                  ? <ContactSelectModal
+                    cancel={ () => { setSelectAgentFromContacts(false) } }
+                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                  />
+                  : <View/>
+              }
+              {
+                selectRecipientFromContacts
+                  ? <ContactSelectModal
+                    cancel={ () => { setSelectRecipientFromContacts(false) } }
+                    proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
+                  />
+                  : <View/>
+              }
+
             </View>
           </View>
         </ScrollView>
@@ -1449,35 +1487,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
 
-              {
-                selectAgentFromContacts
-                ? <ContactSelectModal
-                    cancel={ () => { setSelectAgentFromContacts(false) } }
-                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
-                  />
-                : <View/>
-              }
-              {
-                selectRecipientFromContacts
-                ? <ContactSelectModal
-                    cancel={ () => { setSelectRecipientFromContacts(false) } }
-                    proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
-                  />
-                : <View/>
-              }
-              {
-                selectItemType
-                ? <ItemSelectModal
-                    list={ ['Creative Work', 'Event', 'Menu Item', 'Product', 'Service', 'Trip'] }
-                    cancel={ () => { setSelectItemType(false) } }
-                    proceed={ (type) => {
-                      setItemType(type.replace(' ', ''))
-                      setSelectItemType(false)
-                    }}
-                  />
-                : <View/>
-              }
-
               <View>
                 <Text style={styles.modalText}>Offer</Text>
 
@@ -1528,15 +1537,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
                       </TouchableHighlight>
                     : <View />
                   }
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Invoice (ID)</Text>
-                  <TextInput
-                    value={invoiceIdentifier}
-                    onChangeText={setInvoiceIdentifier}
-                    style={{ borderWidth: 1 }}
-                  />
                 </View>
 
                 {
@@ -1591,7 +1591,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 }
 
                 <CheckBox
-                  title='Declare a specific amount'
+                  title='Specify an amount'
                   checked={isSpecificAmount}
                   onPress={toggleIsSpecificAmount}
                 />
@@ -1700,6 +1700,15 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   />
                 </View>
 
+                <View style={{ padding: 5 }}>
+                  <Text>Invoice (ID)</Text>
+                  <TextInput
+                    value={invoiceIdentifier}
+                    onChangeText={setInvoiceIdentifier}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
                 <View style={{ padding: 10 }} />
                 <TouchableHighlight
                   style={styles.saveButton}
@@ -1715,6 +1724,35 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   <Text>Cancel</Text>
                 </TouchableHighlight>
               </View>
+
+              {
+                selectAgentFromContacts
+                  ? <ContactSelectModal
+                    cancel={ () => { setSelectAgentFromContacts(false) } }
+                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                  />
+                  : <View/>
+              }
+              {
+                selectRecipientFromContacts
+                  ? <ContactSelectModal
+                    cancel={ () => { setSelectRecipientFromContacts(false) } }
+                    proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
+                  />
+                  : <View/>
+              }
+              {
+                selectItemType
+                  ? <ItemSelectModal
+                    list={ ['Creative Work', 'Event', 'Menu Item', 'Product', 'Service', 'Trip'] }
+                    cancel={ () => { setSelectItemType(false) } }
+                    proceed={ (type) => {
+                      setItemType(type.replace(' ', ''))
+                      setSelectItemType(false)
+                    }}
+                  />
+                  : <View/>
+              }
 
             </View>
           </View>
