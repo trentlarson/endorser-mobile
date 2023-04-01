@@ -317,6 +317,12 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
         : ""
     return contactInfo + " offered" + offering + offerRecipientInfo
 
+  } else if (type === "PlanAction") {
+
+    const claimer = claim.agent?.identifier || claim.issuer
+    const claimerInfo = didInfo(claimer, identifiers, contacts)
+    return claimerInfo + " announced a project: " + claim.name
+
   } else if (type === "Tenure") {
     // party.did is for legacy data, before March 2023
     const claimer = claim.party?.identifier || claim.party?.did || record.issuer

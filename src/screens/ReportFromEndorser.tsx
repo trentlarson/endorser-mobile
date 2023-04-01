@@ -235,7 +235,7 @@ export function ReportScreen({ navigation }) {
             Examples:&nbsp;
             <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('programming') }}>programming</Text>,&nbsp;
             <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('Training') }}>Training</Text>,&nbsp;
-            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('AcceptAction') }}>AcceptAction</Text>
+            <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('PlanAction') }}>PlanAction</Text>
           </Text>
           <View style={{ marginTop: 10 }} />
           <Text>

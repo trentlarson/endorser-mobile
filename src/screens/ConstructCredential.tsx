@@ -1307,8 +1307,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [isItemDescribed, setIsItemDescribed] = useState<boolean>(false)
     const [itemDescription, setItemDescription] = useState<string>(null)
     const [itemType, setItemType] = useState<string>('CreativeWork')
-    const [minOffersStr, setMinOffersStr] = useState<number>(0)
-    const [minOffersAmountStr, setMinOffersAmountStr] = useState<number>(0)
+    const [minOffersStr, setMinOffersStr] = useState<string>('0')
+    const [minOffersAmountStr, setMinOffersAmountStr] = useState<string>('0')
     const [parentIdentifier, setParentIdentifier] = useState<string>('')
     const [parentInfoReadOnly, setParentInfoReadOnly] = useState<boolean>(false)
     const [parentType, setParentType] = useState<string>('')
@@ -1355,14 +1355,16 @@ export function ConstructCredentialScreen({ navigation, route }) {
         Alert.alert('You must describe your offer or give a specific amount.')
       } else if (isRequiringOffers && !(minOffersStr || (minOffersAmountStr && unit))) {
         Alert.alert('For minimums, give a number of offers or a total amount & units.')
-      } else if (isRequiringOffers && minOffersStr && !isFinite(minOffersStr)) {
-        Alert.alert('For a minimum number of offers, must choose a valid number.')
-      } else if (isRequiringOffers && minOffersStr && Number(minOffersStr) <= 0) {
-        Alert.alert('For a minimum number of offers, must choose a positive number.')
       } else if (isRequiringOffers && minOffersAmountStr && !isFinite(minOffersAmountStr)) {
         Alert.alert('For a minimum amount in offers, must choose a valid number.')
-      } else if (isRequiringOffers && minOffersAmountStr && Number(minOffersAmountStr) <= 0) {
-        Alert.alert('For a minimum amount in offers, must choose a positive number.')
+      } else if (isRequiringOffers && minOffersStr && !isFinite(minOffersStr)) {
+        Alert.alert('For a minimum number of offers, must choose a valid number.')
+      } else if (
+        isRequiringOffers
+        && (!minOffersAmountStr || Number(minOffersAmountStr) <= 0)
+        && (!minOffersStr || Number(minOffersStr) <= 0)
+      ) {
+        Alert.alert('For a minimum amount or number of offers, must choose a number above 0.')
       } else {
         let result = {
           "@context": "https://schema.org",
@@ -1393,11 +1395,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
         if (isRequiringOffers && (minOffersStr || minOffersAmountStr)) {
           result.actionAccessibilityRequirement = {}
-          if (minOffersStr) {
+          if (minOffersStr && Number(minOffersStr) > 0) {
             result.actionAccessibilityRequirement.requiresOffers =
               Number(minOffersStr)
           }
-          if (minOffersAmountStr) {
+          if (minOffersAmountStr && Number(minOffersAmountStr) > 0) {
             result.actionAccessibilityRequirement.requiresOffersTotal = {
               // TypeAndQuantityNode
               amountOfThisGood: Number(minOffersAmountStr),
