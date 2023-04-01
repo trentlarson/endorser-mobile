@@ -399,34 +399,6 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     <View />
                 }
 
-                { /** Take a Loan or a Give **/
-
-                  !isUser(source.issuer)
-                  && (source.claim['@type'] === 'LoanOrCredit'
-                     || source.claim['@type'] === 'GiveAction')
-                  ?
-                    <View style={{ flexDirection: 'row', padding: 10 }}>
-                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
-                      <Pressable
-                        style={{ padding: 10 }}
-                        onPress={ () =>
-                          navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, {
-                            credentialSubject: {
-                              "@context": "https://schema.org",
-                              "@type": "TakeAction",
-                              agent: { identifier: identifiers[0].did },
-                              object: removeSchemaContext(source.claim),
-                            }
-                          })
-                        }
-                      >
-                        <Text style={{ color: "blue" }}>Take</Text>
-                      </Pressable>
-                    </View>
-                  :
-                    <View />
-                }
-
                 { /** Offer to help with a Plan **/
                   source.claim['@type'] === 'PlanAction'
                   ?
