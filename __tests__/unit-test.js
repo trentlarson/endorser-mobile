@@ -101,7 +101,7 @@ test('account Offers & Gives', () => {
   })
   outputExp.allPromised = [input[1], input[2]]
   outputExp.outstandingCurrencyEntries = {
-    "HUR": [[undefined, OFFER_1], [OFFER_2_ID, input[2]]]
+    "HUR": [[undefined, input[1]], [OFFER_2_ID, input[2]]]
   }
   outputExp.outstandingCurrencyTotals = { "HUR": 5 }
   outputExp.outstandingInvoiceTotals = { "0f21cc1d44412b4ac4cb47973554fd79": 2 }
