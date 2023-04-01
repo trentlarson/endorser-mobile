@@ -157,7 +157,8 @@ export function MyCredentialsScreen({ navigation }) {
   return (
     <SafeAreaView>
       <ScrollView>{/* vertical scrolling */}
-        <ScrollView horizontal={ true }>{/* horizontal scrolling for long string values */}
+        {/* horizontal scrolling for actions & long string values */}
+        <ScrollView horizontal={ true }>
 
           <View style={{ padding: 20, height: screenHeight }}>
             <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Only Yours</Text>
@@ -208,6 +209,11 @@ export function MyCredentialsScreen({ navigation }) {
                     keyExtractor={item => item.id.toString()}
                     ItemSeparatorComponent={() => <View style={styles.line} />}
                     ListEmptyComponent={<Text>{ searchResults == null ? "" : "None" }</Text>}
+                    /* fixed height is critical for iOS vertical scroll */
+                    style={{
+                      borderWidth: searchResults == null ? 0 : 1,
+                      height: searchResults == null ? 60 : 500,
+                    }}
                     ListHeaderComponent={
                       <View>
                         {

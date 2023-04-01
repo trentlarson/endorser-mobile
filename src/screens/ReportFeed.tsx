@@ -143,49 +143,53 @@ export function ReportFeedScreen({ navigation, route }) {
               }
             </Text>
             <Text style={{ color: 'red' }}>{ subfeedError }</Text>
-            <FlatList
-              data={ subfeedData }
-              keyExtractor={ item => item.id }
-              initialNumToRender={ 10 }
-              renderItem={ data => (
-                <RenderOneRecord
-                  source={ data.item }
-                  navigation={ navigation }
-                  afterItemCss={ styles.line }
-                />
-              )}
-              style={{ borderWidth: 1, height: subfeedData.length > 0 ? 400 : 60 }}
-              ListFooterComponent={(
-                <View>
-                  <ActivityIndicator color="#00ff00" animating={ loadingSubfeedRecent }/>
-                  <View style={{ display: (loadingSubfeedRecent ? "none" : "flex") }}>
-                    <View style={{ display: (subfeedHitLimit ? "flex" : "none") }}>
-                      {
-                        clickedSubLoad
-                        ? <Text>
-                            Checked further back in time.
-                            It is possible that there were no matches in that time frame.
-                            There may be more even further in the past.
-                          </Text>
-                        : <View />
-                      }
-                      <Button
-                        title="Load More"
-                        onPress={() => {
-                          updateSubfeed(subfeed)
-                          setClickedSubLoad(true)
-                        }}
-                      />
-                    </View>
-                    <View style={{ display: (subfeedHitLimit ? "none" : "flex") }}>
-                      <Text>
-                        You're all caught up.
-                      </Text>
+            {/* horizontal scrolling for actions & long string values */}
+            <ScrollView horizontal={ true }>
+              <FlatList
+                data={ subfeedData }
+                keyExtractor={ item => item.id }
+                initialNumToRender={ 10 }
+                renderItem={ data => (
+                  <RenderOneRecord
+                    source={ data.item }
+                    navigation={ navigation }
+                    afterItemCss={ styles.line }
+                  />
+                )}
+                /* fixed height is critical for iOS vertical scroll */
+                style={{ borderWidth: 1, height: subfeedData.length > 0 ? 500 : 60 }}
+                ListFooterComponent={(
+                  <View>
+                    <ActivityIndicator color="#00ff00" animating={ loadingSubfeedRecent }/>
+                    <View style={{ display: (loadingSubfeedRecent ? "none" : "flex") }}>
+                      <View style={{ display: (subfeedHitLimit ? "flex" : "none") }}>
+                        {
+                          clickedSubLoad
+                          ? <Text>
+                              Checked further back in time.
+                              It is possible that there were no matches in that time frame.
+                              There may be more even further in the past.
+                            </Text>
+                          : <View />
+                        }
+                        <Button
+                          title="Load More"
+                          onPress={() => {
+                            updateSubfeed(subfeed)
+                            setClickedSubLoad(true)
+                          }}
+                        />
+                      </View>
+                      <View style={{ display: (subfeedHitLimit ? "none" : "flex") }}>
+                        <Text>
+                          You're all caught up.
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                </View>
-              )}
-            />
+                )}
+              />
+            </ScrollView>
           </View>
         ) : (
           <View />
@@ -205,37 +209,41 @@ export function ReportFeedScreen({ navigation, route }) {
               }
             </Text>
             <Text style={{ color: 'red' }}>{ feedError }</Text>
-            <FlatList
-              data={ feedData }
-              keyExtractor={ item => item.id }
-              initialNumToRender={ 10 }
-              renderItem={ data => (
-                <RenderOneRecord
-                  source={ data.item }
-                  navigation={ navigation }
-                  afterItemCss={ styles.line }
-                />
-              )}
-              style={{ borderWidth: 1, height: feedData.length > 0 ? 500 : 60 }}
-              ListFooterComponent={(
-                <View>
-                  <ActivityIndicator color="#00ff00" animating={ loadingAllRecent }/>
-                  <View style={{ display: (loadingAllRecent ? "none" : "flex") }}>
-                    <View style={{ display: (feedHitLimit ? "flex" : "none") }}>
-                      <Button
-                        title="Load More"
-                        onPress={ updateAllFeed }
-                      />
-                    </View>
-                    <View style={{ display: (feedHitLimit ? "none" : "flex") }}>
-                      <Text>
-                        You're all caught up.
-                      </Text>
+            {/* horizontal scrolling for actions & long string values */}
+            <ScrollView horizontal={ true }>
+              <FlatList
+                data={ feedData }
+                keyExtractor={ item => item.id }
+                initialNumToRender={ 10 }
+                renderItem={ data => (
+                  <RenderOneRecord
+                    source={ data.item }
+                    navigation={ navigation }
+                    afterItemCss={ styles.line }
+                  />
+                )}
+                /* fixed height is critical for iOS vertical scroll */
+                style={{ borderWidth: 1, height: feedData.length > 0 ? 500 : 60 }}
+                ListFooterComponent={(
+                  <View>
+                    <ActivityIndicator color="#00ff00" animating={ loadingAllRecent }/>
+                    <View style={{ display: (loadingAllRecent ? "none" : "flex") }}>
+                      <View style={{ display: (feedHitLimit ? "flex" : "none") }}>
+                        <Button
+                          title="Load More"
+                          onPress={ updateAllFeed }
+                        />
+                      </View>
+                      <View style={{ display: (feedHitLimit ? "none" : "flex") }}>
+                        <Text>
+                          You're all caught up.
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                </View>
-              )}
-            />
+                )}
+              />
+            </ScrollView>
           </View>
         ) : (
           <Text

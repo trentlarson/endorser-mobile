@@ -145,9 +145,12 @@ export function ReportScreen({ navigation }) {
       return <AcceptAggregateList acceptRecords={filteredResults1} />
     } else {
       return (
-        <ScrollView horizontal={ true }>{/* horizontal scrolling for long string values */}
+        /* horizontal scrolling for actions & long string values */
+        <ScrollView horizontal={ true }>
           <FlatList
             data={filteredResults1}
+            /* fixed height is critical for iOS vertical scroll */
+            style={{ borderWidth: 1, height: 500 }}
             renderItem={datum =>
               <RenderOneRecord
                 source={ datum.item }
