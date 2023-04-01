@@ -115,9 +115,10 @@ const APP_IMAGE =
     {
     HANDY_APP
     ? (
+      // this 'require' runs even when HANDY_APP is false... ug
       <Image
         style={{ height: 30, marginLeft: '45%', width: 30 }}
-        source={require('./goodlaw-icon-white.png')}
+        source={ require('./image/goodlaw-icon-white.png') }
       />
     ) : (
       <View />
@@ -303,7 +304,7 @@ function HomeScreen({ navigation }) {
         // on android: Note that I get nothing from notifee when my app is in the background and a notification press brings it back.
 
         // on android: handles from terminated state (not from foreground or background)
-        // on ios: handles from terminated state (even though docs say that getInitialNotification does nothing) so we'll skip and let the onForegroundEvent handle it 
+        // on ios: handles from terminated state (even though docs say that getInitialNotification does nothing) so we'll skip and let the onForegroundEvent handle it
         if (Platform.OS === 'android') {
           const initNotify = await notifee.getInitialNotification()
           // note that the pressAction inside initNotify.android is typically undefined
