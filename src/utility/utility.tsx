@@ -269,10 +269,10 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
 
   const summary = utility.claimSpecialDescription(source, identifiers, contacts)
 
-  const addHandleIfMissing = (obj, handleId) => {
+  const addHandleAsIdIfMissing = (obj, handleId) => {
     if (!obj.handleId && handleId) {
       const result = R.clone(obj)
-      result.handleId = handleId
+      result.identifier = handleId
       return result
     } else {
       return obj
@@ -462,7 +462,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                             credentialSubject: {
                               "@context": "https://schema.org",
                               "@type": "AgreeAction",
-                              object: removeSchemaContext(addHandleIfMissing(source.claim, source.handleId)),
+                              object: removeSchemaContext(addHandleAsIdIfMissing(source.claim, source.handleId)),
                             }
                           })
                         }
