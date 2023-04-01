@@ -22,6 +22,7 @@ export function MyGivenScreen({ navigation, route }) {
       <FlatList
         data={givenList}
         keyExtractor={(item, index) => '' + index}
+        style={{ padding: 20 }}
         ListEmptyComponent={<Text>None</Text>}
         renderItem={(data) => {
           let label, recipient
@@ -54,7 +55,6 @@ export function MyGivenScreen({ navigation, route }) {
             </View>
           )
         }}
-        style={{ padding: 10 }}
       />
     </SafeAreaView>
   )

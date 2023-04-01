@@ -8,7 +8,9 @@ export function MyOffersScreen({ navigation, route }) {
 
   const {
     currencyLabel,
-    offerList, // list of two-element array: [invoice ID & full claim entry]
+    // list of two-element array: [invoice ID & full claim entry]
+    // and those without ID or recipient will have a invoice ID of undefined
+    offerList,
   } = route.params
 
   const allIdentifiers = useSelector((state) => state.identifiers || [])
@@ -19,8 +21,8 @@ export function MyOffersScreen({ navigation, route }) {
       <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Outstanding Promised { currencyLabel }</Text>
       <FlatList
         data={offerList}
-        keyExtractor={item => item[0] || "undefined"} // those without ID or recipient will have a key of undefined
-        style={{ padding: 10 }}
+        keyExtractor={(item, index) => '' + index}
+        style={{ padding: 20 }}
         ListEmptyComponent={<Text>None</Text>}
         renderItem={(data) => {
           let label, recipient
