@@ -290,15 +290,25 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
     return issuer + " accepted " + claimSummary(claim.object)
 
   } else if (type === "GiveAction") {
+    // agent.did is for legacy data, before March 2023
+    const giver = claim.agent?.identifier || record.issuer
+    const giverInfo = didInfo(giver, identifiers, contacts)
     const gaveAmount =
       claim.object?.amountOfThisGood
       ? displayAmount(claim.object.unitCode, claim.object.amountOfThisGood)
       : claimSummary(claim.object)
-    return issuer + " gave " + gaveAmount
+    // recipient.did is for legacy data, before March 2023
+    const gaveRecipientId = claim.recipient?.identifier || claim.recipient?.did
+    const gaveRecipientInfo =
+      gaveRecipientId
+      ? " to " + didInfo(gaveRecipientId, identifiers, contacts)
+      : ""
+    return giverInfo + " gave " + gaveAmount + gaveRecipientInfo
 
   } else if (type === "JoinAction") {
     // agent.did is for legacy data, before March 2023
-    const contactInfo = didInfo(claim.agent.identifier || claim.agent.did, identifiers, contacts)
+    const agent = claim.agent?.identifier || claim.agent?.did || claim.issuer
+    const contactInfo = didInfo(agent, identifiers, contacts)
 
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
     eventOrganizer = eventOrganizer || "";
@@ -312,7 +322,8 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
     return contactInfo + fullEvent + eventDate;
 
   } else if (isOffer(claim)) {
-    const contactInfo = didInfo(record.issuer, identifiers, contacts)
+    const offerer = claim.offeredBy?.identifier || record.issuer
+    const contactInfo = didInfo(offerer, identifiers, contacts)
     let offering = ""
     if (claim.includesObject) {
       offering += " " + displayAmount(claim.includesObject.unitCode, claim.includesObject.amountOfThisGood)
@@ -320,11 +331,18 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
     if (claim.itemOffered?.description) {
       offering += ", saying: " + claim.itemOffered?.description
     }
-    return contactInfo + " offered" + offering
+    // recipient.did is for legacy data, before March 2023
+    const offerRecipientId = claim.recipient?.identifier || claim.recipient?.did
+    const offerRecipientInfo =
+      offerRecipientId
+        ? " to " + didInfo(offerRecipientId, identifiers, contacts)
+        : ""
+    return contactInfo + " offered" + offering + offerRecipientInfo
 
   } else if (type === "Tenure") {
     // party.did is for legacy data, before March 2023
-    const contactInfo = didInfo(claim.party.identifier || claim.party.did, identifiers, contacts)
+    const claimer = claim.party?.identifier || claim.party?.did || record.issuer
+    const contactInfo = didInfo(claimer, identifiers, contacts)
     const polygon = claim.spatialUnit?.geo?.polygon || ""
     return contactInfo + " claimed [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
 
