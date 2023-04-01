@@ -28,7 +28,6 @@ export function ContactsScreen({ navigation, route }) {
   const [contactUrl, setContactUrl] = useState<string>('')
   const [editContactIndex, setEditContactIndex] = useState<number>(null)
   const [editContactName, setEditContactName] = useState<string>(null)
-  const [finishedImport, setFinishedImport] = useState<boolean>(false)
   const [inputContactData, setInputContactData] = useState<boolean>(false)
   const [inputContactUrl, setInputContactUrl] = useState<boolean>(false)
   const [loadingAction, setLoadingAction] = useState<Record<string,boolean>>({})
@@ -45,9 +44,7 @@ export function ContactsScreen({ navigation, route }) {
   // these are tracking progress when saving data
   const [actionErrors, setActionErrors] = useState<Array<string>>([])
   const [csvMessages, setCsvMessages] = useState<Array<string>>([])
-  const [doneSavingStoring, setDoneSavingStoring] = useState<boolean>()
   const [saving, setSaving] = useState<boolean>(false)
-  const [storingVisibility, setStoringVisibility] = useState<boolean>(false)
 
   const allIdentifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
@@ -221,10 +218,10 @@ export function ContactsScreen({ navigation, route }) {
         } else if (contactArray.length > 1 && contactArray[1] === '') {
           messages = R.concat(messages, ['Skipped empty DID in the row for "' + contactArray[0] + '".'])
         } else if (contactArray[0] === contactFields[0] && messages.length === 0) {
-          messages = R.concat(messages, ['Skipped first row with "' + contactFields[0] + '" field of "' + contactFields[0] + '". If you really want to include that, make a header row.'])
+          messages = R.concat(messages, ['Skipped first row with "' + contactFields[0] + '" field of "' + contactArray[0] + '". If you really want to include that, make a header row.'])
         } else {
           const contact = new Contact()
-          for (const col = 0; col < contactFields.length; col++) {
+          for (let col = 0; col < contactFields.length; col++) {
             if (col < contactArray.length) {
               let value = contactArray[col]
               if (typeof value === 'string') {
@@ -277,7 +274,7 @@ export function ContactsScreen({ navigation, route }) {
             messages = R.concat(messages, ['Got an error saving contacts: ' + err])
           })
       }
-    } catch (e) {
+    } catch (err) {
       messages = R.concat(messages, ['Got an error saving contacts: ' + err])
     }
 
@@ -288,12 +285,13 @@ export function ContactsScreen({ navigation, route }) {
 
   const createContactsFromCsvTextInput = async () => {
     setSaving(true)
-    let result = await createContactsFromThisCsvText(contactsCsvText)
+    const result = await createContactsFromThisCsvText(contactsCsvText)
     setSaving(false)
     if (result.messages) {
-      setActionErrors(errors => R.concat(errors, [result.messages]))
+      setActionErrors(errors => R.concat(errors, result.messages))
+    } else {
+      setContactsCsvText('')
     }
-    setContactsCsvText('')
     setWantsCsvText(false)
   }
 
@@ -306,10 +304,7 @@ export function ContactsScreen({ navigation, route }) {
       }
       return text
     }).then(async result => {
-      const createResult = await createContactsFromThisCsvText(result)
-      if (createResult.messages) {
-        setActionErrors(errors => R.concat(errors, [createResult.messages]))
-      }
+      return createContactsFromThisCsvText(result)
     })
     .catch((err) => {
       setActionErrors(errors => R.concat(errors, ['Got an error retrieving contacts: ' + err]))
@@ -318,9 +313,13 @@ export function ContactsScreen({ navigation, route }) {
 
   const createContactsFromCsvUrlInput = async () => {
     setSaving(true)
-    await createContactsFromThisCsvUrl(contactsCsvUrl)
+    const result = await createContactsFromThisCsvUrl(contactsCsvUrl)
     setSaving(false)
-    setContactsCsvUrl('')
+    if (result.messages) {
+      setActionErrors(errors => R.concat(errors, result.messages))
+    } else {
+      setContactsCsvUrl('')
+    }
     setWantsCsvUrl(false)
   }
 
