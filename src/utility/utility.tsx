@@ -354,12 +354,13 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                             agent: { identifier: source.claim.offeredBy?.identifier },
                             recipient: source.claim.recipient,
                           }
-                          if (source.claim.identifier) {
+                          if (source.handleId || source.claim.identifier) {
                             giveActionForm.fulfills = {
                               "@type": source.claim['@type'],
-                              identifier: source.claim.identifier,
+                              identifier: source.handleId || source.claim.identifier,
                             }
                           }
+                          // There are potentially both an object & an item given.
                           let giveActions = []
                           if (source.claim.includesObject) {
                             const objectGive = R.clone(giveActionForm)

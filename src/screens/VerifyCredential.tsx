@@ -2,7 +2,7 @@ import didJwt from 'did-jwt'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, Modal, SafeAreaView, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Button, FlatList, Modal, SafeAreaView, ScrollView, Text, View } from "react-native";
 import Clipboard from '@react-native-community/clipboard'
 import { CheckBox } from 'react-native-elements'
 import QRCodeScanner from 'react-native-qrcode-scanner'
@@ -159,10 +159,14 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [endorserId, setEndorserId] = useState<string>('')
   const [howLongAgo, setHowLongAgo] = useState<string>('')
   const [issuer, setIssuer] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(true)
+  const [loadingVer, setLoadingVer] = useState<boolean>(true)
+  const [loadingTotals, setLoadingTotals] = useState<boolean>(false)
   const [numHidden, setNumHidden] = useState<number>(0)
+  const [planOfferTotals, setPlanOfferTotals] = useState<Record<string, number>>({})
+  const [planGiveTotals, setPlanGiveTotals] = useState<Record<string, number>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [showMyQr, setShowMyQr] = useState<boolean>(false)
+  const [totalsError, setTotalsError] = useState<string>('')
   const [veriCredObject, setVeriCredObject] = useState<any>()
   const [verifyError, setVerifyError] = useState<string>('')
   const [visibleIdList, setVisibleIdList] = useState<string[]>([])
@@ -197,7 +201,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
         // If from the server (from a wrappedClaim) then it's constructed from those pieces.
         let vcObj = veriCred || (veriCredStr && JSON.parse(veriCredStr))
 
-        setLoading(true)
+        setLoadingVer(true)
         setConfirmError('')
         setDetectedSigInvalid(false)
         setDetectedSigProblem(false)
@@ -216,7 +220,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           await fetch(url, {
             headers: {
               "Content-Type": "application/json",
-              "Uport-Push-Token": userToken
+              "Authorization": "Bearer " + userToken
             }})
             .then(async response => {
               if (response.status === 200) {
@@ -342,7 +346,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
             await fetch(url, {
               headers: {
                 "Content-Type": "application/json",
-                "Uport-Push-Token": userToken
+                "Authorization": "Bearer " + userToken
               }})
               .then(async response => {
                 if (response.status === 200) {
@@ -404,11 +408,79 @@ export function VerifyCredentialScreen({ navigation, route }) {
         }
 
         setVeriCredObject(vcObj)
-        setLoading(false)
+        setLoadingVer(false)
       }
 
       verifyAll()
 
+    }, [])
+  )
+
+  // also load totals if this is a plan
+  useFocusEffect(
+    React.useCallback(() => {
+      async function loadTotals() {
+        setLoadingTotals(true)
+
+        const url =
+          appStore.getState().settings.apiServer
+          + '/api/v2/report/giveTotals?planId='
+          + encodeURIComponent(wrappedClaim.handleId)
+        console.log('plan url', url)
+        const userToken = await utility.accessToken(identifiers[0])
+        await fetch(url, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + userToken
+          }
+        })
+        .then(async response => {
+          if (response.status === 200) {
+            return response.json()
+          } else {
+            setTotalsError('Could not load given totals from server.')
+          }
+        })
+        .then(data => {
+          console.log('give data', data)
+          setPlanGiveTotals(data.data)
+        })
+        .catch(err =>
+          setTotalsError('Got error loading given totals: ' + err)
+        )
+
+        const url2 =
+          appStore.getState().settings.apiServer
+          + '/api/v2/report/offerTotals?planId='
+          + encodeURIComponent(wrappedClaim.handleId)
+        const userToken2 = await utility.accessToken(identifiers[0])
+        await fetch(url2, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + userToken2
+          }
+        })
+          .then(async response => {
+            if (response.status === 200) {
+              return response.json()
+            } else {
+              setTotalsError('Could not load offered totals from server.')
+            }
+          })
+          .then(data => {
+            console.log('offer data', data)
+            setPlanOfferTotals(data.data)
+          })
+          .catch(err =>
+            setTotalsError('Got error loading offered totals: ' + err)
+          )
+
+        setLoadingTotals(false)
+      }
+
+      if (wrappedClaim.claimType === 'PlanAction') {
+        loadTotals()
+      }
     }, [])
   )
 
@@ -418,7 +490,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Details</Text>
           {
-            loading
+            loadingVer
             ? <ActivityIndicator color="#00FF00" />
             : <View style={{ marginTop: 20}}/>
           }
@@ -478,8 +550,54 @@ export function VerifyCredentialScreen({ navigation, route }) {
                   proceedToEditOffer(navigation, credentialSubject, wrappedClaim?.handleId)
                 }
               >
+                Record given help with this activity
+              </Text>
+
+              <Text
+                style={{ color: 'blue', ...styles.centeredText }}
+                onPress={() =>
+                  proceedToEditOffer(navigation, credentialSubject, wrappedClaim?.handleId)
+                }
+              >
                 Offer help with this activity
               </Text>
+
+              <Text style={{ fontWeight: 'bold' }}>Give Totals</Text>
+              {/* These currency-amount lists should be small. */}
+              {
+                loadingTotals
+                ? <ActivityIndicator color="#00FF00" />
+                :
+                  R.isEmpty(planGiveTotals)
+                  ?
+                    <Text>None</Text>
+                  :
+                    R.keys(planGiveTotals).map(key =>
+                      <Text key={ key }>
+                        { utility.displayAmount(key, planGiveTotals[key]) }
+                      </Text>
+                    )
+              }
+
+              <Text style={{ fontWeight: 'bold', marginTop: 10 }}>OfferTotals</Text>
+              {/* These currency-amount lists should be small. */}
+              {
+                loadingTotals
+                ? <ActivityIndicator color="#00FF00" />
+                :
+                  R.isEmpty(planGiveTotals)
+                  ?
+                    <Text>None</Text>
+                  :
+                    R.keys(planOfferTotals).map(key =>
+                      <Text key={ key }>
+                        { utility.displayAmount(key, planOfferTotals[key]) }
+                      </Text>
+                    )
+              }
+
+              <Text style={{ color: 'red' }}>{ totalsError }</Text>
+
               <View style={{ padding: 10 }} />
             </View>
           :
@@ -493,7 +611,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Confirmations</Text>
 
           {
-            loading
+            loadingVer
             ? <ActivityIndicator color="#00FF00" />
             : <View style={{ marginTop: 20}}/>
           }
