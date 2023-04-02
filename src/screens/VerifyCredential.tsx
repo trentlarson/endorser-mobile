@@ -550,15 +550,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
                   proceedToEditOffer(navigation, credentialSubject, wrappedClaim?.handleId)
                 }
               >
-                Record given help with this activity
-              </Text>
-
-              <Text
-                style={{ color: 'blue', ...styles.centeredText }}
-                onPress={() =>
-                  proceedToEditOffer(navigation, credentialSubject, wrappedClaim?.handleId)
-                }
-              >
                 Offer help with this activity
               </Text>
 
