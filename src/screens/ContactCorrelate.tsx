@@ -234,6 +234,16 @@ export function ContactCorrelateScreen({ navigation }) {
             contact in common.
           </Text>
 
+          <Text style={{ marginTop: 10 }}>
+            You and that person must run this process and complete it within
+            one minute.
+          </Text>
+
+          <Text style={{ marginLeft: 10, marginTop: 10 }}>
+            Each time you run it together, you may get a different matching
+            contact. You can run it as many times as you wish.
+          </Text>
+
           <Text style={{ marginLeft: 10, marginTop: 10 }}>
             Nobody else will see all your contacts; they are
             hidden from your counterparty by an intermediate server, and they are
