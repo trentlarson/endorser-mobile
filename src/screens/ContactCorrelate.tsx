@@ -52,8 +52,6 @@ export function ContactCorrelateScreen({ navigation }) {
 
   const checkMatch = (result, contactHashes) => {
     // we get a match immediately if the counterparty sent first
-    console.log('repeat sentContactHashes', contactHashes)
-    console.log('got result', result, R.find(hash => hash == result, contactHashes))
     if (result && !R.find(hash => hash == result, contactHashes)) {
       // something is very wrong because it returned one that wasn't sent
       setFoundMatch(undefined)
@@ -61,7 +59,6 @@ export function ContactCorrelateScreen({ navigation }) {
     } else {
       const found =
         R.find(contact => hashDidWithPass(password)(contact.did) == result, allContacts)
-      console.log('got result found:', found)
       setFoundMatch(found || null)
     }
   }
@@ -80,9 +77,7 @@ export function ContactCorrelateScreen({ navigation }) {
     const token = await utility.accessToken(allIdentifiers[0])
     const payload =
       allContacts.map(contact => hashDidWithPass(password)(contact.did))
-    console.log('setting sentContactHashes', payload)
     setSentContactHashes(payload)
-    console.log('sent hashes', payload)
     await fetch(
       endorserApiServer
       + '/api/util/cacheContactList?counterparty='
@@ -95,10 +90,8 @@ export function ContactCorrelateScreen({ navigation }) {
       },
       body: JSON.stringify({ contactHashes: payload }),
     }).then(async response => {
-      console.log('response',response.status,response.status==201, response)
       if (response.status == 201) {
         const resultData = await response.json()
-        console.log('result: ', resultData)
         if (resultData.data == RESULT_NEED_DATA) {
           setFoundMatch(undefined)
           setMatching(true)
@@ -165,7 +158,6 @@ export function ContactCorrelateScreen({ navigation }) {
       .then(async response => {
         if (response.status == 200) {
           const resultData = await response.json()
-          console.log('result: ', resultData)
           if (resultData.data == RESULT_NEED_DATA) {
             setFoundMatch(undefined)
             setMatching(true)
