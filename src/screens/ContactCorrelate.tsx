@@ -2,7 +2,7 @@ import crypto from "crypto";
 import * as R from "ramda";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
+  ActivityIndicator, Alert,
   Button,
   Modal,
   SafeAreaView,
@@ -43,7 +43,7 @@ export function ContactCorrelateScreen({ navigation }) {
   const [waitingForCounterparty, setWaitingForCounterparty] = useState<boolean>(false)
   const [matchError, setMatchError] = useState<string>('')
   const [matching, setMatching] = useState<boolean>(false)
-  const [password, setPassword] = useState<string>('unicord')
+  const [password, setPassword] = useState<string>('')
   const [selectCounterpartyFromContacts, setSelectCounterpartyFromContacts] = useState<boolean>(false)
   const [sentContactHashes, setSentContactHashes] = useState<Array<string>>([])
 
@@ -76,7 +76,10 @@ export function ContactCorrelateScreen({ navigation }) {
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(allIdentifiers[0])
     const payload =
-      allContacts.map(contact => hashDidWithPass(password)(contact.did))
+      // only taking 500 because of limit on server payload size
+      R.take(500, allContacts).map(
+        contact => hashDidWithPass(password)(contact.did)
+      )
     setSentContactHashes(payload)
     await fetch(
       endorserApiServer
@@ -207,7 +210,13 @@ export function ContactCorrelateScreen({ navigation }) {
   const foundMessage = (matchResult: Contact) => {
     return (
       matchResult != null
-        ? <Text>Result: A match was found! { matchResult.did }</Text>
+        ?
+          <View>
+            <Text style={{ textAlign: 'center' }}>Result: A match was found!</Text>
+            <Text style={{ textAlign: 'center' }}>
+              { utility.didInfo(matchResult.did, allIdentifiers, allContacts) }
+            </Text>
+          </View>
         : matchResult === null
           ? <Text>Result: No match was found in that set.</Text>
           : <Text />
@@ -231,11 +240,17 @@ export function ContactCorrelateScreen({ navigation }) {
             hidden from the server and the rest of the world by the password that
             you and the counterparty share.
           </Text>
+
+          <Text style={{ marginLeft: 10, marginTop: 10 }}>
+            Note that only the first 500 contacts will be tested.
+          </Text>
         </View>
 
-        <View style={{ flexDirection: 'row' }}>
+        <View style={{ marginTop: 20 }} />
+        <Text>Enter the counterparty's ID.</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
           <TextInput
-            style={{ borderWidth: 1, width: 300 }}
+            style={{ borderWidth: 1, width: 200 }}
             onChangeText={setCounterpartyId}
             autoCapitalize={'none'}
             autoCorrect={false}
@@ -243,16 +258,38 @@ export function ContactCorrelateScreen({ navigation }) {
             { counterpartyId }
           </TextInput>
           <Button
-            title="Pick"
+            title="Pick from Contacts"
             onPress={() => setSelectCounterpartyFromContacts(true)}
           />
         </View>
 
         <View style={{ marginTop: 20 }} />
-        <Text style={{ textAlign: 'center' }}>All contacts will be tested.</Text>
+        <Text>
+          Enter a password, anything that you and the counterparty agree on, just for this reveal.
+          You don't need to remember it, just share it privately with the other person this one time.
+        </Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          <Text style={{ marginRight: 10 }}>Password</Text>
+          <TextInput
+            style={{ borderWidth: 1, width: 100 }}
+            onChangeText={setPassword}
+            autoCapitalize={'none'}
+            autoCorrect={false}
+          >
+            { password }
+          </TextInput>
+        </View>
+
+        <View style={{ marginTop: 20 }} />
         <Button
-          title="Begin Search Process"
-          onPress={startMatching}
+          title="Begin Search Process Together"
+          onPress={() => {
+            if (counterpartyId) {
+              startMatching()
+            } else {
+              Alert.alert('You must set the ID of the counterparty.')
+            }
+          }}
         />
 
         {
