@@ -118,6 +118,8 @@ export function ImportIdentityScreen({navigation}) {
   const [idImporting, setIdImporting] = useState<boolean>(false)
   const [makeLowercase, setMakeLowercase] = useState<boolean>(false)
   const [mnemonic, setMnemonic] = useState<String>('')
+  //const [mnemonic, setMnemonic] = useState<String>('seminar accuse mystery assist delay law thing deal image undo guard initial shallow wrestle list fragile borrow velvet tomorrow awake explain test offer control')
+  //const [mnemonic, setMnemonic] = useState<String>('annual soap surround inhale island jewel blush rookie gate aerobic brave enlist bird nut remain cross undo surround year rapid blade impulse control broccoli')
   const [mnemonicIsOld, setMnemonicIsOld] = useState<boolean>(false)
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
 

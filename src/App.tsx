@@ -59,6 +59,7 @@ import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/Verify
 import { SettingsScreen } from "./screens/Settings";
 import { SignatureResultsScreen } from './screens/SignatureResults'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
+import { ContactCorrelateScreen } from "./screens/ContactCorrelate";
 
 
 /****************************************************************
@@ -161,9 +162,10 @@ const ContactsStack = createStackNavigator();
 function ContactsStackScreen() {
   return (
     <ContactsStack.Navigator>
-       <ContactsStack.Screen name="Contact List" component={ContactsScreen} />
+      <ContactsStack.Screen name="Contact List" component={ContactsScreen} />
 
-       <ContactsStack.Screen name="Contact Import" component={ContactImportScreen} />
+      <ContactsStack.Screen name="Contact Correlate" component={ContactCorrelateScreen} />
+      <ContactsStack.Screen name="Contact Import" component={ContactImportScreen} />
     </ContactsStack.Navigator>
   )
 }

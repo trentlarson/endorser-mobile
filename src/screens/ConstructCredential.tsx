@@ -2,7 +2,7 @@ import Debug from 'debug'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, Button, FlatList, Linking, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Button, Linking, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
 import { CheckBox } from "react-native-elements"
 import RadioGroup, {RadioButtonProps} from 'react-native-radio-buttons-group'
 import { useSelector } from 'react-redux'
@@ -14,8 +14,7 @@ import { onboarding } from '../data/onboarding'
 import * as utility from '../utility/utility'
 import { BVCButton } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
-import { dbConnection, HANDY_APP } from "../veramo/setup";
-import { useFocusEffect } from "@react-navigation/native";
+import { HANDY_APP } from "../veramo/setup";
 
 const debug = Debug('endorser-mobile:share-credential')
 

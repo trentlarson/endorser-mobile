@@ -15,7 +15,7 @@ import { styles } from './style'
 import { Contact } from '../entity/contact'
 import * as utility from '../utility/utility'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
-import { agent, dbConnection, SERVICE_ID } from '../veramo/setup'
+import { dbConnection, SERVICE_ID } from '../veramo/setup'
 
 export function ContactsScreen({ navigation, route }) {
 
@@ -626,7 +626,7 @@ export function ContactsScreen({ navigation, route }) {
 
           <Button
             title="Scan QR Code"
-            onPress={() => navigation.navigate('Contact Import') }
+            onPress={() => navigation.navigate('Contact Import')}
           />
 
           <View style={{ padding: 5 }} />
@@ -1039,6 +1039,14 @@ export function ContactsScreen({ navigation, route }) {
                 :
                   <View/>
               }
+
+              <View style={{ padding: 10 }} />
+              <Text
+                style={{ color: 'blue', ...styles.centeredText }}
+                onPress={() => navigation.navigate('Contact Correlate') }
+              >
+                Find Matching Contact
+              </Text>
 
             </View>
           :
