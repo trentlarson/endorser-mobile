@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux'
 import { styles } from './style'
 import { PrivateData } from '../entity/privateData'
 import * as utility from '../utility/utility'
-import { proceedToEditOffer, VisibleDidModal, YamlFormat } from '../utility/utility.tsx'
+import { proceedToEditGive, proceedToEditOffer, VisibleDidModal, YamlFormat } from "../utility/utility.tsx";
 import { appSlice, appStore } from '../veramo/appSlice'
 import { agent, dbConnection, DEFAULT_BASIC_RESOLVER } from '../veramo/setup'
 
@@ -426,7 +426,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
           appStore.getState().settings.apiServer
           + '/api/v2/report/giveTotals?planId='
           + encodeURIComponent(wrappedClaim.handleId)
-        console.log('plan url', url)
         const userToken = await utility.accessToken(identifiers[0])
         await fetch(url, {
           headers: {
@@ -442,7 +441,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
           }
         })
         .then(data => {
-          console.log('give data', data)
           setPlanGiveTotals(data.data)
         })
         .catch(err =>
@@ -468,7 +466,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
             }
           })
           .then(data => {
-            console.log('offer data', data)
             setPlanOfferTotals(data.data)
           })
           .catch(err =>
@@ -492,7 +489,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           {
             loadingVer
             ? <ActivityIndicator color="#00FF00" />
-            : <View style={{ marginTop: 20}}/>
+            : <View style={{ padding: 10 }}/>
           }
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 20 }}>Claim</Text>
           <YamlFormat source={credentialSubject} navigation={navigation} />
@@ -547,10 +544,19 @@ export function VerifyCredentialScreen({ navigation, route }) {
               <Text
                 style={{ color: 'blue', ...styles.centeredText }}
                 onPress={() =>
+                  proceedToEditGive(navigation, credentialSubject, wrappedClaim?.handleId)
+                }
+              >
+                Record help given to this
+              </Text>
+              <View style={{ padding: 10 }} />
+              <Text
+                style={{ color: 'blue', ...styles.centeredText }}
+                onPress={() =>
                   proceedToEditOffer(navigation, credentialSubject, wrappedClaim?.handleId)
                 }
               >
-                Offer help with this activity
+                Offer help with this
               </Text>
 
               <Text style={{ fontWeight: 'bold' }}>Give Totals</Text>
@@ -604,7 +610,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           {
             loadingVer
             ? <ActivityIndicator color="#00FF00" />
-            : <View style={{ marginTop: 20}}/>
+            : <View style={{ padding: 10 }}/>
           }
 
           {/* Show any directly visible. */}

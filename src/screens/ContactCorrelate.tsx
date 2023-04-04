@@ -226,7 +226,7 @@ export function ContactCorrelateScreen({ navigation }) {
   return (
     <SafeAreaView>
       <ScrollView style={{ padding: 10 }}>
-        <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Find Common Contact</Text>
+        <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Find a Common Contact</Text>
 
         <View style={{ marginBottom: 20 }}>
           <Text>

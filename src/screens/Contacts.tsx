@@ -1045,7 +1045,7 @@ export function ContactsScreen({ navigation, route }) {
                 style={{ color: 'blue', ...styles.centeredText }}
                 onPress={() => navigation.navigate('Contact Correlate') }
               >
-                Find Matching Contact
+                Find a Common Contact
               </Text>
 
             </View>

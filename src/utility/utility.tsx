@@ -210,6 +210,18 @@ export const YamlFormat = ({ source, afterItemCss }) => {
   )
 }
 
+export const proceedToEditGive = (navigation, origClaim, handleId) => {
+  const giveClaim = {
+    "@context": utility.SCHEMA_ORG_CONTEXT,
+    "@type": "GiveAction",
+    fulfills: { "@type": "PlanAction", identifier: origClaim.identifier},
+  }
+  if (!giveClaim.identifier && handleId) {
+    giveClaim.fulfills.identifier = handleId
+  }
+  navigation.navigate('Create Credential', { incomingClaim: giveClaim })
+}
+
 export const proceedToEditOffer = (navigation, origClaim, handleId) => {
   const offerClaim = {
     '@context': utility.SCHEMA_ORG_CONTEXT,
@@ -393,6 +405,21 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                   source.claim['@type'] === 'PlanAction'
                   ?
                     <View style={{ flexDirection: 'row', padding: 10 }}>
+
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () => {
+                          if (!source.handleId) {
+                            Alert.alert("You cannot give to a project with no identifier.")
+                          } else {
+                            proceedToEditGive(navigation, source.claim, source.handleId)
+                          }
+                        }}
+                      >
+                        <Text style={{ color: "blue" }}>Record Given</Text>
+                      </Pressable>
+
                       <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
                       <Pressable
                         style={{ padding: 10 }}
@@ -407,26 +434,6 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                         <Text style={{ color: "blue" }}>Offer Help</Text>
                       </Pressable>
 
-                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
-                      <Pressable
-                        style={{ padding: 10 }}
-                        onPress={ () => {
-
-                          if (!source.handleId) {
-                            Alert.alert("You cannot give to a project with no identifier.")
-                            return
-                          }
-
-                          const giveAction = {
-                            "@context": "https://schema.org",
-                            "@type": "GiveAction",
-                            fulfills: { "@type": "PlanAction", identifier: source.handleId},
-                          }
-                          navigation.navigate('Create Credential', { incomingClaim: giveAction })
-                        }}
-                      >
-                        <Text style={{ color: "blue" }}>Record Given</Text>
-                      </Pressable>
                     </View>
                   :
                     <View />
