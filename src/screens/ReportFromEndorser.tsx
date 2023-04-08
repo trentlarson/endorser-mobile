@@ -172,11 +172,13 @@ export function ReportScreen({ navigation }) {
 
     let urlSuffix
     let oneResult = false
-    if (param.searchTerm != null) {
-      urlSuffix = '?claimContents=' + encodeURIComponent(param.searchTerm)
-    } else if (param.claimId != null) {
+    if (param.claimId != null) {
       urlSuffix = '/' + encodeURIComponent(param.claimId)
       oneResult = true
+    } else if (param.searchClaimType != null) {
+      urlSuffix = '?claimType=' + encodeURIComponent(param.searchClaimType)
+    } else if (param.searchTerm != null) {
+      urlSuffix = '?claimContents=' + encodeURIComponent(param.searchTerm)
     }
 
     if (urlSuffix) {
@@ -209,7 +211,7 @@ export function ReportScreen({ navigation }) {
         setSearchError('There was a problem searching. See logs for more info.')
       })
     } else {
-      console.log('The call to searchEndorser needs searchTerm or claimId in param, but got', param)
+      console.log('The call to searchEndorser needs claimId or searchClaimType or searchTerm in param, but got', param)
       setSearchError('No search criteria was supplied.')
     }
   }
@@ -246,16 +248,36 @@ export function ReportScreen({ navigation }) {
                         editable
                         style={{ borderWidth: 1 }}
                       />
-                      <Text>
+                      <Text style={{ marginTop: 10 }}>
                         Examples:&nbsp;
-                        <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('programming') }}>programming</Text>,&nbsp;
-                        <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('Training') }}>Training</Text>,&nbsp;
-                        <Text style={{ color: 'blue' }} onPress={() => { setSearchTerm('PlanAction') }}>PlanAction</Text>
+                        <Text style={{ color: 'blue' }} onPress={() => {
+                          setSearchTerm('programming')
+                          searchEndorser({ searchTerm: 'programming'})
+                        }}>programming</Text>,&nbsp;
+                        <Text style={{ color: 'blue' }} onPress={() => {
+                          setSearchTerm('Training')
+                          searchEndorser({ searchTerm: 'Training'})
+                        }}>Training</Text>,&nbsp;
+                        <Text style={{ color: 'blue' }} onPress={() => {
+                          setSearchTerm('PlanAction')
+                          searchEndorser({ searchTerm: 'PlanAction'})
+                        }}>PlanAction</Text>
                       </Text>
                       <View style={{ marginTop: 10 }} />
-                      <Text>
-                        <Text style={{ color: 'blue' }} onPress={() => { setSelectFromContacts(true) }}>Select a Contact</Text>
-                      </Text>
+                      <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text>
+                          <Text style={{ color: 'blue' }} onPress={() => {
+                            searchEndorser({ searchClaimType: 'PlanAction'})
+                          }}>Show Plans & Projects</Text>
+                        </Text>
+                        <Text>
+                          <Text style={{ color: 'blue' }} onPress={() => {
+                            setSelectFromContacts(true) }}
+                          >
+                            Select a Contact
+                          </Text>
+                        </Text>
+                      </View>
 
                       <Button
                         title="Search"
@@ -351,7 +373,11 @@ export function ReportScreen({ navigation }) {
           selectFromContacts
           ? <ContactSelectModal
               cancel={ () => { setSelectFromContacts(false) } }
-              proceed={ (did) => { setSearchTerm(did); setSelectFromContacts(false) }}
+              proceed={ (did) => {
+                setSelectFromContacts(false)
+                setSearchTerm(did);
+                searchEndorser({ searchTerm: did })
+              }}
           />
           : <View/>
         }
