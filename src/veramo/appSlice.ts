@@ -7,6 +7,7 @@ import { Settings } from '../entity/settings'
 import * as utility from '../utility/utility'
 
 const MAX_LOG_LENGTH = 2000000
+const BVC_PROJECT_CLAIM_ID = 'https://endorser.ch/entity/01GXHF8CF66FEMXFM9NY5XWCY4'
 
 export const DEFAULT_ENDORSER_API_SERVER = 'https://endorser.ch:3000'
 export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
@@ -42,6 +43,8 @@ export const appSlice = createSlice({
     // it'll be null if we haven't even loaded from the DB yet.
     contacts: null as Array<Contact> | null,
 
+    homeProjectId: BVC_PROJECT_CLAIM_ID,
+
     logMessage: '',
 
     refreshHomeFeed: false,
@@ -73,6 +76,9 @@ export const appSlice = createSlice({
     setContact: (state, contents: Payload<Contact>) => {
       const index = R.findIndex(c => c.did === contents.payload.did, state.contacts)
       state.contacts[index] = contents.payload
+    },
+    setHomeProjectId: (state, contents: Payload<string>) => {
+      state.homeProjectId = contents.payload
     },
     setHomeScreen: (state, contents: Payload<string>) => {
       state.settings.homeScreen = contents.payload

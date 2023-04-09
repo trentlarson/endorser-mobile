@@ -227,10 +227,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
                 return response.json()
               } else {
                 const text = await response.text()
-                let bodyText =
+                let userMessage =
                   'While retrieving full claim, got bad response status of ' + response.status
                   + ' with text ' + text
-                let userMessage = null
                 // if the body is JSON, maybe we can show something more helpful
                 try {
                   userMessage = JSON.parse(text).error?.message
@@ -279,7 +278,14 @@ export function VerifyCredentialScreen({ navigation, route }) {
 
           try {
 
-            verifiedResponse = await didJwt.verifyJWT(vcObj.proof.jwt, {resolver: DEFAULT_BASIC_RESOLVER, auth: true})
+            const issueEpoch = Math.floor(new Date(vcObj.issuanceDate).getTime() / 1000)
+            const nowEpoch = Math.floor(Date.now() / 1000)
+            const skewTime = nowEpoch - issueEpoch
+
+            verifiedResponse = await didJwt.verifyJWT(
+              vcObj.proof.jwt,
+              {resolver: DEFAULT_BASIC_RESOLVER, auth: true, skewTime: skewTime }
+            )
             //console.log("verifiedResponse", JSON.stringify(verifiedResponse, null, 2))
 
             // if we're here, it must have passed validation
@@ -288,9 +294,20 @@ export function VerifyCredentialScreen({ navigation, route }) {
           } catch (e) {
             if (e.toString().indexOf('Signature invalid for JWT') > -1) {
               setDetectedSigInvalid(true)
+            } else if (e.toString().indexOf('JWT has expired') > -1) {
+              setDetectedSigProblem(true)
+              appStore.dispatch(appSlice.actions.addLog({
+                log: true,
+                msg:
+                  "Got expiration error verifying JWT, even with skewTime: "
+                  + JSON.stringify(e)
+              }))
             } else {
               setDetectedSigProblem(true)
-              console.log('Got unknown error verifying JWT:', e)
+              appStore.dispatch(appSlice.actions.addLog({
+                log: true,
+                msg: "Got unknown error verifying JWT: " + JSON.stringify(e)
+              }))
             }
           }
         }
@@ -298,12 +315,14 @@ export function VerifyCredentialScreen({ navigation, route }) {
         if (verifiedResponse) {
 
           // check that the contents inside and outside the JWT match
-          if (verifiedResponse.payload.vc
-              && verifiedResponse.payload.vc.credentialSubject) {
-            setCredentialSubject(verifiedResponse.payload.vc.credentialSubject)
+          const verSub =
+            verifiedResponse.payload.vc?.credentialSubject
+            || verifiedResponse.payload.claim // still happening; saw in Plan
+          if (verSub) {
+            setCredentialSubject(verSub)
             if (vcObj.credentialSubject) {
               setCredentialSubjectsMatch(
-                R.equals(vcObj.credentialSubject, verifiedResponse.payload.vc.credentialSubject)
+                R.equals(vcObj.credentialSubject, verSub)
               )
             } else {
               // nothing to compare to, so don't say it doesn't match
@@ -353,10 +372,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
                   return response.json()
                 } else {
                   const text = await response.text()
-                  let bodyText =
+                  let userMessage =
                     'While retrieving confirmations, got bad response status of ' + response.status
                     + ' with text ' + text
-                  let userMessage = null
                   // if the body is JSON, maybe we can show something more helpful
                   try {
                     userMessage = JSON.parse(text).error?.message
@@ -437,7 +455,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
           if (response.status === 200) {
             return response.json()
           } else {
-            setTotalsError('Could not load given totals from server.')
+            const text = await response.text()
+            throw 'Got from server: ' + text
           }
         })
         .then(data => {
@@ -462,7 +481,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
             if (response.status === 200) {
               return response.json()
             } else {
-              setTotalsError('Could not load offered totals from server.')
+              const text = await response.text()
+              throw 'Got from server: ' + text
             }
           })
           .then(data => {
@@ -576,13 +596,13 @@ export function VerifyCredentialScreen({ navigation, route }) {
                     )
               }
 
-              <Text style={{ fontWeight: 'bold', marginTop: 10 }}>OfferTotals</Text>
+              <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Offer Totals</Text>
               {/* These currency-amount lists should be small. */}
               {
                 loadingTotals
                 ? <ActivityIndicator color="#00FF00" />
                 :
-                  R.isEmpty(planGiveTotals)
+                  R.isEmpty(planOfferTotals)
                   ?
                     <Text>None</Text>
                   :

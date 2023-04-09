@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [6.6.0] - 2023-04 ??
+
+- Gives & offers on plans
+- ID for BVC-specific time donations
+- Common-contact discovery
+- Fixes for give & offer creation and iOS list scrolling
+
+
+
 ## [6.5.120] - 2023-03-08 - 27ae1b40b780020dfc1976d62c3a1b0ec4825697
 
 ### Added

@@ -7,10 +7,13 @@ import { useSelector } from 'react-redux'
 
 import * as utility from './utility'
 import { styles } from '../screens/style'
+import { appStore } from "../veramo/appSlice";
 
-function setClaimToAttendance(id: IIdentifier | undefined, startTime: string, navigation) {
-  const claimObj = utility.bvcClaim(id ? id.did : 'UNKNOWN', startTime)
-  navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: claimObj })
+function setClaimToAttendAndGive(id: IIdentifier | undefined, startTime: string, navigation) {
+  const claimObjs = utility.bvcClaims(
+    id ? id.did : 'UNKNOWN', startTime, appStore.getState().homeProjectId
+  )
+  navigation.push(utility.REVIEW_SIGN_SCREEN_NAV, { credentialSubject: claimObjs })
 }
 
 export const BVCButton = ({ identifier, navigation, description }) => {
@@ -23,13 +26,16 @@ export const BVCButton = ({ identifier, navigation, description }) => {
       onPress={() => {
         let currentOrPreviousSat = DateTime.local()
         if (currentOrPreviousSat.weekday < 6) {
-          // it's not Saturday or Sunday, so move back one week before setting to the Saturday
+          // it's not Saturday or Sunday,
+          // so move back one week before setting to the Saturday
           currentOrPreviousSat = currentOrPreviousSat.minus({week:1})
         }
-        const eventStartDateObj = currentOrPreviousSat.set({weekday:6}).set({hour:9}).startOf("hour")
-        // Hack, but the full ISO pushes the length to 340 which crashes verifyJWT!  Crazy!
-        const TODAY_OR_PREV_START_DATE = eventStartDateObj.toISO({suppressMilliseconds:true})
-        setClaimToAttendance(identifier, TODAY_OR_PREV_START_DATE, navigation)
+        const eventStartDateObj =
+          currentOrPreviousSat.set({weekday:6}).set({hour:9}).startOf("hour")
+        // Hack, but full ISO pushes the length to 340 which crashes verifyJWT!
+        const TODAY_OR_PREV_START_DATE =
+          eventStartDateObj.toISO({suppressMilliseconds:true})
+        setClaimToAttendAndGive(identifier, TODAY_OR_PREV_START_DATE, navigation)
       }}
     />
   )

@@ -551,21 +551,31 @@ export const contactJwtForPayload = async (viewServer, identifier, name) => {
   }
 }
 
-export const bvcClaim = (did: string, startTime: string) => {
-  return {
-    '@context': SCHEMA_ORG_CONTEXT,
-    '@type': 'JoinAction',
-    agent: {
-      identifier: did,
-    },
-    event: {
-      organizer: {
-        name: 'Bountiful Voluntaryist Community',
+export const bvcClaims = (did: string, startTime: string, planId: string) => {
+  return [
+    {
+      '@context': SCHEMA_ORG_CONTEXT,
+      '@type': 'JoinAction',
+      agent: {
+        identifier: did,
       },
-      name: 'Saturday Morning Meeting',
-      startTime: startTime,
-    }
-  }
+      event: {
+        organizer: {
+          name: 'Bountiful Voluntaryist Community',
+        },
+        name: 'Saturday Morning Meeting',
+        startTime: startTime,
+      },
+    },
+    {
+      '@context': SCHEMA_ORG_CONTEXT,
+      '@type': 'GiveAction',
+      agent: { identifier: did },
+      object: { amountOfThisGood: 1, unitCode: 'HUR' },
+      fulfills: { '@type': 'PlanAction', identifier: planId },
+      description: 'Participated in Saturday meetup',
+    },
+  ]
 }
 
 // from Buffer to hex String (a quirky ethersproject function that I hope we fix)

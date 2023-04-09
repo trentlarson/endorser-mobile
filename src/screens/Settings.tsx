@@ -33,6 +33,7 @@ export function SettingsScreen({navigation}) {
   const [creatingId, setCreatingId] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [finishedCheckingIds, setFinishedCheckingIds] = useState<boolean>(false)
+  const [homeProjectId, setHomeProjectId] = useState<string>(appStore.getState().homeProjectId)
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [isInAdvancedMode, setIsInAdvancedMode] = useState<boolean>(appStore.getState().advancedMode)
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
@@ -203,6 +204,11 @@ export function SettingsScreen({navigation}) {
 
     setLastNotifiedClaimId(value)
     setLastViewedClaimId(value)
+  }
+
+  const storeHomeProjectId = async (value) => {
+    appStore.dispatch(appSlice.actions.setHomeProjectId(value))
+    setHomeProjectId(value)
   }
 
   const checkLimits = async () => {
@@ -681,6 +687,13 @@ export function SettingsScreen({navigation}) {
                     <TextInput
                       value={lastViewedClaimId || ''}
                       onChangeText={storeLastViewedClaimId}
+                      style={{borderWidth: 1}}
+                    />
+
+                    <Text>Home Project</Text>
+                    <TextInput
+                      value={homeProjectId || ''}
+                      onChangeText={storeHomeProjectId}
                       style={{borderWidth: 1}}
                     />
 
