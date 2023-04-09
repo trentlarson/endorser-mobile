@@ -293,7 +293,6 @@ FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=<App-Specific Password>
 To Release:
 - For minimal Contract app, change configuration
   - In src/veramo/setup.ts, switch HANDY_APP to true
-- Copy icons into the 'src' directory. (Minimal app requires it, and iOS build looks for it, so just include it.)
 - Test everything.
   - To install on a local iPhone, you can edit the scheme in the product to have a build configuration of "Release".
 - Update CHANGELOG.md

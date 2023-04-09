@@ -21,9 +21,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleVersion</key>
-	<string>120</string>
+	<string>121</string>
 	<key>CFBundleShortVersionString</key>
-	<string>6.5.120</string>
+	<string>6.6.121</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>LSRequiresIPhoneOS</key>
