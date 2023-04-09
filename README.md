@@ -304,7 +304,7 @@ To Release:
   - In android/app/build.gradle, update versionName (to match version in package.json) & versionCode (with build number to match ios)
     - Always increment the versionCode (and ensure you don't already have a larger release in ios, just for consistency's sake).  It is possible to reuse the versionName.
   - `cd android; bundle exec fastlane beta; cd ..`
-    - It will prompt for credentials almost immediately.
+    - It will prompt for credentials immediately.
     - For error: "Keystore file 'endorser-mobile/android/fastlane/../app/google...keystore' not found for signing config 'externalOverride'."
       - Put the google...keystore file in place.
     - For error: "Google Api Error: forbidden: The caller does not have permission"

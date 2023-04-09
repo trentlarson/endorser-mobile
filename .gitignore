@@ -71,6 +71,8 @@ buck-out/
 
 # Google signing
 android/app/pc-api-*.json
+# This is covered above by the *.keystore, but I like this here.
+android/app/google-comm-endo-upload-key.keystore
 
 # Apple credentials for Fastlane
 ios/.env.default
