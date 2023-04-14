@@ -71,7 +71,7 @@ function btoa(str) {
 ```
 
 
-- A "CompileC" error can happen after removing a dependency. You may have to manually remove node_modules and pods (both `ios/Pods` and `~/Library/Caches/CocoaPods`) and reinstall them... but even that may not work and sometimes I just clone a new copy and installe anew. (I've also seen it work to just rerun the app.
+- A "CompileC" error can happen after removing a dependency. You may have to manually remove node_modules and pods (both `ios/Pods` and `~/Library/Caches/CocoaPods`) and reinstall them... but even that may not work and sometimes I just clone a new copy and install anew. (I've also seen it work to just rerun the app.
 
 
 ```
@@ -272,7 +272,7 @@ To configure first release on new environment:
 - iOS
   - In the ios directory, run `bundle update`
   - In Xcode, add the developer account under Preferences -> Accounts. (Maybe import the project.)
-  - Configure Apple signing. (Certain errors will prompt you for this stuff, eg. "Signing for "React-Core-AccessibilityResources" requires a development team. Select a development team in the Signing & Capabilities editor.")
+  - Configure Apple signing. (Certain errors will prompt you for this stuff, eg. '')
     - To renew certificate: https://developer.apple.com/account/resources/certificates/list
       ... and make one for Apple Distribution
       ... and also Apple Development (not sure about iOS App Development or iOS App Distribution)
@@ -281,6 +281,11 @@ To configure first release on new environment:
         - Code Signing Identity -> Release -> set to Apple Development
         - Development Team set to Trent Larson
       ... and possibly restart Xcode. (Yes, that make it work after these errors: "Provisioning profile... doesn't include signing certificate")
+    - The React-Core-AccessibilityResources signing is an independent setting.
+      (Example error: "Signing for "React-Core-AccessibilityResources" requires a development team. Select a development team in the Signing & Capabilities editor.")
+      In Xcode, with Pods at the same level as EndorserMobile on the left,
+      right-click and "Open as Xcode Project" and then select React-Core-AccessibilityResources
+      and select the development team.
     - I've had to type in my password in a pop-up dozens of times.
     - The file `.env.default` in `ios` will allow you to upload to Apple:
 ```
@@ -342,7 +347,6 @@ To Release:
       - Note that the upload fails if you didn't already create a release in App Store Connect.
     - This takes about 30 minutes. The upload takes about 10 at the end; there's no prompt after requesting the 6-digit code.
       - If 2FA is a problem, try https://github.com/fastlane/fastlane/blob/master/spaceship/docs/Authentication.md#auto-select-sms-via-spaceship_2fa_sms_default_phone_number
-
     - After entering the 6-digit code (in about 18 minutes), it should say "Login Successful". It failed when I was on a VPN... maybe because I hadn't created the version in the App Store yet.
   - Submit the release for review (by filling in the "What's New" and "Notes"), and after they approve the review then you can test in TestFlight or release.
     - Double-check that it's submitted for review: it should say "Waiting for Review". (choose the app, click App Review on the side, choose it from Ready For Review list, and hit "Submit to App Review". Just clicking "Add to Review" on the first screen isn't enough.)

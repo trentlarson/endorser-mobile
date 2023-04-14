@@ -2874,7 +2874,7 @@ __metadata:
     react-native-reanimated: ^1.13.2
     react-native-safe-area-context: ^3.1.9
     react-native-screens: ^2.16.1
-    react-native-sodium: ^0.4.0
+    react-native-sodium: ^0.3.9
     react-native-sqlite-storage: ^5.0.0
     react-native-svg: ^12.1.0
     react-native-vector-icons: ^8.1.0
@@ -10619,10 +10619,10 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"react-native-sodium@npm:^0.4.0":
-  version: 0.4.0
-  resolution: "react-native-sodium@npm:0.4.0"
-  checksum: 419016eb705d6612cf23983b658adce7c10dbd59b442102a822ce43ed1d8bf0c814d802e9f5a1463062ecf55b972491fdd9bec39ba103735ab79804ab41b3280
+"react-native-sodium@npm:^0.3.9":
+  version: 0.3.9
+  resolution: "react-native-sodium@npm:0.3.9"
+  checksum: 5dab07244ccd097e6231b58f41e1d1340ce9812fcd256c2eec259be61bd762883945d33280bee042fbb1bcd7d4370b8a6c98908a163acdd860f41467436b0d28
   languageName: node
   linkType: hard
 
