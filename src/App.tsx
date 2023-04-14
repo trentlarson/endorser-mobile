@@ -228,7 +228,7 @@ function HomeScreen({ navigation }) {
   const [feedCounts, setFeedCounts] = useState({})
   const [initError, setInitError] = useState<string>()
   const [loadingInitial, setLoadingInitial] = useState<boolean>(true)
-  const [loadingSubfeeds, setLoadingSubfeeds] = useState<boolean>(true)
+  const [loadingSubfeeds, setLoadingSubfeeds] = useState<boolean>(false)
   const [loadSubfeedError, setLoadSubfeedError] = useState<string>()
   const [needsNotificationsAuthorized, setNeedsNotificationsAuthorized] = useState<boolean>(false)
   const [oldMnemonic, setOldMnemonic] = useState<boolean>(false)
@@ -363,6 +363,7 @@ function HomeScreen({ navigation }) {
   }, [])
 
   const loadFeedSummary = async () => {
+    setLoadingSubfeeds(true)
     if (setupFinished) {
       return utility.countClaimsOfInterest(
         allContacts,
@@ -370,11 +371,17 @@ function HomeScreen({ navigation }) {
         allIdentifiers[0],
         settings.lastViewedClaimId
       ).then(result => {
-        //console.log('Finished loading claims of interest:', result)
         setFeedCounts(result)
+        setLoadSubfeedError("")
         setLoadingSubfeeds(false)
       }).catch(err => {
-        setLoadSubfeedError("" + err)
+        if (err.bodyText) {
+          appStore.dispatch(appSlice.actions.addLog({
+            log: true,
+            msg: "Underlying error loading subfeeds: " + err.bodyText
+          }))
+        }
+        setLoadSubfeedError("" + (err.userMessage || err))
         setLoadingSubfeeds(false)
       })
     }
@@ -385,6 +392,7 @@ function HomeScreen({ navigation }) {
     loadFeedSummary()
   }, [setupFinished])
 
+  // Potentially reload, eg. because another screen triggered a full load
   useFocusEffect(() => {
     if (appStore.getState().refreshHomeFeed) {
       appStore.dispatch(appSlice.actions.setRefreshHomeFeed(false))
@@ -424,8 +432,20 @@ function HomeScreen({ navigation }) {
               <ScrollView style={{ borderWidth: 1, height: 100 }}>
               {
                 loadSubfeedError
-                ? <Text style={{ color: 'red' }}>{ loadSubfeedError }</Text>
-                : <View />
+                ?
+                  <View>
+                    <Text style={{ color: 'red' }}>
+                      { loadSubfeedError }
+                      <Text
+                        style={{ color: "blue" }}
+                        onPress={ () => loadFeedSummary() }
+                      >
+                        &nbsp;&nbsp;&nbsp;&nbsp;Retry
+                      </Text>
+                    </Text>
+                  </View>
+                :
+                  <View />
               }
               {
                 loadingSubfeeds

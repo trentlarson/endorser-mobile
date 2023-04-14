@@ -157,52 +157,52 @@ export function MyCredentialsScreen({ navigation }) {
   return (
     <SafeAreaView>
       <ScrollView>{/* vertical scrolling */}
-        {/* horizontal scrolling for actions & long string values */}
-        <ScrollView horizontal={ true }>
+        <View style={{ padding: 20, height: screenHeight }}>
+          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Only Yours</Text>
+          {
+            loading
+            ?
+              <View>
+                <Text>Loaded { loadedNumber }...</Text>
+                <ActivityIndicator color="#00FF00" />
+              </View>
+            :
+              <View>
 
-          <View style={{ padding: 20, height: screenHeight }}>
-            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Only Yours</Text>
-            {
-              loading
-              ?
-                <View>
-                  <Text>Loaded { loadedNumber }...</Text>
-                  <ActivityIndicator color="#00FF00" />
-                </View>
-              :
-                <View>
+                {
+                  searchResults != null
+                  ?
+                    <View />
+                  :
+                    <View>
+                      <Text>
+                          Filter (optional)
+                          &nbsp;
+                          <Icon name="info-circle" onPress={() => setShowSearchInfoModal(true)} />
+                      </Text>
 
-                  {
-                    searchResults != null
-                    ?
-                      <View />
-                    :
-                      <View>
-                        <Text>
-                            Filter (optional)
-                            &nbsp;
-                            <Icon name="info-circle" onPress={() => setShowSearchInfoModal(true)} />
-                        </Text>
+                      <TextInput
+                        autoCapitalize={'none'}
+                        value={searchTerm}
+                        onChangeText={setSearchTerm}
+                        editable
+                        style={{ borderWidth: 1 }}
+                      />
+                      <Button
+                        title="Search About You"
+                        onPress={searchEndorserForString}
+                      />
 
-                        <TextInput
-                          autoCapitalize={'none'}
-                          value={searchTerm}
-                          onChangeText={setSearchTerm}
-                          editable
-                          style={{ borderWidth: 1 }}
-                        />
-                        <Button
-                          title="Search About You"
-                          onPress={searchEndorserForString}
-                        />
+                      <View style={{ padding: 5 }} />
+                      <Button
+                        title="Retrieve All Your Transactional Claims"
+                        onPress={searchEndorserForTransactions}
+                      />
+                    </View>
+                }
 
-                        <View style={{ padding: 5 }} />
-                        <Button
-                          title="Retrieve All Your Transactional Claims"
-                          onPress={searchEndorserForTransactions}
-                        />
-                      </View>
-                  }
+                {/* horizontal scrolling for actions & long string values */}
+                <ScrollView horizontal={ true }>
 
                   <FlatList
                     data={searchResults}
@@ -320,46 +320,46 @@ export function MyCredentialsScreen({ navigation }) {
                       />
                     }
                   />
+                </ScrollView>
 
 
 
 
-                  <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={!!showSearchInfoModal}
-                  >
-                    <View style={styles.centeredView}>
-                      <View style={styles.modalView}>
-                        <Text>This only retrieves the 50 most recent matches.</Text>
-                        <TouchableHighlight
-                          onPress={() => {
-                            setShowSearchInfoModal(false)
-                          }}
-                        >
-                          <Text>Close</Text>
-                        </TouchableHighlight>
-                      </View>
+                <Modal
+                  animationType="slide"
+                  transparent={true}
+                  visible={!!showSearchInfoModal}
+                >
+                  <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                      <Text>This only retrieves the 50 most recent matches.</Text>
+                      <TouchableHighlight
+                        onPress={() => {
+                          setShowSearchInfoModal(false)
+                        }}
+                      >
+                        <Text>Close</Text>
+                      </TouchableHighlight>
                     </View>
-                  </Modal>
+                  </View>
+                </Modal>
 
-                  <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={!!quickMessage}
-                  >
-                    <View style={styles.centeredView}>
-                      <View style={styles.modalView}>
-                        <Text>{ quickMessage }</Text>
-                      </View>
+                <Modal
+                  animationType="slide"
+                  transparent={true}
+                  visible={!!quickMessage}
+                >
+                  <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                      <Text>{ quickMessage }</Text>
                     </View>
-                  </Modal>
+                  </View>
+                </Modal>
 
-                </View>
-            }
-          </View>
+              </View>
+          }
+        </View>
 
-        </ScrollView>
       </ScrollView>
     </SafeAreaView>
   )

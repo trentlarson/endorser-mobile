@@ -146,11 +146,12 @@ export function ReportScreen({ navigation }) {
     } else {
       return (
         /* horizontal scrolling for actions & long string values */
-        <ScrollView horizontal={ true }>
+        <ScrollView horizontal={true}>
           <FlatList
             data={filteredResults1}
-            /* fixed height is critical for iOS vertical scroll */
-            style={{ borderWidth: 1, height: 400 }}
+            scrollEnabled={false} /* somehow this allows both Android & iOS to scroll*/
+            /* fixed height makes iOS vertical scroll but stops Android from scrolling */
+            style={{ borderWidth: 1 }}
             ListHeaderComponent={
               <Text style={{ padding: 10 }}>(Only retrieved the 50 most recent matching claims.)</Text>
             }
@@ -283,6 +284,21 @@ export function ReportScreen({ navigation }) {
                         title="Search"
                         onPress={() => searchEndorser({ searchTerm: searchTerm })}
                       />
+
+                      {
+                        identifiers.length > 0
+                        ?
+                          <View style={{ marginTop: 20 }} >
+                            <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Only Yours</Text>
+                            <Button
+                              title="Search..."
+                              onPress={() => navigation.navigate('Your Credentials')}
+                            />
+                          </View>
+                        :
+                          <View/>
+                      }
+
                     </View>
                   :
                     <View>
@@ -305,9 +321,8 @@ export function ReportScreen({ navigation }) {
                 <Text style={{ color: 'red' }}>{searchError}</Text>
 
                 {
-                  searchResults == null
-                  ? <Text/>
-                  : searchResults.length == 0
+                  searchResults != null
+                  ? searchResults.length == 0
                     ? <Text>No results.</Text>
                     : <View>
                         <CheckBox
@@ -349,25 +364,17 @@ export function ReportScreen({ navigation }) {
                             <View />
                         }
 
-                        { filteredResultOutput(searchResults) }
+                        <View>
+                          { filteredResultOutput(searchResults) }
+                        </View>
                       </View>
+                    :
+                      <View />
                 }
               </View>
           }
 
         </View>
-        { identifiers.length > 0
-          ?
-            <View style={{ padding: 20 }}>
-              <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Search Only Yours</Text>
-              <Button
-                title="Search..."
-                onPress={() => navigation.navigate('Your Credentials')}
-              />
-            </View>
-          :
-            <View/>
-        }
 
         {
           selectFromContacts

@@ -116,6 +116,14 @@ export function ReportFeedScreen({ navigation, route }) {
     setLoadingAllRecent(false)
   }
 
+  const EntireFeedLink = () =>
+    <Text
+      style={{ padding: 10, color: "blue" }}
+      onPress={() => { setShowAllFeed(true); updateAllFeed() } }
+    >
+      Show Entire Feed & Mark Everything Read
+    </Text>
+
   useEffect(() => {
     if (subfeed) {
       updateSubfeed(subfeed)
@@ -130,6 +138,8 @@ export function ReportFeedScreen({ navigation, route }) {
       <View style={{ padding: 20 }}>
 
       {
+        // See similar code below for all feed items.
+        // This shows only a subset of the feed.
         !showAllFeed
         ? (
           <View>
@@ -142,6 +152,7 @@ export function ReportFeedScreen({ navigation, route }) {
                 : ""
               }
             </Text>
+            <EntireFeedLink />
             <Text style={{ color: 'red' }}>{ subfeedError }</Text>
             {/* horizontal scrolling for actions & long string values */}
             <ScrollView horizontal={ true }>
@@ -157,7 +168,7 @@ export function ReportFeedScreen({ navigation, route }) {
                   />
                 )}
                 /* fixed height is critical for iOS vertical scroll */
-                style={{ borderWidth: 1, height: subfeedData.length > 0 ? 500 : 60 }}
+                style={{ borderWidth: 1, height: subfeedData.length > 0 ? 400 : 60 }}
                 ListFooterComponent={(
                   <View>
                     <ActivityIndicator color="#00ff00" animating={ loadingSubfeedRecent }/>
@@ -197,6 +208,8 @@ export function ReportFeedScreen({ navigation, route }) {
       }
 
       {
+        // See similar code above for a subset of the feed.
+        // This shows all the feed items.
         showAllFeed
         ? (
           <View>
@@ -208,6 +221,7 @@ export function ReportFeedScreen({ navigation, route }) {
                  : ""
               }
             </Text>
+            <EntireFeedLink />
             <Text style={{ color: 'red' }}>{ feedError }</Text>
             {/* horizontal scrolling for actions & long string values */}
             <ScrollView horizontal={ true }>
@@ -223,7 +237,7 @@ export function ReportFeedScreen({ navigation, route }) {
                   />
                 )}
                 /* fixed height is critical for iOS vertical scroll */
-                style={{ borderWidth: 1, height: feedData.length > 0 ? 500 : 60 }}
+                style={{ borderWidth: 1, height: feedData.length > 0 ? 400 : 60 }}
                 ListFooterComponent={(
                   <View>
                     <ActivityIndicator color="#00ff00" animating={ loadingAllRecent }/>
@@ -246,12 +260,7 @@ export function ReportFeedScreen({ navigation, route }) {
             </ScrollView>
           </View>
         ) : (
-          <Text
-            style={{ padding: 10, color: "blue" }}
-            onPress={() => { setShowAllFeed(true); updateAllFeed() } }
-          >
-            Show Entire Feed & Mark Everything Read
-          </Text>
+          <View />
         )
       }
       </View>

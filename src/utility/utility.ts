@@ -806,16 +806,17 @@ export const retrieveClaims = async (endorserApiServer, identifier, afterId, bef
       "Content-Type": "application/json",
       "Uport-Push-Token": token,
     }
-  }).then(response => {
+  }).then(async response => {
     if (response.status !== 200) {
-      throw Error('There was a low-level error from the server.')
+      const details = await response.text()
+      throw { userMessage: 'There was a low-level error from the server.', bodyText: details }
     }
     return response.json()
   }).then(results => {
     if (results.data) {
       return results
     } else {
-      throw Error(results.error || 'The server got an error. (For details, see the log on the Settings page.)')
+      throw { userMessage: 'There was an error from the server.', bodyText: JSON.stringify(results) }
     }
   })
 }
@@ -924,7 +925,6 @@ const addClaimOfInterest = (didOfInterestChecker) => (previous, entry) => {
 export const countClaimsOfInterest = async (
   contacts, endorserApiServer, identifier, afterId, beforeId
 ) => {
-  const token = await accessToken(identifier)
   const contactChecker = isDidOfInterestFrom(contacts, identifier.did)
   const reducer = addClaimOfInterest(contactChecker)
   let nextResult = {

@@ -312,7 +312,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
               />
             :
               <Text onPress={() => setShowMore(prev => !prev)}>
-                <Icon name="chevron-right" style={{ color: 'blue', fontSize: 12 }} />
+                <Icon name="chevron-right" style={{ color: 'blue', fontSize: 20 }} />
                 ...
               </Text>
           }

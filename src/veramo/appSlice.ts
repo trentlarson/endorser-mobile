@@ -4,10 +4,9 @@ import { IIdentifier } from "@veramo/core"
 
 import { Contact } from '../entity/contact'
 import { Settings } from '../entity/settings'
-import * as utility from '../utility/utility'
 
 const MAX_LOG_LENGTH = 2000000
-const BVC_PROJECT_CLAIM_ID = 'https://endorser.ch/entity/01GXHF8CF66FEMXFM9NY5XWCY4'
+const BVC_PROJECT_CLAIM_ID = 'https://endorser.ch/entity/01GXYPFF7FA03NXKPYY142PY4H'
 
 export const DEFAULT_ENDORSER_API_SERVER = 'https://endorser.ch:3000'
 export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
@@ -33,7 +32,7 @@ export const appSlice = createSlice({
 
     // This is nullable because it is cached state from the DB...
     // it'll be null if we haven't even loaded from the DB yet.
-    settings: null as Settings,
+    settings: null as Settings | null,
 
     // This is nullable because it is cached state from the DB...
     // it'll be null if we haven't even loaded from the DB yet.
