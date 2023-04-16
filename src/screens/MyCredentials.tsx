@@ -8,7 +8,6 @@ import { styles } from './style'
 import * as utility from '../utility/utility'
 import { RenderOneRecord, YamlFormat } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
-import { agent } from '../veramo/setup'
 
 export function MyCredentialsScreen({ navigation }) {
 
@@ -170,10 +169,8 @@ export function MyCredentialsScreen({ navigation }) {
               <View>
 
                 {
-                  searchResults != null
+                  searchResults == null
                   ?
-                    <View />
-                  :
                     <View>
                       <Text>
                           Filter (optional)
@@ -199,6 +196,8 @@ export function MyCredentialsScreen({ navigation }) {
                         onPress={searchEndorserForTransactions}
                       />
                     </View>
+                  :
+                    <View />
                 }
 
                 {/* horizontal scrolling for actions & long string values */}
@@ -337,6 +336,7 @@ export function MyCredentialsScreen({ navigation }) {
                         onPress={() => {
                           setShowSearchInfoModal(false)
                         }}
+                        style={styles.cancelButton}
                       >
                         <Text>Close</Text>
                       </TouchableHighlight>

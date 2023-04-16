@@ -2,11 +2,21 @@ import didJwt from 'did-jwt'
 import { DateTime, Duration } from 'luxon'
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, FlatList, Modal, SafeAreaView, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Button,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableHighlight,
+  View
+} from "react-native";
 import Clipboard from '@react-native-community/clipboard'
 import { CheckBox } from 'react-native-elements'
 import QRCodeScanner from 'react-native-qrcode-scanner'
 import QRCode from "react-native-qrcode-svg"
+import Icon from 'react-native-vector-icons/FontAwesome'
 import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
@@ -165,6 +175,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [planOfferTotals, setPlanOfferTotals] = useState<Record<string, number>>({})
   const [planGiveTotals, setPlanGiveTotals] = useState<Record<string, number>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
+  const [showInfoConsistency, setShowInfoConsistency] = useState<boolean>(false)
   const [showMyQr, setShowMyQr] = useState<boolean>(false)
   const [totalsError, setTotalsError] = useState<string>('')
   const [veriCredObject, setVeriCredObject] = useState<any>()
@@ -495,7 +506,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
         setLoadingTotals(false)
       }
 
-      if (wrappedClaim.claimType === 'PlanAction') {
+      console.log('checking for useFocusEffect', wrappedClaim)
+      if (wrappedClaim?.claimType === 'PlanAction') {
         loadTotals()
       }
     }, [])
@@ -711,7 +723,11 @@ export function VerifyCredentialScreen({ navigation, route }) {
                   credentialSubject
                   ?
                     <View style={{ flex: 1, flexDirection: 'row' }}>
-                      <Text style={{ width: '30%' }}>Consistent?</Text>
+                      <Text style={{ width: '30%' }}>
+                        Consistent?
+                        &nbsp;
+                        <Icon name="info-circle" onPress={() => setShowInfoConsistency(true)} />
+                      </Text>
                       <Text>{ credentialSubjectsMatch ? 'Yes' : 'No' }</Text>
                     </View>
                   :
@@ -758,6 +774,26 @@ export function VerifyCredentialScreen({ navigation, route }) {
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <Text>{ quickMessage }</Text>
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={!!showInfoConsistency}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text>
+                  This is consistent if there is a payload and a signature and they match.
+                </Text>
+                <TouchableHighlight
+                  onPress={() => { setShowInfoConsistency(false) }}
+                  style={styles.cancelButton}
+                >
+                  <Text>Close</Text>
+                </TouchableHighlight>
               </View>
             </View>
           </Modal>
