@@ -218,7 +218,10 @@ export function ContactCorrelateScreen({ navigation }) {
             </Text>
           </View>
         : matchResult === null
-          ? <Text>Result: No match was found in that set.</Text>
+          ? <Text>
+              Result: No match was found in that set.
+              (Or: the passwords are different.)
+            </Text>
           : <Text />
     )
   }

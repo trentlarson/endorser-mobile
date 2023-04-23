@@ -54,6 +54,7 @@ export function ReportScreen({ navigation }) {
       // result is object with key 'result'
       // ... with value an array of DIDs who confirmed who I can see, potentially some HIDDEN
       if (result.result) {
+        // don't include confirmations by this person
         const resultOthers = R.reject(did => did === claimIssuerDid, result.result)
         setConfirms(cons => R.set(R.lensProp(claimId), resultOthers.length, cons))
       } else {
@@ -92,7 +93,7 @@ export function ReportScreen({ navigation }) {
                       onPress={() => retrieveConfirms(accept.id, accept.issuer) }
                       style={{ color: 'blue', textAlign: 'center' }}
                     >
-                      See Other Confirms
+                      Load Confirms
                     </Text>
               }
               </View>
@@ -137,7 +138,7 @@ export function ReportScreen({ navigation }) {
       : filteredResults0
     if (results.length > 0 && filteredResults1.length === 0) {
       return (
-        <Text>There are results but they include IDs not visible to you. (Use checkboxes to show more claims.)</Text>
+        <Text>There are results but they include IDs not visible. (Use checkboxes to show more claims.)</Text>
       )
     } else if (showAcceptsOnly && showAcceptConfirmations) {
       return <AcceptList acceptRecords={filteredResults1} />
@@ -149,7 +150,7 @@ export function ReportScreen({ navigation }) {
         <ScrollView horizontal={true}>
           <FlatList
             data={filteredResults1}
-            scrollEnabled={false} /* somehow this allows both Android & iOS to scroll*/
+            scrollEnabled={false} /* somehow this allows both Android & iOS to scroll */
             /* fixed height makes iOS vertical scroll but stops Android from scrolling */
             style={{ borderWidth: 1 }}
             ListHeaderComponent={

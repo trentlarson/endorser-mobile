@@ -55,7 +55,9 @@ import { ReportFeedScreen } from './screens/ReportFeed'
 import { ReportScreen } from './screens/ReportFromEndorser'
 import { ReviewToSignCredentialScreen } from './screens/ReviewToSignCredential'
 import { ScanAnythingScreen } from './screens/ScanAnything'
-import { ScanPresentationScreen, VerifyCredentialScreen } from './screens/VerifyCredential'
+import { ScanPresentationScreen } from './screens/ScanPresentation'
+import { VerifyCredentialScreen } from './screens/VerifyCredential'
+import { VerifyPresentationScreen } from './screens/VerifyPresentation'
 import { SettingsScreen } from "./screens/Settings";
 import { SignatureResultsScreen } from './screens/SignatureResults'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
@@ -151,6 +153,7 @@ function ClaimsStackScreen() {
       <ClaimsStack.Screen name="Sent Signature Results" component={SignatureResultsScreen} />
       <ClaimsStack.Screen name="Signature Results" component={SignCredentialScreen} />
       <ClaimsStack.Screen name="Verify Credential" component={VerifyCredentialScreen} />
+      <ClaimsStack.Screen name="Verify Presentation" component={VerifyPresentationScreen} />
       <ClaimsStack.Screen name="Your Credentials" component={MyCredentialsScreen} />
       <ClaimsStack.Screen name="Your Given" component={MyGivenScreen} />
       <ClaimsStack.Screen name="Your Offers" component={MyOffersScreen} />

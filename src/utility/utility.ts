@@ -133,11 +133,11 @@ export const capitalizeAndInsertSpacesBeforeCaps = (text) => {
 }
 
 // insert a nice English phrase for this camel-case item
-// return "unknown" message for null or undefined input
+// return generic message for null or undefined input
 export const helpfulSpacesBeforeCaps = (text) => {
   return (
     !text
-      ? 'something not known' // to differentiate from "something unknown" below
+      ? 'something' // to differentiate from "a claim" below
       : 'a ' + capitalizeAndInsertSpacesBeforeCaps(text)
   )
 }
@@ -231,8 +231,8 @@ export function didInfo(did, identifiers, contacts) {
  **/
 const claimSummary = (claim) => {
   if (!claim) {
-    // to differentiate from "something not known" above
-    return 'something unknown'
+    // to differentiate from "something" above
+    return 'a claim'
   }
   if (claim.claim) {
     // probably a Verified Credential
