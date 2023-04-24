@@ -178,7 +178,7 @@ function testRecursivelyOnString(func, input) {
 }
 
 export const containsHiddenDid = (obj) => {
-  return testRecursivelyOnString(str => str === HIDDEN_DID, obj)
+  return testRecursivelyOnString(isHiddenDid, obj)
 }
 
 export const containsNonHiddenDid = (obj) => {

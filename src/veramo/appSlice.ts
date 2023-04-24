@@ -15,6 +15,27 @@ export const LOCAL_ENDORSER_VIEW_SERVER = 'http://127.0.0.1:3001'
 export const TEST_ENDORSER_API_SERVER = 'https://test.endorser.ch:8000'
 export const TEST_ENDORSER_VIEW_SERVER = 'https://test.endorser.ch:8080'
 
+export interface AppState {
+  // This is nullable because it is cached state from the DB...
+  // it'll be null if we haven't even loaded from the DB yet.
+  settings: Settings | null;
+
+  // This is nullable because it is cached state from the DB...
+  // it'll be null if we haven't even loaded from the DB yet.
+  identifiers: Array<IIdentifier> | null;
+
+  // This is nullable because it is cached state from the DB...
+  // it'll be null if we haven't even loaded from the DB yet.
+  contacts: Array<Contact> | null;
+
+  homeProjectId: string;
+  logMessage: string;
+  refreshHomeFeed: boolean;
+  viewServer: string;
+  advancedMode: boolean;
+  testMode: boolean;
+}
+
 // for contents set in reducers
 interface Payload<T> {
   type: string;
@@ -30,16 +51,10 @@ export const appSlice = createSlice({
   name: 'app',
   initialState: {
 
-    // This is nullable because it is cached state from the DB...
-    // it'll be null if we haven't even loaded from the DB yet.
     settings: null as Settings | null,
 
-    // This is nullable because it is cached state from the DB...
-    // it'll be null if we haven't even loaded from the DB yet.
     identifiers: null as Array<IIdentifier> | null,
 
-    // This is nullable because it is cached state from the DB...
-    // it'll be null if we haven't even loaded from the DB yet.
     contacts: null as Array<Contact> | null,
 
     homeProjectId: BVC_PROJECT_CLAIM_ID,
@@ -52,7 +67,7 @@ export const appSlice = createSlice({
 
     advancedMode: false,
     testMode: false,
-  },
+  } as AppState,
   reducers: {
     addIdentifier: (state, contents: Payload<IIdentifier>) => {
       state.identifiers = state.identifiers.concat([contents.payload])

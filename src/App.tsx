@@ -62,6 +62,7 @@ import { SettingsScreen } from "./screens/Settings";
 import { SignatureResultsScreen } from './screens/SignatureResults'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
 import { ContactCorrelateScreen } from "./screens/ContactCorrelate";
+import { ContactCorrelateChoicesScreen } from "./screens/ContactCorrelateChoices";
 
 
 /****************************************************************
@@ -168,6 +169,7 @@ function ContactsStackScreen() {
       <ContactsStack.Screen name="Contact List" component={ContactsScreen} />
 
       <ContactsStack.Screen name="Contact Correlate" component={ContactCorrelateScreen} />
+      <ContactsStack.Screen name="Contact Correlate Choices" component={ContactCorrelateChoicesScreen} />
       <ContactsStack.Screen name="Contact Import" component={ContactImportScreen} />
     </ContactsStack.Navigator>
   )

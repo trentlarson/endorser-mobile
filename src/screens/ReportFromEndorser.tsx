@@ -1,7 +1,8 @@
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { ActivityIndicator, Button, FlatList, Item, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Button, FlatList, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
 import { CheckBox } from 'react-native-elements'
+import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux'
 
 import * as utility from '../utility/utility'
@@ -339,6 +340,18 @@ export function ReportScreen({ navigation }) {
                             setShowAcceptConfirmations(false)
                             setShowAcceptTotals(false)
                           }}
+                        />
+                        <Button
+                          title="Find a Common Contact for These"
+                          onPress={() =>
+                            navigation.navigate(
+                              'Contacts',
+                              {
+                                screen: "Contact Correlate Choices",
+                                params: { claims: searchResults }
+                              }
+                            )
+                          }
                         />
                         {
                           showAcceptsOnly

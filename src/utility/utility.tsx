@@ -326,6 +326,11 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
             {
               <View style={{ flexDirection: 'row' }}>
 
+                <View style={{ flexDirection: 'row', padding: 10 }}>
+                  <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
+                  <Text>Load Confirms</Text>
+                </View>
+
                 { /** Accept a Contract **/
 
                   utility.isContract(source.claim) || utility.isContractAccept(source.claim)

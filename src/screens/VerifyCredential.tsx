@@ -363,20 +363,20 @@ export function VerifyCredentialScreen({ navigation, route }) {
             "Authorization": "Bearer " + userToken2
           }
         })
-          .then(async response => {
-            if (response.status === 200) {
-              return response.json()
-            } else {
-              const text = await response.text()
-              throw 'Got from server: ' + text
-            }
-          })
-          .then(data => {
-            setPlanOfferTotals(data.data)
-          })
-          .catch(err =>
-            setTotalsError('Got error loading offered totals: ' + err)
-          )
+        .then(async response => {
+          if (response.status === 200) {
+            return response.json()
+          } else {
+            const text = await response.text()
+            throw 'Got from server: ' + text
+          }
+        })
+        .then(data => {
+          setPlanOfferTotals(data.data)
+        })
+        .catch(err =>
+          setTotalsError('Got error loading offered totals: ' + err)
+        )
 
         setLoadingTotals(false)
       }
