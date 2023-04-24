@@ -14,7 +14,7 @@ a la tea.xyz
 | Project       | Version   |
 | ------------- | --------- |
 | nodejs.org    | ^16.0.0   |
-| yarnpkg.com   | ^3.1.2    |
+| yarnpkg.com   | ^1.22.19  |
 | ruby-lang.org | ^3.1.2    |
 
 ... and Java zulu-11.60-19 for Android
