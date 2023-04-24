@@ -29,37 +29,43 @@ const hashDidWithPass = (pass) => (did) => {
   return hash.digest('hex')
 }
 
-export function ContactCorrelateScreen({ navigation }) {
+export function ContactCorrelateScreen({ navigation, route }) {
+
+  const inputConfirmerIds = route.params?.confirmerIds
 
   const [counterpartyId, setCounterpartyId] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   /**
    * The value of match is:
    * - undefined before a match is tried and when waiting for the counterparty
-   * - null if there is no match
-   * - some string of matching contact if there was a match
+   * - some string array of matching contact DIDs if there were matches
    */
-  const [foundMatch, setFoundMatch] = useState<string>()
+  const [foundMatches, setFoundMatches] = useState<Array<string>>(undefined)
   const [waitingForCounterparty, setWaitingForCounterparty] = useState<boolean>(false)
   const [matchError, setMatchError] = useState<string>('')
   const [matching, setMatching] = useState<boolean>(false)
   const [password, setPassword] = useState<string>('')
   const [selectCounterpartyFromContacts, setSelectCounterpartyFromContacts] = useState<boolean>(false)
-  const [sentContactHashes, setSentContactHashes] = useState<Array<string>>([])
+  const [serverForcedOnlyOneMatch, setServerForcedOnlyOneMatch] = useState<boolean>(false)
+  const [sentHashesToDids, setSentHashesToDids] = useState<Record<string, string>>({})
 
   const allIdentifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
 
-  const checkMatch = (result, contactHashes) => {
-    // we get a match immediately if the counterparty sent first
-    if (result && !R.find(hash => hash == result, contactHashes)) {
-      // something is very wrong because it returned one that wasn't sent
-      setFoundMatch(undefined)
+  const confirmerIds =
+    inputConfirmerIds
+    ||
+    // only taking 500 because of limit on server payload size
+    R.take(500, allContacts)
+
+  const checkMatch = (result, hashToDid) => {
+    if (!result) {
+      setFoundMatches(undefined)
       setMatchError('The server responded with an invalid match.')
     } else {
-      const found =
-        R.find(contact => hashDidWithPass(password)(contact.did) == result, allContacts)
-      setFoundMatch(found || null)
+      const foundDids = result.map(hash => hashToDid[hash])
+      setFoundMatches(foundDids)
+      setMatchError('')
     }
   }
 
@@ -75,12 +81,10 @@ export function ContactCorrelateScreen({ navigation }) {
 
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(allIdentifiers[0])
-    const payload =
-      // only taking 500 because of limit on server payload size
-      R.take(500, allContacts).map(
-        contact => hashDidWithPass(password)(contact.did)
-      )
-    setSentContactHashes(payload)
+    const contactDids = confirmerIds.map(contact => contact.did)
+    const payload = contactDids.map(hashDidWithPass(password))
+    const hashToDid = R.zipObj(payload, contactDids)
+    setSentHashesToDids(hashToDid)
     await fetch(
       endorserApiServer
       + '/api/util/cacheContactList?counterparty='
@@ -96,16 +100,13 @@ export function ContactCorrelateScreen({ navigation }) {
       if (response.status == 201) {
         const resultData = await response.json()
         if (resultData.data == RESULT_NEED_DATA) {
-          setFoundMatch(undefined)
+          setFoundMatches(undefined)
           setMatching(true)
           setWaitingForCounterparty(true)
-        } else if (resultData.data == RESULT_NO_MATCH) {
-          setFoundMatch(null)
-          setMatching(false)
-          setWaitingForCounterparty(false)
-        } else if (resultData.data?.match) {
-          // gotta send payload because async sentContactHashes may not be updated yet
-          checkMatch(resultData.data?.match, payload)
+        } else if (resultData.data?.matches) {
+          // we get a match immediately if the counterparty sent first
+          checkMatch(resultData.data.matches, hashToDid)
+          setServerForcedOnlyOneMatch(resultData.data.onlyOneMatch)
           setMatching(false)
           setWaitingForCounterparty(false)
         } else {
@@ -162,15 +163,12 @@ export function ContactCorrelateScreen({ navigation }) {
         if (response.status == 200) {
           const resultData = await response.json()
           if (resultData.data == RESULT_NEED_DATA) {
-            setFoundMatch(undefined)
+            setFoundMatches(undefined)
             setMatching(true)
             setWaitingForCounterparty(true)
-          } else if (resultData.data == RESULT_NO_MATCH) {
-            setFoundMatch(null)
-            setMatching(false)
-            setWaitingForCounterparty(false)
-          } else if (resultData.data?.match) {
-            checkMatch(resultData.data?.match, sentContactHashes)
+          } else if (resultData.data?.matches) {
+            checkMatch(resultData.data.matches, sentHashesToDids)
+            setServerForcedOnlyOneMatch(resultData.data.onlyOneMatch)
             setMatching(false)
             setWaitingForCounterparty(false)
           } else {
@@ -209,20 +207,30 @@ export function ContactCorrelateScreen({ navigation }) {
 
   const foundMessage = (matchResult: Contact) => {
     return (
-      matchResult != null
+      matchResult === undefined
+      ?
+        <View />
+      : matchResult.length === 0
         ?
+          <Text>
+            Result: No match was found in that set.
+            (Or: the passwords are different.)
+          </Text>
+        : // matchResult.length > 0
           <View>
-            <Text style={{ textAlign: 'center' }}>Result: A match was found!</Text>
-            <Text style={{ textAlign: 'center' }}>
-              { utility.didInfo(matchResult.did, allIdentifiers, allContacts) }
-            </Text>
+            <Text style={{ textAlign: 'center' }}>Result: Matches were found!</Text>
+            {
+              matchResult.map((match, index) => {
+                return (
+                  <View key={ index }>
+                    <Text style={{ textAlign: 'center' }}>
+                      { utility.didInfo(match, allIdentifiers, allContacts) }
+                    </Text>
+                  </View>
+                )
+              })
+            }
           </View>
-        : matchResult === null
-          ? <Text>
-              Result: No match was found in that set.
-              (Or: the passwords are different.)
-            </Text>
-          : <Text />
     )
   }
 
@@ -255,7 +263,7 @@ export function ContactCorrelateScreen({ navigation }) {
           </Text>
 
           <Text style={{ marginLeft: 10, marginTop: 10 }}>
-            Note that only the first 500 contacts will be tested.
+            Note that { confirmerIds.length } contacts will be tested.
           </Text>
         </View>
 
@@ -325,7 +333,15 @@ export function ContactCorrelateScreen({ navigation }) {
 
         <Text style={{ color: 'red', textAlign: 'center' }}>{ matchError } </Text>
 
-        { foundMessage(foundMatch) }
+        { foundMessage(foundMatches) }
+
+        {
+          serverForcedOnlyOneMatch
+          ? <Text style={{ textAlign: 'center' }}>
+              Note: the server only returned one match because someone chose that option.
+            </Text>
+          : <View />
+        }
 
 
 
@@ -343,7 +359,7 @@ export function ContactCorrelateScreen({ navigation }) {
               {
               loading
               ? <ActivityIndicator color="#00ff00" />
-              : foundMatch === undefined
+              : foundMatches === undefined
                 ?
                   <View>
                     <Text>Your counterparty hasn't started their process.</Text>
@@ -355,7 +371,7 @@ export function ContactCorrelateScreen({ navigation }) {
                     />
                   </View>
                 :
-                  foundMessage(foundMatch)
+                  foundMessage(foundMatches)
               }
 
               <TouchableHighlight
