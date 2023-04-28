@@ -53,7 +53,6 @@ export function SettingsScreen({navigation}) {
 
   const identifiersSelector = useSelector((state) => state.identifiers || [])
   const homeScreenSelector = useSelector((state) => (state.settings || {}).homeScreen)
-  const logMessageSelector = useSelector((state) => state.logMessage)
 
   const toggleStateForHomeIsBVC = async () => {
     const newValue = homeScreenSelector == null ? 'BVC' : null
@@ -114,9 +113,12 @@ export function SettingsScreen({navigation}) {
     const conn = await dbConnection
     // may be empty string, but we don't want that in the DB
     const valueToSave = inputApiServer || null
-    const settings = await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: valueToSave })
-    appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
-    setStoredApiServer(inputApiServer)
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { apiServer: valueToSave })
+    const settings = classToPlain(appStore.getState().settings)
+    settings.apiServer = valueToSave
+    appStore.dispatch(appSlice.actions.setSettings(settings))
+    setInputApiServer(valueToSave)
+    setStoredApiServer(valueToSave)
   }
 
   const deleteLastIdentifier = async () => {
@@ -613,7 +615,7 @@ export function SettingsScreen({navigation}) {
                 <View style={{ marginTop: 10 }}/>
                 <Text>Endorser API Server</Text>
                 <TextInput
-                  value={inputApiServer ? inputApiServer : ''}
+                  value={inputApiServer || ''}
                   onChangeText={setInputApiServer}
                   style={{borderWidth: 1}}
                 />

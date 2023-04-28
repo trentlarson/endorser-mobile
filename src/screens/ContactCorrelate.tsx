@@ -20,8 +20,12 @@ import { ContactSelectModal } from "./ContactSelect";
 import { styles } from "./style";
 import { Contact } from "../entity/contact";
 
-export const RESULT_NEED_DATA = 'NEED_COUNTERPARTY_DATA'
-export const RESULT_NO_MATCH = 'NO_MATCH'
+export const RESULT_ALL_CLEARED = 'ALL_CACHES_CLEARED'
+export const RESULT_NEED_APPROVAL = 'NEED_COUNTERPARTY_APPROVAL'
+export const RESULT_NEED_BOTH_USER_DATA = 'NEED_BOTH_USER_DATA'
+export const RESULT_NEED_COUNTERPARTY_DATA = 'NEED_COUNTERPARTY_DATA'
+export const RESULT_NEED_THIS_USER_DATA = 'NEED_THIS_USER_DATA'
+export const RESULT_ONE_CLEARED = 'ONE_CACHE_CLEARED'
 
 const hashDidWithPass = (pass) => (did) => {
   const hash = crypto.createHash('sha256');
@@ -34,20 +38,22 @@ export function ContactCorrelateScreen({ navigation, route }) {
   const inputConfirmerIds = route.params?.confirmerIds
 
   const [counterpartyId, setCounterpartyId] = useState<string>('')
+  //const [counterpartyId, setCounterpartyId] = useState<string>('did:ethr:0x000Ee5654b9742f6Fe18ea970e32b97ee2247B51')
+  //const [counterpartyId, setCounterpartyId] = useState<string>('did:ethr:0x2224EA786b7C2A8E5782E16020F2f415Dce6bFa7')
   const [loading, setLoading] = useState<boolean>(false)
   /**
    * The value of match is:
    * - undefined before a match is tried and when waiting for the counterparty
    * - some string array of matching contact DIDs if there were matches
    */
-  const [foundMatches, setFoundMatches] = useState<Array<string>>(undefined)
-  const [waitingForCounterparty, setWaitingForCounterparty] = useState<boolean>(false)
+  const [foundMatches, setFoundMatches] = useState<Array<string>>()
   const [matchError, setMatchError] = useState<string>('')
   const [matching, setMatching] = useState<boolean>(false)
   const [password, setPassword] = useState<string>('')
   const [selectCounterpartyFromContacts, setSelectCounterpartyFromContacts] = useState<boolean>(false)
   const [serverForcedOnlyOneMatch, setServerForcedOnlyOneMatch] = useState<boolean>(false)
   const [sentHashesToDids, setSentHashesToDids] = useState<Record<string, string>>({})
+  const [showRecheckPopup, setShowRecheckPopup] = useState<boolean>(false)
 
   const allIdentifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
@@ -87,7 +93,7 @@ export function ContactCorrelateScreen({ navigation, route }) {
     setSentHashesToDids(hashToDid)
     await fetch(
       endorserApiServer
-      + '/api/util/cacheContactList?counterparty='
+      + '/api/userUtil/cacheContactList?counterparty='
       + encodeURIComponent(counterpartyId),
       {
         method: 'POST',
@@ -99,16 +105,15 @@ export function ContactCorrelateScreen({ navigation, route }) {
     }).then(async response => {
       if (response.status == 201) {
         const resultData = await response.json()
-        if (resultData.data == RESULT_NEED_DATA) {
+        if (resultData.data == RESULT_NEED_COUNTERPARTY_DATA) {
           setFoundMatches(undefined)
           setMatching(true)
-          setWaitingForCounterparty(true)
+          setShowRecheckPopup(true)
         } else if (resultData.data?.matches) {
           // we get a match immediately if the counterparty sent first
           checkMatch(resultData.data.matches, hashToDid)
           setServerForcedOnlyOneMatch(resultData.data.onlyOneMatch)
           setMatching(false)
-          setWaitingForCounterparty(false)
         } else {
           // should never get here
           setMatchError(
@@ -118,10 +123,12 @@ export function ContactCorrelateScreen({ navigation, route }) {
         }
       } else {
         const result = await response.text()
-        const error = { backendResult: result }
+        let error = { backendResult: result }
         try {
-          const embeddedMessage = JSON.stringify(result).error?.message
-          error.error = { message: embeddedMessage }
+          const embeddedError = JSON.parse(result).error
+          if (embeddedError) {
+            error = embeddedError
+          }
         } catch {
           // looks like the contents weren't JSON
         }
@@ -129,10 +136,10 @@ export function ContactCorrelateScreen({ navigation, route }) {
       }
     })
     .catch(err => {
-      let message = 'There was an error from the server trying to start the matching process.'
-      if (err.error?.message) {
-        message = message + ' ' + err.error.message
-      }
+      const message =
+        err.message
+        ||
+        'There was an error trying to start the matching process on the server.'
       setMatchError(message)
       appStore.dispatch(appSlice.actions.addLog({
         log: true,
@@ -151,7 +158,7 @@ export function ContactCorrelateScreen({ navigation, route }) {
     const token = await utility.accessToken(allIdentifiers[0])
     await fetch(
       endorserApiServer
-      + '/api/util/getContactMatch?counterparty='
+      + '/api/userUtil/getContactMatch?counterparty='
       + encodeURIComponent(counterpartyId),
       {
         headers: {
@@ -162,15 +169,19 @@ export function ContactCorrelateScreen({ navigation, route }) {
       .then(async response => {
         if (response.status == 200) {
           const resultData = await response.json()
-          if (resultData.data == RESULT_NEED_DATA) {
+          if (resultData.data == RESULT_NEED_BOTH_USER_DATA
+              || resultData.data == RESULT_NEED_THIS_USER_DATA) {
             setFoundMatches(undefined)
-            setMatching(true)
-            setWaitingForCounterparty(true)
+            setMatchError(
+              "You still need to start the matching process."
+            )
+          } else if (resultData.data == RESULT_NEED_COUNTERPARTY_DATA) {
+            setFoundMatches(undefined)
+            setShowRecheckPopup(true)
           } else if (resultData.data?.matches) {
             checkMatch(resultData.data.matches, sentHashesToDids)
             setServerForcedOnlyOneMatch(resultData.data.onlyOneMatch)
             setMatching(false)
-            setWaitingForCounterparty(false)
           } else {
             // should never get here
             setMatchError(
@@ -180,10 +191,12 @@ export function ContactCorrelateScreen({ navigation, route }) {
           }
         } else {
           const result = await response.text()
-          const error = { backendResult: result }
+          let error = { backendResult: result }
           try {
-            const embeddedMessage = JSON.stringify(result).error?.message
-            error.error = { message: embeddedMessage }
+            const embeddedError = JSON.parse(result).error
+            if (embeddedError) {
+              error = embeddedError
+            }
           } catch {
             // looks like the contents weren't JSON
           }
@@ -191,14 +204,78 @@ export function ContactCorrelateScreen({ navigation, route }) {
         }
       })
       .catch(err => {
-        let message = 'There was an error from the server trying to retrieve a match.'
-        if (err.error?.message) {
-          message = message + ' ' + err.error.message
-        }
+        const message =
+          err.message
+          ||
+          'There was an error trying to retrieve a match from the server.'
         setMatchError(message)
         appStore.dispatch(appSlice.actions.addLog({
           log: true,
           msg: "Got some server error retrieving the match with "
+            + counterpartyId + " - " + JSON.stringify(err)
+        }))
+      })
+    setLoading(false)
+  }
+
+  const requestMatchReset = async () => {
+    setLoading(true)
+    setMatchError('')
+
+    const endorserApiServer = appStore.getState().settings.apiServer
+    const token = await utility.accessToken(allIdentifiers[0])
+    await fetch(
+      endorserApiServer
+      + '/api/userUtil/clearContactCaches?counterparty='
+      + encodeURIComponent(counterpartyId),
+      {
+        method: 'DELETE',
+        headers: {
+          "Content-Type": "application/json",
+          "Uport-Push-Token": token,
+        },
+      })
+      .then(async response => {
+        if (response.status == 200) {
+          const resultData = await response.json()
+          if (resultData.success == RESULT_ALL_CLEARED) {
+            setMatching(false)
+            Alert.alert("Done", "All data was cleared. You may begin again.")
+          } else if (resultData.success == RESULT_ONE_CLEARED) {
+            setMatching(false)
+            Alert.alert("Done", "Your data was cleared. You may begin again.")
+          } else if (resultData.success === RESULT_NEED_APPROVAL) {
+            Alert.alert("Reset Requested", "Begin again once your counterparty has agreed.")
+          } else {
+            // should never get here
+            setMatchError(
+              "Got strange success results from the server: "
+              + JSON.stringify(response.success)
+            )
+          }
+        } else {
+          const result = await response.text()
+          let error = { backendResult: result }
+          try {
+            const embeddedError = JSON.parse(result).error
+            if (embeddedError) {
+              error = embeddedError
+            }
+          } catch {
+            // looks like the contents weren't JSON
+          }
+          throw error
+        }
+      })
+      .catch(err => {
+        const message =
+          err.message
+          ||
+          'There was an error trying to reset your request on the server.'
+        setMatchError(message)
+        appStore.dispatch(appSlice.actions.addLog({
+          log: true,
+          msg: "Got some server error clearing the contact match caches with "
             + counterpartyId + " - " + JSON.stringify(err)
         }))
       })
@@ -214,7 +291,7 @@ export function ContactCorrelateScreen({ navigation, route }) {
         ?
           <Text>
             Result: No match was found in that set.
-            (Or: the passwords are different.)
+            (Or: the passwords may be different.)
           </Text>
         : // matchResult.length > 0
           <View>
@@ -302,46 +379,58 @@ export function ContactCorrelateScreen({ navigation, route }) {
         </View>
 
         <View style={{ marginTop: 20 }} />
+        {
+          loading
+          ?
+            <ActivityIndicator color="#00ff00" />
+          :
+            <Text>
+              Status:
+              &nbsp;
+              {
+                foundMatches
+                ? "Finished matching."
+                : matching ? "Started matching." : "Ready to start."
+              }
+            </Text>
+        }
+
+        { foundMessage(foundMatches) }
+
+        {
+          serverForcedOnlyOneMatch
+            ? <Text style={{ textAlign: 'center' }}>
+              Note: the server only returned one match because someone chose that option.
+            </Text>
+            : <View />
+        }
+
+        <Text style={{ color: 'red', textAlign: 'center' }}>{ matchError } </Text>
+
         <Button
-          title="Begin Search Process Together"
+          title="Start matching process together"
           onPress={() => {
             if (counterpartyId) {
-              startMatching()
+              startMatching(); setShowRecheckPopup(true)
             } else {
               Alert.alert('You must set the ID of the counterparty.')
             }
           }}
         />
 
-        {
-          waitingForCounterparty
-          ?
-            <Button
-              title="Recheck Process Already Begun"
-              onPress={() => { setMatching(true) }}
-              style={{ marginTop: 20 }}
-            />
-          :
-            <View />
-        }
+        <Button
+          title="Recheck results"
+          onPress={() => { checkForMatch(true); setShowRecheckPopup(true) }}
+          style={{ marginTop: 10 }}
+        />
 
-        {
-          loading
-          ? <ActivityIndicator color="#00ff00" />
-          : <View />
-        }
-
-        <Text style={{ color: 'red', textAlign: 'center' }}>{ matchError } </Text>
-
-        { foundMessage(foundMatches) }
-
-        {
-          serverForcedOnlyOneMatch
-          ? <Text style={{ textAlign: 'center' }}>
-              Note: the server only returned one match because someone chose that option.
-            </Text>
-          : <View />
-        }
+        <Button
+          title="Clear results. (Counterparty must agree.)"
+          onPress={() => {
+            requestMatchReset()
+          }}
+          style={{ marginTop: 10 }}
+        />
 
 
 
@@ -349,34 +438,39 @@ export function ContactCorrelateScreen({ navigation, route }) {
         <Modal
           animationType="slide"
           transparent={true}
-          visible={!!matching}
+          visible={!!showRecheckPopup}
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
 
-              <Text>The process has started.</Text>
-
               {
               loading
               ? <ActivityIndicator color="#00ff00" />
-              : foundMatches === undefined
+              : foundMatches
                 ?
-                  <View>
-                    <Text>Your counterparty hasn't started their process.</Text>
-                    <Button
-                      title="Recheck"
-                      onPress={() => {
-                        checkForMatch()
-                      }}
-                    />
-                  </View>
-                :
                   foundMessage(foundMatches)
+                :
+                  matching
+                  ?
+                    <View>
+                      <Text>Data is still needed.</Text>
+                    </View>
+                  :
+                    <Text>Process hasn't started.</Text>
               }
 
+              <View style={{ marginTop: 20 }} />
+              <TouchableHighlight
+                style={styles.saveButton}
+                onPress={() => checkForMatch()}
+              >
+                <Text>Recheck</Text>
+              </TouchableHighlight>
+
+              <View style={{ marginTop: 20 }} />
               <TouchableHighlight
                 style={styles.cancelButton}
-                onPress={() => setMatching(false)}
+                onPress={() => setShowRecheckPopup(false)}
               >
                 <Text>Close</Text>
               </TouchableHighlight>
