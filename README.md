@@ -11,11 +11,12 @@ For the reporting facility, we use the [endorser-ch APIs](https://github.com/tre
 
 a la tea.xyz
 
-| Project       | Version   |
-| ------------- | --------- |
-| nodejs.org    | ^16.0.0   |
-| yarnpkg.com   | ^1.22.19  |
-| ruby-lang.org | ^3.1.2    |
+| Project       | Version  |
+|---------------|----------|
+| nodejs.org    | ^16.0.0  |
+| yarnpkg.com   | ^1.22.19 |
+| ruby-lang.org | ^3.1.2   |
+| rubygems.org  | ^3.3.25  |
 
 ... and Java zulu-11.60-19 for Android
 

@@ -11,12 +11,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.6.124] - 2023-04
+## [6.7.126] - 2023-04-28
 
+### Added
+- Common-contact discovery from lists of claims
+
+
+
+## [6.6.125] - 2023-04-16 - d64db5871d854886cf66483a6d27d44e7da34ff7
+
+### Added
 - Gives & offers on plans
 - ID for BVC-specific time donations
 - Common-contact discovery
-- Fixes for give & offer creation and iOS list scrolling
+
+### Fixed
+- Verifiable presentation scanning
+- Give & offer creation and iOS list scrolling
 
 
 
