@@ -266,7 +266,7 @@ PODS:
     - React-Core
   - react-native-safe-area-context (3.4.1):
     - React-Core
-  - react-native-sodium (0.4.0):
+  - react-native-sodium (0.3.9):
     - React
   - react-native-sqlite-storage (5.0.0):
     - React
@@ -571,7 +571,7 @@ SPEC CHECKSUMS:
   react-native-get-random-values: a6ea6a8a65dc93e96e24a11105b1a9c8cfe1d72a
   react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846
   react-native-safe-area-context: 9e40fb181dac02619414ba1294d6c2a807056ab9
-  react-native-sodium: 274874541aa6bd00040f28c2e1e5118cbf113c0e
+  react-native-sodium: be31e3fd97b1e9abd0853d7623fbec4b390b6615
   react-native-sqlite-storage: 418ef4afc5e6df6ce3574c4617e5f0b65cffde55
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
   React-RCTActionSheet: 89a0ca9f4a06c1f93c26067af074ccdce0f40336
