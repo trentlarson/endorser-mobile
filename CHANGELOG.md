@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [6.7.126] - 2023-04-28
+## [6.7.126] - 2023-04-28 - ffa7f5da0e1eb699c9f911a0234268e8a47f2be7
 
 ### Added
 - Common-contact discovery from lists of claims

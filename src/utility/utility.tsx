@@ -281,7 +281,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
   const identifiers = useSelector((state) => state.identifiers || [])
   const contacts = useSelector((state) => state.contacts || [])
 
-  const isUser = did => did === identifiers[0].did
+  const isUser = did => did === identifiers[0]?.did
 
   const summary = utility.claimSpecialDescription(source, identifiers, contacts)
 
@@ -325,11 +325,6 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
           <View>
             {
               <View style={{ flexDirection: 'row' }}>
-
-                <View style={{ flexDirection: 'row', padding: 10 }}>
-                  <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
-                  <Text>Load Confirms</Text>
-                </View>
 
                 { /** Accept a Contract **/
 

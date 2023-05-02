@@ -13,13 +13,15 @@ a la tea.xyz
 
 | Project       | Version  |
 |---------------|----------|
+| libsodium.org | ^1.0.18  |
 | nodejs.org    | ^16.0.0  |
-| yarnpkg.com   | ^1.22.19 |
 | ruby-lang.org | ^3.1.2   |
 | rubygems.org  | ^3.3.25  |
+| yarnpkg.com   | ^1.22.19 |
 
-... and Java zulu-11.60-19 for Android
+... which can be done with: `tea +libsodium.org +nodejs.org +ruby-lang.org +rubygems.org +yarnpkg.com sh`
 
+Android also needs Java (which isn't in tea yet) which can be done on my machine with `export JAVA_HOME=~/.asdf/installs/java/zulu-11.60.19`
 
 ## Dev Build & Run
 
@@ -43,7 +45,6 @@ Run ios:
 
 Run android:
 
-- If [this issue](https://github.com/ethers-io/ethers.js/issues/3460) isn't fixed then apply the @ethersproject/base64 fix below.
 - `yarn run android`
 
 (If it cannot find emulators, see Troubleshooting below.)
@@ -146,7 +147,7 @@ error Failed to launch the app on simulator, An error was encountered processing
 Unable to lookup in current state: Shutdown
 ```
 
-Switch to the Simulator app, choose "File" and "Open Simulator" and choose one to run.
+  Switch to the Simulator app, choose "File" and "Open Simulator" and choose one to run.
 
 - Sometimes the emulator loses external network access. Try a Cold Boot Now (usually via Android Studio).
 
@@ -154,7 +155,9 @@ Switch to the Simulator app, choose "File" and "Open Simulator" and choose one t
 
 - During "bundle exec fastlane beta", you might see a message of "Could not find fastlane-2.210.1, CFPropertyList-3.0.5... in any of the sources". Try "bundle install".
 
-- On M1, builds may get: "In .../node_modules/react-native-sodium/libsodium/libsodium-ios/lib/libsodium.a(libsodium_la-aead_chacha20poly1305.o), building for iOS Simulator, but linking in object file built for iOS, file '.../node_modules/react-native-sodium/libsodium/libsodium-ios/lib/libsodium.a' for architecture arm64". Open a terminal "using Rosetta" and run from there. (You may have to check out a clean set of source files.) (I would sure like to find a way to run natively!)
+- Builds may get: "In .../node_modules/react-native-sodium/libsodium/libsodium-ios/lib/libsodium.a(libsodium_la-aead_chacha20poly1305.o), building for iOS Simulator, but linking in object file built for iOS, file '.../node_modules/react-native-sodium/libsodium/libsodium-ios/lib/libsodium.a' for architecture arm64" when building on M1. Open a terminal "using Rosetta" and run from there. (You may have to check out a clean set of source files.) (I would sure like to find a way to run natively!)
+
+- Compilation may complain about "node->getLayout().hadOverflow() |" in Yoga.cpp on Xcode 14.3. Edit node_modules/react-native/ReactCommon/yoga/yoga/Yoga.cpp and change the line to make it double: "||" (Only necessary on line 2285.)
 
 
 
@@ -326,6 +329,7 @@ To Release:
       - First check the old version with existing data on a device.
       - Then: Internal Testing, Create a Release
     - To release: Go to Internal Testing, then View Release Details, then "Promote release" and select "Production", add details and "Save", then "Start rollout to Production". It'll show as "In review" for a little while. (Old instructions: repeatedly check the "Production" track and the release details/track until it allows you to release to production; sometimes it doesn't show for a few minutes; maybe login/logout would help.)
+    - Note that public testers may have to receive a link and/or turn on auto-update but they will be prompted to update. (They can go back to the public version by uninstalling and going back to the Play Store listing.)
 
 - ios
   - Change scheme to have a buildConfiguration of "Release" in ios/EndorserMobile.xcodeproj/xcshareddata/xcschemes/EndorserMobile.xcscheme

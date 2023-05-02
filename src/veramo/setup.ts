@@ -13,7 +13,7 @@ import { EthrDIDProvider } from '@veramo/did-provider-ethr'
 import { KeyManager } from '@veramo/key-manager'
 
 // Custom key management system for RN
-import { KeyManagementSystem } from '@veramo/kms-local-react-native'
+import { KeyManagementSystem } from '@veramo/kms-local'
 
 // Custom resolver
 // Custom resolvers
