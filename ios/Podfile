@@ -1,28 +1,21 @@
+
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '11.0'
+platform :ios, '13.0'
 
 target 'EndorserMobile' do
   config = use_native_modules!
 
-  use_react_native!(:path => config["reactNativePath"])
+  use_react_native!(:path => "../node_modules/react-native")
 
   target 'EndorserMobileTests' do
     inherit! :complete
     # Pods for testing
   end
 
-  # Enables Flipper.
-  #
-  # Note that if you have use_frameworks! enabled, Flipper will not work and
-  # you should disable these next few lines.
-  use_flipper!({ 'Flipper' => '0.90.0', 'Flipper-Folly' => '2.6.7', 'Flipper-RSocket' => '1.4.3' })
-  post_install do |installer|
-    flipper_post_install(installer)
-  end
-
   permissions_path = '../node_modules/react-native-permissions/ios'
+
   pod 'Permission-Camera', :path => "#{permissions_path}/Camera"
   pod 'Permission-Notifications', :path => "#{permissions_path}/Notifications"
 
