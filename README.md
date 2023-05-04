@@ -11,15 +11,14 @@ For the reporting facility, we use the [endorser-ch APIs](https://github.com/tre
 
 a la tea.xyz
 
-| Project       | Version  |
-|---------------|----------|
-| libsodium.org | ^1.0.18  |
-| nodejs.org    | ^16.0.0  |
-| ruby-lang.org | ^3.1.2   |
-| rubygems.org  | ^3.3.25  |
-| yarnpkg.com   | ^1.22.19 |
+| Project       | Version          |
+|---------------|------------------|
+| nodejs.org    | >=16.18.0<20.0.0 |
+| ruby-lang.org | ^3.2.2           |
+| rubygems.org  | ^3.3.25          |
+| yarnpkg.com   | ^3.4.1           |
 
-... which can be done with: `tea +libsodium.org +nodejs.org +ruby-lang.org +rubygems.org +yarnpkg.com sh`
+... which can be done with: `tea +nodejs.org +ruby-lang.org +rubygems.org +yarnpkg.com sh`
 
 Android also needs Java (which isn't in tea yet) which can be done on my machine with `export JAVA_HOME=~/.asdf/installs/java/zulu-11.60.19`
 
