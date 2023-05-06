@@ -92,10 +92,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
         setDetectedSigValid(false)
         setHowLongAgo('')
 
-        if (wrappedClaim) {
-          setCredentialSubject(wrappedClaim.claim)
-        }
-
         if (!vcObj && wrappedClaim) {
           // try to retrive a full VC
 
@@ -220,7 +216,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           // there's also a signer.id ... is it ever different?
         } else {
           // no verified response, so let's guess at other places
-          setCredentialSubject(vcObj?.credentialSubject)
+          setCredentialSubject(wrappedClaim?.claim || vcObj?.credentialSubject)
         }
 
         {
