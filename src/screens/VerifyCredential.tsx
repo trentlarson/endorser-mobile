@@ -203,7 +203,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
             || verifiedResponse.payload.claim // still happening; saw in Plan
           if (verSub) {
             setCredentialSubject(verSub)
-            if (vcObj.credentialSubject) {
+            if (vcObj?.credentialSubject) {
               setCredentialSubjectsMatch(
                 R.equals(vcObj.credentialSubject, verSub)
               )
@@ -220,7 +220,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           // there's also a signer.id ... is it ever different?
         } else {
           // no verified response, so let's guess at other places
-          setCredentialSubject(vcObj.credentialSubject)
+          setCredentialSubject(vcObj?.credentialSubject)
         }
 
         {

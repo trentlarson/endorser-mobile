@@ -45,7 +45,7 @@ export function SignCredentialScreen({ navigation, route }) {
    */
   async function sendToEndorserSite(jwt: string, index: number): Promise<string> {
     setFetching(R.update(index, true))
-    appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Starting the send to Endorser server..."}))
+    appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Starting send to Endorser server..."}))
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(identifier)
     appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... sending to server..."}))
@@ -62,7 +62,7 @@ export function SignCredentialScreen({ navigation, route }) {
       setFetched(R.update(index, true))
       appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... got server status " + resp.status + "..."}))
       if (resp.ok) {
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished the send to Endorser server."}))
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... finished sending to Endorser server."}))
         const json = await resp.json()
         return { serverId: json }
       } else {
