@@ -47,10 +47,10 @@ export function ScanPresentationScreen({ navigation }) {
           // probably not at the end
         }
         if (parseSucceeded) {
-          navigation.navigate('Verify Presentation', { veriPresStr: allScanned })
+          navigation.replace('Verify Presentation', { veriPresStr: allScanned })
         }
       } else {
-        navigation.navigate('Verify Presentation', { veriPresStr: allScanned })
+        navigation.replace('Verify Presentation', { veriPresStr: allScanned })
       }
     }
   }
