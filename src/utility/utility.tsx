@@ -58,7 +58,7 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
           <Text>
             { utility.didInfo(didForVisibility, allIdentifiers, allContacts) }
           </Text>
-          <Text>(DID is copied to clipboard.)</Text>
+          <Text>(The DID is copied to the clipboard.)</Text>
           <TouchableHighlight
             style={styles.cancelButton}
             onPress={() => {
@@ -155,15 +155,13 @@ export const YamlFormat = ({ source, afterItemCss }) => {
           ? () => { setDidsForLinkedModal(visibleToDids); setClaimIdForLinkedModal(claimId); }
           : () => { copyToClipboard(value) }
       return (
-        <View style={{ flexDirection: "row" }}>
-          <Text
-            style={ style }
-            onPress={ onPress }
-            selectable={ true } // still can't copy/paste with this; why?
-          >
-            { value }
-          </Text>
-        </View>
+        <Text
+          style={ style }
+          onPress={ onPress }
+          selectable={ true } // still can't copy/paste with this; why?
+        >
+          { value }
+        </Text>
       )
     }
   }
