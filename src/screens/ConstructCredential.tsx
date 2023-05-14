@@ -15,6 +15,7 @@ import * as utility from '../utility/utility'
 import { BVCButton } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
 import { HANDY_APP } from "../veramo/setup";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const debug = Debug('endorser-mobile:share-credential')
 
@@ -1049,6 +1050,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [fulfillsType, setFulfillsType] = useState<string>('')
     const [isFulfills, setIsFulfills] = useState<boolean>(false)
     const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
+    const [providerIds, setProviderIds] = useState<string>('')
     const [recipientId, setRecipientId] = useState<string>('')
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
@@ -1102,7 +1104,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
             amountOfThisGood: Number(amountStr),
             unitCode: unit,
           }
+        }
 
+        if (providerIds) {
+          const allIds = R.reject(R.isEmpty, R.split(/[\s\,]/, providerIds))
+          result.provider = R.map((id) => ({ identifier: id }), allIds)
         }
 
         result.identifier = invoiceIdentifier || undefined
@@ -1263,6 +1269,31 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   <TextInput
                     value={description}
                     onChangeText={setDescription}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>
+                    Other Provider(s)
+                    &nbsp;
+                    <Icon
+                      name="info-circle"
+                      onPress={() =>
+                        Alert.alert(
+                          "This is a list of other contributors who helped"
+                          + " make this possible."
+                          + "\n\nUse handle IDs for other Gives or Plans or Organizations."
+                          + "\nSeparate with spaces or commas.")
+                      }
+                      size={ 18 }
+                    />
+                  </Text>
+                  <TextInput
+                    value={providerIds}
+                    onChangeText={setProviderIds}
                     editable
                     multiline={true}
                     style={{ borderWidth: 1 }}
