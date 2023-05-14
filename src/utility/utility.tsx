@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import * as R from 'ramda'
 import React, { useState } from 'react'
 import { Alert, Button, Modal, Pressable, Text, TouchableHighlight, View } from 'react-native'
+import Clipboard from "@react-native-community/clipboard"
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { useSelector } from 'react-redux'
 
@@ -57,6 +58,7 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
           <Text>
             { utility.didInfo(didForVisibility, allIdentifiers, allContacts) }
           </Text>
+          <Text>(DID is copied to clipboard.)</Text>
           <TouchableHighlight
             style={styles.cancelButton}
             onPress={() => {
@@ -72,7 +74,6 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
 }
 
 
-
 /**
  * Render each claim.
  *
@@ -84,9 +85,16 @@ export const YamlFormat = ({ source, afterItemCss }) => {
   const [didForVisibleModal, setDidForVisibleModal] = useState<string>(null)
   const [didsForLinkedModal, setDidsForLinkedModal] = useState<Array<string>>(null)
   const [claimIdForLinkedModal, setClaimIdForLinkedModal] = useState<string>(null)
+  const [quickMessage, setQuickMessage] = useState<string>(null)
 
   const identifiers = useSelector((state) => state.identifiers || [])
   const allContacts = useSelector((state) => state.contacts || [])
+
+  const copyToClipboard = (value) => {
+    Clipboard.setString(value)
+    setQuickMessage('Copied')
+    setTimeout(() => { setQuickMessage(null) }, 1000)
+  }
 
   /**
    * claimId (optional) is the ID for server lookup
@@ -138,19 +146,24 @@ export const YamlFormat = ({ source, afterItemCss }) => {
     } else {
       const isVisibleDid = (typeof obj == 'string' && utility.isDid(obj) && !utility.isHiddenDid(obj))
       const style = (isVisibleDid || visibleToDids != null) ? { color: 'blue' } : {}
+      // this is partly to avoid double-quotes
+      const value = (typeof obj == 'string') ? obj : JSON.stringify(obj)
       const onPress =
         isVisibleDid
-        ? () => { setDidForVisibleModal(obj) }
+        ? () => { Clipboard.setString(value); setDidForVisibleModal(obj) }
         : (visibleToDids != null)
           ? () => { setDidsForLinkedModal(visibleToDids); setClaimIdForLinkedModal(claimId); }
-          : () => {}
+          : () => { copyToClipboard(value) }
       return (
-        <Text
-          style={ style }
-          onPress={ onPress }
-        >
-          { JSON.stringify(obj) }
-        </Text>
+        <View style={{ flexDirection: "row" }}>
+          <Text
+            style={ style }
+            onPress={ onPress }
+            selectable={ true } // still can't copy/paste with this; why?
+          >
+            { value }
+          </Text>
+        </View>
       )
     }
   }
@@ -208,6 +221,19 @@ export const YamlFormat = ({ source, afterItemCss }) => {
             >
               <Text>Close</Text>
             </TouchableHighlight>
+          </View>
+        </View>
+      </Modal>
+
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={!!quickMessage}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text>{ quickMessage }</Text>
           </View>
         </View>
       </Modal>
