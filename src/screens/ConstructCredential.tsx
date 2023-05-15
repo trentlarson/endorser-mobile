@@ -1054,6 +1054,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [recipientId, setRecipientId] = useState<string>('')
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
+    const [showInfoModal, setShowInfoModal] = useState<boolean>(false)
     const [unit, setUnit] = useState<string>(INITIAL_SELECTED_BUTTON && INITIAL_SELECTED_BUTTON.value)
     const [unitButtons, setUnitButtons] = useState<RadioButtonProps[]>(INITIAL_UNIT_BUTTONS)
 
@@ -1281,16 +1282,23 @@ export function ConstructCredentialScreen({ navigation, route }) {
                     &nbsp;
                     <Icon
                       name="info-circle"
-                      onPress={() =>
-                        Alert.alert(
-                          "This is a list of other contributors who helped"
-                          + " make this possible."
-                          + "\n\nUse handle IDs for other Gives or Plans or Organizations."
-                          + "\nSeparate with spaces or commas.")
-                      }
+                      onPress={() => setShowInfoModal(!showInfoModal) }
                       size={ 18 }
                     />
                   </Text>
+                  {
+                    showInfoModal
+                    ? (
+                      <Text>
+                        This is a list of other contributors who helped
+                        make this possible.
+                        Use handle IDs for other Gives or Plans or Organizations.
+                        Separate with spaces or commas.
+                      </Text>
+                    ) : (
+                      <View />
+                    )
+                  }
                   <TextInput
                     value={providerIds}
                     onChangeText={setProviderIds}
