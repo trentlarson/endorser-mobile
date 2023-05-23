@@ -1,3 +1,4 @@
+import * as R from 'ramda'
 import React from 'react'
 import { Alert, FlatList, Modal, Text, TouchableHighlight, View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -6,7 +7,13 @@ import { styles } from './style'
 
 export function ContactSelectModal(props) {
 
-  const allContacts = useSelector((state) => state.contacts || [])
+  let allContacts =
+    useSelector((state) => state.contacts || [])
+  if (props.includeMyDid
+      && !R.find(R.propEq('did', props.includeMyDid), allContacts)) {
+    allContacts =
+      R.append({ name: 'You', did: props.includeMyDid }, R.clone(allContacts))
+  }
 
   return (
     <Modal

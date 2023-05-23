@@ -399,6 +399,7 @@ export function ReportScreen({ navigation }) {
                 setSearchTerm(did);
                 searchEndorser({ searchTerm: did })
               }}
+              includeMyDid={ identifiers[0].did }
           />
           : <View/>
         }

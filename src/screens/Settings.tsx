@@ -167,7 +167,7 @@ export function SettingsScreen({navigation}) {
 
   const setQrJwtForPayload = async (identifier, name) => {
     try {
-      const qrJwt = await utility.contactJwtForPayload(DEFAULT_ENDORSER_VIEW_SERVER, identifier, name)
+      const qrJwt = await utility.contactJwtForPayload(identifier, name)
       setQrJwts(jwts => R.set(R.lensProp(identifier.did), qrJwt, jwts))
     } catch (err) {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got error setting JWT contents for contact: " + err}))

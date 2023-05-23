@@ -563,7 +563,6 @@ export function ContactsScreen({ navigation, route }) {
 
   const retrieveContactUrl = async () => {
     return utility.contactJwtForPayload(
-      DEFAULT_ENDORSER_VIEW_SERVER,
       allIdentifiers[0],
       appStore.getState().settings.name
     )

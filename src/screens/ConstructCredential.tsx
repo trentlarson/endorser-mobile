@@ -390,6 +390,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
   /**
     props has:
     - providerId string for the identifier of the provider
+    - recipientId string for the identifier of the recipient
     - proceed function that takes the claim
     - cancel function
    **/
@@ -430,7 +431,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     function loanOrCreditClaimFromInputs() {
       return loanOrCreditClaim(
         props.providerId,
-        recipientId,
+        props.recipientId,
         Number(amountStr),
         currency,
         description,
@@ -454,6 +455,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 ? <ContactSelectModal
                     cancel={ () => { setSelectFromContacts(false) } }
                     proceed={ (did) => { setRecipientId(did); setSelectFromContacts(false) }}
+                    includeMyDid={ identifiers[0].did }
                   />
                 : <View/>
               }
@@ -645,6 +647,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 ? <ContactSelectModal
                     cancel={ () => { setSelectFromContacts(false) } }
                     proceed={ (did) => { setFundedId(did); setSelectFromContacts(false) }}
+                    includeMyDid={ identifiers[0].did }
                   />
                 : <View/>
               }
@@ -893,6 +896,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 ? <ContactSelectModal
                     cancel={ () => { setSelectAgentFromContacts(false) } }
                     proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                    includeMyDid={ identifiers[0].did }
                   />
                 : <View/>
               }
@@ -1042,7 +1046,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
    **/
   function GaveModal(props) {
 
-    const [agentId, setAgentId] = useState<string>(props.userId)
+    const [agentId, setAgentId] = useState<string>('')
     const [amountStr, setAmountStr] = useState<number>('')
     const [invoiceIdentifier, setInvoiceIdentifier] = useState<string>('')
     const [description, setDescription] = useState<string>(null)
@@ -1050,8 +1054,9 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [fulfillsType, setFulfillsType] = useState<string>('')
     const [isFulfills, setIsFulfills] = useState<boolean>(false)
     const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
+    const [isTrade, setIsTrade] = useState<boolean>(false)
     const [providerIds, setProviderIds] = useState<string>('')
-    const [recipientId, setRecipientId] = useState<string>('')
+    const [recipientId, setRecipientId] = useState<string>(props.userId)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
     const [showInfoModal, setShowInfoModal] = useState<boolean>(false)
@@ -1089,14 +1094,22 @@ export function ConstructCredentialScreen({ navigation, route }) {
         }
 
         result.agent = agentId ? { identifier: agentId } : undefined
+        result.recipient = recipientId ? { identifier: recipientId } : undefined
 
         if (isFulfills) {
-          result.fulfills = {
-            "@type": fulfillsType,
-            identifier: fulfillsId,
+          result.fulfills = {}
+          if (fulfillsId) {
+            result.fulfills.identifier = fulfillsId
           }
-        } else {
-          result.recipient = recipientId ? { identifier: recipientId } : undefined
+          if (fulfillsType) {
+            result.fulfills["@type"] = fulfillsType
+          }
+          if (!fulfillsId) {
+            // only use if there's no ID to look up and the type isn't provided
+            if (isTrade) {
+              result.fulfills["@type"] = "TradeAction"
+            }
+          }
         }
 
         if (isSpecificAmount) {
@@ -1162,51 +1175,64 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   }
                 </View>
 
-                {
-                  !isFulfills
-                  ? (
-                    <View style={{ padding: 5 }}>
-                      <Text>Recipient</Text>
-                      <TextInput
-                        value={recipientId}
-                        onChangeText={setRecipientId}
-                        editable
-                        style={{ borderWidth: 1 }}
-                        autoCapitalize={'none'}
-                        autoCorrect={false}
-                      />
-                      {
-                        allContacts.length > 0
-                          ? <TouchableHighlight
-                            style={styles.moreButton}
-                            onPress={() => setSelectRecipientFromContacts(true)}
-                          >
-                            <Text>Pick</Text>
-                          </TouchableHighlight>
-                          : <View />
-                      }
-                    </View>
-                  ) : (
-                    <View />
-                  )
-                }
+                <View style={{ padding: 5 }}>
+                  <Text>Recipient</Text>
+                  <TextInput
+                    value={recipientId}
+                    onChangeText={setRecipientId}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
+                  />
+                  {
+                    allContacts.length > 0
+                      ? <TouchableHighlight
+                        style={styles.moreButton}
+                        onPress={() => setSelectRecipientFromContacts(true)}
+                      >
+                        <Text>Pick</Text>
+                      </TouchableHighlight>
+                      : <View />
+                  }
+                </View>
+
                 <CheckBox
-                  title='Dedicate to a project or offer'
+                  title='Given to a project, offer, etc'
                   checked={isFulfills}
                   onPress={toggleIsFulfills}
                 />
                 {
                   isFulfills
                   ? (
-                    <View style={{ padding: 5 }}>
-                      <Text>Project or Offer ID</Text>
+                    <View style={{ padding: 15 }}>
+                      <Text>ID of Project, Offer, Donation, Trade, etc</Text>
                       <TextInput
                         value={fulfillsId}
-                        onChangeText={setFulfillsId}
+                        onChangeText={(text) => {
+                          setFulfillsId(text)
+                          setIsTrade(false)
+                        }}
                         editable
                         multiline={false}
                         style={{ borderWidth: 1 }}
                       />
+
+                      {
+                        !fulfillsId
+                        ? (
+                          <View style={{ marginTop: 10 }}>
+                            <Text>Since you don't have an ID:</Text>
+                            <CheckBox
+                              title="Check if this is part of a trade (and not a donation)."
+                              checked={isTrade}
+                              onPress={() => setIsTrade(!isTrade)}
+                            />
+                          </View>
+                        ) : (
+                          <View />
+                        )
+                      }
                     </View>
                   ) : (
                     <View />
@@ -1293,7 +1319,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                         This is a list of other contributors who helped
                         make this possible.
                         Use handle IDs for other Gives or Plans or Organizations.
-                        Separate with spaces or commas.
+                        Separate each with spaces or commas.
                       </Text>
                     ) : (
                       <View />
@@ -1338,6 +1364,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   ? <ContactSelectModal
                     cancel={ () => { setSelectAgentFromContacts(false) } }
                     proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                    includeMyDid={ identifiers[0].did }
                   />
                   : <View/>
               }
@@ -1346,6 +1373,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   ? <ContactSelectModal
                     cancel={ () => { setSelectRecipientFromContacts(false) } }
                     proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
+                    includeMyDid={ identifiers[0].did }
                   />
                   : <View/>
               }
@@ -1768,6 +1796,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   ? <ContactSelectModal
                     cancel={ () => { setSelectAgentFromContacts(false) } }
                     proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                    includeMyDid={ identifiers[0].did }
                   />
                   : <View/>
               }
@@ -1776,6 +1805,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   ? <ContactSelectModal
                     cancel={ () => { setSelectRecipientFromContacts(false) } }
                     proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
+                    includeMyDid={ identifiers[0].did }
                   />
                   : <View/>
               }
@@ -1998,6 +2028,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 ? <ContactSelectModal
                     cancel={ () => { setSelectFromContacts(false) } }
                     proceed={ (did) => { setIdentifier(did); setSelectFromContacts(false) }}
+                    includeMyDid={ identifiers[0].did }
                   />
                 : <View/>
               }

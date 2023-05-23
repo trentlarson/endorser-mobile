@@ -9,6 +9,7 @@ import matchAll from 'string.prototype.matchall'
 import { IIdentifier } from '@veramo/core'
 
 import { Contact } from '../entity/contact'
+import { DEFAULT_ENDORSER_VIEW_SERVER } from "../veramo/appSlice";
 
 export class EndorserRecord {
   id: string
@@ -535,7 +536,7 @@ function uportJwtPayload(did, name, publicKeyHex) {
 }
 
 // returns null if the identifier doesn't have all necessary data
-export const contactJwtForPayload = async (viewServer, identifier, name) => {
+export const contactJwtForPayload = async (identifier, name) => {
   // The public key should always exist, but we've seen Veramo weirdness
   // where an entry in the key table with a lowercase DID will be overwritten
   // by one with mixed case but the associated entry in the identifier table
@@ -543,7 +544,7 @@ export const contactJwtForPayload = async (viewServer, identifier, name) => {
   if (identifier.keys[0] && identifier.keys[0].publicKeyHex && identifier.keys[0].privateKeyHex) {
     const sharePayload = uportJwtPayload(identifier.did, name, identifier.keys[0].publicKeyHex)
     const newJwt = await createJwt(identifier, sharePayload)
-    const viewPrefix =  viewServer + ENDORSER_JWT_URL_LOCATION
+    const viewPrefix = DEFAULT_ENDORSER_VIEW_SERVER + ENDORSER_JWT_URL_LOCATION
     const qrJwt: string = viewPrefix + newJwt
     return qrJwt
   } else {
@@ -572,7 +573,10 @@ export const bvcClaims = (did: string, startTime: string, planId: string) => {
       '@type': 'GiveAction',
       agent: { identifier: did },
       object: { amountOfThisGood: 1, unitCode: 'HUR' },
-      fulfills: { '@type': 'PlanAction', identifier: planId },
+      fulfills: {
+        '@type': 'DonateAction',
+        isPartOf: { '@type': 'PlanAction', identifier: planId },
+      },
       description: 'Participated in Saturday meetup',
     },
   ]
