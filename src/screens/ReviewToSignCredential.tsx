@@ -54,7 +54,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
           const hasContractAndPrivateFields = utility.isContract(subj) && subj.fields
           const hasContractAcceptAndPrivateFields = utility.isContractAccept(subj) && subj.object.fields
           if (hasContractAndPrivateFields || hasContractAcceptAndPrivateFields) {
-            const fields = subj.fields || (subj.object && subj.object.fields)
+            const fields = subj.fields || (subj.object?.fields)
 
             let orderedFields = fields // hopefully these will be template-ordered soon
             let fieldsMerkle: string
@@ -220,7 +220,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                               }
                             )}
                           >
-                              Edit Information
+                            Edit Information
                           </Text>
                           :
                           <View />
@@ -238,7 +238,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                     <Text style={{ padding: 10, color: 'red' }}>There is no backup available for this ID. We recommend you generate a different identifier and do not keep using this one. (See Help.)</Text>
                 ) : (
                     <Text/>
-                  )}
+                )}
 
                 <Text>Shared Data</Text>
                 <Text style={{ color: 'red' }}>{ claimError }</Text>
@@ -250,7 +250,7 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                     { formatClaimJson(CLAIM_ARRAY) }
                 </TextInput>
 
-                <Text>Private Fields</Text>
+                <Text>Private Data</Text>
                 <TextInput
                   editable={false}
                   multiline={true}
@@ -258,6 +258,14 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
                 >
                     { formatClaimJson(PRIVATE_FIELDS) }
                 </TextInput>
+
+                <Button
+                  title="Edit"
+                  onPress={() => navigation.push('Edit Credential', {
+                    claims: CLAIM_ARRAY,
+                    privateFields: PRIVATE_FIELDS,
+                  })}
+                />
               </View>
             </View>
           ) : (
