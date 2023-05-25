@@ -179,7 +179,7 @@ export function SignCredentialScreen({ navigation, route }) {
 
       const sentResult = await signAndSend(cred, index)
 
-      if (sentResult && privateDataId) {
+      if (sentResult.serverId && privateDataId) {
         const conn = await dbConnection
         let host = appStore.getState().settings.apiServer
         if (host.startsWith('https://')) {
@@ -192,8 +192,9 @@ export function SignCredentialScreen({ navigation, route }) {
           privateDataId,
           {
             serverHost: host,
-            serverId: sentResult,
-            serverUrl: appStore.getState().settings.apiServer + '/api/claim/' + sentResult,
+            serverId: sentResult.serverId,
+            serverUrl:
+              appStore.getState().settings.apiServer + '/api/claim/' + sentResult.serverId,
           }
         )
       }
@@ -242,6 +243,10 @@ export function SignCredentialScreen({ navigation, route }) {
 
         Promise.all(finalCredSubjs.map((cred, index) => saveSignSend(cred, index)))
         .then((results) => navigation.replace('Sent Signature Results', { results }))
+        .catch((e) => {
+          setOneResultMessage(0, "Something failed in the signing or sending of one of the claims. See logs for details.")
+          appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Got overall error in SignSendToEndorser: " + e}))
+        })
       }
       doActions()
     }, [finalCredSubjs])
@@ -272,7 +277,7 @@ export function SignCredentialScreen({ navigation, route }) {
                         fetched[index] ? (
                           endorserIds[index] ? (
                             <View>
-                              <Text style={{ textAlign: "center" }}>Endorser Id { endorserIds[index] }</Text>
+                              <Text style={{ textAlign: "center" }}>Endorser ID { endorserIds[index] }</Text>
                             </View>
                           ) : ( /* fetched && !endorserId */
                             <Text>

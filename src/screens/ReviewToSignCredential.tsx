@@ -13,7 +13,7 @@ const debug = Debug('endorser-mobile:review-credential')
 
 export function ReviewToSignCredentialScreen({ navigation, route }) {
 
-  const { acceptContract, credentialSubject, scannedText } = route.params
+  const { acceptContract, credentialSubject, privateFields, scannedText } = route.params
 
   const id0 = appStore.getState().identifiers && appStore.getState().identifiers[0]
 
@@ -89,10 +89,12 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
         }
 
         const allFinalCredSubjs = []
+        const prevPrivateFields = R.clone(privateFields || [])
         const allFinalPrivateFields = []
 
         // now separate any private data from shared-ledger data
-        for (const subj of credSubjArray) {
+        for (let i = 0; i < credSubjArray.length; i++) {
+          const subj = credSubjArray[i]
           if (utility.isContract(subj)) {
             const strippedContract = R.clone(subj)
             const erasedPrivates = R.clone(subj.fields)
@@ -102,13 +104,13 @@ export function ReviewToSignCredentialScreen({ navigation, route }) {
             } else {
               allFinalCredSubjs.push(strippedContract)
             }
-            allFinalPrivateFields.push(erasedPrivates)
+            allFinalPrivateFields.push(prevPrivateFields[i] || erasedPrivates)
           } else if (utility.isContractAccept(subj)) {
             const strippedContract = R.clone(subj)
             const erasedPrivates = R.clone(subj.object.fields)
             delete strippedContract.object.fields
             allFinalCredSubjs.push(strippedContract)
-            allFinalPrivateFields.push(erasedPrivates)
+            allFinalPrivateFields.push(prevPrivateFields[i] || erasedPrivates)
           } else {
             allFinalCredSubjs.push(subj)
             allFinalPrivateFields.push(null)
