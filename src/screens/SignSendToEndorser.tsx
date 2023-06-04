@@ -3,10 +3,8 @@ import * as didJwt from 'did-jwt'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
-import { CheckBox } from "react-native-elements"
 import { useFocusEffect } from '@react-navigation/native';
 
-import { Contact } from '../entity/contact'
 import { PrivateData } from '../entity/privateData'
 import * as utility from '../utility/utility'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'

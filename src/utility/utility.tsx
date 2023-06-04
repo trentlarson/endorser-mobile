@@ -193,7 +193,7 @@ export const YamlFormat = ({ source, afterItemCss }) => {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text>
-              This person can be seen by the people in your network, below.
+              This person can be seen by the people connected to you, below.
               Ask one of them to give you more information about this claim:
             </Text>
             <Text style={{ padding: 10 }} selectable={true}>{ claimIdForLinkedModal }</Text>

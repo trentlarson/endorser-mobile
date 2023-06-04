@@ -255,7 +255,11 @@ const claimSummary = (claim) => {
     claim = claim.claim
   }
   if (Array.isArray(claim)) {
-    return 'multiple claims'
+    if (claim.length === 1) {
+      claim = claim[0]
+    } else {
+      return 'multiple claims'
+    }
   }
   let type = claim['@type']
   return helpfulSpacesBeforeCaps(type)

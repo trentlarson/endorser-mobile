@@ -525,8 +525,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
             <Text>
               {
                 visibleIdList.length > 0
-                ? 'This is confirmed by these in your network:'
-                : 'This is not confirmed by anyone in your network.'
+                ? 'This is confirmed by these connected to you:'
+                : 'This is not confirmed by anyone connected to you.'
               }
             </Text>
             {
@@ -542,8 +542,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
             <Text>
               {
                 visibleTo.length > 0
-                ? 'Those who confirmed are visible to these others in your network:'
-                : 'Anyone else who confirmed is not visible to those in your network.'
+                ? 'Those who confirmed are visible to these connected to you:'
+                : 'Anyone else who confirmed is not visible to anyone connected to you.'
               }
             </Text>
             {
@@ -573,7 +573,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
           <View style={{ padding: 5 }}>
             <Text>
               { 'There are ' + (numHidden > 0 ? 'confirmations by ' + numHidden : 'no confirmations by anyone')
-                + ' outside your network.' }
+                + ' outside your connections.' }
             </Text>
           </View>
 
