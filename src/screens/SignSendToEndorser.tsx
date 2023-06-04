@@ -2,12 +2,12 @@
 import * as didJwt from 'did-jwt'
 import * as R from 'ramda'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Linking, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Linking, SafeAreaView, ScrollView, Text, View } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native';
 
 import { PrivateData } from '../entity/privateData'
 import * as utility from '../utility/utility'
-import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
+import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER } from '../veramo/appSlice'
 import { dbConnection } from '../veramo/setup'
 
 // This didn't show anything in some sessions.

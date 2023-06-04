@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
+  TextInput,
   View
 } from "react-native";
 import { CheckBox } from 'react-native-elements'
@@ -59,7 +60,6 @@ export function ScanPresentationScreen({ navigation }) {
     <SafeAreaView>
       <ScrollView>
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Scan</Text>
 
           <CheckBox
             title={ 'Scan Multiple QR Codes' }
@@ -96,6 +96,16 @@ export function ScanPresentationScreen({ navigation }) {
               )
             )
           }
+
+          <View style={{ flexDirection: 'row', marginLeft: 20 }}>
+            <Text>... or paste:</Text>
+            <TextInput
+              onChange={e => {
+                onSuccessfulQrText(e.nativeEvent.text)
+              }}
+              style={{ borderWidth: 1, width: 200 }}
+            />
+          </View>
 
           { appStore.getState().testMode
             ? <View>

@@ -198,7 +198,7 @@ export const YamlFormat = ({ source, afterItemCss }) => {
             </Text>
             <Text style={{ padding: 10 }} selectable={true}>{ claimIdForLinkedModal }</Text>
 
-            <Text>It's visible to these in your nOetwork:</Text>
+            <Text>It's visible to these in your network:</Text>
             {
               didsForLinkedModal != null
               ? didsForLinkedModal.map((did) => {

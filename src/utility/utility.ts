@@ -133,16 +133,6 @@ export const capitalizeAndInsertSpacesBeforeCaps = (text) => {
   )
 }
 
-// insert a nice English phrase for this camel-case item
-// return generic message for null or undefined input
-export const helpfulSpacesBeforeCaps = (text) => {
-  return (
-    !text
-      ? 'something' // to differentiate from "a claim" below
-      : 'a ' + capitalizeAndInsertSpacesBeforeCaps(text)
-  )
-}
-
 // return a space & claim number (1-based) for the index (0-based), or '' if there's only one
 export const claimNumberText = (index, total, upperCase) => {
   let claimText = upperCase ? 'Claim' : 'claim'
@@ -243,12 +233,12 @@ export function didInfoLong(did, identifiers, contacts) {
 }
 
 /**
- return readable summary of claim if possible
+ return readable summary of claim, or something generic
  **/
 const claimSummary = (claim) => {
   if (!claim) {
     // to differentiate from "something" above
-    return 'a claim'
+    return 'something'
   }
   if (claim.claim) {
     // probably a Verified Credential
@@ -261,8 +251,16 @@ const claimSummary = (claim) => {
       return 'multiple claims'
     }
   }
-  let type = claim['@type']
-  return helpfulSpacesBeforeCaps(type)
+  const type = claim['@type']
+  if (!type) {
+    return 'a claim'
+  } else {
+    let typeExpl = capitalizeAndInsertSpacesBeforeCaps(type)
+    if (typeExpl === 'Person') {
+      typeExpl += ' claim'
+    }
+    return 'a ' + typeExpl
+  }
 }
 
 /**
