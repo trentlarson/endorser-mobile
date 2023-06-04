@@ -301,7 +301,7 @@ export function ContactCorrelateScreen({ navigation, route }) {
                 return (
                   <View key={ index }>
                     <Text style={{ textAlign: 'center' }}>
-                      { utility.didInfo(match, allIdentifiers, allContacts) }
+                      { utility.didInfoLong(match, allIdentifiers, allContacts) }
                     </Text>
                   </View>
                 )

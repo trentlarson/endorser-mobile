@@ -56,7 +56,7 @@ export const VisibleDidModal = ({ didForVisibility, setDidForVisibility }) => {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text>
-            { utility.didInfo(didForVisibility, allIdentifiers, allContacts) }
+            { utility.didInfoLong(didForVisibility, allIdentifiers, allContacts) }
           </Text>
           <Text>(The DID is copied to the clipboard.)</Text>
           <TouchableHighlight
@@ -198,14 +198,14 @@ export const YamlFormat = ({ source, afterItemCss }) => {
             </Text>
             <Text style={{ padding: 10 }} selectable={true}>{ claimIdForLinkedModal }</Text>
 
-            <Text>It's visible to these in network:</Text>
+            <Text>It's visible to these in your nOetwork:</Text>
             {
               didsForLinkedModal != null
               ? didsForLinkedModal.map((did) => {
                   const contact = R.find(con => con.did === did, allContacts)
                   return (
                     <Text key={ did } style={{ padding: 10 }} selectable={true}>
-                      { utility.didInfo(did, identifiers, allContacts) }
+                      { utility.didInfoLong(did, identifiers, allContacts) }
                     </Text>
                   )
                 })

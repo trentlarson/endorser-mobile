@@ -74,7 +74,7 @@ export function ContactCorrelateChoicesScreen({ navigation, route }) {
           data={confirmerIds}
           keyExtractor={datum => datum}
           renderItem={datum =>
-            <Text>{utility.didInfo(datum.item, allIdentifiers, allContacts)}</Text>
+            <Text>{utility.didInfoLong(datum.item, allIdentifiers, allContacts)}</Text>
           }
           ListFooterComponent={
             loadingContacts

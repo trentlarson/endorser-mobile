@@ -531,7 +531,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
             </Text>
             {
               visibleIdList.map(did =>
-                <Text key={did} selectable={true}>* { utility.didInfo(did, identifiers, allContacts) }</Text>
+                <Text key={did} selectable={true}>* { utility.didInfoLong(did, identifiers, allContacts) }</Text>
               )
             }
           </View>
@@ -591,7 +591,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
                 <View style={{ flex: 1, flexDirection: 'row' }}>
                   <Text style={{ width: '30%' }}>Issuer</Text>
                   <Text style={{ width: '70%' }} selectable={true}>
-                    { utility.didInfo(issuer, identifiers, allContacts) }
+                    { utility.didInfoLong(issuer, identifiers, allContacts) }
                   </Text>
                 </View>
                 {

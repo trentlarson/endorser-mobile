@@ -208,10 +208,11 @@ export const firstAndLast3OfDid = (did) => {
   return firstAndLast3(lastChars)
 }
 
-const UNKNOWN_CONTACT = "Unknown Person"
+const UNKNOWN_ENTITY = "Someone Unknown"
+const UNKNOWN_VISIBLE = "Someone Unnamed"
 
 /**
-  always returns text; if unknown then it's UNKNOWN_CONTACT
+  always returns text, maybe UNNAMED_VISIBLE or UNKNOWN_ENTITY
  **/
 export function didInfo(did, identifiers, contacts) {
   const myId = R.find(i => i.did === did, identifiers)
@@ -221,9 +222,23 @@ export function didInfo(did, identifiers, contacts) {
     const contact = R.find(c => c.did === did, contacts)
     if (contact) {
       return contact.name || "(no name)"
+    } else if (isHiddenDid(did)) {
+      return UNKNOWN_ENTITY
     } else {
-      return UNKNOWN_CONTACT
+      return UNKNOWN_VISIBLE
     }
+  }
+}
+
+/**
+ always returns text; if unknown then it's UNKNOWN_ENTITY
+ **/
+export function didInfoLong(did, identifiers, contacts) {
+  const result = didInfo(did, identifiers, contacts)
+  if (result === UNKNOWN_VISIBLE) {
+    return "Unnamed (" + firstAndLast3OfDid(did) + ")"
+  } else {
+    return result
   }
 }
 
