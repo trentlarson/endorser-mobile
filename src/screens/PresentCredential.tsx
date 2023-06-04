@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
-import { ActivityIndicator, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Modal, SafeAreaView, ScrollView, Text, TextInput, View } from "react-native";
 import QRCode from "react-native-qrcode-svg"
+import Icon from 'react-native-vector-icons/FontAwesome'
 import { useFocusEffect } from '@react-navigation/native'
 import { ICreateVerifiablePresentationArgs } from '@veramo/credentials-w3c'
 
 import { appStore } from '../veramo/appSlice'
 import { agent } from '../veramo/setup'
+import Clipboard from "@react-native-community/clipboard";
+import { styles } from "./style";
 
 // Here is a size that tested well for scanning with my phone.
 // Maximums: https://www.npmjs.com/package/qrcode#qr-code-capacity
@@ -19,9 +22,16 @@ export function PresentCredentialScreen({ navigation, route }) {
 
   const [fullPrezStr, setFullPrezStr] = useState<Array<string>>()
   const [prezStrs, setPrezStrs] = useState<Array<string>>()
+  const [quickMessage, setQuickMessage] = useState<string>(null)
   const [qrMessage, setQrMessage] = useState<string>()
   const [errorMsg, setErrorMsg] = useState<string>()
   const [loading, setLoading] = useState<boolean>(true)
+
+  const copyToClipboard = (value) => {
+    Clipboard.setString(value)
+    setQuickMessage('Copied')
+    setTimeout(() => { setQuickMessage(null) }, 1000)
+  }
 
   useFocusEffect(
     React.useCallback(() => {
@@ -134,7 +144,15 @@ export function PresentCredentialScreen({ navigation, route }) {
                       )
                     }
 
-                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 100 }}>Full Text</Text>
+                    <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 100 }}>
+                      Full Text
+                      &nbsp;
+                      <Icon
+                        name="copy"
+                        style={{ color: 'blue', fontSize: 20 }}
+                        onPress={ () => copyToClipboard(fullPrezStr) }
+                      />
+                    </Text>
                     <TextInput
                       editable={false}
                       multiline={true}
@@ -145,6 +163,19 @@ export function PresentCredentialScreen({ navigation, route }) {
 
                   </View>
             }
+
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={!!quickMessage}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <Text>{ quickMessage }</Text>
+                </View>
+              </View>
+            </Modal>
+
           </View>
         </View>
       </ScrollView>
