@@ -142,10 +142,12 @@ export function ConfirmOthersScreen({ navigation }) {
             <View>
               <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Confirm</Text>
               <Text style={{ color: 'red' }}>{loadError}</Text>
-              <Button
-                title="Proceed to Sign"
-                onPress={ setConfirmations }
-              />
+              <View style={{ width: 400 }}>
+                <Button
+                  title="Proceed to Sign"
+                  onPress={ setConfirmations }
+                />
+              </View>
               <View style={styles.line}/>
             </View>
           }
@@ -221,17 +223,23 @@ export function ConfirmOthersScreen({ navigation }) {
                 : ''
               }</Text>
               { loadingRecentClaims
-                ? <ActivityIndicator size="large" color="#00ff00" />
-                : <Button
-                    title={'Load Previous to ' + monthDayLoaded()}
-                    onPress={() => loadRecentClaims(appStore.getState().identifiers)}
-                  />
+                ?
+                  <ActivityIndicator size="large" color="#00ff00" />
+                :
+                  <View style={{ width: 400 }}>
+                    <Button
+                      title={'Load Previous to ' + monthDayLoaded()}
+                      onPress={() => loadRecentClaims(appStore.getState().identifiers)}
+                    />
+                  </View>
               }
               <View style={{ marginTop: 10 }}/>
-              <Button
-                title="Proceed to Sign"
-                onPress={ setConfirmations }
-              />
+              <View style={{ width: 400 }}>
+                <Button
+                  title="Proceed to Sign"
+                  onPress={ setConfirmations }
+                />
+              </View>
             </View>
           }
         />
