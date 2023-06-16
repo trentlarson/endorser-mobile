@@ -223,11 +223,30 @@ export function ConstructCredentialScreen({ navigation, route }) {
                     <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                     <Text>Pledges</Text>
 
+                    <View style={{ padding: 5 }} />
                     <Button
-                      title={'Pledge To Mutual Integrity'}
+                      title={'Pledge A Life Of Gifts'}
                       onPress={() => {
-                        setAskForPledgeAbout("Copyright 2021 Mutual Integrity Foundation")
-                        setAskForPledgeInfo("I pledge to honor my word as my bond and support others as peers in acting with integrity. I accept that dishonoring my word and this pledge will result in a breach of integrity as recorded on my reputation slate until I measure the impact and make amends.")
+                        setAskForPledgeAbout("See Basic Giving Pledge at LivesOfGifts.org")
+                        setAskForPledgeInfo("I am building a gifting society, in ways that fulfill me.")
+                      }}
+                    />
+
+                    <View style={{ padding: 5 }} />
+                    <Button
+                      title={'Make Voluntary Pledge for A Life Of Gifts'}
+                      onPress={() => {
+                        setAskForPledgeAbout("See Voluntary Pledge at LivesOfGifts.org")
+                        setAskForPledgeInfo("I am creating society run by mutual agreement, where more and more organization evolves naturally and voluntarily.")
+                      }}
+                    />
+
+                    <View style={{ padding: 5 }} />
+                    <Button
+                      title={'Make Pursuit Pledge for A Life Of Gifts'}
+                      onPress={() => {
+                        setAskForPledgeAbout("See Pursuit Pledge at LivesOfGifts.org")
+                        setAskForPledgeInfo("I am helping everyone pursue what they love, where less and less effort is spent on basic needs and fears.")
                       }}
                     />
 
@@ -237,6 +256,14 @@ export function ConstructCredentialScreen({ navigation, route }) {
                       onPress={() => {
                         setAskForPledgeAbout("See ThickRedLine.org")
                         setAskForPledgeInfo("I recognize natural law, basic morality, and the Non-Aggression Principle, and I understand that it is morally and logically impossible for the government and/or my badge to confer rights upon me that the population does not have and cannot delegate. I pledge only to act to protect lives, liberty, and property. I renounce the use of force or coercion on peaceful people where there is no victim to defend or protect.")
+                      }}
+                    />
+
+                    <Button
+                      title={'Pledge To Mutual Integrity'}
+                      onPress={() => {
+                        setAskForPledgeAbout("Copyright 2021 Mutual Integrity Foundation")
+                        setAskForPledgeInfo("I pledge to honor my word as my bond and support others as peers in acting with integrity. I accept that dishonoring my word and this pledge will result in a breach of integrity as recorded on my reputation slate until I measure the impact and make amends.")
                       }}
                     />
 
@@ -258,14 +285,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
                       }}
                     />
 
-                    <View style={{ padding: 5 }} />
-                    <Button
-                      title={'Pledge A Life Of Gifts'}
-                      onPress={() => {
-                        setAskForPledgeAbout("See LivesOfGifts.org")
-                        setAskForPledgeInfo("I am building a society based on giving, in ways that fulfill me.")
-                      }}
-                    />
                   </View>
                 :
                   <View/>
