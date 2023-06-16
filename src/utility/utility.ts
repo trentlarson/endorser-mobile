@@ -270,7 +270,7 @@ const claimSummary = (claim) => {
  contacts is a list of objects with a 'did' field for others and a 'name' field for their name
  **/
 export const claimSpecialDescription = (record, identifiers, contacts) => {
-  const claim = record.claim
+  let claim = record.claim
   if (claim.claim) {
     // it's probably a Verified Credential
     claim = claim.claim
@@ -287,7 +287,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
 
   } else if (type === "GiveAction") {
     // agent.did is for legacy data, before March 2023
-    const giver = claim.agent?.identifier || record.issuer
+    const giver = claim.agent?.identifier || claim.agent?.did || record.issuer
     const giverInfo = didInfo(giver, identifiers, contacts)
     const gaveAmount =
       claim.object?.amountOfThisGood

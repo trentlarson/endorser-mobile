@@ -58,7 +58,7 @@ export function ReportFeedScreen({ navigation, route }) {
           case 'GiveAction': subfilter = utility.isGiveOfInterest(contactChecker); break;
           case 'Offer': subfilter = utility.isOfferOfInterest(contactChecker); break;
           case 'PlanAction': subfilter = utility.isPlanOfInterest(contactChecker); break;
-          case 'Other': subfilter = utility.isNonPrimaryClaimOfInterest(contactChecker); break;
+          default: subfilter = utility.isNonPrimaryClaimOfInterest(contactChecker); break;
         }
         const filteredData = R.filter(subfilter, results.data)
         setSubfeedData(previousData => previousData.concat(filteredData))

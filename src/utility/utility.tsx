@@ -240,14 +240,16 @@ export const YamlFormat = ({ source, afterItemCss }) => {
   )
 }
 
-export const proceedToEditGive = (navigation, origClaim, handleId) => {
+export const proceedToEditGive = (navigation, origClaim, fulfillsHandleId, fulfillsType, providerHandleId) => {
   const giveClaim = {
     "@context": utility.SCHEMA_ORG_CONTEXT,
     "@type": "GiveAction",
-    fulfills: { "@type": "PlanAction", identifier: origClaim.identifier},
   }
-  if (!giveClaim.identifier && handleId) {
-    giveClaim.fulfills.identifier = handleId
+  if (fulfillsHandleId) {
+    giveClaim.fulfills = { "@type": fulfillsType, identifier: fulfillsHandleId }
+  }
+  if (providerHandleId) {
+    giveClaim.provider = [{ identifier: providerHandleId }]
   }
   navigation.navigate('Create Credential', { incomingClaim: giveClaim })
 }
@@ -378,6 +380,31 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     <View />
                 }
 
+                { /** Give forward from another Give **/
+
+                  source.claim['@type'] === 'GiveAction'
+                    ?
+                    <View style={{ flexDirection: 'row', padding: 10 }}>
+
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () => {
+                          if (!source.handleId) {
+                            Alert.alert("You cannot give to a project with no identifier.")
+                          } else {
+                            proceedToEditGive(navigation, source.claim, null, null, source.handleId)
+                          }
+                        }}
+                      >
+                        <Text style={{ color: "blue" }}>Paid Forward From</Text>
+                      </Pressable>
+
+                    </View>
+                    :
+                    <View />
+                }
+
                 { /** Give to fulfill an Offer **/
 
                   (source.claim['@type'] === 'Offer')
@@ -423,7 +450,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                           })
                         }}
                       >
-                        <Text style={{ color: "blue" }}>Record Given</Text>
+                        <Text style={{ color: "blue" }}>Record Delivery</Text>
                       </Pressable>
                     </View>
                   :
@@ -443,11 +470,25 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                           if (!source.handleId) {
                             Alert.alert("You cannot give to a project with no identifier.")
                           } else {
-                            proceedToEditGive(navigation, source.claim, source.handleId)
+                            proceedToEditGive(navigation, source.claim, source.handleId, "PlanAction")
                           }
                         }}
                       >
-                        <Text style={{ color: "blue" }}>Record Given</Text>
+                        <Text style={{ color: "blue" }}>Record Contribution To</Text>
+                      </Pressable>
+
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () => {
+                          if (!source.handleId) {
+                            Alert.alert("You cannot give to a project with no identifier.")
+                          } else {
+                            proceedToEditGive(navigation, source.claim, null, null, source.handleId)
+                          }
+                        }}
+                      >
+                        <Text style={{ color: "blue" }}>Record It Helped...</Text>
                       </Pressable>
 
                       <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
@@ -461,7 +502,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                           }
                         }}
                       >
-                        <Text style={{ color: "blue" }}>Offer Help</Text>
+                        <Text style={{ color: "blue" }}>Offer Help With</Text>
                       </Pressable>
 
                     </View>
@@ -498,7 +539,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                           })
                         }
                       >
-                        <Text style={{ color: "blue" }}>Agree</Text>
+                        <Text style={{ color: "blue" }}>Agree With</Text>
                       </Pressable>
                     </View>
                   :
@@ -512,7 +553,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     <Pressable
                       onPress={ () => navigation.navigate('Verify Credential', { wrappedClaim: source }) }
                     >
-                      <Text style={{ color: "blue" }}>Check it</Text>
+                      <Text style={{ color: "blue" }}>Check</Text>
                     </Pressable>
                   </View>
                 }
@@ -530,7 +571,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                           navigation.navigate('Present Credential', { fullClaim: source })
                         }
                       >
-                        <Text style={{ color: "blue" }}>Present it</Text>
+                        <Text style={{ color: "blue" }}>Present</Text>
                       </Pressable>
                     </View>
                 }

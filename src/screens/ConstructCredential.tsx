@@ -1137,6 +1137,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
           setIsFulfills(true)
           setFulfillsId(incomingClaim.fulfills.identifier)
           setFulfillsType(incomingClaim.fulfills["@type"])
+          setRecipientId('')
+        }
+        if (incomingClaim.provider) {
+          setProviderIds(R.join(',', R.map(R.prop('identifier'), incomingClaim.provider)))
+          setRecipientId('')
         }
       }
     }, [])
@@ -1198,7 +1203,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 </View>
 
                 <CheckBox
-                  title='Given to a project, offer, etc'
+                  title='Given for a project, offer, etc'
                   checked={isFulfills}
                   onPress={toggleIsFulfills}
                 />

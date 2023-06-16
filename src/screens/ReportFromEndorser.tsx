@@ -258,15 +258,19 @@ export function ReportScreen({ navigation }) {
                           searchEndorser({ searchTerm: 'programming'})
                         }}>programming</Text>,&nbsp;
                         <Text style={{ color: 'blue' }} onPress={() => {
-                          setSearchTerm('Training')
-                          searchEndorser({ searchTerm: 'Training'})
-                        }}>Training</Text>,&nbsp;
+                          setSearchTerm('training')
+                          searchEndorser({ searchTerm: 'training'})
+                        }}>training</Text>,&nbsp;
+                        <Text style={{ color: 'blue' }} onPress={() => {
+                          setSearchTerm('GiveAction')
+                          searchEndorser({ searchTerm: 'GiveAction'})
+                        }}>Give Actions</Text>,&nbsp;
                         <Text style={{ color: 'blue' }} onPress={() => {
                           setSearchTerm('PlanAction')
                           searchEndorser({ searchTerm: 'PlanAction'})
-                        }}>PlanAction</Text>
+                        }}>Projects</Text>
                       </Text>
-                      <View style={{ marginTop: 10 }} />
+                      <View style={{ marginTop: 20 }} />
                       <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Text>
                           <Text style={{ color: 'blue' }} onPress={() => {
@@ -282,6 +286,7 @@ export function ReportScreen({ navigation }) {
                         </Text>
                       </View>
 
+                      <View style={{ marginTop: 20 }} />
                       <Button
                         title="Search"
                         onPress={() => searchEndorser({ searchTerm: searchTerm })}
