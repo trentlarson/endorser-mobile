@@ -564,27 +564,6 @@ function HomeScreen({ navigation }) {
               }
               </ScrollView>
 
-              {/*************** Show Customized Actions */}
-              {settings != null && settings.homeScreen === 'BVC'
-              ? (
-                <View>
-                  <Text style={{ textAlign: 'center' }}>Bountiful Voluntaryist Community Saturday Meeting</Text>
-                  <BVCButton
-                    description='Meeting'
-                    identifier={ allIdentifiers[0] }
-                    navigation={ navigation }
-                  />
-                  <View style={{ marginTop: 5 }}/>
-                  <Button
-                    title={'Confirm Others'}
-                    onPress={() => navigation.navigate('Confirm Others')}
-                  />
-                  <View style={{ marginBottom: 50 }}/>
-                </View>
-              ) : ( // it's not the BVC home screen
-                <View />
-              )}
-
               {/*************** Show Notification Message */}
               {
                 needsNotificationsAuthorized
@@ -608,6 +587,27 @@ function HomeScreen({ navigation }) {
                   <View />
               }
 
+              {/*************** Show Customized Actions */}
+              {settings != null && settings.homeScreen === 'BVC'
+              ? (
+                <View>
+                  <Text style={{ textAlign: 'center' }}>Bountiful Voluntaryist Community Saturday Meeting</Text>
+                  <BVCButton
+                    description='Meeting'
+                    identifier={ allIdentifiers[0] }
+                    navigation={ navigation }
+                  />
+                  <View style={{ marginTop: 5 }}/>
+                  <Button
+                    title={'Confirm Others'}
+                    onPress={() => navigation.navigate('Confirm Others')}
+                  />
+                  <View style={{ marginBottom: 40 }}/>
+                </View>
+              ) : ( // it's not the BVC home screen
+                <View />
+              )}
+
               {/*************** Finally, show all the generic actions */}
               <View style={{ marginTop: 5 }}/>
               <Button
@@ -619,7 +619,8 @@ function HomeScreen({ navigation }) {
                 title={"Agree / Certify / Confirm"}
                 onPress={() => navigation.navigate('Confirm Others')}
               />
-              <View style={{ marginTop: 5 }}/>
+
+              <View style={{ marginTop: 40 }}/>
               <Button
                 title="View Feed"
                 onPress={() => navigation.navigate(utility.REPORT_FEED_SCREEN_NAV)}
