@@ -180,31 +180,12 @@ export function ConstructCredentialScreen({ navigation, route }) {
                     <Text>What do you want to assert?</Text>
 
                     <View style={{ padding: 5 }} />
-                    <Button
-                      title={'Advertise or Seek Skills or Services'}
-                      onPress={() => setAskForPersonInfo(true)}
-                    />
-
-                    <View style={{ padding: 5 }} />
-                    <BVCButton
-                      description='BVC Meeting'
-                      identifier={ identifiers[0] }
-                      navigation={ navigation }
-                    />
-
-                    <View style={{ padding: 5 }} />
-                    <Button
-                      title={'Witness To Something Remarkable'}
-                      onPress={() => setAskForWitnessInfo("They ")}
-                    />
-
-                    <View style={{ padding: 5 }} />
                     <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
-                    <Text>Transactions</Text>
+                    <Text>Contributions</Text>
 
                     <Button
-                      title={'Plan'}
-                      onPress={() => setAskForPlanInfo(true)}
+                      title={'Gave'}
+                      onPress={() => setAskForGaveInfo(true)}
                     />
 
                     <View style={{ padding: 5 }} />
@@ -215,8 +196,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
                     <View style={{ padding: 5 }} />
                     <Button
-                      title={'Gave'}
-                      onPress={() => setAskForGaveInfo(true)}
+                      title={'Plan'}
+                      onPress={() => setAskForPlanInfo(true)}
                     />
 
                     <View style={{ padding: 5 }} />
@@ -316,7 +297,29 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
                   <View style={{ padding: 5 }} />
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
-                  <Text>Other</Text>
+                  <Text>Miscellaneous</Text>
+
+                  <Button
+                    title={'Advertise or Seek Skills or Services'}
+                    onPress={() => setAskForPersonInfo(true)}
+                  />
+
+                  <View style={{ padding: 5 }} />
+                  <BVCButton
+                    description='BVC Meeting'
+                    identifier={ identifiers[0] }
+                    navigation={ navigation }
+                  />
+
+                  <View style={{ padding: 5 }} />
+                  <Button
+                    title={'Witness To Something Remarkable'}
+                    onPress={() => setAskForWitnessInfo("They ")}
+                  />
+
+                  <View style={{ padding: 5 }} />
+                  <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
+                  <Text>Other Tools</Text>
 
                   <Button
                     title={'Scan For Claim'}
@@ -2057,6 +2060,12 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
               <View>
                 <Text style={styles.modalText}>Witness</Text>
+                <Text>
+                  First, consider whether this is more appropriate as a Give,
+                  showing recognition for something positive given to the world.
+                  That will show up in more feeds, can it can be tied to broader
+                  projects.
+                </Text>
 
                 <View style={{ padding: 5 }}>
                   <Text>Identifier</Text>
