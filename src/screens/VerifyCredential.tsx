@@ -93,7 +93,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
         setHowLongAgo('')
 
         if (!vcObj && wrappedClaim) {
-          // try to retrive a full VC
+          // attempt to retrive a full VC
 
           const url = appStore.getState().settings.apiServer + '/api/claim/full/' + encodeURIComponent(wrappedClaim.id)
           const userToken = await utility.accessToken(identifiers[0])
