@@ -276,7 +276,8 @@ export function SettingsScreen({navigation}) {
       })
     }
     if (creatingId) {
-      createIdentifier()
+      // wait a bit to let the UI update to show the spinner
+      setTimeout(() => createIdentifier(), 100)
     }
   }, [creatingId])
 
@@ -323,7 +324,7 @@ export function SettingsScreen({navigation}) {
                   <View>
                     <Text style={{ marginTop: 10 }}>
                       The first step to validating contracts is to create your own private keys.
-                      Hit "Create Keys" and get started.
+                      Hit "Create New Keys" and get started.
                     </Text>
                     { creatingId
                       ? <View>
@@ -331,16 +332,7 @@ export function SettingsScreen({navigation}) {
                         <ActivityIndicator size="large" color="#00ff00" />
                       </View>
                       : <View>
-                        <Button title="Create Keys" onPress={() => { setCreatingId(true) }} />
-                        <Text>Advanced</Text>
-                        <Text>You may guard your seed phrase with a password, but this is optional.</Text>
-                        <TextInput
-                          autoCapitalize={'none'}
-                          defaultValue={ mnemonicPassword }
-                          onChangeText={ setMnemonicPassword }
-                          style={{borderWidth: 1}}
-                          textContentType={'newPassword'}
-                        />
+                        <Button title="Create New Keys" onPress={()=>navigation.navigate('Initialize')} />
                       </View>
                     }
                   </View>
@@ -470,7 +462,7 @@ export function SettingsScreen({navigation}) {
 
             { isInTestMode
               ? <View style={{ marginTop: 20 }}>
-                  <Button title="Create Identifier" onPress={()=>{setCreatingId(true)}} />
+                  <Button title="Create New Keys Directly" onPress={()=>{setCreatingId(true)}} />
                   <Text>... and guard seed phrase with password:</Text>
                   <TextInput
                     autoCapitalize={'none'}
