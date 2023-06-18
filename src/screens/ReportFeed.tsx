@@ -67,7 +67,7 @@ export function ReportFeedScreen({ navigation, route }) {
       }
     })
     .catch(e => {
-      console.log('Error with subfeed', e)
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Error with subfeed: " + JSON.stringify(e)}))
       setSubfeedError('Got error retrieving subfeed data.')
     })
 
@@ -109,7 +109,7 @@ export function ReportFeedScreen({ navigation, route }) {
       }
     })
     .catch(e => {
-      console.log('Error with feed', e)
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Error with feed: " + JSON.stringify(e)}))
       setFeedError('Got error retrieving feed data.')
     })
 

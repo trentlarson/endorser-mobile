@@ -600,6 +600,9 @@ export function ContactsScreen({ navigation, route }) {
           setContactsCsvText(text)
           setWantsCsvText(true)
         })
+        .catch(e => {
+          setActionErrors(errors => R.concat(errors, [e]))
+        })
       }
       setScannedImport(null)
     }

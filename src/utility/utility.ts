@@ -830,15 +830,17 @@ export const retrieveClaims = async (endorserApiServer, identifier, afterId, bef
   }).then(async response => {
     if (response.status !== 200) {
       const details = await response.text()
-      throw { userMessage: 'There was a low-level error from the server.', bodyText: details }
+      throw { userMessage: 'There was a low-level error retrieving claims from the server.', bodyText: details }
     }
     return response.json()
   }).then(results => {
     if (results.data) {
       return results
     } else {
-      throw { userMessage: 'There was an error from the server.', bodyText: JSON.stringify(results) }
+      throw { userMessage: 'There was an error retrieving claim data from the server.', bodyText: JSON.stringify(results) }
     }
+  }).catch(error => {
+    throw { userMessage: 'There was an error retrieving claims the server.', bodyText: JSON.stringify(error) }
   })
 }
 

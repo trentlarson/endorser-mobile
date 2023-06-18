@@ -62,6 +62,16 @@ export function MyCredentialsScreen({ navigation }) {
       setOutstandingPerInvoice({})
       setTotalCurrenciesOutstanding({})
       setTotalCurrenciesPaid({})
+    }).catch(e => {
+      appStore.dispatch(appSlice.actions.addLog({
+        log: true,
+        msg: "Unsuccessful search for personal transactions. " + JSON.stringify(e)
+      }))
+
+      setQuickMessage('Request error. See logs for more info.')
+      setTimeout(() => {
+        setQuickMessage(null)
+      }, 2000)
     })
   }
 
@@ -91,7 +101,7 @@ export function MyCredentialsScreen({ navigation }) {
         const text = await response.text()
         appStore.dispatch(appSlice.actions.addLog({
           log: true,
-          msg: "Unsuccessful result code for personal transactions. " + text
+          msg: "Unsuccessful result code for personal Give & Offer types. " + text
         }))
 
         setQuickMessage('Request status error. See logs for more info.')
@@ -106,7 +116,7 @@ export function MyCredentialsScreen({ navigation }) {
         } else {
           appStore.dispatch(appSlice.actions.addLog({
             log: true,
-            msg: "Unsuccessful results for personal transactions: " + JSON.stringify(results)
+            msg: "Unsuccessful results for personal Give & Offer types: " + JSON.stringify(results)
           }))
           setQuickMessage('Request results error. See logs for more info.')
           setTimeout(() => { setQuickMessage(null) }, 2000)
@@ -115,7 +125,7 @@ export function MyCredentialsScreen({ navigation }) {
     }).catch(e => {
       appStore.dispatch(appSlice.actions.addLog({
         log: true,
-        msg: "Unsuccessful result code for personal transactions. " + JSON.stringify(e)
+        msg: "Unsuccessful request for personal Give & Offer types. " + JSON.stringify(e)
       }))
 
       setQuickMessage('Request error. See logs for more info.')

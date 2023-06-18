@@ -35,7 +35,7 @@ export function ReportScreen({ navigation }) {
       + '/api/report/issuersWhoClaimedOrConfirmed?claimId='
       + encodeURIComponent(claimId)
     const userToken = await utility.accessToken(identifiers[0])
-    await fetch(url, {
+    fetch(url, {
       headers: {
         "Content-Type": "application/json",
         "Uport-Push-Token": userToken

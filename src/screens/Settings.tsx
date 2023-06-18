@@ -216,7 +216,7 @@ export function SettingsScreen({navigation}) {
   const checkLimits = async () => {
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(identifiersSelector[0])
-    await fetch(endorserApiServer + '/api/report/rateLimits', {
+    fetch(endorserApiServer + '/api/report/rateLimits', {
       headers: {
         "Content-Type": "application/json",
         "Uport-Push-Token": token,
