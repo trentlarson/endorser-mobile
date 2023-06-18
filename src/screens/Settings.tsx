@@ -588,6 +588,9 @@ export function SettingsScreen({navigation}) {
                         <Text>
                           You have done {limits.doneRegistrationsThisMonth} registrations out of {limits.maxRegistrationsPerMonth} for this month. Your registrations counter resets at: {R.replace('T', ' ', limits.nextMonthBeginDateTime)}
                         </Text>
+                        <Text>
+                          Note that you cannot register anyone the day you get registered, and you can only register one per day during your first month.
+                        </Text>
                       </View>
                   }
                   <Text style={{ padding: 10 }}>{limitsMessage}</Text>
