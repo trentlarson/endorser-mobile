@@ -41,8 +41,9 @@ export function SignatureResultsScreen({ navigation, route }) {
                 {
                   result.serverId ? (
                     <View>
+                        <Text>Endorser.ch ID:</Text>
                         <Text style={{ textAlign: "center" }} selectable={true}>
-                          Endorser.ch ID { result.serverId }
+                          { result.serverId }
                         </Text>
                         <Text
                           style={{ color: 'blue', textAlign: "right" }}
