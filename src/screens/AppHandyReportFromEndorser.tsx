@@ -63,12 +63,12 @@ export function AppHandyReportScreen({ navigation }) {
         setSearchResults(correctResults)
         setSearchError('')
       }).catch(err => {
-        console.log('There was a problem searching on ', param, err)
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "There was a problem searching: " + err}))
         setSearchError('There was a problem searching.')
       })
-      
+
     } else {
-      console.log('The call to searchEndorser needs searchTerm or claimId in param, but got', param)
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "The call to searchEndorser needs searchTerm or claimId in param, but got: " + param}))
     }
   }
 
@@ -128,7 +128,7 @@ export function AppHandyReportScreen({ navigation }) {
                             checked={showClaimsWithoutDids}
                             onPress={() => setShowClaimsWithoutDids(!showClaimsWithoutDids)}
                           />
-                          
+
                           { filteredResultOutput(searchResults) }
                         </View>
                   }

@@ -873,7 +873,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
           },
         })
         .then(resp => {
-          console.log('resp.status',resp.status)
           if (resp.status === 200) {
             setHasConflictingPlanId(true)
           } else {
@@ -1085,7 +1084,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const allContacts = useSelector((state) => state.contacts || [])
 
     function toggleIsFulfills() {
-      console.log('toggling fulfills', isFulfills)
       setIsFulfills((curVal) => !curVal);
     }
 

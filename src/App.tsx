@@ -270,7 +270,10 @@ function HomeScreen({ navigation }) {
     .then(() => {
       checkNotify()
     })
-    .catch(console.log)
+    .catch(err => {
+      console.log('Error requesting notifications (full): ', err)
+      appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Error requesting notifications (stringified): " + err}))
+    })
     .finally(() => {
       setQuickMessage('Rechecked')
       setTimeout(() => { setQuickMessage(null) }, 1000)
@@ -355,8 +358,8 @@ function HomeScreen({ navigation }) {
         setSetupFinished(true)
 
       } catch (err) {
-        console.log('Got error on initial App useEffect:', err)
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
+        console.log('Got error on initial App useEffect (full):', err)
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error (stringified): " + err}))
         setInitError(
           'Something went wrong during initialization.'
           + ' Kindly send us the logs (near the bottom of Help).'
@@ -705,8 +708,8 @@ function AppHandyHomeScreen({ navigation }) {
         setLoadingInitial(false)
 
       } catch (err) {
-        console.log('Got error on initial App useEffect:', err)
-        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error: " + err}))
+        console.log('Got error on initial App useEffect (full):', err)
+        appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... got an error (stringified): " + err}))
         setInitError('Something went wrong during initialization. Kindly send us the logs (near the bottom of Help).')
       }
 

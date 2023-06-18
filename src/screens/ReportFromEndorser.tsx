@@ -214,7 +214,7 @@ export function ReportScreen({ navigation }) {
         setSearchError('There was a problem searching. See logs for more info.')
       })
     } else {
-      console.log('The call to searchEndorser needs claimId or searchClaimType or searchTerm in param, but got', param)
+      //console.log('The call to searchEndorser needs claimId or searchClaimType or searchTerm in param, but got', param)
       setSearchError('No search criteria was supplied.')
     }
   }
