@@ -288,8 +288,28 @@ function HomeScreen({ navigation }) {
       try {
 
         const setupSettings = await initializeSettings()
+
+        // migrate old mnemonic data
         if (setupSettings != null && setupSettings.mnemonic != null) {
           setOldMnemonic(true)
+        }
+        // migrate old homeScreen data from string to stringified array
+        if (setupSettings.homeScreen && !setupSettings.homeScreen.startsWith('[')) {
+          // it's an old value of a string key, so change it to an array
+          const newHomeScreenSetting = [setupSettings.homeScreen]
+
+          // save in DB
+          const conn = await dbConnection
+          await conn.manager.update(
+            Settings,
+            MASTER_COLUMN_VALUE,
+            { homeScreen: JSON.stringify(newHomeScreenSetting) }
+          )
+
+          // save in global state
+          const settings = classToPlain(appStore.getState().settings)
+          settings.homeScreen = JSON.stringify(newHomeScreenSetting)
+          appStore.dispatch(appSlice.actions.setSettings(settings))
         }
 
         setLoadingInitial(false)
@@ -591,7 +611,7 @@ function HomeScreen({ navigation }) {
               }
 
               {/*************** Show Customized Actions */}
-              {settings != null && settings.homeScreen === 'BVC'
+              {settings != null && settings.homeScreen && settings.homeScreen.indexOf('"BVC"') !== -1
               ? (
                 <View>
                   <Text style={{ textAlign: 'center' }}>Bountiful Voluntaryist Community Saturday Meeting</Text>

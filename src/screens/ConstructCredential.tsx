@@ -1177,6 +1177,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
               <View>
                 <Text style={styles.modalText}>Gave</Text>
+                <Text>You can simply fill out the description.</Text>
+                <Text>Note that you are the recipient by default.</Text>
 
                 <View style={{ padding: 5 }}>
                   <Text>Giver</Text>

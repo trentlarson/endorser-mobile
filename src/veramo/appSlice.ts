@@ -29,6 +29,7 @@ export interface AppState {
   contacts: Array<Contact> | null;
 
   homeProjectId: string;
+  homeScreen: string; // array of home screen IDs, JSON-ified
   logMessage: string;
   refreshHomeFeed: boolean;
   viewServer: string;

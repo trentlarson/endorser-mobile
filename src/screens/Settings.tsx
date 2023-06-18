@@ -34,6 +34,7 @@ export function SettingsScreen({navigation}) {
   const [error, setError] = useState<string>('')
   const [finishedCheckingIds, setFinishedCheckingIds] = useState<boolean>(false)
   const [homeProjectId, setHomeProjectId] = useState<string>(appStore.getState().homeProjectId)
+  const [homeScreenValues, setHomeScreenValues] = useState<string[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [isInAdvancedMode, setIsInAdvancedMode] = useState<boolean>(appStore.getState().advancedMode)
   const [isInTestMode, setIsInTestMode] = useState<boolean>(appStore.getState().testMode)
@@ -59,6 +60,9 @@ export function SettingsScreen({navigation}) {
     const conn = await dbConnection
     await conn.manager.save(Settings, { id: MASTER_COLUMN_VALUE, homeScreen: newValue })
     appStore.dispatch(appSlice.actions.setHomeScreen(newValue))
+  }
+  const toggleHomeShowsBVC = () => {
+
   }
 
   const toggleAdvancedMode = () => {
@@ -213,6 +217,39 @@ export function SettingsScreen({navigation}) {
     setHomeProjectId(value)
   }
 
+  // Store the new home screen values in the DB and global & page state.
+  const storeHomeScreenValues = async (values) => {
+    // save in DB
+    const conn = await dbConnection
+    await conn.manager.update(Settings, MASTER_COLUMN_VALUE, { homeScreen: JSON.stringify(values) })
+
+    // save in global state
+    const settings = classToPlain(appStore.getState().settings)
+    settings.homeScreen = JSON.stringify(values)
+    appStore.dispatch(appSlice.actions.setSettings(settings))
+
+    // save in page state
+    setHomeScreenValues(values)
+  }
+
+  const addHomeScreenValue = async (value) => {
+    const newValues = [...homeScreenValues, value]
+    await storeHomeScreenValues(newValues)
+  }
+
+  const removeHomeScreenValue = async (value) => {
+    const newValues = homeScreenValues.filter(v => v !== value)
+    await storeHomeScreenValues(newValues)
+  }
+
+  const toggleHomeScreenValue = async (value) => {
+    if (homeScreenValues.indexOf(value) > -1) {
+      await removeHomeScreenValue(value)
+    } else {
+      await addHomeScreenValue(value)
+    }
+  }
+
   const checkLimits = async () => {
     const endorserApiServer = appStore.getState().settings.apiServer
     const token = await utility.accessToken(identifiersSelector[0])
@@ -259,6 +296,20 @@ export function SettingsScreen({navigation}) {
     }
     getIdentifiers()
   }, [appStore.getState().identifiers])
+
+  useEffect(() => {
+    const setHomeScreen = async () => {
+      try {
+        setHomeScreenValues(JSON.parse(appStore.getState().settings.homeScreen))
+      } catch (e) {
+        appStore.dispatch(appSlice.actions.addLog({
+          log: true,
+          msg: "Unable to work with home screen setting of " + savedHomeScreen + " because: " + e + " -- it'll stay []"
+        }))
+      }
+    }
+    setHomeScreen()
+  }, [])
 
   useEffect(() => {
     const createIdentifier = async () => {
@@ -631,8 +682,8 @@ export function SettingsScreen({navigation}) {
                   <Text>Home Screen</Text>
                   <CheckBox
                     title='Bountiful Voluntaryist Community'
-                    checked={homeScreenSelector === 'BVC'}
-                    onPress={toggleStateForHomeIsBVC}
+                    checked={homeScreenValues.indexOf('BVC') !== -1}
+                    onPress={() => toggleHomeScreenValue('BVC')}
                   />
                 </View>
 
