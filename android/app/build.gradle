@@ -101,7 +101,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         multiDexEnabled true
         versionCode 127
-        versionName "6.7.127-rc"
+        versionName "6.7.127"
     }
 
     splits {
