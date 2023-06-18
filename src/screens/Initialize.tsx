@@ -54,7 +54,8 @@ export function InitializeScreen({navigation}) {
       })
     }
     if (creatingId) {
-      createIdentifier()
+      // wait a bit to let the UI update to show the spinner
+      setTimeout(() => createIdentifier(), 100)
     }
   }, [creatingId])
 

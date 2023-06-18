@@ -162,7 +162,8 @@ export function ImportIdentityScreen({navigation}) {
       })
     }
     if (idImporting) {
-      coordImportId()
+      // wait a bit so that the UI can update to show the spinner
+      setTimeout(() => coordImportId(), 100)
     }
   }, [idImporting])
 
