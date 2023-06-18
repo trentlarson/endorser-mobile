@@ -681,6 +681,11 @@ export function SettingsScreen({navigation}) {
                 <View style={{ marginTop: 10, padding: 10 }}>
                   <Text>Home Screen</Text>
                   <CheckBox
+                    title='Gave'
+                    checked={homeScreenValues.indexOf('Gave') !== -1}
+                    onPress={() => toggleHomeScreenValue('Gave')}
+                  />
+                  <CheckBox
                     title='Bountiful Voluntaryist Community'
                     checked={homeScreenValues.indexOf('BVC') !== -1}
                     onPress={() => toggleHomeScreenValue('BVC')}

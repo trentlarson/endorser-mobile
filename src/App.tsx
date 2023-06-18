@@ -611,9 +611,29 @@ function HomeScreen({ navigation }) {
               }
 
               {/*************** Show Customized Actions */}
+              {settings != null && settings.homeScreen && settings.homeScreen.indexOf('"Gave"') !== -1
+                ? (
+                  <View style={{ marginTop: 5 }}>
+                    <Button
+                      title={'Gave'}
+                      onPress={() => {
+                        const giveClaim = {
+                          "@context": utility.SCHEMA_ORG_CONTEXT,
+                          "@type": "GiveAction",
+                          recipient: { identifier: allIdentifiers[0] },
+                        }
+                        navigation.navigate('Create Credential', { incomingClaim: giveClaim })
+                      }}
+                    />
+                    <View style={{ marginBottom: 40 }}/>
+                  </View>
+                ) : (
+                  <View />
+                )}
+
               {settings != null && settings.homeScreen && settings.homeScreen.indexOf('"BVC"') !== -1
               ? (
-                <View>
+                <View style={{ marginTop: 5 }}>
                   <Text style={{ textAlign: 'center' }}>Bountiful Voluntaryist Community Saturday Meeting</Text>
                   <BVCButton
                     description='Meeting'
