@@ -183,13 +183,16 @@ export function ReportFeedScreen({ navigation, route }) {
                             </Text>
                           : <View />
                         }
-                        <Button
-                          title="Load More"
-                          onPress={() => {
-                            updateSubfeed(subfeed)
-                            setClickedSubLoad(true)
-                          }}
-                        />
+                        {/* Without width, button gets long so text is hidden */}
+                        <View style={{ width: 400 }}>
+                          <Button
+                            title="Load More"
+                            onPress={() => {
+                              updateSubfeed(subfeed)
+                              setClickedSubLoad(true)
+                            }}
+                          />
+                        </View>
                       </View>
                       <View style={{ display: (subfeedHitLimit ? "none" : "flex") }}>
                         <Text>

@@ -227,6 +227,7 @@ export function ConfirmOthersScreen({ navigation }) {
                   <ActivityIndicator size="large" color="#00ff00" />
                 :
                   <View style={{ width: 400 }}>
+                    {/* Without width, button gets long so text is hidden */}
                     <Button
                       title={'Load Previous to ' + monthDayLoaded()}
                       onPress={() => loadRecentClaims(appStore.getState().identifiers)}
