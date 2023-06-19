@@ -9,7 +9,9 @@ For the reporting facility, we use the [endorser-ch APIs](https://github.com/tre
 
 ## Dependencies
 
-a la tea.xyz
+- One way is with asdf-vm.com (which is the only way I can get the deploy to work).
+
+- The following is for tea.xyz, which works for me for development until I try to deploy (eg. `bundle exec fastlane beta` because "mkmf.rb can't find header files for ruby")
 
 | Project       | Version          |
 |---------------|------------------|
@@ -28,7 +30,7 @@ Android also needs Java (which isn't in tea yet) which can be done on my machine
 
 - Note that there are also some other mobile dependencies, eg. Xcode, iOS CocoaPods, and Android Studio. The tools will prompt you along the way.
 
-- There are some values to customize: SERVICE_ID, INFURA_PROJECT_ID, *_ENDORSER_*_SERVER
+- There are some values to customize in src/veramo/setup.ts: SERVICE_ID, INFURA_PROJECT_ID
 
 - For ios:
 
@@ -348,7 +350,8 @@ To Release:
         6.5" (eg. iPhone 11) taken at 361x780 then scaled to 1284x2778 (exactly)
         5.5" (eg. iPhone 8) ... 400x710 ... 1242x2208 (exactly)
       - Add screenshots to version control in endorser-mobile-assets
-    - `cd ios; FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT=120 bundle exec fastlane beta; cd ..`
+    - ` export FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=...App-Specific Password...`
+    - `cd ios; SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER="+1 (123) 123-1233" FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT=120 bundle exec fastlane beta; cd ..`
       - Note that the upload fails if you didn't already create a release in App Store Connect.
     - This takes about 30 minutes. The upload takes about 10 at the end; there's no prompt after requesting the 6-digit code.
     - After entering the 6-digit code (in about 18 minutes), it should say "Login Successful". It failed when I was on a VPN... maybe because I hadn't created the version in the App Store yet.

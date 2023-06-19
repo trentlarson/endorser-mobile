@@ -34,6 +34,7 @@ export function SettingsScreen({navigation}) {
   const [error, setError] = useState<string>('')
   const [finishedCheckingIds, setFinishedCheckingIds] = useState<boolean>(false)
   const [homeProjectId, setHomeProjectId] = useState<string>(appStore.getState().homeProjectId)
+  // we'll ensure this is always some array, even if the DB has a null value
   const [homeScreenValues, setHomeScreenValues] = useState<string[]>([])
   const [hasMnemonic, setHasMnemonic] = useState<boolean>(false)
   const [isInAdvancedMode, setIsInAdvancedMode] = useState<boolean>(appStore.getState().advancedMode)
@@ -300,11 +301,13 @@ export function SettingsScreen({navigation}) {
   useEffect(() => {
     const setHomeScreen = async () => {
       try {
-        setHomeScreenValues(JSON.parse(appStore.getState().settings.homeScreen))
+        setHomeScreenValues(JSON.parse(appStore.getState().settings.homeScreen) || [])
       } catch (e) {
         appStore.dispatch(appSlice.actions.addLog({
           log: true,
-          msg: "Unable to work with home screen setting of " + savedHomeScreen + " because: " + e + " -- it'll stay []"
+          msg: "Unable to work with home screen setting of "
+            + appStore.getState().settings.homeScreen
+            + " because: " + e + " -- it'll stay []"
         }))
       }
     }

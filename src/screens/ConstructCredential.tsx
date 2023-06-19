@@ -183,6 +183,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                     <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                     <Text>Contributions</Text>
 
+                    <View style={{ padding: 5 }} />
                     <Button
                       title={'Gave'}
                       onPress={() => setAskForGaveInfo(true)}
@@ -240,6 +241,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                       }}
                     />
 
+                    <View style={{ padding: 5 }} />
                     <Button
                       title={'Pledge To Mutual Integrity'}
                       onPress={() => {
@@ -275,6 +277,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Contracts</Text>
 
+                  <View style={{ padding: 5 }} />
                   <Button
                     title={'Common Paper Mutual NDA'}
                     onPress={() => navigation.push(
@@ -299,6 +302,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Miscellaneous</Text>
 
+                  <View style={{ padding: 5 }} />
                   <Button
                     title={'Advertise or Seek Skills or Services'}
                     onPress={() => setAskForPersonInfo(true)}
@@ -321,6 +325,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   <View style={{ backgroundColor: 'rgba(0,0,0,0.9)', height: 0.8, width: '30%' }}/>
                   <Text>Other Tools</Text>
 
+                  <View style={{ padding: 5 }} />
                   <Button
                     title={'Scan For Claim'}
                     onPress={() =>

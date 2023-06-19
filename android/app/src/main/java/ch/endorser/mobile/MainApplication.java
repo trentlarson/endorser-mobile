@@ -62,7 +62,8 @@ public class MainApplication extends Application implements ReactApplication {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       DefaultNewArchitectureEntryPoint.load();
     }
-    ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+    // removing because it now fails to compile for Play Store deployment with react-native 0.71.7
+    //ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
 
     // for WorkManager
     Constraints constraints = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
