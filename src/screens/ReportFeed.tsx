@@ -168,7 +168,12 @@ export function ReportFeedScreen({ navigation, route }) {
                   />
                 )}
                 /* fixed height is critical for iOS vertical scroll */
-                style={{ borderWidth: 1, height: subfeedData.length > 0 ? 400 : 60 }}
+                style={{ borderWidth: 1, height: subfeedData.length > 0 ? 400 : 90 }}
+                ListEmptyComponent={(
+                  <View style={{ display: (subfeedHitLimit ? "flex" : "none") }}>
+                    <Text>No items for this time period.</Text>
+                  </View>
+                )}
                 ListFooterComponent={(
                   <View>
                     <ActivityIndicator color="#00ff00" animating={ loadingSubfeedRecent }/>
@@ -186,7 +191,7 @@ export function ReportFeedScreen({ navigation, route }) {
                         {/* Without width, button gets long so text is hidden */}
                         <View style={{ width: 400 }}>
                           <Button
-                            title="Load More"
+                            title="Load Further Back"
                             onPress={() => {
                               updateSubfeed(subfeed)
                               setClickedSubLoad(true)
@@ -240,14 +245,19 @@ export function ReportFeedScreen({ navigation, route }) {
                   />
                 )}
                 /* fixed height is critical for iOS vertical scroll */
-                style={{ borderWidth: 1, height: feedData.length > 0 ? 400 : 60 }}
+                style={{ borderWidth: 1, height: feedData.length > 0 ? 400 : 90 }}
+                ListEmptyComponent={(
+                  <View style={{ display: (subfeedHitLimit ? "flex" : "none") }}>
+                    <Text>No items for this time period.</Text>
+                  </View>
+                )}
                 ListFooterComponent={(
                   <View>
                     <ActivityIndicator color="#00ff00" animating={ loadingAllRecent }/>
                     <View style={{ display: (loadingAllRecent ? "none" : "flex") }}>
                       <View style={{ display: (feedHitLimit ? "flex" : "none") }}>
                         <Button
-                          title="Load More"
+                          title="Load Further Back"
                           onPress={ updateAllFeed }
                         />
                       </View>

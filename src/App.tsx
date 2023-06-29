@@ -307,9 +307,9 @@ function HomeScreen({ navigation }) {
           )
 
           // save in global state
-          const settings = classToPlain(appStore.getState().settings)
-          settings.homeScreen = JSON.stringify(newHomeScreenSetting)
-          appStore.dispatch(appSlice.actions.setSettings(settings))
+          const newSettings = classToPlain(appStore.getState().settings)
+          newSettings.homeScreen = JSON.stringify(newHomeScreenSetting)
+          appStore.dispatch(appSlice.actions.setSettings(newSettings))
         }
 
         setLoadingInitial(false)
