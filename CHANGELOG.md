@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
-## [6.7.129] - 2023-07-21
+## [6.7.129] - 2023-07-21 - 9faa71a42b510ee5c1585db208a61533d4bd1118
 
 ### Added
 - Bookmarks of plans and projects
