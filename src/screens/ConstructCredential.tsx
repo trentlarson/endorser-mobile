@@ -1085,6 +1085,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [providerIds, setProviderIds] = useState<string>('')
     const [recipientId, setRecipientId] = useState<string>(props.userId)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
+    const [selectFulfillsFromBookmarks, setSelectFulfillsFromBookmarks] = useState<boolean>(false)
     const [selectProviderFromBookmarks, setSelectProviderFromBookmarks] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
     const [showInfoModal, setShowInfoModal] = useState<boolean>(false)
@@ -1260,6 +1261,14 @@ export function ConstructCredentialScreen({ navigation, route }) {
                         multiline={false}
                         style={{ borderWidth: 1 }}
                       />
+                      {
+                        <TouchableHighlight
+                          style={styles.moreButton}
+                          onPress={() => setSelectFulfillsFromBookmarks(true)}
+                        >
+                          <Text>Pick from Bookmarks</Text>
+                        </TouchableHighlight>
+                      }
 
                       {
                         !fulfillsId
@@ -1425,6 +1434,14 @@ export function ConstructCredentialScreen({ navigation, route }) {
                     cancel={ () => { setSelectRecipientFromContacts(false) } }
                     proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
                     includeMyDid={ identifiers[0].did }
+                  />
+                  : <View/>
+              }
+              {
+                selectFulfillsFromBookmarks
+                  ? <BookmarkSelectModal
+                    cancel={ () => { setSelectFulfillsFromBookmarks(false) } }
+                    proceed={ (handleId) => { setFulfillsId(handleId); setSelectFulfillsFromBookmarks(false) }}
                   />
                   : <View/>
               }
