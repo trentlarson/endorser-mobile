@@ -595,7 +595,7 @@ function HomeScreen({ navigation }) {
                     <Text style={{ textAlign: 'center' }}>
                       Note: you will not get notified of new claims.
                       &nbsp;
-                      <Icon name="info-circle" onPress={() => navigation.navigate('Notification Permissions')} />
+                      <Icon name="info-circle" onPress={() => navigation.navigate('Settings', { screen: 'Notification Permissions' })} />
                     </Text>
                     <Text style={{ textAlign: 'center' }}>
                       <Text
