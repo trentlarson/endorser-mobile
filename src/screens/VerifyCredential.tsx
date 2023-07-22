@@ -45,8 +45,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [loadingVer, setLoadingVer] = useState<boolean>(true)
   const [loadingTotals, setLoadingTotals] = useState<boolean>(false)
   const [numHidden, setNumHidden] = useState<number>(0)
-  const [planOfferTotals, setPlanOfferTotals] = useState<Record<string, number>>({})
   const [planGiveTotals, setPlanGiveTotals] = useState<Record<string, number>>({})
+  const [planProviderGives, setPlanProviderGives] = useState<number>(0)
+  const [planOfferTotals, setPlanOfferTotals] = useState<Record<string, number>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [showInfoConsistency, setShowInfoConsistency] = useState<boolean>(false)
   const [showMyQr, setShowMyQr] = useState<boolean>(false)
@@ -75,6 +76,38 @@ export function VerifyCredentialScreen({ navigation, route }) {
     contract.fieldsMerkle = contractClaim.fieldsMerkle
     const accept = utility.constructAccept(utility.REPLACE_USER_DID_STRING, contract)
     return accept
+  }
+
+  const loadMoreProviderGives = async (providerId, beforeId) => {
+    const url =
+      appStore.getState().settings.apiServer
+      + '/api/v2/report/givesProvidedBy?providerId='
+      + encodeURIComponent(providerId)
+      + (beforeId ? '&beforeId=' + encodeURIComponent(beforeId) : '')
+    const userToken = await utility.accessToken(identifiers[0])
+    return fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + userToken
+      }
+    })
+    .then(async response => {
+      if (response.status === 200) {
+        return response.json()
+      } else {
+        const text = await response.text()
+        throw 'Got from server: ' + text
+      }
+    })
+    .then(data => {
+      setPlanProviderGives((prevLen) => prevLen + data.data.length)
+      if (data.hitLimit) {
+        loadMoreProviderGives(providerId, data.data[data.data.length - 1].rowId)
+      }
+    })
+    .catch(err =>
+      setTotalsError('Got error loading provided counts: ' + err)
+    )
   }
 
   useFocusEffect(
@@ -374,6 +407,8 @@ export function VerifyCredentialScreen({ navigation, route }) {
           setTotalsError('Got error loading offered totals: ' + err)
         )
 
+        loadMoreProviderGives(wrappedClaim.handleId)
+
         setLoadingTotals(false)
       }
 
@@ -489,15 +524,22 @@ export function VerifyCredentialScreen({ navigation, route }) {
                 loadingTotals
                 ? <ActivityIndicator color="#00FF00" />
                 :
-                  R.isEmpty(planOfferTotals)
+                R.isEmpty(planOfferTotals)
                   ?
-                    <Text>None</Text>
+                  <Text>None</Text>
                   :
-                    R.keys(planOfferTotals).map(key =>
-                      <Text key={ key }>
-                        { utility.displayAmount(key, planOfferTotals[key]) }
-                      </Text>
-                    )
+                  R.keys(planOfferTotals).map(key =>
+                    <Text key={ key }>
+                      { utility.displayAmount(key, planOfferTotals[key]) }
+                    </Text>
+                  )
+              }
+
+              <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Paid Forward</Text>
+              {
+                loadingTotals
+                ? <ActivityIndicator color="#00FF00" />
+                : <Text>This Assisted { planProviderGives } Other Give{ planProviderGives !== 1 ? "s" : "" }</Text>
               }
 
               <Text style={{ color: 'red' }}>{ totalsError }</Text>
