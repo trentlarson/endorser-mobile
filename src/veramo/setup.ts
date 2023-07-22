@@ -15,7 +15,6 @@ import { KeyManager } from '@veramo/key-manager'
 // Custom key management system for RN
 import { KeyManagementSystem } from '@veramo/kms-local'
 
-// Custom resolver
 // Custom resolvers
 import { DIDResolverPlugin } from '@veramo/did-resolver'
 import { Resolver } from 'did-resolver'
@@ -33,6 +32,7 @@ import { createConnection } from 'typeorm'
 
 import * as R from 'ramda'
 
+import { ClaimBookmark } from '../entity/claimBookmark'
 import { Contact } from '../entity/contact'
 import { Settings } from '../entity/settings'
 import { PrivateData } from '../entity/privateData'
@@ -45,18 +45,18 @@ import { HandlePublicKeys1652142819353 } from '../migration/1652142819353-Handle
 import { LastClaimsSeen1656811846836 }   from '../migration/1656811846836-LastClaimsSeen'
 import { ContactRegistered1662256903367 }from '../migration/1662256903367-ContactRegistered'
 import { PrivateData1663080623479 }      from '../migration/1663080623479-PrivateData'
+import { ClaimBookmark1689966637749 }   from '../migration/1689966637749-ClaimBookmarks'
 
-const ALL_ENTITIES = Entities.concat([Contact, Settings, PrivateData])
+const ALL_ENTITIES = Entities.concat([ClaimBookmark, Contact, Settings, PrivateData])
 
 
 
-// Create react native DB connection configured by ormconfig.js
 export const dbConnection = createConnection({
   database: 'endorser-mobile.sqlite',
   entities: ALL_ENTITIES,
   location: 'default',
   logging: ['error', 'info', 'warn'],
-  migrations: [ Initial1616938713828, SettingsContacts1616967972293, EncryptedSeed1637856484788, HomeScreenConfig1639947962124, HandlePublicKeys1652142819353, LastClaimsSeen1656811846836, ContactRegistered1662256903367, PrivateData1663080623479 ],
+  migrations: [ Initial1616938713828, SettingsContacts1616967972293, EncryptedSeed1637856484788, HomeScreenConfig1639947962124, HandlePublicKeys1652142819353, LastClaimsSeen1656811846836, ContactRegistered1662256903367, PrivateData1663080623479, ClaimBookmark1689966637749 ],
   migrationsRun: true,
   type: 'react-native',
 })
@@ -76,6 +76,7 @@ export const HANDY_APP = false
 // this is used as the object in RegisterAction claims
 export const SERVICE_ID = 'endorser.ch'
 
+// You will need to get a project ID from infura https://www.infura.io
 const INFURA_PROJECT_ID = 'INFURA_PROJECT_ID'
 
 const providers = {}

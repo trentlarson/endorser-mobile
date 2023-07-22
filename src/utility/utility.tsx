@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import * as R from 'ramda'
 import React, { useState } from 'react'
-import { Alert, Button, Modal, Pressable, Text, TouchableHighlight, View } from 'react-native'
+import { Alert, Button, Modal, Pressable, Text, TextInput, TouchableHighlight, View } from "react-native";
 import Clipboard from "@react-native-community/clipboard"
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { useSelector } from 'react-redux'
@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux'
 import * as utility from './utility'
 import { styles } from '../screens/style'
 import { appStore } from "../veramo/appSlice";
+import { dbConnection } from '../veramo/setup'
 
 function setClaimToAttendAndGive(id: IIdentifier | undefined, startTime: string, navigation) {
   const claimObjs = utility.bvcClaims(
@@ -269,6 +270,63 @@ export const proceedToEditOffer = (navigation, origClaim, handleId) => {
   navigation.navigate('Create Credential', { incomingClaim: offerClaim })
 }
 
+export const BookmarkModal = ({ takeBookmark, setTakeBookmark, record, deleteCallback, saveCallback }) => {
+
+  const defaultBookmarkName = record.claim.name || ''
+  const [bookmarkName, setBookmarkName] = useState<string>(defaultBookmarkName)
+
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={!!takeBookmark}
+    >
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Text>Set bookmark for { record.handleId }</Text>
+          <View>
+            <Text>Name</Text>
+            <TextInput
+              value={bookmarkName}
+              onChangeText={setBookmarkName}
+              editable
+              style={{borderWidth: 1}}
+            />
+          </View>
+          <TouchableHighlight
+            style={styles.saveButton}
+            onPress={() => {
+              utility.saveBookmark(dbConnection, record, bookmarkName)
+                .then(() => { saveCallback() })
+              setTakeBookmark(null)
+            }}
+          >
+            <Text>Save</Text>
+          </TouchableHighlight>
+          <TouchableHighlight
+            style={styles.cancelButton}
+            onPress={() => {
+              utility.deleteBookmark(dbConnection, record.handleId)
+                .then(() => { deleteCallback() })
+              setTakeBookmark(null)
+            }}
+          >
+            <Text>Erase</Text>
+          </TouchableHighlight>
+          <TouchableHighlight
+            style={styles.cancelButton}
+            onPress={() => {
+              setTakeBookmark(null)
+            }}
+          >
+            <Text>Cancel</Text>
+          </TouchableHighlight>
+        </View>
+      </View>
+    </Modal>
+  )
+}
+
 /**
  * Render each claim with links to take actions and expand details.
  *
@@ -300,9 +358,11 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
   }
   const finalOutstandingPerInvoice = outstandingPerInvoice || {}
 
+  const [quickMessage, setQuickMessage] = useState<string>(null)
   const [showActions, setShowActions] = useState<boolean>(false)
   const [showDetails, setShowDetails] = useState<boolean>(false)
   const [showMore, setShowMore] = useState<boolean>(false)
+  const [takeBookmark, setTakeBookmark] = useState<boolean>(false)
 
   const identifiers = useSelector((state) => state.identifiers || [])
   const contacts = useSelector((state) => state.contacts || [])
@@ -576,6 +636,32 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     </View>
                 }
 
+                { /** Add/remove bookmark for a Plan or Project **/
+
+                  source.claim['@type'] === 'PlanAction'
+                  || source.claim['@type'] === 'Project'
+                  ?
+                  <View style={{ flexDirection: 'row', padding: 10 }}>
+
+                    <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
+                    <Pressable
+                      style={{ padding: 10 }}
+                      onPress={ () => {
+                        if (!source.handleId) {
+                          Alert.alert("You cannot bookmark a claim with no identifier.")
+                        } else {
+                          setTakeBookmark(true)
+                        }
+                      }}
+                    >
+                      <Text style={{ color: "blue" }}>Bookmark</Text>
+                    </Pressable>
+
+                  </View>
+                  :
+                  <View />
+                }
+
               </View>
             }
 
@@ -596,6 +682,33 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                 />
               : <View />
             }
+
+            <BookmarkModal
+              record={source}
+              setTakeBookmark={setTakeBookmark}
+              takeBookmark={takeBookmark}
+              deleteCallback={() => {
+                setQuickMessage('Deleted')
+                setTimeout(() => { setQuickMessage(null) }, 1000)
+              }}
+              saveCallback={() => {
+                setQuickMessage('Saved')
+                setTimeout(() => { setQuickMessage(null) }, 1000)
+              }}
+            />
+
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={!!quickMessage}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <Text>{ quickMessage }</Text>
+                </View>
+              </View>
+            </Modal>
+
           </View>
         :
           <View />

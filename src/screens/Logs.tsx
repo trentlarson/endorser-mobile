@@ -27,6 +27,11 @@ export function LogsScreen({navigation}) {
       <ScrollView>
 
         <Button
+          title='Log Bookmark Table'
+          onPress={logDatabaseTable('claimBookmark')}
+        />
+        <View style={{ marginTop: 5 }}/>
+        <Button
           title='Log Contact Table'
           onPress={logDatabaseTable('contact')}
         />

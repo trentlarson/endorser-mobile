@@ -4,6 +4,7 @@
 A mobile app for recording claims and reporting on them
 
 For the reporting facility, we use the [endorser-ch APIs](https://github.com/trentlarson/endorser-ch).
+See next plans in the 'mobile' tasks inside its [prject task list](https://raw.githubusercontent.com/trentlarson/endorser-ch/master/project.task.yaml).
 
 
 
@@ -20,7 +21,7 @@ For the reporting facility, we use the [endorser-ch APIs](https://github.com/tre
 | rubygems.org  | ^3.3.25          |
 | yarnpkg.com   | ^3.4.1           |
 
-... which can be done with: `tea +nodejs.org +ruby-lang.org +rubygems.org +yarnpkg.com sh`
+... which can also be done with: `sh <(curl tea.xyz) -E sh`
 
 Android also needs Java (which isn't in tea yet) which can be done on my machine with `export JAVA_HOME=~/.asdf/installs/java/zulu-11.60.19`
 
@@ -165,8 +166,7 @@ Unable to lookup in current state: Shutdown
 
 ## Create a New DB Migration
 
-`cd src/migration`
-`npx typeorm migration:create -n YourMigrationName`
+`yarn dlx typeorm migration:create src/migration/ProjectBookmarks`
 
 ... and edit it to include a field: 'public name = "ClassName...789"'
 ... and edit src/veramo/setup.js and add import for that file and add to `migrations` (and add to ALL_ENTITIES if there's a new table)

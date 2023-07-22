@@ -10,6 +10,8 @@ import { IIdentifier } from '@veramo/core'
 
 import { Contact } from '../entity/contact'
 import { DEFAULT_ENDORSER_VIEW_SERVER } from "../veramo/appSlice";
+import { ClaimBookmark } from "../entity/claimBookmark";
+import { dbConnection } from "../veramo/setup";
 
 export class EndorserRecord {
   id: string
@@ -401,10 +403,39 @@ export const accessToken = async (identifier) => {
   return jwt
 }
 
+export const deleteBookmark = async (dbConnection, claimId) => {
+  const conn = await dbConnection
+  return conn.manager.delete(ClaimBookmark, claimId)
+}
+
+export const loadBookmark = async (dbConnection, claimId) => {
+  const conn = await dbConnection
+  return conn.manager.findOne(ClaimBookmark, claimId)
+}
+
+export const loadBookmarks = async (dbConnection) => {
+  const conn = await dbConnection
+  return conn.manager.find(ClaimBookmark, {order: {name: 'ASC'}})
+}
+
+export const saveBookmark = async (dbConnection, record: EndorserRecord, bookmarkName) => {
+  const bookmark = new ClaimBookmark()
+  bookmark.claimId = record.handleId
+  bookmark.cachedClaimStr = JSON.stringify(record.claim)
+  bookmark.context = record.claimContext
+  bookmark.issuedAt = record.issuedAt
+  bookmark.issuer = record.issuer
+  bookmark.name = bookmarkName
+  bookmark.type = record.claimType
+
+  const conn = await dbConnection
+  return conn.manager.save(ClaimBookmark, bookmark)
+}
+
 export const loadContacts = async (appSlice, appStore, dbConnection, useCached) => {
   if (!appStore.getState().contacts || !useCached) {
     const conn = await dbConnection
-    return conn.manager.find(Contact, {order: {name:'ASC'}})
+    return conn.manager.find(Contact, {order: {name: 'ASC'}})
     .then((foundContacts) => {
       return appStore.dispatch(appSlice.actions.setContacts(classToPlain(foundContacts)))
     })
