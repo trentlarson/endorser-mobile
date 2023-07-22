@@ -10,6 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [6.7.129] - 2023-07-21
+
+### Added
+- Bookmarks of plans and projects
+- For provider plan/project, a count of gives assisted by them on the verify screen
+
+
+
+## [6.7.128] - 2023-06-18 - 3935452c8eb3abe9253a56e1ea229e17a8bb910b
+
+### Added
+- Providers for gives
+- Edit of credentials
+- Three Lives of Gifts pledges, with the first one edited
+- Option for 'Gave' button on the home screen
+
+### Fixed
+- 'Load More' button at the bottom of lists is now always visible.
+
+
 
 ## [6.7.126] - 2023-04-28 - ffa7f5da0e1eb699c9f911a0234268e8a47f2be7
 
