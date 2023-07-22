@@ -37,7 +37,7 @@ export function ContactSelectModal(props) {
             <Text>You Have No Contacts</Text>
           }
           ListHeaderComponent={
-            <Text>Choose A Contact</Text>
+            <Text>Choice of Contacts</Text>
           }
         />
 

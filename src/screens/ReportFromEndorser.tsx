@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux'
 import * as utility from '../utility/utility'
 import { RenderOneRecord } from '../utility/utility.tsx'
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
-import { ContactSelectModal } from './ContactSelect'
+import { ContactSelectModal } from './ContactSelectModal'
 import { styles } from './style'
 
 export function ReportScreen({ navigation }) {

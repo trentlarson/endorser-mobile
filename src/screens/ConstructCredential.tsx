@@ -7,7 +7,7 @@ import { CheckBox } from "react-native-elements"
 import RadioGroup, {RadioButtonProps} from 'react-native-radio-buttons-group'
 import { useSelector } from 'react-redux'
 
-import { ContactSelectModal } from './ContactSelect'
+import { ContactSelectModal } from './ContactSelectModal'
 import { ItemSelectModal } from './ItemSelectModal'
 import { styles } from './style'
 import { onboarding } from '../data/onboarding'
@@ -16,6 +16,7 @@ import { BVCButton } from '../utility/utility.tsx'
 import { appSlice, appStore } from '../veramo/appSlice'
 import { HANDY_APP } from "../veramo/setup";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { BookmarkSelectModal } from "./BookmarkSelectModal";
 
 const debug = Debug('endorser-mobile:share-credential')
 
@@ -1084,6 +1085,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [providerIds, setProviderIds] = useState<string>('')
     const [recipientId, setRecipientId] = useState<string>(props.userId)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
+    const [selectProviderFromBookmarks, setSelectProviderFromBookmarks] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
     const [showInfoModal, setShowInfoModal] = useState<boolean>(false)
     const [unit, setUnit] = useState<string>(INITIAL_SELECTED_BUTTON && INITIAL_SELECTED_BUTTON.value)
@@ -1103,6 +1105,14 @@ export function ConstructCredentialScreen({ navigation, route }) {
       setUnitButtons(buttons)
       const selectedButton = R.find(R.prop('selected'), buttons)
       setUnit(selectedButton.value)
+    }
+
+    function addProviderId(handleId) {
+      if (providerIds.length > 0) {
+        setProviderIds(providerIds + ',' + handleId)
+      } else {
+        setProviderIds(handleId)
+      }
     }
 
     function possiblyFinish(proceedToFinish) {
@@ -1170,6 +1180,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
         }
       }
     }, [])
+
     return (
       <Modal
         animationType="slide"
@@ -1364,6 +1375,14 @@ export function ConstructCredentialScreen({ navigation, route }) {
                     multiline={true}
                     style={{ borderWidth: 1 }}
                   />
+                  {
+                    <TouchableHighlight
+                      style={styles.moreButton}
+                      onPress={() => setSelectProviderFromBookmarks(true)}
+                    >
+                      <Text>Pick from Bookmarks</Text>
+                    </TouchableHighlight>
+                  }
                 </View>
 
                 <View style={{ padding: 5 }}>
@@ -1406,6 +1425,14 @@ export function ConstructCredentialScreen({ navigation, route }) {
                     cancel={ () => { setSelectRecipientFromContacts(false) } }
                     proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
                     includeMyDid={ identifiers[0].did }
+                  />
+                  : <View/>
+              }
+              {
+                selectProviderFromBookmarks
+                  ? <BookmarkSelectModal
+                    cancel={ () => { setSelectProviderFromBookmarks(false) } }
+                    proceed={ (handleId) => { addProviderId(handleId); setSelectProviderFromBookmarks(false) }}
                   />
                   : <View/>
               }

@@ -16,7 +16,7 @@ import { useSelector } from "react-redux";
 
 import * as utility from "../utility/utility";
 import { appSlice, appStore } from "../veramo/appSlice";
-import { ContactSelectModal } from "./ContactSelect";
+import { ContactSelectModal } from "./ContactSelectModal";
 import { styles } from "./style";
 import { Contact } from "../entity/contact";
 

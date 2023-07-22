@@ -77,7 +77,7 @@ export const HANDY_APP = false
 export const SERVICE_ID = 'endorser.ch'
 
 // You will need to get a project ID from infura https://www.infura.io
-const INFURA_PROJECT_ID = 'INFURA_PROJECT_ID'
+const INFURA_PROJECT_ID = '0f439b3b9237480ea8eb9da7b1f3965a'//'INFURA_PROJECT_ID'
 
 const providers = {}
 NETWORK_NAMES.forEach((networkName) => {
