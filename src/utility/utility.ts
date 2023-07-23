@@ -289,7 +289,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
 
   } else if (type === "GiveAction") {
     // agent.did is for legacy data, before March 2023
-    const giver = claim.agent?.identifier || claim.agent?.did || record.issuer
+    const giver = claim.agent?.identifier || claim.agent?.did
     const giverInfo = didInfo(giver, identifiers, contacts)
     const gaveAmount =
       claim.object?.amountOfThisGood
@@ -305,7 +305,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
 
   } else if (type === "JoinAction") {
     // agent.did is for legacy data, before March 2023
-    const agent = claim.agent?.identifier || claim.agent?.did || record.issuer
+    const agent = claim.agent?.identifier || claim.agent?.did
     const contactInfo = didInfo(agent, identifiers, contacts)
 
     let eventOrganizer = claim.event && claim.event.organizer && claim.event.organizer.name;
@@ -320,7 +320,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
     return contactInfo + fullEvent + eventDate;
 
   } else if (isOffer(claim)) {
-    const offerer = claim.offeredBy?.identifier || record.issuer
+    const offerer = claim.offeredBy?.identifier
     const contactInfo = didInfo(offerer, identifiers, contacts)
     let offering = ""
     if (claim.includesObject) {
@@ -335,7 +335,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
       offerRecipientId
         ? " to " + didInfo(offerRecipientId, identifiers, contacts)
         : ""
-    return contactInfo + " offered" + offering + offerRecipientInfo
+    return contactInfo + " offers" + offering + offerRecipientInfo
 
   } else if (type === "PlanAction") {
 
@@ -345,10 +345,10 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
 
   } else if (type === "Tenure") {
     // party.did is for legacy data, before March 2023
-    const claimer = claim.party?.identifier || claim.party?.did || record.issuer
+    const claimer = claim.party?.identifier || claim.party?.did
     const contactInfo = didInfo(claimer, identifiers, contacts)
     const polygon = claim.spatialUnit?.geo?.polygon || ""
-    return contactInfo + " claimed [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
+    return contactInfo + " possesses [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
 
   } else {
     return issuer + " declared " + claimSummary(claim, contacts)

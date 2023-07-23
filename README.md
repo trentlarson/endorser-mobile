@@ -350,7 +350,7 @@ To Release:
         6.5" (eg. iPhone 11) taken at 361x780 then scaled to 1284x2778 (exactly)
         5.5" (eg. iPhone 8) ... 400x710 ... 1242x2208 (exactly)
       - Add screenshots to version control in endorser-mobile-assets
-    - ` export FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=...App-Specific Password...`
+    - ` export FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=...App-Specific Password for This Machine...`
     - `cd ios; SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER="+1 (123) 123-1233" FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT=120 bundle exec fastlane beta; cd ..`
       - Note that the upload fails if you didn't already create a release in App Store Connect.
     - This takes about 30 minutes. The upload takes about 10 at the end; there's no prompt after requesting the 6-digit code.
