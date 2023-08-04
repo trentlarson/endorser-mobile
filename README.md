@@ -330,6 +330,7 @@ To Release:
       - First check the old version with existing data on a device.
       - Then: Internal Testing, Create a Release
     - To release: Go to Internal Testing, then View Release Details, then "Promote release" and select "Production", add details and "Save", then "Start rollout to Production". It'll show as "In review" for a little while. (Old instructions: repeatedly check the "Production" track and the release details/track until it allows you to release to production; sometimes it doesn't show for a few minutes; maybe login/logout would help.)
+      - One time I went to "Publishing Overview" on the side and it showed a button that worked.
     - Note that public testers may have to receive a link and/or turn on auto-update but they will be prompted to update. (They can go back to the public version by uninstalling and going back to the Play Store listing.)
 
 - ios
