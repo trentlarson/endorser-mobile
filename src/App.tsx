@@ -211,7 +211,28 @@ const initializeSettings = async () => {
   } else if (!settings.apiServer) {
     settings.apiServer = DEFAULT_ENDORSER_API_SERVER
     settings = await conn.manager.save(Settings, settings)
+  } else if (settings.apiServer === 'https://endorser.ch:3000') {
+    // this is the previous API URL, so let's update it
+    settings.apiServer = DEFAULT_ENDORSER_API_SERVER
+    settings = await conn.manager.save(Settings, settings)
   }
+
+  // migrate old homeScreen data from string to stringified array
+  if (settings.homeScreen && !settings.homeScreen.startsWith('[')) {
+    // it's an old value of a string key, so change it to an array
+    const newHomeScreenSetting = [settings.homeScreen]
+
+    // save in DB
+    const conn = await dbConnection
+    await conn.manager.update(
+      Settings,
+      MASTER_COLUMN_VALUE,
+      { homeScreen: JSON.stringify(newHomeScreenSetting) }
+    )
+
+    settings.homeScreen = JSON.stringify(newHomeScreenSetting)
+  }
+
   appStore.dispatch(appSlice.actions.setSettings(classToPlain(settings)))
   appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... loaded settings, about to load contacts..."}))
 
@@ -289,27 +310,9 @@ function HomeScreen({ navigation }) {
 
         const setupSettings = await initializeSettings()
 
-        // migrate old mnemonic data
+        // prompt to migrate old mnemonic data
         if (setupSettings != null && setupSettings.mnemonic != null) {
           setOldMnemonic(true)
-        }
-        // migrate old homeScreen data from string to stringified array
-        if (setupSettings.homeScreen && !setupSettings.homeScreen.startsWith('[')) {
-          // it's an old value of a string key, so change it to an array
-          const newHomeScreenSetting = [setupSettings.homeScreen]
-
-          // save in DB
-          const conn = await dbConnection
-          await conn.manager.update(
-            Settings,
-            MASTER_COLUMN_VALUE,
-            { homeScreen: JSON.stringify(newHomeScreenSetting) }
-          )
-
-          // save in global state
-          const newSettings = classToPlain(appStore.getState().settings)
-          newSettings.homeScreen = JSON.stringify(newHomeScreenSetting)
-          appStore.dispatch(appSlice.actions.setSettings(newSettings))
         }
 
         setLoadingInitial(false)

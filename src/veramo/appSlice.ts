@@ -8,7 +8,7 @@ import { Settings } from '../entity/settings'
 const MAX_LOG_LENGTH = 2000000
 const BVC_PROJECT_CLAIM_ID = 'https://endorser.ch/entity/01GXYPFF7FA03NXKPYY142PY4H'
 
-export const DEFAULT_ENDORSER_API_SERVER = 'https://endorser.ch:3000'
+export const DEFAULT_ENDORSER_API_SERVER = 'https://api.endorser.ch'
 export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
 export const LOCAL_ENDORSER_API_SERVER = 'http://127.0.0.1:3000'
 export const LOCAL_ENDORSER_VIEW_SERVER = 'http://127.0.0.1:3001'
