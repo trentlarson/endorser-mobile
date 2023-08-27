@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Changed prod API URL from port 3000 to api.endorser.ch
+
+
 
 ## [6.7.129] - 2023-07-21 - 9faa71a42b510ee5c1585db208a61533d4bd1118
 
@@ -144,7 +148,7 @@ Released
 - Run daily background task to detect new claims and alert user. (Still in testing. Android only.)
 
 ### Changed
-- Improvments to credential presentation, including multiple QR codes to share.
+- Improvements to credential presentation, including multiple QR codes to share.
 
 
 
