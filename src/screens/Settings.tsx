@@ -14,8 +14,7 @@ import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
 import {
   createAndStoreIdentifier,
-  DEFAULT_ROOT_DERIVATION_PATH,
-  UPORT_ROOT_DERIVATION_PATH
+  DEFAULT_ROOT_DERIVATION_PATH
 } from "../utility/idUtility";
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER, LOCAL_ENDORSER_API_SERVER, LOCAL_ENDORSER_VIEW_SERVER, TEST_ENDORSER_API_SERVER, TEST_ENDORSER_VIEW_SERVER } from "../veramo/appSlice"
 import { agent, dbConnection } from "../veramo/setup"

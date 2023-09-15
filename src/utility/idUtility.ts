@@ -119,7 +119,7 @@ export const importAndStoreIdentifier = async (
   //
   const seed: Buffer = await bip39.mnemonicToSeed(mnemonic)
   const root = bip32.fromSeed(seed)
-  const node = root.derivePath(UPORT_ROOT_DERIVATION_PATH)
+  const node = root.derivePath(DEFAULT_ROOT_DERIVATION_PATH)
   const privateHex = node.privateKey.toString("hex")
   const publicHex = node.publicKey.toString("hex")
   const address = didJwt.toEthereumAddress('0x' + publicHex)
