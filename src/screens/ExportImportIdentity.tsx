@@ -6,7 +6,11 @@ import { useSelector } from 'react-redux'
 
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
-import { importAndStoreIdentifier } from "../utility/idUtility"
+import {
+  DEFAULT_ROOT_DERIVATION_PATH,
+  importAndStoreIdentifier,
+  UPORT_ROOT_DERIVATION_PATH
+} from "../utility/idUtility";
 import { appSlice, appStore } from "../veramo/appSlice"
 import { dbConnection, HANDY_APP } from "../veramo/setup"
 
@@ -82,6 +86,7 @@ export function ExportIdentityScreen({navigation}) {
                 ) : (
                   <View />
                 )}
+                <Text>... and, for recovery anywhere, be sure to record your derivation path from the settings page.</Text>
               </View>
             ) : (
               <View>
@@ -113,15 +118,17 @@ export function ExportIdentityScreen({navigation}) {
 }
 
 export function ImportIdentityScreen({navigation}) {
+  const [derivationPath, setDerivationPath] = useState<string>(DEFAULT_ROOT_DERIVATION_PATH)
   const [error, setError] = useState<string>('')
   const [idChanged, setIdChanged] = useState<boolean>(false)
   const [idImporting, setIdImporting] = useState<boolean>(false)
   const [makeLowercase, setMakeLowercase] = useState<boolean>(false)
   const [mnemonic, setMnemonic] = useState<String>('')
-  //const [mnemonic, setMnemonic] = useState<String>('seminar accuse mystery assist delay law thing deal image undo guard initial shallow wrestle list fragile borrow velvet tomorrow awake explain test offer control')
-  //const [mnemonic, setMnemonic] = useState<String>('annual soap surround inhale island jewel blush rookie gate aerobic brave enlist bird nut remain cross undo surround year rapid blade impulse control broccoli')
+  //const [mnemonic, setMnemonic] = useState<String>('seminar accuse mystery assist delay law thing deal image undo guard initial shallow wrestle list fragile borrow velvet tomorrow awake explain test offer control') // user 000
+  //const [mnemonic, setMnemonic] = useState<String>('annual soap surround inhale island jewel blush rookie gate aerobic brave enlist bird nut remain cross undo surround year rapid blade impulse control broccoli') // user 222
   const [mnemonicIsOld, setMnemonicIsOld] = useState<boolean>(false)
   const [mnemonicPassword, setMnemonicPassword] = useState<string>('')
+  const [showDerivationPath, setShowDerivationPath] = useState<boolean>(false)
 
   const identifiersSelector = useSelector((state) => state.identifiers || [])
 
@@ -141,7 +148,7 @@ export function ImportIdentityScreen({navigation}) {
     const coordImportId = async () => {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Importing identifier..."}))
 
-      importAndStoreIdentifier(mnemonic, mnemonicPassword, makeLowercase, identifiersSelector)
+      importAndStoreIdentifier(mnemonic, mnemonicPassword, derivationPath, makeLowercase, identifiersSelector)
       .then(newIdentifier => {
         appStore.dispatch(appSlice.actions.addLog({log: true, msg: "... totally finished importing identifier."}))
         setIdChanged(true)
@@ -219,7 +226,38 @@ export function ImportIdentityScreen({navigation}) {
                           checked={makeLowercase}
                           onPress={() => setMakeLowercase(!makeLowercase)}
                         />
-                        <Text>Note that this will also create an identifier with the default uPort derivation path.</Text>
+                        {
+                          showDerivationPath
+                          ?
+                            <View>
+                              <Text>Derivation Path</Text>
+                              <TextInput
+                                value={derivationPath}
+                                onChangeText={setDerivationPath}
+                                autoCapitalize={'none'}
+                                style={{borderWidth: 1}}
+                              />
+                              <Text
+                                style={{ color: 'blue', padding: 10 }}
+                                onPress={() => setDerivationPath(DEFAULT_ROOT_DERIVATION_PATH)}
+                              >
+                                Set to default (matching Time Safari)
+                              </Text>
+                              <Text
+                                style={{ color: 'blue', padding: 10 }}
+                                onPress={() => setDerivationPath(UPORT_ROOT_DERIVATION_PATH)}
+                              >
+                                Set to legacy version (matching uPort)
+                              </Text>
+                            </View>
+                          :
+                            <Text
+                              style={{ color: 'blue', padding: 10 }}
+                              onPress={() => setShowDerivationPath((prev) => !prev)}
+                            >
+                              Show Derivation Path
+                            </Text>
+                        }
                       </View>
                     }
                     <Button

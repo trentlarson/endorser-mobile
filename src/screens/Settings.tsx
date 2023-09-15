@@ -12,7 +12,11 @@ import { IIdentifier } from "@veramo/core"
 import * as pkg from '../../package.json'
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
 import * as utility from "../utility/utility"
-import { createAndStoreIdentifier, UPORT_ROOT_DERIVATION_PATH } from '../utility/idUtility'
+import {
+  createAndStoreIdentifier,
+  DEFAULT_ROOT_DERIVATION_PATH,
+  UPORT_ROOT_DERIVATION_PATH
+} from "../utility/idUtility";
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER, LOCAL_ENDORSER_API_SERVER, LOCAL_ENDORSER_VIEW_SERVER, TEST_ENDORSER_API_SERVER, TEST_ENDORSER_VIEW_SERVER } from "../veramo/appSlice"
 import { agent, dbConnection } from "../veramo/setup"
 import { styles } from './style'
@@ -317,7 +321,7 @@ export function SettingsScreen({navigation}) {
   useEffect(() => {
     const createIdentifier = async () => {
       appStore.dispatch(appSlice.actions.addLog({log: true, msg: "Creating new identifier..."}))
-      createAndStoreIdentifier(mnemonicPassword)
+      createAndStoreIdentifier(mnemonicPassword, DEFAULT_ROOT_DERIVATION_PATH)
       .then(setNewId)
       .then(() => {
         setCreatingId(false)
@@ -460,18 +464,18 @@ export function SettingsScreen({navigation}) {
                           <View style={{ padding: 10 }} />
 
                           <Text>Public Key (base64)</Text>
-                          <Text style={{ marginBottom: 20 }} selectable={true}>
+                          <Text style={{ marginBottom: 20 }}>
                             { Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64') }
                           </Text>
 
                           <Text>Public Key (hex)</Text>
-                          <Text style={{ marginBottom: 20 }} selectable={true}>
+                          <Text style={{ marginBottom: 20 }}>
                             { ident.keys[0].publicKeyHex }
                           </Text>
 
                           <Text>Derivation Path</Text>
                           <Text style={{ marginBottom: 20 }} selectable={true}>
-                            { ident.keys[0].meta && ident.keys[0].meta.derivationPath ? ident.keys[0].meta.derivationPath : 'Unknown. Probably: ' + UPORT_ROOT_DERIVATION_PATH }
+                            { ident.keys[0].meta && ident.keys[0].meta.derivationPath ? ident.keys[0].meta.derivationPath : 'Unknown. Probably: ' + DEFAULT_ROOT_DERIVATION_PATH }
                           </Text>
 
                           <View>

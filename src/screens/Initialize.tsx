@@ -5,7 +5,7 @@ import { classToPlain } from "class-transformer"
 import { useSelector } from 'react-redux'
 
 import { MASTER_COLUMN_VALUE, Settings } from "../entity/settings"
-import { createAndStoreIdentifier } from '../utility/idUtility'
+import { createAndStoreIdentifier, DEFAULT_ROOT_DERIVATION_PATH } from "../utility/idUtility";
 import { appSlice, appStore } from "../veramo/appSlice"
 import { agent, dbConnection } from "../veramo/setup"
 
@@ -35,7 +35,7 @@ export function InitializeScreen({navigation}) {
         log: true,
         msg: "Creating new identifier..."
       }))
-      createAndStoreIdentifier(mnemonicPassword)
+      createAndStoreIdentifier(mnemonicPassword, DEFAULT_ROOT_DERIVATION_PATH)
       .then(setNewId)
       .then(() => {
         setCreatingId(false)

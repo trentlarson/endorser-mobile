@@ -11,6 +11,9 @@ import { appSlice, appStore } from "../veramo/appSlice"
 import { agent, dbConnection, DEFAULT_DID_PROVIDER_NAME } from '../veramo/setup'
 
 // from https://github.com/uport-project/veramo/discussions/346#discussioncomment-302234
+// ... though I recommend leaving the second position (ie. the first "0") for different chains,
+// so the third (and more) position(s) would be for different identities, addresses, etc as desired.
+export const DEFAULT_ROOT_DERIVATION_PATH = "m/84737769'/0'/0'/0'"
 export const UPORT_ROOT_DERIVATION_PATH = "m/7696500'/0'/0'/0'"
 
 const newIdentifier = (address: string, publicHex: string, privateHex: string, derivationPath: string): Omit<IIdentifier, 'provider'> => {
@@ -81,7 +84,13 @@ const storeIdentifier = async (newId: Omit<IIdentifier, 'provider'>, mnemonic: s
 }
 
 // Import an existing ID
-export const importAndStoreIdentifier = async (mnemonic: string, mnemonicPassword: string, toLowercase: boolean, previousIdentifiers: Array<IIdentifier>) => {
+export const importAndStoreIdentifier = async (
+  mnemonic: string,
+  mnemonicPassword: string,
+  derivationPath: string,
+  toLowercase: boolean,
+  previousIdentifiers: Array<IIdentifier>
+) => {
 
   // just to get rid of variability that might cause an error
   mnemonic = mnemonic.trim().toLowerCase()
@@ -122,7 +131,7 @@ export const importAndStoreIdentifier = async (mnemonic: string, mnemonicPasswor
   // ... plus: import { HDNode } from '@ethersproject/hdnode'
   **/
   const hdnode: HDNode = HDNode.fromMnemonic(mnemonic)
-  const rootNode: HDNode = hdnode.derivePath(UPORT_ROOT_DERIVATION_PATH)
+  const rootNode: HDNode = hdnode.derivePath(derivationPath)
   const privateHex = rootNode.privateKey.substring(2) // original starts with '0x'
   const publicHex = rootNode.publicKey.substring(2) // original starts with '0x'
   let address = rootNode.address
@@ -157,7 +166,7 @@ export const importAndStoreIdentifier = async (mnemonic: string, mnemonicPasswor
 
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... derived keys and address..."}))
 
-  const newId = newIdentifier(address, publicHex, privateHex, UPORT_ROOT_DERIVATION_PATH)
+  const newId = newIdentifier(address, publicHex, privateHex, derivationPath)
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... created new ID..."}))
 
   // awaiting because otherwise the UI may not see that a mnemonic was created
@@ -167,7 +176,7 @@ export const importAndStoreIdentifier = async (mnemonic: string, mnemonicPasswor
 }
 
 // Create a totally new ID
-export const createAndStoreIdentifier = async (mnemonicPassword) => {
+export const createAndStoreIdentifier = async (mnemonicPassword, derivationPath) => {
 
   // This doesn't give us the entropy/seed.
   //const id = await agent.didManagerCreate()
@@ -176,5 +185,5 @@ export const createAndStoreIdentifier = async (mnemonicPassword) => {
   const mnemonic = bip39.entropyToMnemonic(entropy)
   appStore.dispatch(appSlice.actions.addLog({log: false, msg: "... generated mnemonic..."}))
 
-  return importAndStoreIdentifier(mnemonic, mnemonicPassword, false, [])
+  return importAndStoreIdentifier(mnemonic, mnemonicPassword, derivationPath, false, [])
 }

@@ -654,8 +654,10 @@ export const checkPubKeyBase64 = (oldKeyBase64) => {
 }
 
 /**
- @return results of Settings.uportJwtPayload:
+ @return results of uportJwtPayload:
    { iat: number, iss: string (DID), own: { name, publicEncKey (base64-encoded key) } }
+
+ Note that similar code is also contained in time-safari
  */
 export const getContactPayloadFromJwtUrl = (jwtUrlText: string) => {
   let jwtText = jwtUrlText
