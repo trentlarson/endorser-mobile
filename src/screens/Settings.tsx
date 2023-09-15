@@ -20,6 +20,7 @@ import {
 import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER, LOCAL_ENDORSER_API_SERVER, LOCAL_ENDORSER_VIEW_SERVER, TEST_ENDORSER_API_SERVER, TEST_ENDORSER_VIEW_SERVER } from "../veramo/appSlice"
 import { agent, dbConnection } from "../veramo/setup"
 import { styles } from './style'
+import Icon from "react-native-vector-icons/FontAwesome";
 
 interface RateLimits {
   doneClaimsThisWeek: string;
@@ -414,6 +415,12 @@ export function SettingsScreen({navigation}) {
                       <Text>Identifier</Text>
                       <Text style={{ fontSize: 11, marginBottom: 20 }} selectable={true}>
                         { ident.did }
+                        &nbsp;&nbsp;
+                        <Icon
+                          onPress={() => copyToClipboard(ident.did)}
+                          name="copy"
+                          style={{ color: 'blue' }}
+                        />
                       </Text>
 
                       {
@@ -466,16 +473,34 @@ export function SettingsScreen({navigation}) {
                           <Text>Public Key (base64)</Text>
                           <Text style={{ marginBottom: 20 }}>
                             { Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64') }
+                            &nbsp;&nbsp;
+                            <Icon
+                              onPress={() => copyToClipboard(Buffer.from(ident.keys[0].publicKeyHex, 'hex').toString('base64'))}
+                              name="copy"
+                              style={{ color: 'blue' }}
+                            />
                           </Text>
 
                           <Text>Public Key (hex)</Text>
                           <Text style={{ marginBottom: 20 }}>
                             { ident.keys[0].publicKeyHex }
+                            &nbsp;&nbsp;
+                            <Icon
+                              onPress={() => copyToClipboard(ident.keys[0].publicKeyHex)}
+                              name="copy"
+                              style={{ color: 'blue' }}
+                            />
                           </Text>
 
                           <Text>Derivation Path</Text>
-                          <Text style={{ marginBottom: 20 }} selectable={true}>
+                          <Text style={{ marginBottom: 20 }}>
                             { ident.keys[0].meta && ident.keys[0].meta.derivationPath ? ident.keys[0].meta.derivationPath : 'Unknown. Probably: ' + DEFAULT_ROOT_DERIVATION_PATH }
+                            &nbsp;&nbsp;
+                            <Icon
+                              onPress={() => copyToClipboard(ident.keys[0].meta && ident.keys[0].meta.derivationPath ? ident.keys[0].meta.derivationPath : 'Unknown. Probably: ' + DEFAULT_ROOT_DERIVATION_PATH)}
+                              name="copy"
+                              style={{ color: 'blue' }}
+                            />
                           </Text>
 
                           <View>
