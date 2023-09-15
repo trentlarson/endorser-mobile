@@ -309,6 +309,7 @@ To Release:
 - Update CHANGELOG.md
 - Set INFURA_PROJECT_ID in src/veramo/setup.ts (useful for checking claims)
 - In package.json, update version
+- Change the version info for android & ios below (so the tag has the new values)
 - Tag
 - (I recommend starting with ios since it takes longer to get approved.)
 - android
@@ -334,9 +335,9 @@ To Release:
     - Note that public testers may have to receive a link and/or turn on auto-update but they will be prompted to update. (They can go back to the public version by uninstalling and going back to the Play Store listing.)
 
 - ios
-  - Change scheme to have a buildConfiguration of "Release" in ios/EndorserMobile.xcodeproj/xcshareddata/xcschemes/EndorserMobile.xcscheme
   - In ios/EndorserMobile/Info.plist, update CFBundleShortVersionString to match version in package.json, and CFBundleVersion to be the build number (same as in Android).
     - Note that you cannot repeat an upload of a build number. (Version is OK.)
+  - Change scheme to have a buildConfiguration of "Release" in ios/EndorserMobile.xcodeproj/xcshareddata/xcschemes/EndorserMobile.xcscheme
   - In ios/EndorserMobile.xcodeproj/project.pbxproj, make the two instances of CURRENT_PROJECT_VERSION to be the build number (same as CFBundle Version. same as in android).
     - Alternatively, you could enable 'increment_build_number' in ios/fastlane/Fastfile.
     - The project.pbxproj doesn't actually do anything when using fastlane.
