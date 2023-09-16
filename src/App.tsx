@@ -341,8 +341,7 @@ function HomeScreen({ navigation }) {
         if (Platform.OS === 'android') {
           const initNotify = await notifee.getInitialNotification()
           // note that the pressAction inside initNotify.android is typically undefined
-          if (initNotify
-              && initNotify.pressAction.id === utility.ANDROID_FEED_ACTION) {
+          if (initNotify?.pressAction?.id === utility.ANDROID_FEED_ACTION) {
 
             // tried customizing initNotify.pressAction.launchActivity but it always comes back as 'default'
             // might use initNotify data or id or body or title
