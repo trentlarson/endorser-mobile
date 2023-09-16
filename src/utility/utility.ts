@@ -200,20 +200,25 @@ export const firstAndLast3OfDid = (did) => {
   return firstAndLast3(lastChars)
 }
 
-const UNKNOWN_ENTITY = "Someone Unknown"
-const UNKNOWN_VISIBLE = "Someone Unnamed"
+const UNKNOWN_ENTITY = "Someone Not In Network"
+const UNKNOWN_VISIBLE = "Someone Not In Contacts"
+const UNSPECIFIED_ENTITY = "Someone Anonymous"
 
 /**
   always returns text, maybe UNNAMED_VISIBLE or UNKNOWN_ENTITY
+
+ Similar logic is found in Time Safari.
  **/
 export function didInfo(did, identifiers, contacts) {
+  if (!did) { return UNSPECIFIED_ENTITY }
+
   const myId = R.find(i => i.did === did, identifiers)
   if (myId) {
     return "You"
   } else {
     const contact = R.find(c => c.did === did, contacts)
     if (contact) {
-      return contact.name || "(no name)"
+      return contact.name || "Contact With No Name"
     } else if (isHiddenDid(did)) {
       return UNKNOWN_ENTITY
     } else {

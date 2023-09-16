@@ -13,7 +13,7 @@ export const DEFAULT_ENDORSER_VIEW_SERVER = 'https://endorser.ch'
 export const LOCAL_ENDORSER_API_SERVER = 'http://127.0.0.1:3000'
 export const LOCAL_ENDORSER_VIEW_SERVER = 'http://127.0.0.1:3001'
 export const TEST_ENDORSER_API_SERVER = 'https://test-api.endorser.ch'
-export const TEST_ENDORSER_VIEW_SERVER = 'https://test-api.endorser.ch'
+export const TEST_ENDORSER_VIEW_SERVER = 'https://test.endorser.ch'
 
 export interface AppState {
   // This is nullable because it is cached state from the DB...

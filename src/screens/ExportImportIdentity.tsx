@@ -86,7 +86,7 @@ export function ExportIdentityScreen({navigation}) {
                 ) : (
                   <View />
                 )}
-                <Text>... and, for recovery anywhere, be sure to record your derivation path from the settings page.</Text>
+                <Text>... and, for recovery anywhere, be sure to record your derivation path from the Settings page.</Text>
               </View>
             ) : (
               <View>
