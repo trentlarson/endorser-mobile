@@ -250,6 +250,9 @@ Manually
 
 - On an actual device (remember the table-name fiasco!)
 
+  - Look at the existing identity & export, feed, and contacts,
+    then double-check afterward that they didn't change.
+
   - Android
     - Must use Play Store to release to internal testing (because migrations
       fiasco wasn't caught when connected directly to the device).
@@ -262,6 +265,7 @@ Manually
       would have caught the migrations fiasco).
 
   - Install then create or import.
+
   - Notification permissions: new install messaging, accepted, declined then
     accepted, turned off in settings then accepted, ensure user knows when off.
 

@@ -148,8 +148,7 @@ export function MyCredentialsScreen({ navigation }) {
     } while (nextBefore)
 
     setLoading(false)
-    const displayResults = R.reverse(allResults) // we will keep the convention of reverse chronological order
-    setSearchResults(displayResults)
+    setSearchResults(allResults)
     setMaybeMore(false)
 
     const accounting = utility.countTransactions(allResults, identifiers[0].did)
@@ -231,7 +230,7 @@ export function MyCredentialsScreen({ navigation }) {
                               <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
                                 Matching Claims
                               </Text>
-                              <Text>{ maybeMore ? "(Showing the most recent, up to 50.)" : "" }</Text>
+                              <Text>{ maybeMore ? "(There may be more results further in the past.)" : "" }</Text>
                             </View>
                           : <Text />
                         }
@@ -307,8 +306,8 @@ export function MyCredentialsScreen({ navigation }) {
                               <View style={styles.line} />
                               <Text>
                                 {numStrangesAndUnknowns} of these claims
-                                {numStrangesAndUnknowns === 1 ? " does" : " do"}
-                                &nbsp;not have measurable info.
+                                {numStrangesAndUnknowns === 1 ? " does" : " do "}
+                                not have measurable info.
                               </Text>
                             </View>
                           :

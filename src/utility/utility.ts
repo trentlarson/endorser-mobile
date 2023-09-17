@@ -340,7 +340,7 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
       offerRecipientId
         ? " to " + didInfo(offerRecipientId, identifiers, contacts)
         : ""
-    return contactInfo + " offers" + offering + offerRecipientInfo
+    return contactInfo + " offered" + offering + offerRecipientInfo
 
   } else if (type === "PlanAction") {
 
@@ -749,9 +749,9 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
   let totalCurrencyPaid = {} // map of currency code to amount paid
   let totalCurrencyPromised = {} // map of currency code to total amount promised
   const wrappedClaims2 =
-    wrappedClaims.sort((j1, j2) =>
-      DateTime.fromISO(j1.issuedAt.replace(" ", "T")).toMillis()
-      - DateTime.fromISO(j2.issuedAt.replace(" ", "T")).toMillis()
+    R.sortBy(
+      claim => DateTime.fromISO(claim.issuedAt.replace(" ", "T")).toMillis(),
+      wrappedClaims
     )
   for (const jwtEntry of wrappedClaims2) {
     const claim = jwtEntry.claim;
