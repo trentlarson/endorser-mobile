@@ -12,7 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Nothing Yet
 
 
-## [6.7.131] - 2023-09-16 - fb8e40f567affc763483a97be77ab9f72dba91ef
+## [6.7.132] - 2023-09-17 - 21755364e480334f22730da65030e5e15baf27aa
+
+### Fixed
+- List of my offers
+- Sorting of my transactions
 
 ### Changed
 - Changed prod API URL from port 3000 to api.endorser.ch

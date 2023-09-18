@@ -326,10 +326,7 @@ To Release:
     - For error: "Google Api Error: forbidden: The caller does not have permission"
       - Check that the pc-api...json file is in place. Also go to Console -> Setup -> API access and find that Service Account key, then Grant Access.
   - To create a new release & upload -- especially if it shows on Releases Overview but not in Production track:
-    - Do one of these in Google Play Console:
-      - In Internal testing, "Edit release", or
-      - In Production, "Create new release" or "Edit release", or
-      - In "Releases overview" under "Latest releases" click arrow on right of next release. (When do we see this?)
+    - In Google Play Console, under Production, "Create new release", add the bundle, and "Next"/"Save" a couple times.
     - After uploading, "Save", "Review Release", then "Rollout to internal testing".
     - Test
       - First check the old version with existing data on a device.
