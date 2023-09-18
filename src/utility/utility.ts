@@ -724,9 +724,11 @@ const objectToYamlString = (obj, indentLevel) => {
  * - allPaid are all paid objects with a 'claim' (ie. GiveAction)
  * - idsOfStranges are recognized claims (ie. Offer, GiveAction) but missing some necessary fields
  * - idsOfUnknowns are unrecognized claims (ie. not Offer or GiveAction)
+ * - outstandingCurrencyEntries is a map of currency code to array of [outstanding invoice (offer) ID, full entry]
  * - outstandingCurrencyTotals is a map of currency code to outstanding amount promised
  * - outstandingInvoiceTotals is a map of
  *     invoice ID (ie. fulfills.identifier or recipient.identifier) to outstanding amount promised
+ * - paidCurrencyEntries is a map of currency code to array of [paid invoice ID, full entry]
  * - totalCurrencyPaid is a map of currency code to amount paid
  * - totalCurrencyPromised is a map of currency code to total amount promised
  *
@@ -787,17 +789,15 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
           // there shouldn't be duplicates; we'll assume the last one is the most correct
           // ... but we probably won't test for this because it shouldn't be defined behavior
           if (outstandingInvoiceTotals[invoiceNum]) {
-            // so if there is a previous invoice, we'll undo that one from the totals
+            // so if there is a previous invoice, we'll consider this an edit and remove the previous
+            outstandingCurrencyEntries[currency] =
+              R.reject(entryPair => entryPair[0] == invoiceNum, outstandingCurrencyEntries[currency] || [])
             outstandingCurrencyTotals[currency] =
               (outstandingCurrencyTotals[currency] || 0) - outstandingInvoiceTotals[invoiceNum]
           }
 
           outstandingInvoiceTotals[invoiceNum] = amount
         }
-        // with or without an invoice number, it's outstanding in this currency
-        // ... but first: remove any previous one
-        outstandingCurrencyEntries[currency] =
-          R.reject(entryPair => entryPair[0] == invoiceNum, outstandingCurrencyEntries[currency] || [])
         outstandingCurrencyEntries[currency] =
           (outstandingCurrencyEntries[currency] || []).concat([[invoiceNum, jwtEntry]])
         outstandingCurrencyTotals[currency] = (outstandingCurrencyTotals[currency] || 0) + amount
@@ -831,8 +831,8 @@ export const countTransactions = (wrappedClaims, userDid: string) => {
       }
 
       paidCurrencyEntries[currency] = (paidCurrencyEntries[currency] || []).concat([[invoiceNum, jwtEntry]])
-      totalCurrencyPaid[currency] = (totalCurrencyPaid[currency] || 0) + amount
 
+      totalCurrencyPaid[currency] = (totalCurrencyPaid[currency] || 0) + amount
       allPaid = allPaid.concat([jwtEntry]);
 
     } else {
