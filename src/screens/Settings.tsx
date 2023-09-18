@@ -657,10 +657,10 @@ export function SettingsScreen({navigation}) {
                     :
                       <View style={{ padding: 10 }}>
                         <Text style>
-                          You have done {limits.doneClaimsThisWeek} claims out of {limits.maxClaimsPerWeek} for this week. Your claims counter resets at: {R.replace('T', ' ', limits.nextWeekBeginDateTime)}
+                          You have done {limits.doneClaimsThisWeek} {limits.doneClaimsThisWeek === 1 ? "claim" : "claims"} out of {limits.maxClaimsPerWeek} for this week. Your claims counter resets at: {R.replace('T', ' ', limits.nextWeekBeginDateTime)}
                         </Text>
                         <Text>
-                          You have done {limits.doneRegistrationsThisMonth} registrations out of {limits.maxRegistrationsPerMonth} for this month. Your registrations counter resets at: {R.replace('T', ' ', limits.nextMonthBeginDateTime)}
+                          You have done {limits.doneRegistrationsThisMonth} {limits.doneRegistrationsThisMonth === 1 ? "registration" : "registrations"} out of {limits.maxRegistrationsPerMonth} for this month. Your registrations counter resets at: {R.replace('T', ' ', limits.nextMonthBeginDateTime)}
                         </Text>
                         <Text>
                           Note that you cannot register anyone the day you get registered, and you can only register one per day during your first month.
