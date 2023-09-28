@@ -461,6 +461,14 @@ function sha1(input: Buffer): Buffer {
   return crypto.createHash('sha1').update(input).digest();
 }
 
+/**
+ * Derive a key from a password using a salt and iteration count, returning a
+ * buffer of the specified length.
+ * @param password
+ * @param salt
+ * @param iterations
+ * @param len
+ */
 function passwordDeriveBytes(
   password: string,
   salt: string,
@@ -626,10 +634,7 @@ export const bvcClaims = (did: string, startTime: string, planId: string) => {
       '@type': 'GiveAction',
       agent: { identifier: did },
       object: { amountOfThisGood: 1, unitCode: 'HUR' },
-      fulfills: {
-        '@type': 'DonateAction',
-        isPartOf: { '@type': 'PlanAction', identifier: planId },
-      },
+      fulfills: { '@type': 'PlanAction', identifier: planId },
       description: 'Participated in Saturday meetup',
     },
   ]
