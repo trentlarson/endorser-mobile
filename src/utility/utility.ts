@@ -364,7 +364,7 @@ export const removeSchemaContext = obj =>
   obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
 
 export const addHandleAsIdIfMissing = (obj, handleId) => {
-  if (!obj.handleId && handleId) {
+  if (!obj.identifier && handleId) {
     const result = R.clone(obj)
     result.identifier = handleId
     return result
