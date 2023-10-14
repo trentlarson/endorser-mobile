@@ -18,8 +18,9 @@ See next plans in the 'mobile' tasks inside its [prject task list](https://raw.g
 |---------------|------------------|
 | nodejs.org    | >=16.18.0<20.0.0 |
 | ruby-lang.org | ^3.2.2           |
-| rubygems.org  | ^3.3.25          |
+| rubygems.org  | ^3.4.19          |
 | yarnpkg.com   | ^3.4.1           |
+| openjdk.org   | ^20              |
 
 ... which can also be done with: `sh <(curl tea.xyz) -E sh`
 

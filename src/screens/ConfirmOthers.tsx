@@ -107,11 +107,12 @@ export function ConfirmOthersScreen({ navigation }) {
       const onlyGoodRecords = R.reject(R.isNil, values)
       if (onlyGoodRecords.length > 0) {
         const fullClaims = onlyGoodRecords.map(record => {
-          const goodClaim = utility.removeSchemaContext(
-            utility.removeVisibleToDids(
-              utility.addHandleAsIdIfMissing(record.claim, record.handleId)
+          const goodClaim =
+            utility.removeSchemaContext(
+              utility.removeVisibleToDids(
+                utility.addHandleAsIdIfMissing(record.claim, record.handleId)
+              )
             )
-          )
           return {
             "@context": "https://schema.org",
             "@type": "AgreeAction",
