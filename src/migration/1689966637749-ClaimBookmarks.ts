@@ -21,7 +21,7 @@ export class ClaimBookmark1689966637749 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        const result = await queryRunner.query('DROP TABLE "bookmark"')
+        const result = await queryRunner.query('DROP TABLE "claimBookmark"')
         console.log('Down Migration of', this.name, 'got', result)
     }
 
