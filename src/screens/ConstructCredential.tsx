@@ -68,6 +68,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
           setAskForOfferInfo(true)
         } else if (utility.isGiveAction(incomingClaim)) {
           setAskForGaveInfo(true)
+        } else if (utility.isPlanAction(incomingClaim)) {
+          setAskForPlanInfo(true)
         }
       }
     }
@@ -813,6 +815,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     const [agentId, setAgentId] = useState<string>(props.userId)
     const [endTime, setEndTime] = useState<string>(null)
+    const [fulfillsPlanId, setFulfillsPlanId] = useState<string>(null)
     const [hasConflictingPlanId, setHasConflictingPlanId] = useState<boolean>(false)
     const [loadingPlanId, setLoadingPlanId] = useState<boolean>(false)
     const [planDescription, setPlanDescription] = useState<string>(null)
@@ -822,6 +825,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [resultDescription, setResultDescription] = useState<string>(null)
     const [resultIdentifier, setResultIdentifier] = useState<string>(null)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
+    const [selectFulfillsFromBookmarks, setSelectFulfillsFromBookmarks] = useState<boolean>(false)
 
     const allContacts = useSelector((state) => state.contacts || [])
 
@@ -853,6 +857,12 @@ export function ConstructCredentialScreen({ navigation, route }) {
         result.agent = agentId ? { identifier: agentId } : undefined
         result.description = planDescription || undefined
         result.endTime = isoEndTime || undefined
+        if (fulfillsPlanId) {
+          result.fulfills = {
+            "@type": "PlanAction",
+            identifier: fulfillsPlanId,
+          }
+        }
         result.identifier = planIdentifier || undefined
         result.image = planImageUrl || undefined
         result.name = planName || undefined
@@ -907,6 +917,14 @@ export function ConstructCredentialScreen({ navigation, route }) {
       setPlanIdentifier(planId)
       retrieveServerPlanByExternalId(planId)
     }
+
+    useEffect(() => {
+      if (utility.isPlanAction(incomingClaim)) {
+        if (incomingClaim.fulfills?.identifier) {
+          setFulfillsPlanId(incomingClaim.fulfills.identifier)
+        }
+      }
+    }, [])
 
     return (
       <Modal
@@ -998,7 +1016,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 </View>
 
                 <View style={{ padding: 5 }}>
-                  <Text>ID of Plan</Text>
+                  <Text>ID of Plan (for external ones)</Text>
                   {
                     loadingPlanId
                     ? <ActivityIndicator color="#00ff00" />
@@ -1017,6 +1035,28 @@ export function ConstructCredentialScreen({ navigation, route }) {
                     style={{ borderWidth: 1 }}
                   />
                 </View>
+
+                <View style={{ padding: 10 }} />
+                <Text style={styles.modalText}>Part Of</Text>
+
+                <View style={{ padding: 5 }}>
+                  <Text>ID of Plan This Fulfills</Text>
+                  <TextInput
+                    value={fulfillsPlanId}
+                    onChangeText={setFulfillsPlanId}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+                {
+                  <TouchableHighlight
+                    style={styles.moreButton}
+                    onPress={() => setSelectFulfillsFromBookmarks(true)}
+                  >
+                    <Text>Pick from Bookmarks</Text>
+                  </TouchableHighlight>
+                }
 
                 <View style={{ padding: 10 }} />
                 <Text style={styles.modalText}>Result</Text>
@@ -1057,6 +1097,16 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 >
                   <Text>Cancel</Text>
                 </TouchableHighlight>
+
+                {
+                  selectFulfillsFromBookmarks
+                    ? <BookmarkSelectModal
+                      cancel={ () => { setSelectFulfillsFromBookmarks(false) } }
+                      proceed={ (handleId) => { setFulfillsPlanId(handleId); setSelectFulfillsFromBookmarks(false) }}
+                    />
+                    : <View/>
+                }
+
               </View>
             </View>
           </View>

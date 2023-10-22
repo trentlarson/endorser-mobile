@@ -246,9 +246,7 @@ export const proceedToEditGive = (navigation, origClaim, fulfillsHandleId, fulfi
     "@context": utility.SCHEMA_ORG_CONTEXT,
     "@type": "GiveAction",
   }
-  if (fulfillsHandleId) {
-    giveClaim.fulfills = { "@type": fulfillsType, identifier: fulfillsHandleId }
-  }
+  giveClaim.fulfills = { "@type": fulfillsType, identifier: fulfillsHandleId }
   navigation.navigate('Create Credential', { incomingClaim: giveClaim })
 }
 
@@ -259,10 +257,19 @@ export const proceedToEditOffer = (navigation, origClaim, handleId) => {
     itemOffered: {
       '@type': 'CreativeWork',
       isPartOf: { '@type': origClaim['@type'], identifier: origClaim.identifier }
-    }
+    },
   }
   if (!origClaim.identifier && handleId) {
     offerClaim.itemOffered.isPartOf.identifier = handleId
+  }
+  navigation.navigate('Create Credential', { incomingClaim: offerClaim })
+}
+
+export const proceedToEditPlan = (navigation, origClaim, handleId) => {
+  const offerClaim = {
+    '@context': utility.SCHEMA_ORG_CONTEXT,
+    '@type': 'PlanAction',
+    fulfills: { '@type': 'PlanAction', identifier: handleId },
   }
   navigation.navigate('Create Credential', { incomingClaim: offerClaim })
 }
@@ -447,11 +454,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                       <Pressable
                         style={{ padding: 10 }}
                         onPress={ () => {
-                          if (!source.handleId) {
-                            Alert.alert("You cannot give to a project with no identifier.")
-                          } else {
-                            proceedToEditGive(navigation, source.claim, source.handleId, "GiveAction")
-                          }
+                          proceedToEditGive(navigation, source.claim, source.handleId, "GiveAction")
                         }}
                       >
                         <Text style={{ color: "blue" }}>Record Contribution To</Text>
@@ -524,11 +527,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                       <Pressable
                         style={{ padding: 10 }}
                         onPress={ () => {
-                          if (!source.handleId) {
-                            Alert.alert("You cannot give to a project with no identifier.")
-                          } else {
-                            proceedToEditGive(navigation, source.claim, source.handleId, "PlanAction")
-                          }
+                          proceedToEditGive(navigation, source.claim, source.handleId, "PlanAction")
                         }}
                       >
                         <Text style={{ color: "blue" }}>Record Contribution To</Text>
@@ -538,14 +537,20 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                       <Pressable
                         style={{ padding: 10 }}
                         onPress={ () => {
-                          if (!source.handleId) {
-                            Alert.alert("You cannot give to a project with no identifier.")
-                          } else {
-                            proceedToEditOffer(navigation, source.claim, source.handleId)
-                          }
+                          proceedToEditOffer(navigation, source.claim, source.handleId)
                         }}
                       >
                         <Text style={{ color: "blue" }}>Offer Help With</Text>
+                      </Pressable>
+
+                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
+                      <Pressable
+                        style={{ padding: 10 }}
+                        onPress={ () => {
+                          proceedToEditPlan(navigation, source.claim, source.handleId, "PlanAction")
+                        }}
+                      >
+                        <Text style={{ color: "blue" }}>Create Plan To Fulfill</Text>
                       </Pressable>
 
                     </View>
@@ -630,11 +635,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                     <Pressable
                       style={{ padding: 10 }}
                       onPress={ () => {
-                        if (!source.handleId) {
-                          Alert.alert("You cannot bookmark a claim with no identifier.")
-                        } else {
-                          setTakeBookmark(true)
-                        }
+                        setTakeBookmark(true)
                       }}
                     >
                       <Text style={{ color: "blue" }}>Bookmark</Text>
