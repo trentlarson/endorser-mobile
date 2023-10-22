@@ -241,16 +241,13 @@ export const YamlFormat = ({ source, afterItemCss }) => {
   )
 }
 
-export const proceedToEditGive = (navigation, origClaim, fulfillsHandleId, fulfillsType, providerHandleId) => {
+export const proceedToEditGive = (navigation, origClaim, fulfillsHandleId, fulfillsType) => {
   const giveClaim = {
     "@context": utility.SCHEMA_ORG_CONTEXT,
     "@type": "GiveAction",
   }
   if (fulfillsHandleId) {
     giveClaim.fulfills = { "@type": fulfillsType, identifier: fulfillsHandleId }
-  }
-  if (providerHandleId) {
-    giveClaim.provider = [{ identifier: providerHandleId }]
   }
   navigation.navigate('Create Credential', { incomingClaim: giveClaim })
 }
@@ -453,11 +450,11 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                           if (!source.handleId) {
                             Alert.alert("You cannot give to a project with no identifier.")
                           } else {
-                            proceedToEditGive(navigation, source.claim, null, null, source.handleId)
+                            proceedToEditGive(navigation, source.claim, source.handleId, "GiveAction")
                           }
                         }}
                       >
-                        <Text style={{ color: "blue" }}>Paid Forward From</Text>
+                        <Text style={{ color: "blue" }}>Record Contribution To</Text>
                       </Pressable>
 
                     </View>
@@ -495,7 +492,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                             const objectGive = R.clone(giveActionForm)
                             objectGive.object = R.clone(source.claim.includesObject)
                             if (source.claim.itemOffered?.isPartOf) {
-                              objectGive.object.isPartOf =
+                              objectGive.fulfills =
                                 R.clone(source.claim.itemOffered.isPartOf)
                             }
                             giveActions = R.concat(giveActions, [objectGive])
@@ -535,20 +532,6 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                         }}
                       >
                         <Text style={{ color: "blue" }}>Record Contribution To</Text>
-                      </Pressable>
-
-                      <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
-                      <Pressable
-                        style={{ padding: 10 }}
-                        onPress={ () => {
-                          if (!source.handleId) {
-                            Alert.alert("You cannot give to a project with no identifier.")
-                          } else {
-                            proceedToEditGive(navigation, source.claim, null, null, source.handleId)
-                          }
-                        }}
-                      >
-                        <Text style={{ color: "blue" }}>Record It Helped...</Text>
                       </Pressable>
 
                       <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />

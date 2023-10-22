@@ -507,7 +507,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                         style={styles.moreButton}
                         onPress={() => setSelectFromContacts(true)}
                       >
-                        <Text>Pick</Text>
+                        <Text>Pick from Contacts</Text>
                       </TouchableHighlight>
                     : <View />
                   }
@@ -699,7 +699,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                         style={styles.moreButton}
                         onPress={() => setSelectFromContacts(true)}
                       >
-                        <Text>Pick</Text>
+                        <Text>Pick from Contacts</Text>
                       </TouchableHighlight>
                     : <View />
                   }
@@ -947,7 +947,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                         style={styles.moreButton}
                         onPress={() => setSelectAgentFromContacts(true)}
                       >
-                        <Text>Pick</Text>
+                        <Text>Pick from Contacts</Text>
                       </TouchableHighlight>
                     : <View />
                   }
@@ -1086,7 +1086,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [recipientId, setRecipientId] = useState<string>(props.userId)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
     const [selectFulfillsFromBookmarks, setSelectFulfillsFromBookmarks] = useState<boolean>(false)
-    const [selectProviderFromBookmarks, setSelectProviderFromBookmarks] = useState<boolean>(false)
+    const [selectProviderFromContacts, setSelectProviderFromContacts] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
     const [showInfoModal, setShowInfoModal] = useState<boolean>(false)
     const [unit, setUnit] = useState<string>(INITIAL_SELECTED_BUTTON && INITIAL_SELECTED_BUTTON.value)
@@ -1108,11 +1108,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
       setUnit(selectedButton.value)
     }
 
-    function addProviderId(handleId) {
+    function addProviderId(did) {
       if (providerIds.length > 0) {
-        setProviderIds(providerIds + ',' + handleId)
+        setProviderIds(providerIds + ',' + did)
       } else {
-        setProviderIds(handleId)
+        setProviderIds(did)
       }
     }
 
@@ -1213,7 +1213,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                         style={styles.moreButton}
                         onPress={() => setSelectAgentFromContacts(true)}
                       >
-                        <Text>Pick</Text>
+                        <Text>Pick from Contacts</Text>
                       </TouchableHighlight>
                     : <View />
                   }
@@ -1235,7 +1235,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                         style={styles.moreButton}
                         onPress={() => setSelectRecipientFromContacts(true)}
                       >
-                        <Text>Pick</Text>
+                        <Text>Pick from Contacts</Text>
                       </TouchableHighlight>
                       : <View />
                   }
@@ -1387,9 +1387,9 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   {
                     <TouchableHighlight
                       style={styles.moreButton}
-                      onPress={() => setSelectProviderFromBookmarks(true)}
+                      onPress={() => setSelectProviderFromContacts(true)}
                     >
-                      <Text>Pick from Bookmarks</Text>
+                      <Text>Pick from Contacts</Text>
                     </TouchableHighlight>
                   }
                 </View>
@@ -1446,10 +1446,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   : <View/>
               }
               {
-                selectProviderFromBookmarks
-                  ? <BookmarkSelectModal
-                    cancel={ () => { setSelectProviderFromBookmarks(false) } }
-                    proceed={ (handleId) => { addProviderId(handleId); setSelectProviderFromBookmarks(false) }}
+                selectProviderFromContacts
+                  ? <ContactSelectModal
+                    cancel={ () => { setSelectProviderFromContacts(false) } }
+                    proceed={ (did) => { addProviderId(did); setSelectProviderFromContacts(false) }}
+                    includeMyDid={ identifiers[0].did }
                   />
                   : <View/>
               }
@@ -1653,7 +1654,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                         style={styles.moreButton}
                         onPress={() => setSelectAgentFromContacts(true)}
                       >
-                        <Text>Pick</Text>
+                        <Text>Pick from Contacts</Text>
                       </TouchableHighlight>
                     : <View />
                   }
@@ -1675,7 +1676,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                         style={styles.moreButton}
                         onPress={() => setSelectRecipientFromContacts(true)}
                       >
-                        <Text>Pick</Text>
+                        <Text>Pick from Contacts</Text>
                       </TouchableHighlight>
                     : <View />
                   }
@@ -2134,7 +2135,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                         style={styles.moreButton}
                         onPress={() => setSelectFromContacts(true)}
                       >
-                        <Text>Pick</Text>
+                        <Text>Pick from Contacts</Text>
                       </TouchableHighlight>
                     : <View />
                   }
