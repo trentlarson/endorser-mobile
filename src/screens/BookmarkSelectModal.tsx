@@ -5,6 +5,7 @@ import { FlatList, Modal, Text, TouchableHighlight, View } from 'react-native'
 import { styles } from './style'
 import * as utility from '../utility/utility'
 import { dbConnection } from "../veramo/setup"
+import { isGlobalUri, stripEndorserPrefix } from "../utility/utility";
 
 export function BookmarkSelectModal(props) {
 
@@ -31,7 +32,9 @@ export function BookmarkSelectModal(props) {
           renderItem={data =>
             <TouchableHighlight
               style={styles.saveButton}
-              onPress={ () => props.proceed(data.item.claimId) }
+              onPress={ () => {
+                props.proceed(stripEndorserPrefix(data.item.claimId));
+              }}
             >
               <Text>{data.item.name}</Text>
             </TouchableHighlight>

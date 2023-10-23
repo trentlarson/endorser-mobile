@@ -11,7 +11,6 @@ import { IIdentifier } from '@veramo/core'
 import { Contact } from '../entity/contact'
 import { DEFAULT_ENDORSER_VIEW_SERVER } from "../veramo/appSlice";
 import { ClaimBookmark } from "../entity/claimBookmark";
-import { dbConnection } from "../veramo/setup";
 
 export class EndorserRecord {
   id: string
@@ -43,6 +42,7 @@ export const ENDORSER_JWT_URL_LOCATION = '/contact?jwt='
 export const REPLACE_USER_DID_STRING = 'PUT_USER_DID'
 export const SCHEMA_ORG_CONTEXT = 'https://schema.org'
 export const UPORT_JWT_PREFIX = 'https://id.uport.me/req/'
+export const ENDORSER_CH_HANDLE_PREFIX = 'https://endorser.ch/entity/'
 
 export const ANDROID_FEED_ACTION = 'default' // only 'default' will launch the app if background / terminated on android
 
@@ -77,6 +77,22 @@ const firstAndLast3 = (text) => {
 
 export const isHiddenDid = (did) => {
   return did === HIDDEN_DID
+}
+
+/**
+ * from https://tools.ietf.org/html/rfc3986#section-3
+ * also useful is https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Definition
+ **/
+export const isGlobalUri = (uri) => {
+  return uri && uri.match(new RegExp(/^[A-Za-z][A-Za-z0-9+.-]+:/));
+}
+
+export const stripEndorserPrefix = (claimId) => {
+  if (claimId && claimId.startsWith(ENDORSER_CH_HANDLE_PREFIX)) {
+    return claimId.substring(ENDORSER_CH_HANDLE_PREFIX.length)
+  } else {
+    return claimId
+  }
 }
 
 export const isAccept = (claim) => {
@@ -425,7 +441,7 @@ export const loadBookmarks = async (dbConnection) => {
 
 export const saveBookmark = async (dbConnection, record: EndorserRecord, bookmarkName) => {
   const bookmark = new ClaimBookmark()
-  bookmark.claimId = record.handleId
+  bookmark.claimId = record.id
   bookmark.cachedClaimStr = JSON.stringify(record.claim)
   bookmark.context = record.claimContext
   bookmark.issuedAt = record.issuedAt

@@ -10,6 +10,7 @@ import * as utility from './utility'
 import { styles } from '../screens/style'
 import { appStore } from "../veramo/appSlice";
 import { dbConnection } from '../veramo/setup'
+import { isGlobalUri, stripEndorserPrefix } from "./utility";
 
 function setClaimToAttendAndGive(id: IIdentifier | undefined, startTime: string, navigation) {
   const claimObjs = utility.bvcClaims(
@@ -241,37 +242,50 @@ export const YamlFormat = ({ source, afterItemCss }) => {
   )
 }
 
-export const proceedToEditGive = (navigation, origClaim, fulfillsHandleId, fulfillsType) => {
+const attachClaimIdentifier = (claimId, claim, clause) => {
+  // up to v 6.8.132, bookmarks used full handle IDs, so strip that off if possible
+  // some early bookmarks were full handle IDs, so strip off the prefix
+  let sendClaimId = stripEndorserPrefix(claimId || claim.identifier)
+  if (isGlobalUri(sendClaimId)) {
+    clause.identifier = sendClaimId
+  } else {
+    clause.lastClaimId = sendClaimId
+  }
+
+}
+
+export const proceedToEditGive = (navigation, origClaim, fulfillsClaimId, fulfillsType) => {
   const giveClaim = {
     "@context": utility.SCHEMA_ORG_CONTEXT,
     "@type": "GiveAction",
   }
-  giveClaim.fulfills = { "@type": fulfillsType, identifier: fulfillsHandleId }
+  giveClaim.fulfills = { "@type": fulfillsType, lastClaimId: fulfillsClaimId }
+  attachClaimIdentifier(fulfillsClaimId, origClaim, giveClaim.fulfills)
   navigation.navigate('Create Credential', { incomingClaim: giveClaim })
 }
 
-export const proceedToEditOffer = (navigation, origClaim, handleId) => {
+export const proceedToEditOffer = (navigation, origClaim, claimId) => {
   const offerClaim = {
     '@context': utility.SCHEMA_ORG_CONTEXT,
     '@type': 'Offer',
     itemOffered: {
       '@type': 'CreativeWork',
-      isPartOf: { '@type': origClaim['@type'], identifier: origClaim.identifier }
+      isPartOf: { '@type': origClaim['@type'] }
     },
   }
-  if (!origClaim.identifier && handleId) {
-    offerClaim.itemOffered.isPartOf.identifier = handleId
-  }
+  attachClaimIdentifier(claimId, origClaim, offerClaim.itemOffered.isPartOf)
   navigation.navigate('Create Credential', { incomingClaim: offerClaim })
 }
 
-export const proceedToEditPlan = (navigation, origClaim, handleId) => {
-  const offerClaim = {
+export const proceedToEditPlan = (navigation, origClaim, claimId) => {
+  const planClaim = {
     '@context': utility.SCHEMA_ORG_CONTEXT,
     '@type': 'PlanAction',
-    fulfills: { '@type': 'PlanAction', identifier: handleId },
+    fulfills: { '@type': 'PlanAction' },
   }
-  navigation.navigate('Create Credential', { incomingClaim: offerClaim })
+  attachClaimIdentifier(claimId, origClaim, planClaim.fulfills)
+  console.log('sending', planClaim)
+  navigation.navigate('Create Credential', { incomingClaim: planClaim })
 }
 
 export const BookmarkModal = ({ takeBookmark, setTakeBookmark, record, deleteCallback, saveCallback }) => {
@@ -287,7 +301,7 @@ export const BookmarkModal = ({ takeBookmark, setTakeBookmark, record, deleteCal
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Text>Set bookmark for { record.handleId }</Text>
+          <Text>Set bookmark for { record.name }</Text>
           <View>
             <Text>Name</Text>
             <TextInput
@@ -310,7 +324,7 @@ export const BookmarkModal = ({ takeBookmark, setTakeBookmark, record, deleteCal
           <TouchableHighlight
             style={styles.cancelButton}
             onPress={() => {
-              utility.deleteBookmark(dbConnection, record.handleId)
+              utility.deleteBookmark(dbConnection, record.claimId)
                 .then(() => { deleteCallback() })
               setTakeBookmark(null)
             }}
@@ -454,7 +468,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                       <Pressable
                         style={{ padding: 10 }}
                         onPress={ () => {
-                          proceedToEditGive(navigation, source.claim, source.handleId, "GiveAction")
+                          proceedToEditGive(navigation, source.claim, source.id, "GiveAction")
                         }}
                       >
                         <Text style={{ color: "blue" }}>Record Contribution To</Text>
@@ -486,7 +500,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                           if (source.handleId || source.claim.identifier) {
                             giveActionForm.fulfills = {
                               "@type": source.claim['@type'],
-                              identifier: source.handleId || source.claim.identifier,
+                              lastClaimId: source.claim.identifier || source.handleId,
                             }
                           }
                           // There are potentially both an object & an item given.
@@ -527,7 +541,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                       <Pressable
                         style={{ padding: 10 }}
                         onPress={ () => {
-                          proceedToEditGive(navigation, source.claim, source.handleId, "PlanAction")
+                          proceedToEditGive(navigation, source.claim, source.id, "PlanAction")
                         }}
                       >
                         <Text style={{ color: "blue" }}>Record Contribution To</Text>
@@ -537,7 +551,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                       <Pressable
                         style={{ padding: 10 }}
                         onPress={ () => {
-                          proceedToEditOffer(navigation, source.claim, source.handleId)
+                          proceedToEditOffer(navigation, source.claim, source.id)
                         }}
                       >
                         <Text style={{ color: "blue" }}>Offer Help With</Text>
@@ -547,7 +561,7 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                       <Pressable
                         style={{ padding: 10 }}
                         onPress={ () => {
-                          proceedToEditPlan(navigation, source.claim, source.handleId, "PlanAction")
+                          proceedToEditPlan(navigation, source.claim, source.id, "PlanAction")
                         }}
                       >
                         <Text style={{ color: "blue" }}>Create Plan To Fulfill</Text>

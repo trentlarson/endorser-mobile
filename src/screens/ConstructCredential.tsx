@@ -17,6 +17,7 @@ import { appSlice, appStore } from '../veramo/appSlice'
 import { HANDY_APP } from "../veramo/setup";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { BookmarkSelectModal } from "./BookmarkSelectModal";
+import { isGlobalUri } from "../utility/utility";
 
 const debug = Debug('endorser-mobile:share-credential')
 
@@ -862,6 +863,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
             "@type": "PlanAction",
             identifier: fulfillsPlanId,
           }
+          if (isGlobalUri(fulfillsPlanId)) {
+            result.fulfills.identifier = fulfillsPlanId
+          } else {
+            result.fulfills.lastClaimId = fulfillsPlanId
+          }
         }
         result.identifier = planIdentifier || undefined
         result.image = planImageUrl || undefined
@@ -920,9 +926,10 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     useEffect(() => {
       if (utility.isPlanAction(incomingClaim)) {
-        if (incomingClaim.fulfills?.identifier) {
-          setFulfillsPlanId(incomingClaim.fulfills.identifier)
-        }
+        setFulfillsPlanId(
+          incomingClaim.fulfills?.lastClaimId
+          || incomingClaim.fulfills?.identifier
+        )
       }
     }, [])
 
@@ -1102,7 +1109,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   selectFulfillsFromBookmarks
                     ? <BookmarkSelectModal
                       cancel={ () => { setSelectFulfillsFromBookmarks(false) } }
-                      proceed={ (handleId) => { setFulfillsPlanId(handleId); setSelectFulfillsFromBookmarks(false) }}
+                      proceed={ (claimId) => { setFulfillsPlanId(claimId); setSelectFulfillsFromBookmarks(false) }}
                     />
                     : <View/>
                 }
@@ -1185,7 +1192,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
         if (isFulfills) {
           result.fulfills = {}
           if (fulfillsId) {
-            result.fulfills.identifier = fulfillsId
+            if (isGlobalUri(fulfillsId)) {
+              result.fulfills.identifier = fulfillsId
+            } else {
+              result.fulfills.lastClaimId = fulfillsId
+            }
           }
           if (fulfillsType) {
             result.fulfills["@type"] = fulfillsType
@@ -1221,7 +1232,10 @@ export function ConstructCredentialScreen({ navigation, route }) {
       if (utility.isGiveAction(incomingClaim)) {
         if (incomingClaim.fulfills) {
           setIsFulfills(true)
-          setFulfillsId(incomingClaim.fulfills.identifier)
+          setFulfillsId(
+            incomingClaim.fulfills.identifier
+            || incomingClaim.fulfills.lastClaimId
+          )
           setFulfillsType(incomingClaim.fulfills["@type"])
           setRecipientId('')
         }
@@ -1537,6 +1551,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [recipientId, setRecipientId] = useState<string>(null)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
     const [selectItemType, setSelectItemType] = useState<boolean>(false)
+    const [selectParentIdFromBookmarks, setSelectParentIdFromBookmarks] = useState<boolean>(false)
     const [selectRecipientFromContacts, setSelectRecipientFromContacts] = useState<boolean>(false)
     const [termsOfService, setTermsOfService] = useState<string>('')
     const [unit, setUnit] = useState<string>(INITIAL_SELECTED_BUTTON && INITIAL_SELECTED_BUTTON.value)
@@ -1599,10 +1614,16 @@ export function ConstructCredentialScreen({ navigation, route }) {
         if (itemDescription || parentIdentifier) {
           result.itemOffered = { '@type': itemType }
           result.itemOffered.description = itemDescription || undefined
-          if (parentIdentifier) {
-            result.itemOffered.isPartOf = {
-              '@type': parentType,
-              identifier: parentIdentifier
+          if (parentIdentifier
+              || parentType) {
+            result.itemOffered.isPartOf = {}
+            if (parentType) {
+              result.itemOfferes.idPartOf['@type'] = parentType
+            }
+            if (isGlobalUri(parentIdentifier)) {
+              result.itemOffered.isPartOf.identifier = parentIdentifier
+            } else {
+              result.itemOffered.isPartOf.lastClaimId = parentIdentifier
             }
           }
         }
@@ -1663,7 +1684,10 @@ export function ConstructCredentialScreen({ navigation, route }) {
               setItemType('CreativeWork')
             }
             setParentType(incomingOffer.itemOffered.isPartOf['@type'])
-            setParentIdentifier(incomingOffer.itemOffered.isPartOf.identifier)
+            setParentIdentifier(
+              incomingOffer.itemOffered.isPartOf.identifier
+              || incomingOffer.itemOffered.isPartOf.lastClaimId
+            )
             setParentInfoReadOnly(true)
           }
         }
@@ -1747,6 +1771,14 @@ export function ConstructCredentialScreen({ navigation, route }) {
                     style={{ borderWidth: 1 }}
                   />
                 </View>
+                {
+                  <TouchableHighlight
+                    style={styles.moreButton}
+                    onPress={() => setSelectParentIdFromBookmarks(true)}
+                  >
+                    <Text>Pick from Bookmarks</Text>
+                  </TouchableHighlight>
+                }
 
                 <CheckBox
                   title='Describe your offering'
@@ -1924,6 +1956,14 @@ export function ConstructCredentialScreen({ navigation, route }) {
                     cancel={ () => { setSelectAgentFromContacts(false) } }
                     proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
                     includeMyDid={ identifiers[0].did }
+                  />
+                  : <View/>
+              }
+              {
+                selectParentIdFromBookmarks
+                  ? <BookmarkSelectModal
+                    cancel={ () => { setSelectParentIdFromBookmarks(false) } }
+                    proceed={ (claimId) => { setParentIdentifier(claimId); setSelectParentIdFromBookmarks(false) }}
                   />
                   : <View/>
               }
