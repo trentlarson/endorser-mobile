@@ -1733,10 +1733,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
         result.description = planDescription || undefined
         result.endTime = isoEndTime || undefined
         if (fulfillsPlanId) {
-          result.fulfills = {
-            "@type": "PlanAction",
-            identifier: fulfillsPlanId,
-          }
+          result.fulfills = { "@type": "PlanAction" }
           if (isGlobalUri(fulfillsPlanId)) {
             result.fulfills.identifier = fulfillsPlanId
           } else {
