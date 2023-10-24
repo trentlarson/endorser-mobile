@@ -809,321 +809,6 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
   /**
     props has:
-    - proceed function that takes the claim
-    - cancel function
-   **/
-  function PlanModal(props) {
-
-    const [agentId, setAgentId] = useState<string>(props.userId)
-    const [endTime, setEndTime] = useState<string>(null)
-    const [fulfillsPlanId, setFulfillsPlanId] = useState<string>(null)
-    const [hasConflictingPlanId, setHasConflictingPlanId] = useState<boolean>(false)
-    const [loadingPlanId, setLoadingPlanId] = useState<boolean>(false)
-    const [planDescription, setPlanDescription] = useState<string>(null)
-    const [planIdentifier, setPlanIdentifier] = useState<string>(null)
-    const [planImageUrl, setPlanImageUrl] = useState<string>(null)
-    const [planName, setPlanName] = useState<string>(null)
-    const [resultDescription, setResultDescription] = useState<string>(null)
-    const [resultIdentifier, setResultIdentifier] = useState<string>(null)
-    const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
-    const [selectFulfillsFromBookmarks, setSelectFulfillsFromBookmarks] = useState<boolean>(false)
-
-    const allContacts = useSelector((state) => state.contacts || [])
-
-    function possiblyFinish(proceedToFinish) {
-
-      // note that the last error is what is shown
-      let failureMessage
-
-      let isoEndTime
-      try {
-        isoEndTime = endTime && new Date(endTime).toISOString()
-      } catch (e) {
-        failureMessage = 'This is not an ISO date: ' + endTime
-      }
-
-      if (!planName && !resultDescription) {
-        failureMessage = 'You must give either a name or a result.'
-      }
-
-      if (failureMessage) {
-        Alert.alert(failureMessage)
-
-      } else {
-        let result = {
-          "@context": "https://schema.org",
-          "@type": "PlanAction",
-        }
-
-        result.agent = agentId ? { identifier: agentId } : undefined
-        result.description = planDescription || undefined
-        result.endTime = isoEndTime || undefined
-        if (fulfillsPlanId) {
-          result.fulfills = {
-            "@type": "PlanAction",
-            identifier: fulfillsPlanId,
-          }
-          if (isGlobalUri(fulfillsPlanId)) {
-            result.fulfills.identifier = fulfillsPlanId
-          } else {
-            result.fulfills.lastClaimId = fulfillsPlanId
-          }
-        }
-        result.identifier = planIdentifier || undefined
-        result.image = planImageUrl || undefined
-        result.name = planName || undefined
-
-        if (resultDescription || resultIdentifier) {
-          result.result = {
-            "@type": "CreativeWork",
-            identifier: resultIdentifier || undefined,
-            description: resultDescription || undefined
-          }
-        }
-
-        proceedToFinish(result)
-      }
-    }
-
-    const retrieveServerPlanByExternalId = (planId) => {
-      setLoadingPlanId(true)
-      return new Promise(async (resolve, reject) => {
-        const endorserApiServer = appStore.getState().settings.apiServer
-        const token = await utility.accessToken(identifiers[0])
-        fetch(endorserApiServer + '/api/ext/plan/' + planId, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token,
-          },
-        })
-        .then(resp => {
-          if (resp.status === 200) {
-            setHasConflictingPlanId(true)
-          } else {
-            setHasConflictingPlanId(false)
-          }
-          return resp.text()
-        })
-        .then(text => {
-          //console.log('Got response body for project lookup: ', text)
-        })
-        .catch(err => {
-          appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Got error checking for project: " + err}))
-          Alert.alert('Got an error checking for that plan ID. See logs for more info.')
-        })
-        .finally(() => {
-          setLoadingPlanId(false)
-          resolve()
-        })
-      })
-    }
-
-    const updateAndCheckPlanIdentifier = (planId) => {
-      setPlanIdentifier(planId)
-      retrieveServerPlanByExternalId(planId)
-    }
-
-    useEffect(() => {
-      if (utility.isPlanAction(incomingClaim)) {
-        setFulfillsPlanId(
-          incomingClaim.fulfills?.lastClaimId
-          || incomingClaim.fulfills?.identifier
-        )
-      }
-    }, [])
-
-    return (
-      <Modal
-        animationType="slide"
-        transparent={true}
-        onRequestClose={props.cancel}
-      >
-        <ScrollView>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-
-              {
-                selectAgentFromContacts
-                ? <ContactSelectModal
-                    cancel={ () => { setSelectAgentFromContacts(false) } }
-                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
-                    includeMyDid={ identifiers[0].did }
-                  />
-                : <View/>
-              }
-
-              <View>
-                <Text style={styles.modalText}>Plan</Text>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Planner</Text>
-                  <TextInput
-                    value={agentId}
-                    onChangeText={setAgentId}
-                    editable
-                    style={{ borderWidth: 1 }}
-                    autoCapitalize={'none'}
-                    autoCorrect={false}
-                  />
-                  {
-                    allContacts.length > 0
-                    ? <TouchableHighlight
-                        style={styles.moreButton}
-                        onPress={() => setSelectAgentFromContacts(true)}
-                      >
-                        <Text>Pick from Contacts</Text>
-                      </TouchableHighlight>
-                    : <View />
-                  }
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Plan Name</Text>
-                  <TextInput
-                    value={planName}
-                    onChangeText={setPlanName}
-                    editable
-                    multiline={false}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Plan Description</Text>
-                  <TextInput
-                    value={planDescription}
-                    onChangeText={setPlanDescription}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Image (URL)</Text>
-                  <TextInput
-                    value={planImageUrl}
-                    onChangeText={setPlanImageUrl}
-                    editable
-                    multiline={false}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Target Date</Text>
-                  <TextInput
-                    value={endTime}
-                    onChangeText={setEndTime}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>ID of Plan (for external ones)</Text>
-                  {
-                    loadingPlanId
-                    ? <ActivityIndicator color="#00ff00" />
-                    : <View />
-                  }
-                  {
-                    hasConflictingPlanId
-                    ? <Text style={{ color: 'red' }}>This project ID is taken.</Text>
-                    : <View />
-                  }
-                  <TextInput
-                    value={planIdentifier}
-                    onChangeText={ newVal => updateAndCheckPlanIdentifier(newVal) }
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 10 }} />
-                <Text style={styles.modalText}>Part Of</Text>
-
-                <View style={{ padding: 5 }}>
-                  <Text>ID of Plan This Fulfills</Text>
-                  <TextInput
-                    value={fulfillsPlanId}
-                    onChangeText={setFulfillsPlanId}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-                {
-                  <TouchableHighlight
-                    style={styles.moreButton}
-                    onPress={() => setSelectFulfillsFromBookmarks(true)}
-                  >
-                    <Text>Pick from Bookmarks</Text>
-                  </TouchableHighlight>
-                }
-
-                <View style={{ padding: 10 }} />
-                <Text style={styles.modalText}>Result</Text>
-
-                <View style={{ padding: 5 }}>
-                  <Text>Description of Result</Text>
-                  <TextInput
-                    value={resultDescription}
-                    onChangeText={setResultDescription}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 5 }}>
-                  <Text>ID of Result</Text>
-                  <TextInput
-                    value={resultIdentifier}
-                    onChangeText={setResultIdentifier}
-                    editable
-                    multiline={true}
-                    style={{ borderWidth: 1 }}
-                  />
-                </View>
-
-                <View style={{ padding: 10 }} />
-                <TouchableHighlight
-                  style={styles.saveButton}
-                  onPress={() => possiblyFinish(props.proceed)}
-                >
-                  <Text>Finish...</Text>
-                </TouchableHighlight>
-                <View style={{ padding: 5 }} />
-                <TouchableHighlight
-                  style={styles.cancelButton}
-                  onPress={props.cancel}
-                >
-                  <Text>Cancel</Text>
-                </TouchableHighlight>
-
-                {
-                  selectFulfillsFromBookmarks
-                    ? <BookmarkSelectModal
-                      cancel={ () => { setSelectFulfillsFromBookmarks(false) } }
-                      proceed={ (claimId) => { setFulfillsPlanId(claimId); setSelectFulfillsFromBookmarks(false) }}
-                    />
-                    : <View/>
-                }
-
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-      </Modal>
-    )
-  }
-
-  /**
-    props has:
 
     - proceed function that takes the claim
     - cancel function
@@ -1618,7 +1303,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
               || parentType) {
             result.itemOffered.isPartOf = {}
             if (parentType) {
-              result.itemOfferes.idPartOf['@type'] = parentType
+              result.itemOffered.idPartOf['@type'] = parentType
             }
             if (isGlobalUri(parentIdentifier)) {
               result.itemOffered.isPartOf.identifier = parentIdentifier
@@ -1989,6 +1674,321 @@ export function ConstructCredentialScreen({ navigation, route }) {
                   : <View/>
               }
 
+            </View>
+          </View>
+        </ScrollView>
+      </Modal>
+    )
+  }
+
+  /**
+   props has:
+   - proceed function that takes the claim
+   - cancel function
+   **/
+  function PlanModal(props) {
+
+    const [agentId, setAgentId] = useState<string>(props.userId)
+    const [endTime, setEndTime] = useState<string>(null)
+    const [fulfillsPlanId, setFulfillsPlanId] = useState<string>(null)
+    const [hasConflictingPlanId, setHasConflictingPlanId] = useState<boolean>(false)
+    const [loadingPlanId, setLoadingPlanId] = useState<boolean>(false)
+    const [planDescription, setPlanDescription] = useState<string>(null)
+    const [planIdentifier, setPlanIdentifier] = useState<string>(null)
+    const [planImageUrl, setPlanImageUrl] = useState<string>(null)
+    const [planName, setPlanName] = useState<string>(null)
+    const [resultDescription, setResultDescription] = useState<string>(null)
+    const [resultIdentifier, setResultIdentifier] = useState<string>(null)
+    const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
+    const [selectFulfillsFromBookmarks, setSelectFulfillsFromBookmarks] = useState<boolean>(false)
+
+    const allContacts = useSelector((state) => state.contacts || [])
+
+    function possiblyFinish(proceedToFinish) {
+
+      // note that the last error is what is shown
+      let failureMessage
+
+      let isoEndTime
+      try {
+        isoEndTime = endTime && new Date(endTime).toISOString()
+      } catch (e) {
+        failureMessage = 'This is not an ISO date: ' + endTime
+      }
+
+      if (!planName && !resultDescription) {
+        failureMessage = 'You must give either a name or a result.'
+      }
+
+      if (failureMessage) {
+        Alert.alert(failureMessage)
+
+      } else {
+        let result = {
+          "@context": "https://schema.org",
+          "@type": "PlanAction",
+        }
+
+        result.agent = agentId ? { identifier: agentId } : undefined
+        result.description = planDescription || undefined
+        result.endTime = isoEndTime || undefined
+        if (fulfillsPlanId) {
+          result.fulfills = {
+            "@type": "PlanAction",
+            identifier: fulfillsPlanId,
+          }
+          if (isGlobalUri(fulfillsPlanId)) {
+            result.fulfills.identifier = fulfillsPlanId
+          } else {
+            result.fulfills.lastClaimId = fulfillsPlanId
+          }
+        }
+        result.identifier = planIdentifier || undefined
+        result.image = planImageUrl || undefined
+        result.name = planName || undefined
+
+        if (resultDescription || resultIdentifier) {
+          result.result = {
+            "@type": "CreativeWork",
+            identifier: resultIdentifier || undefined,
+            description: resultDescription || undefined
+          }
+        }
+
+        proceedToFinish(result)
+      }
+    }
+
+    const retrieveServerPlanByExternalId = (planId) => {
+      setLoadingPlanId(true)
+      return new Promise(async (resolve, reject) => {
+        const endorserApiServer = appStore.getState().settings.apiServer
+        const token = await utility.accessToken(identifiers[0])
+        fetch(endorserApiServer + '/api/ext/plan/' + planId, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+          },
+        })
+          .then(resp => {
+            if (resp.status === 200) {
+              setHasConflictingPlanId(true)
+            } else {
+              setHasConflictingPlanId(false)
+            }
+            return resp.text()
+          })
+          .then(text => {
+            //console.log('Got response body for project lookup: ', text)
+          })
+          .catch(err => {
+            appStore.dispatch(appSlice.actions.addLog({log: false, msg: "Got error checking for project: " + err}))
+            Alert.alert('Got an error checking for that plan ID. See logs for more info.')
+          })
+          .finally(() => {
+            setLoadingPlanId(false)
+            resolve()
+          })
+      })
+    }
+
+    const updateAndCheckPlanIdentifier = (planId) => {
+      setPlanIdentifier(planId)
+      retrieveServerPlanByExternalId(planId)
+    }
+
+    useEffect(() => {
+      if (utility.isPlanAction(incomingClaim)) {
+        setFulfillsPlanId(
+          incomingClaim.fulfills?.lastClaimId
+          || incomingClaim.fulfills?.identifier
+        )
+      }
+    }, [])
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        onRequestClose={props.cancel}
+      >
+        <ScrollView>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+
+              {
+                selectAgentFromContacts
+                  ? <ContactSelectModal
+                    cancel={ () => { setSelectAgentFromContacts(false) } }
+                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                    includeMyDid={ identifiers[0].did }
+                  />
+                  : <View/>
+              }
+
+              <View>
+                <Text style={styles.modalText}>Plan</Text>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Planner</Text>
+                  <TextInput
+                    value={agentId}
+                    onChangeText={setAgentId}
+                    editable
+                    style={{ borderWidth: 1 }}
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
+                  />
+                  {
+                    allContacts.length > 0
+                      ? <TouchableHighlight
+                        style={styles.moreButton}
+                        onPress={() => setSelectAgentFromContacts(true)}
+                      >
+                        <Text>Pick from Contacts</Text>
+                      </TouchableHighlight>
+                      : <View />
+                  }
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Plan Name</Text>
+                  <TextInput
+                    value={planName}
+                    onChangeText={setPlanName}
+                    editable
+                    multiline={false}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Plan Description</Text>
+                  <TextInput
+                    value={planDescription}
+                    onChangeText={setPlanDescription}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Image (URL)</Text>
+                  <TextInput
+                    value={planImageUrl}
+                    onChangeText={setPlanImageUrl}
+                    editable
+                    multiline={false}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Target Date</Text>
+                  <TextInput
+                    value={endTime}
+                    onChangeText={setEndTime}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>ID of Plan (for external ones)</Text>
+                  {
+                    loadingPlanId
+                      ? <ActivityIndicator color="#00ff00" />
+                      : <View />
+                  }
+                  {
+                    hasConflictingPlanId
+                      ? <Text style={{ color: 'red' }}>This project ID is taken.</Text>
+                      : <View />
+                  }
+                  <TextInput
+                    value={planIdentifier}
+                    onChangeText={ newVal => updateAndCheckPlanIdentifier(newVal) }
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <Text style={styles.modalText}>Part Of</Text>
+
+                <View style={{ padding: 5 }}>
+                  <Text>ID of Plan This Fulfills</Text>
+                  <TextInput
+                    value={fulfillsPlanId}
+                    onChangeText={setFulfillsPlanId}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+                {
+                  <TouchableHighlight
+                    style={styles.moreButton}
+                    onPress={() => setSelectFulfillsFromBookmarks(true)}
+                  >
+                    <Text>Pick from Bookmarks</Text>
+                  </TouchableHighlight>
+                }
+
+                <View style={{ padding: 10 }} />
+                <Text style={styles.modalText}>Result</Text>
+
+                <View style={{ padding: 5 }}>
+                  <Text>Description of Result</Text>
+                  <TextInput
+                    value={resultDescription}
+                    onChangeText={setResultDescription}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 5 }}>
+                  <Text>ID of Result</Text>
+                  <TextInput
+                    value={resultIdentifier}
+                    onChangeText={setResultIdentifier}
+                    editable
+                    multiline={true}
+                    style={{ borderWidth: 1 }}
+                  />
+                </View>
+
+                <View style={{ padding: 10 }} />
+                <TouchableHighlight
+                  style={styles.saveButton}
+                  onPress={() => possiblyFinish(props.proceed)}
+                >
+                  <Text>Finish...</Text>
+                </TouchableHighlight>
+                <View style={{ padding: 5 }} />
+                <TouchableHighlight
+                  style={styles.cancelButton}
+                  onPress={props.cancel}
+                >
+                  <Text>Cancel</Text>
+                </TouchableHighlight>
+
+                {
+                  selectFulfillsFromBookmarks
+                    ? <BookmarkSelectModal
+                      cancel={ () => { setSelectFulfillsFromBookmarks(false) } }
+                      proceed={ (claimId) => { setFulfillsPlanId(claimId); setSelectFulfillsFromBookmarks(false) }}
+                    />
+                    : <View/>
+                }
+
+              </View>
             </View>
           </View>
         </ScrollView>
