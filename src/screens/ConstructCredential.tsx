@@ -1303,7 +1303,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
               || parentType) {
             result.itemOffered.isPartOf = {}
             if (parentType) {
-              result.itemOffered.idPartOf['@type'] = parentType
+              result.itemOffered.isPartOf['@type'] = parentType
             }
             if (isGlobalUri(parentIdentifier)) {
               result.itemOffered.isPartOf.identifier = parentIdentifier
