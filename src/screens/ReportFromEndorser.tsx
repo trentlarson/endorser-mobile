@@ -251,6 +251,18 @@ export function ReportScreen({ navigation }) {
                         editable
                         style={{ borderWidth: 1 }}
                       />
+
+                      {
+                        searchTerm && searchTerm.length === 26
+                          ?
+                          <Button
+                            title="Find by ID"
+                            onPress={() => searchEndorser({ claimId: searchTerm })}
+                          />
+                          :
+                          <View />
+                      }
+
                       <Text style={{ marginTop: 10 }}>
                         Examples:&nbsp;
                         <Text style={{ color: 'blue' }} onPress={() => {
@@ -314,16 +326,6 @@ export function ReportScreen({ navigation }) {
                         onPress={() => setSearchResults(null)}
                       />
                     </View>
-                }
-                {
-                  searchTerm && searchTerm.length === 26
-                  ?
-                    <Button
-                      title="Find by ID"
-                      onPress={() => searchEndorser({ claimId: searchTerm })}
-                    />
-                  :
-                    <View />
                 }
                 <Text style={{ color: 'red' }}>{searchError}</Text>
 
