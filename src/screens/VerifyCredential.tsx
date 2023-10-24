@@ -46,7 +46,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
   const [loadingTotals, setLoadingTotals] = useState<boolean>(false)
   const [numHidden, setNumHidden] = useState<number>(0)
   const [planGiveTotals, setPlanGiveTotals] = useState<Record<string, number>>({})
-  const [planProviderGives, setPlanProviderGives] = useState<number>(0)
   const [planOfferTotals, setPlanOfferTotals] = useState<Record<string, number>>({})
   const [quickMessage, setQuickMessage] = useState<string>(null)
   const [showInfoConsistency, setShowInfoConsistency] = useState<boolean>(false)
@@ -78,6 +77,9 @@ export function VerifyCredentialScreen({ navigation, route }) {
     return accept
   }
 
+  /**
+   * Plans do not serve as providers. But this will be useful with fulfills.
+   *
   const loadMoreProviderGives = async (providerId, beforeId) => {
     const url =
       appStore.getState().settings.apiServer
@@ -109,6 +111,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
       setTotalsError('Got error loading provided counts: ' + err)
     )
   }
+  **/
 
   useFocusEffect(
     React.useCallback(() => {
@@ -407,8 +410,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
           setTotalsError('Got error loading offered totals: ' + err)
         )
 
-        loadMoreProviderGives(wrappedClaim.handleId)
-
         setLoadingTotals(false)
       }
 
@@ -533,13 +534,6 @@ export function VerifyCredentialScreen({ navigation, route }) {
                       { utility.displayAmount(key, planOfferTotals[key]) }
                     </Text>
                   )
-              }
-
-              <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Paid Forward</Text>
-              {
-                loadingTotals
-                ? <ActivityIndicator color="#00FF00" />
-                : <Text>This Assisted { planProviderGives } Other Give{ planProviderGives !== 1 ? "s" : "" }</Text>
               }
 
               <Text style={{ color: 'red' }}>{ totalsError }</Text>
