@@ -63,6 +63,7 @@ import { SignatureResultsScreen } from './screens/SignatureResults'
 import { SignCredentialScreen } from './screens/SignSendToEndorser'
 import { ContactCorrelateScreen } from "./screens/ContactCorrelate";
 import { ContactCorrelateChoicesScreen } from "./screens/ContactCorrelateChoices";
+import * as util from "util";
 
 
 /****************************************************************
@@ -408,7 +409,7 @@ function HomeScreen({ navigation }) {
         if (err.bodyText) {
           appStore.dispatch(appSlice.actions.addLog({
             log: true,
-            msg: "Underlying error loading subfeeds: " + err.bodyText
+            msg: "Underlying error loading subfeed body: " + err.bodyText + " ... with full error: " + util.inspect(err, {depth: null})
           }))
         }
         setLoadSubfeedError("" + (err.userMessage || err))
