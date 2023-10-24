@@ -379,8 +379,12 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
 export const removeSchemaContext = obj =>
   obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
 
-export const addHandleAsIdIfMissing = (obj, handleId) => {
-  if (!obj.identifier && handleId) {
+export const addLastClaimOrHandleAsIdIfMissing = (obj, lastClaimId, handleId) => {
+  if (!obj.identifier && lastClaimId) {
+    const result = R.clone(obj)
+    result.lastClaimId = lastClaimId
+    return result
+  } else if (!obj.identifier && handleId) {
     const result = R.clone(obj)
     result.identifier = handleId
     return result

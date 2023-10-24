@@ -1190,7 +1190,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 selectFulfillsFromBookmarks
                   ? <BookmarkSelectModal
                     cancel={ () => { setSelectFulfillsFromBookmarks(false) } }
-                    proceed={ (handleId) => { setFulfillsId(handleId); setSelectFulfillsFromBookmarks(false) }}
+                    proceed={ (claimId) => { setFulfillsId(claimId); setSelectFulfillsFromBookmarks(false) }}
                   />
                   : <View/>
               }

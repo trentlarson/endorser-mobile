@@ -7,8 +7,8 @@ export class ClaimBookmark extends BaseEntity {
   /**
    The permanent ID of this credential
 
-   This may be a hash, but it should provide a globally unique reference, potentially resolvable (maybe with help of the context).
-   In endorser.ch, the handleId is used, eg. https://endorser.ch/entity/01D25AVGQG1N8E9JNGK7C7DZRD
+   Since there is a default server, this is usually non-global claim identifier.
+   This could provide a globally unique reference, potentially resolvable (maybe with help of the context).
    **/
   @PrimaryColumn('text')
   //@ts-ignore

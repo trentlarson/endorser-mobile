@@ -592,8 +592,8 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                               object:
                                 utility.removeVisibleToDids(
                                   utility.removeSchemaContext(
-                                    utility.addHandleAsIdIfMissing(
-                                      source.claim, source.handleId
+                                    utility.addLastClaimOrHandleAsIdIfMissing(
+                                      source.claim, source.id, source.handleId
                                     )
                                   )
                                 ),

@@ -110,7 +110,7 @@ export function ConfirmOthersScreen({ navigation }) {
           const goodClaim =
             utility.removeSchemaContext(
               utility.removeVisibleToDids(
-                utility.addHandleAsIdIfMissing(record.claim, record.handleId)
+                utility.addLastClaimOrHandleAsIdIfMissing(record.claim, record.id, record.handleId)
               )
             )
           return {
