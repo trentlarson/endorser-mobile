@@ -258,8 +258,8 @@ export const proceedToEditGive = (navigation, origClaim, fulfillsClaimId, fulfil
   const giveClaim = {
     "@context": utility.SCHEMA_ORG_CONTEXT,
     "@type": "GiveAction",
+    fulfills: { "@type": fulfillsType },
   }
-  giveClaim.fulfills = { "@type": fulfillsType, lastClaimId: fulfillsClaimId }
   attachClaimIdentifier(fulfillsClaimId, origClaim, giveClaim.fulfills)
   navigation.navigate('Create Credential', { incomingClaim: giveClaim })
 }
@@ -277,14 +277,13 @@ export const proceedToEditOffer = (navigation, origClaim, claimId) => {
   navigation.navigate('Create Credential', { incomingClaim: offerClaim })
 }
 
-export const proceedToEditPlan = (navigation, origClaim, claimId) => {
+export const proceedToEditPlan = (navigation, origClaim, claimId, fulfillsType) => {
   const planClaim = {
     '@context': utility.SCHEMA_ORG_CONTEXT,
     '@type': 'PlanAction',
-    fulfills: { '@type': 'PlanAction' },
+    fulfills: { "@type": fulfillsType },
   }
   attachClaimIdentifier(claimId, origClaim, planClaim.fulfills)
-  console.log('sending', planClaim)
   navigation.navigate('Create Credential', { incomingClaim: planClaim })
 }
 
@@ -497,10 +496,12 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                             agent: { identifier: source.claim.offeredBy?.identifier },
                             recipient: source.claim.recipient,
                           }
-                          if (source.handleId || source.claim.identifier) {
-                            giveActionForm.fulfills = {
-                              "@type": source.claim['@type'],
-                              lastClaimId: source.claim.identifier || source.handleId,
+                          if (source.id || source.handleId || source.claim.identifier) {
+                            giveActionForm.fulfills = { "@type": source.claim['@type'] }
+                            if (source.id) {
+                              giveActionForm.fulfills.lastClaimId = source.id
+                            } else {
+                              giveActionForm.fulfills.identifier = source.handleId || source.claim.identifier
                             }
                           }
                           // There are potentially both an object & an item given.

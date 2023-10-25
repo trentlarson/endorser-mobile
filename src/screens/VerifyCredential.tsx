@@ -487,7 +487,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
               <Text
                 style={{ color: 'blue', ...styles.centeredText }}
                 onPress={() =>
-                  proceedToEditGive(navigation, credentialSubject, wrappedClaim?.handleId)
+                  proceedToEditGive(navigation, credentialSubject, wrappedClaim?.id, 'PlanAction')
                 }
               >
                 Record help given to this
@@ -496,7 +496,7 @@ export function VerifyCredentialScreen({ navigation, route }) {
               <Text
                 style={{ color: 'blue', ...styles.centeredText }}
                 onPress={() =>
-                  proceedToEditOffer(navigation, credentialSubject, wrappedClaim?.handleId)
+                  proceedToEditOffer(navigation, credentialSubject, wrappedClaim?.id)
                 }
               >
                 Offer help with this
