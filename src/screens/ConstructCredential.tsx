@@ -1119,8 +1119,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
                       <Text>
                         This is a list of other contributors who helped
                         make this possible.
-                        Use handle IDs for other Gives or Plans or Organizations.
-                        Separate each with spaces or commas.
+                        Use DIDs for individuals or handle IDs for Organizations.
+                        Separate with spaces or commas.
                       </Text>
                     ) : (
                       <View />

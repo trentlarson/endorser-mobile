@@ -312,17 +312,25 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
     // agent.did is for legacy data, before March 2023
     const giver = claim.agent?.identifier || claim.agent?.did
     const giverInfo = didInfo(giver, identifiers, contacts)
-    const gaveAmount =
-      claim.object?.amountOfThisGood
+    let gaveAmount = claim.object?.amountOfThisGood
       ? displayAmount(claim.object.unitCode, claim.object.amountOfThisGood)
-      : claimSummary(claim.object)
+      : "";
+    if (claim.description) {
+      if (gaveAmount) {
+        gaveAmount = gaveAmount + ', and also: ';
+      }
+      gaveAmount = gaveAmount + claim.description;
+    }
+    if (!gaveAmount) {
+      gaveAmount = "something not described";
+    }
     // recipient.did is for legacy data, before March 2023
     const gaveRecipientId = claim.recipient?.identifier || claim.recipient?.did
     const gaveRecipientInfo =
       gaveRecipientId
       ? " to " + didInfo(gaveRecipientId, identifiers, contacts)
       : ""
-    return giverInfo + " gave " + gaveAmount + gaveRecipientInfo
+    return giverInfo + " gave" + gaveRecipientInfo + ": " + gaveAmount
 
   } else if (type === "JoinAction") {
     // agent.did is for legacy data, before March 2023
