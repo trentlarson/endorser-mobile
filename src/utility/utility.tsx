@@ -5,12 +5,13 @@ import { Alert, Button, Modal, Pressable, Text, TextInput, TouchableHighlight, V
 import Clipboard from "@react-native-community/clipboard"
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { useSelector } from 'react-redux'
+import { IIdentifier } from "@veramo/core";
 
 import * as utility from './utility'
 import { styles } from '../screens/style'
 import { appStore } from "../veramo/appSlice";
 import { dbConnection } from '../veramo/setup'
-import { isGlobalUri, stripEndorserPrefix } from "./utility";
+import { EndorserRecord, isGlobalUri, stripEndorserPrefix } from "./utility";
 
 function setClaimToAttendAndGive(id: IIdentifier | undefined, startTime: string, navigation) {
   const claimObjs = utility.bvcClaims(
@@ -659,6 +660,29 @@ export const RenderOneRecord = ({ source, navigation, outstandingPerInvoice, aft
                   </View>
                   :
                   <View />
+                }
+
+                { /** Edit Cred **/
+
+                  !isUser(source.issuer) && !isUser(source.claim.agent?.identifier)
+                  ?
+                  <View />
+                  :
+                  <View style={{ flexDirection: 'row', padding: 10 }}>
+                    <Icon name="circle" style={{ marginLeft: 10, marginRight: 10 }} />
+                    <Pressable
+                      onPress={ () => {
+                        const newClaim = R.clone(source.claim)
+                        newClaim.lastClaimId = source.id
+                        navigation.navigate("Edit Credential", {
+                          claims: [newClaim],
+                          userMessage: "The 'lastClaimId' was added to support this edit."
+                        })
+                      }}
+                    >
+                      <Text style={{ color: "blue" }}>Edit</Text>
+                    </Pressable>
+                  </View>
                 }
 
               </View>

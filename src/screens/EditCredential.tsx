@@ -1,16 +1,11 @@
-import Debug from 'debug'
-import * as R from 'ramda'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Button, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native'
-import { CheckBox } from "react-native-elements"
 
-import { onboarding } from '../data/onboarding'
 import * as utility from '../utility/utility'
-import { appSlice, appStore, DEFAULT_ENDORSER_API_SERVER, DEFAULT_ENDORSER_VIEW_SERVER } from '../veramo/appSlice'
 
 export function EditCredentialScreen({ navigation, route }) {
 
-  let { claims, privateFields } = route.params
+  let { claims, privateFields, userMessage } = route.params
 
   let credSubjArray = []
   if (claims != null) {
@@ -84,6 +79,13 @@ export function EditCredentialScreen({ navigation, route }) {
                 <Text style={{ marginTop: 20, marginBottom: 5, fontSize: 20, fontWeight: 'bold' }}>Technical Details</Text>
 
                 <Text>Shared Data</Text>
+                {
+                  userMessage
+                  ?
+                    <Text>Note: { userMessage }</Text>
+                  :
+                    <View/>
+                }
                 <TextInput
                   multiline={true}
                   style={{ borderWidth: 1, height: 300 }}
