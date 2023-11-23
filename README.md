@@ -18,11 +18,13 @@ See next plans in the 'mobile' tasks inside its [prject task list](https://raw.g
 |---------------|------------------|
 | nodejs.org    | >=16.18.0<20.0.0 |
 | ruby-lang.org | ^3.2.2           |
-| rubygems.org  | ^3.4.19          |
+| rubygems.org  | ^3.2.34          |
 | yarnpkg.com   | ^3.4.1           |
 | openjdk.org   | ^20              |
 
 ... which can also be done with: `sh <(curl tea.xyz) -E sh`
+
+... and is equivalent to: `pkgx "+nodejs.org>=16.18.0<20.0.0" +ruby-lang.org^3.2.2 +rubygems.org=3.2.34 +yarnpkg.com^3.4.1 +openjdk.org^20 sh`
 
 Android also needs Java (which isn't in tea yet) which can be done on my machine with `export JAVA_HOME=~/.asdf/installs/java/zulu-11.60.19`
 
