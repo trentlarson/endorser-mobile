@@ -3173,7 +3173,6 @@ __metadata:
     react-native-crypto: ^2.2.0
     react-native-elements: ^3.2.0
     react-native-gesture-handler: ^1.9.0
-    react-native-get-random-values: ^1.8.0
     react-native-headless-task-worker: ^1.0.0
     react-native-permissions: 3.0.0
     react-native-qrcode-scanner: ^1.5.3
@@ -5315,9 +5314,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.4.535":
-  version: 1.4.591
-  resolution: "electron-to-chromium@npm:1.4.591"
-  checksum: 1deb319475acbf946fba94e1bb0dd06bbb27eadd6450c940952c0b36979b472f7dbd6150f3a7f20269373cf7d6bdfcb554f824441b18e0107edf977f08a23e51
+  version: 1.4.592
+  resolution: "electron-to-chromium@npm:1.4.592"
+  checksum: 0e8ab68a6f100af1a521c39089fb3a0be062a74c7d009409f53988be1050ca4a32425bb0ce20640a3523056cb17baa278c2ed1f346409329eeaad64d02060cee
   languageName: node
   linkType: hard
 
@@ -6163,13 +6162,6 @@ __metadata:
   version: 1.4.1
   resolution: "extsprintf@npm:1.4.1"
   checksum: a2f29b241914a8d2bad64363de684821b6b1609d06ae68d5b539e4de6b28659715b5bea94a7265201603713b7027d35399d10b0548f09071c5513e65e8323d33
-  languageName: node
-  linkType: hard
-
-"fast-base64-decode@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "fast-base64-decode@npm:1.0.0"
-  checksum: 4c59eb1775a7f132333f296c5082476fdcc8f58d023c42ed6d378d2e2da4c328c7a71562f271181a725dd17cdaa8f2805346cc330cdbad3b8e4b9751508bd0a3
   languageName: node
   linkType: hard
 
@@ -10906,17 +10898,6 @@ __metadata:
     invariant: ^2.2.4
     prop-types: ^15.7.2
   checksum: fd06147df96fe0b38752c653a2d4bf49570396922719939a31b494197fd30e6775e4c5e73f889af808204dcfbc087eb00f31a0b676c838d5a35e2b017ae9a419
-  languageName: node
-  linkType: hard
-
-"react-native-get-random-values@npm:^1.8.0":
-  version: 1.10.0
-  resolution: "react-native-get-random-values@npm:1.10.0"
-  dependencies:
-    fast-base64-decode: ^1.0.0
-  peerDependencies:
-    react-native: ">=0.56"
-  checksum: 7100682d5096d8b0e208b2698c3a21221b0e26fe181202f09cc9b481a22b01b4d3baf23db313397e673fd244ba0a870e457e0292ef22ce380147c15b6718f0a9
   languageName: node
   linkType: hard
 
