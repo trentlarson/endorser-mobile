@@ -12,6 +12,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Nothing Yet
 
 
+
+## [6.8.133] - 2023-11.22
+
+### Added
+- Declaring that a plan fulfills another plan
+- Editing item directly from results list
+- Use of lastClaimId when editing a claim
+
+### Fixed
+- Incorrect usage of providers
+
+
+
 ## [6.7.132] - 2023-09-17 - 21755364e480334f22730da65030e5e15baf27aa
 
 ### Fixed
