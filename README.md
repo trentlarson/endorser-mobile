@@ -210,11 +210,11 @@ Manually
 
     - You can import a test user from [here](https://github.com/trentlarson/endorser-ch/blob/master/test/util.js#L73). If paste doesn't work, here are some command-line import for Android:
 
-      - for User #0: `adb shell input text "seminar\ accuse\ mystery\ assist\ delay\ law\ thing\ deal\ image\ undo\ guard\ initial\ shallow\ wrestle\ list\ fragile\ borrow\ velvet\ tomorrow\ awake\ explain\ test\ offer\ control"`
+      - for User #0: `adb shell input text "rigid\ shrug\ mobile\ smart\ veteran\ half\ all\ pond\ toilet\ brave\ review\ universe\ ship\ congress\ found\ yard\ skate\ elite\ apology\ jar\ uniform\ subway\ slender\ luggage"`
 
         - This user has large registration and claim limits.
 
-      - for User #1: `adb shell input text "average\ mammal\ spice\ rebuild\ volume\ border\ tail\ bracket\ else\ absent\ sniff\ connect\ praise\ tennis\ twice\ inquiry\ summer\ crawl\ job\ nurse\ sister\ account\ tooth\ follow"`
+      - for User #2: `adb shell input text "wild\ trade\ rescue\ help\ access\ cave\ expand\ toward\ coconut\ gas\ weird\ neck\ history\ wealth\ desk\ course\ action\ number\ print\ ahead\ black\ song\ dumb\ long"`
 
         - This user has a large number of items in their friend feed.
 
