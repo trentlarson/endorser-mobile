@@ -421,7 +421,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
   /**
     props has:
     - providerId string for the identifier of the provider
-    - recipientId string for the identifier of the recipient
+    - recipientDid string for the identifier of the recipient
     - proceed function that takes the claim
     - cancel function
    **/
@@ -432,7 +432,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [currency, setCurrency] = useState<string>('')
     const [description, setDescription] = useState<string>('')
     const [expiration, setExpiration] = useState<string>(DateTime.local().plus(Duration.fromISO("P6M")).toISODate())
-    const [recipientId, setRecipientId] = useState<string>('')
+    const [recipientDid, setRecipientDid] = useState<string>('')
     const [selectFromContacts, setSelectFromContacts] = useState<boolean>(false)
     const [termsOfService, setTermsOfService] = useState<string>("Recipient may acknowledge receipt of terms (with AcceptAction). Recipient will log final payment (with GiveAction) and provider will agree (with AgreeAction).")
     const [transferAllowed, setTransferAllowed] = useState<boolean>(true)
@@ -440,7 +440,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
     const allContacts = useSelector((state) => state.contacts || [])
 
-    function loanOrCreditClaim(providerId: string, recipientId: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
+    function loanOrCreditClaim(providerId: string, recipientDid: string, amount: number, currency: string, description: string, termsOfService: string, transfersAllowed: number) {
       return {
         "@context": "https://schema.org",
         "@type": "LoanOrCredit",
@@ -449,7 +449,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
         // recommend adding non-standard properties as key:value pairs in descriptions until they evolve into standard properties
         "description": description,
         "recipient": {
-          "identifier": recipientId,
+          "identifier": recipientDid,
         },
         "provider": {
           "identifier": providerId
@@ -462,7 +462,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     function loanOrCreditClaimFromInputs() {
       return loanOrCreditClaim(
         props.providerId,
-        props.recipientId,
+        props.recipientDid,
         Number(amountStr),
         currency,
         description,
@@ -485,7 +485,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 selectFromContacts
                 ? <ContactSelectModal
                     cancel={ () => { setSelectFromContacts(false) } }
-                    proceed={ (did) => { setRecipientId(did); setSelectFromContacts(false) }}
+                    proceed={ (did) => { setRecipientDid(did); setSelectFromContacts(false) }}
                     includeMyDid={ identifiers[0].did }
                   />
                 : <View/>
@@ -497,8 +497,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 <View style={{ padding: 5 }}>
                   <Text>Recipient</Text>
                   <TextInput
-                    value={recipientId}
-                    onChangeText={setRecipientId}
+                    value={recipientDid}
+                    onChangeText={setRecipientDid}
                     editable
                     style={{ borderWidth: 1 }}
                     autoCapitalize={'none'}
@@ -815,7 +815,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
    **/
   function GaveModal(props) {
 
-    const [agentId, setAgentId] = useState<string>('')
+    const [agentDid, setAgentDid] = useState<string>('')
     const [amountStr, setAmountStr] = useState<number>('')
     const [invoiceIdentifier, setInvoiceIdentifier] = useState<string>('')
     const [description, setDescription] = useState<string>(null)
@@ -825,7 +825,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [isSpecificAmount, setIsSpecificAmount] = useState<boolean>(false)
     const [isTrade, setIsTrade] = useState<boolean>(false)
     const [providerIds, setProviderIds] = useState<string>('')
-    const [recipientId, setRecipientId] = useState<string>(props.userId)
+    const [recipientDid, setRecipientDid] = useState<string>(props.userId)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
     const [selectFulfillsFromBookmarks, setSelectFulfillsFromBookmarks] = useState<boolean>(false)
     const [selectProviderFromContacts, setSelectProviderFromContacts] = useState<boolean>(false)
@@ -871,8 +871,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
           "@type": "GiveAction",
         }
 
-        result.agent = agentId ? { identifier: agentId } : undefined
-        result.recipient = recipientId ? { identifier: recipientId } : undefined
+        result.agent = agentDid ? { identifier: agentDid } : undefined
+        result.recipient = recipientDid ? { identifier: recipientDid } : undefined
 
         if (isFulfills) {
           result.fulfills = {}
@@ -922,11 +922,11 @@ export function ConstructCredentialScreen({ navigation, route }) {
             || incomingClaim.fulfills.lastClaimId
           )
           setFulfillsType(incomingClaim.fulfills["@type"])
-          setRecipientId('')
+          setRecipientDid('')
         }
         if (incomingClaim.provider) {
           setProviderIds(R.join(',', R.map(R.prop('identifier'), incomingClaim.provider)))
-          setRecipientId('')
+          setRecipientDid('')
         }
       }
     }, [])
@@ -949,8 +949,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 <View style={{ padding: 5 }}>
                   <Text>Giver</Text>
                   <TextInput
-                    value={agentId}
-                    onChangeText={setAgentId}
+                    value={agentDid}
+                    onChangeText={setAgentDid}
                     editable
                     style={{ borderWidth: 1 }}
                     autoCapitalize={'none'}
@@ -971,8 +971,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 <View style={{ padding: 5 }}>
                   <Text>Recipient</Text>
                   <TextInput
-                    value={recipientId}
-                    onChangeText={setRecipientId}
+                    value={recipientDid}
+                    onChangeText={setRecipientDid}
                     editable
                     style={{ borderWidth: 1 }}
                     autoCapitalize={'none'}
@@ -1172,7 +1172,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 selectAgentFromContacts
                   ? <ContactSelectModal
                     cancel={ () => { setSelectAgentFromContacts(false) } }
-                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                    proceed={ (did) => { setAgentDid(did); setSelectAgentFromContacts(false) }}
                     includeMyDid={ identifiers[0].did }
                   />
                   : <View/>
@@ -1181,7 +1181,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 selectRecipientFromContacts
                   ? <ContactSelectModal
                     cancel={ () => { setSelectRecipientFromContacts(false) } }
-                    proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
+                    proceed={ (did) => { setRecipientDid(did); setSelectRecipientFromContacts(false) }}
                     includeMyDid={ identifiers[0].did }
                   />
                   : <View/>
@@ -1220,7 +1220,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
 
   function OfferModal(props) {
 
-    const [agentId, setAgentId] = useState<string>(props.userId)
+    const [agentDid, setAgentDid] = useState<string>(props.userId)
     const [amountStr, setAmountStr] = useState<string>('')
     const [invoiceIdentifier, setInvoiceIdentifier] = useState<string>('')
     const [isRequiringOffers, setIsRequiringOffers] = useState<boolean>(false)
@@ -1233,7 +1233,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
     const [parentIdentifier, setParentIdentifier] = useState<string>('')
     const [parentInfoReadOnly, setParentInfoReadOnly] = useState<boolean>(false)
     const [parentType, setParentType] = useState<string>('')
-    const [recipientId, setRecipientId] = useState<string>(null)
+    const [recipientDid, setRecipientDid] = useState<string>(null)
     const [selectAgentFromContacts, setSelectAgentFromContacts] = useState<boolean>(false)
     const [selectItemType, setSelectItemType] = useState<boolean>(false)
     const [selectParentIdFromBookmarks, setSelectParentIdFromBookmarks] = useState<boolean>(false)
@@ -1293,7 +1293,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
           "@type": "Offer",
           identifier:
             invoiceIdentifier == '' || invoiceIdentifier == null ? undefined : invoiceIdentifier,
-          offeredBy: { identifier: agentId },
+          offeredBy: { identifier: agentDid },
         }
 
         if (itemDescription || parentIdentifier) {
@@ -1336,7 +1336,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
           }
         }
 
-        result.recipient = recipientId ? { identifier: recipientId } : undefined
+        result.recipient = recipientDid ? { identifier: recipientDid } : undefined
 
         result.description = termsOfService || undefined
 
@@ -1350,7 +1350,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
       if (utility.isOffer(incomingClaim)) {
         const incomingOffer = incomingClaim
         if (incomingOffer.offeredBy?.identifier) {
-          setAgentId(incomingOffer.offeredBy.identifier)
+          setAgentDid(incomingOffer.offeredBy.identifier)
         }
         if (incomingOffer.identifier) {
           setInvoiceIdentifier(incomingOffer.identifier)
@@ -1395,15 +1395,15 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 <View style={{ padding: 5 }}>
                   <Text>Agent</Text>
                   <TextInput
-                    value={agentId}
-                    onChangeText={setAgentId}
+                    value={agentDid}
+                    onChangeText={setAgentDid}
                     editable
                     style={{ borderWidth: 1 }}
                     autoCapitalize={'none'}
                     autoCorrect={false}
                   />
                   {
-                    agentId != props.userId
+                    agentDid != props.userId
                     ? <Text style={{ color: 'red' }}>It is very strange to put someone else as the Agent making this offer.</Text>
                     : <View />
                   }
@@ -1422,8 +1422,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 <View style={{ padding: 5 }}>
                   <Text>Recipient</Text>
                   <TextInput
-                    value={recipientId}
-                    onChangeText={setRecipientId}
+                    value={recipientDid}
+                    onChangeText={setRecipientDid}
                     editable
                     style={{ borderWidth: 1 }}
                     autoCapitalize={'none'}
@@ -1639,7 +1639,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 selectAgentFromContacts
                   ? <ContactSelectModal
                     cancel={ () => { setSelectAgentFromContacts(false) } }
-                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                    proceed={ (did) => { setAgentDid(did); setSelectAgentFromContacts(false) }}
                     includeMyDid={ identifiers[0].did }
                   />
                   : <View/>
@@ -1656,7 +1656,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 selectRecipientFromContacts
                   ? <ContactSelectModal
                     cancel={ () => { setSelectRecipientFromContacts(false) } }
-                    proceed={ (did) => { setRecipientId(did); setSelectRecipientFromContacts(false) }}
+                    proceed={ (did) => { setRecipientDid(did); setSelectRecipientFromContacts(false) }}
                     includeMyDid={ identifiers[0].did }
                   />
                   : <View/>
@@ -1688,7 +1688,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
    **/
   function PlanModal(props) {
 
-    const [agentId, setAgentId] = useState<string>(props.userId)
+    const [agentDid, setAgentDid] = useState<string>(props.userId)
     const [endTime, setEndTime] = useState<string>(null)
     const [fulfillsPlanId, setFulfillsPlanId] = useState<string>(null)
     const [hasConflictingPlanId, setHasConflictingPlanId] = useState<boolean>(false)
@@ -1729,7 +1729,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
           "@type": "PlanAction",
         }
 
-        result.agent = agentId ? { identifier: agentId } : undefined
+        result.agent = agentDid ? { identifier: agentDid } : undefined
         result.description = planDescription || undefined
         result.endTime = isoEndTime || undefined
         if (fulfillsPlanId) {
@@ -1818,7 +1818,7 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 selectAgentFromContacts
                   ? <ContactSelectModal
                     cancel={ () => { setSelectAgentFromContacts(false) } }
-                    proceed={ (did) => { setAgentId(did); setSelectAgentFromContacts(false) }}
+                    proceed={ (did) => { setAgentDid(did); setSelectAgentFromContacts(false) }}
                     includeMyDid={ identifiers[0].did }
                   />
                   : <View/>
@@ -1830,8 +1830,8 @@ export function ConstructCredentialScreen({ navigation, route }) {
                 <View style={{ padding: 5 }}>
                   <Text>Planner</Text>
                   <TextInput
-                    value={agentId}
-                    onChangeText={setAgentId}
+                    value={agentDid}
+                    onChangeText={setAgentDid}
                     editable
                     style={{ borderWidth: 1 }}
                     autoCapitalize={'none'}
