@@ -257,6 +257,8 @@ export function didInfoLong(did, identifiers, contacts) {
 
 /**
  return readable summary of claim, or something generic
+
+ similar code is also contained in Time Safari
  **/
 const claimSummary = (claim) => {
   if (!claim) {
@@ -289,8 +291,10 @@ const claimSummary = (claim) => {
 /**
  return readable description of claim if possible, as a past-tense action
 
- identifiers is a list of objects with a 'did' field, each representhing the user
+ identifiers is a list of objects with a 'did' field, each representing the user
  contacts is a list of objects with a 'did' field for others and a 'name' field for their name
+
+ similar code is also contained in Time Safari
  **/
 export const claimSpecialDescription = (record, identifiers, contacts) => {
   let claim = record.claim
@@ -380,13 +384,15 @@ export const claimSpecialDescription = (record, identifiers, contacts) => {
     return contactInfo + " possesses [" + polygon.substring(0, polygon.indexOf(" ")) + "...]"
 
   } else {
-    return issuer + " declared " + claimSummary(claim, contacts)
+    return issuer + " declared " + claimSummary(claim)
   }
 }
 
+// similar code is also contained in Time Safari
 export const removeSchemaContext = obj =>
   obj['@context'] === 'https://schema.org' ? R.omit(['@context'], obj) : obj
 
+// similar code is also contained in Time Safari
 export const addLastClaimOrHandleAsIdIfMissing = (obj, lastClaimId, handleId) => {
   if (!obj.identifier && lastClaimId) {
     const result = R.clone(obj)
@@ -402,6 +408,7 @@ export const addLastClaimOrHandleAsIdIfMissing = (obj, lastClaimId, handleId) =>
 }
 
 // return clone of object without any nested *VisibleToDids keys
+// similar code is also contained in Time Safari
 export function removeVisibleToDids(input) {
   if (input instanceof Object) {
     if (!Array.isArray(input)) {
@@ -417,7 +424,6 @@ export function removeVisibleToDids(input) {
       // it's an array
       return R.map(removeVisibleToDids, input)
     }
-    return false
   } else {
     return input
   }

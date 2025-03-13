@@ -4,41 +4,52 @@
 A mobile app for recording claims and reporting on them
 
 For the reporting facility, we use the [endorser-ch APIs](https://github.com/trentlarson/endorser-ch).
-See next plans in the 'mobile' tasks inside its [prject task list](https://raw.githubusercontent.com/trentlarson/endorser-ch/master/project.task.yaml).
+See next plans in the 'mobile' tasks inside its [project task list](https://raw.githubusercontent.com/trentlarson/endorser-ch/master/project.task.yaml).
 
 
 
 ## Dependencies
 
-- One way is with asdf-vm.com (which is the only way I can get the deploy to work): `. /opt/homebrew/opt/asdf/libexec/asdf.sh`
+- One way is with asdf-vm.com (which is the only way I can get the deploy to work):
+
+```
+asdf plugin add java
+asdf install java
+asdf plugin add nodejs
+asdf install nodejs
+asdf plugin add ruby
+asdf install ruby
+asdf plugin add yarn
+asdf install yarn
+```
 
 - The following is for tea.xyz, which works for me for development until I try to deploy (eg. `bundle exec fastlane beta` because "mkmf.rb can't find header files for ruby")
 
 | Project       | Version          |
 |---------------|------------------|
+| cocoapods.org | ^1.15.2          |
 | nodejs.org    | >=16.18.0<20.0.0 |
+| openjdk.org   | ^20              |
 | ruby-lang.org | ^3.2.2           |
 | rubygems.org  | ^3.2.34          |
+| watchman      | ^2021.08.26      |
 | yarnpkg.com   | ^3.4.1           |
-| openjdk.org   | ^20              |
 
-... which can also be done with: `sh <(curl tea.xyz) -E sh`
+... which is equivalent to: `pkgx "+nodejs.org>=16.18.0<20.0.0" +ruby-lang.org^3.2.2 +rubygems.org=3.2.34 +yarnpkg.com^3.4.1 +openjdk.org^20 +cocoapods.org +watchman sh`
 
-... and is equivalent to: `pkgx "+nodejs.org>=16.18.0<20.0.0" +ruby-lang.org^3.2.2 +rubygems.org=3.2.34 +yarnpkg.com^3.4.1 +openjdk.org^20 sh`
-
-Android also needs Java (which isn't in tea yet) which can be done on my machine with `export JAVA_HOME=~/.asdf/installs/java/zulu-11.60.19`
+We highly recommend pkgx.dev -- and you can use it even if it's not installed by replacing `pkgx` with `sh <(curl https://pkgx.sh)`
 
 ## Dev Build & Run
 
-`yarn install`
+```
+yarn install
+```
 
-- Note that there are also some other mobile dependencies, eg. Xcode, iOS CocoaPods, and Android Studio. The tools will prompt you along the way.
+  - Note that there are also some other mobile dependencies, eg. Xcode, iOS CocoaPods, and Android Studio. The tools will prompt you along the way.
 
 - There are some values to customize in src/veramo/setup.ts: SERVICE_ID, INFURA_PROJECT_ID
 
 - For ios:
-
-  - `brew install cocoapods` # note that I had problems on an M1 with `gem install`
 
   - `cd ios; pod install; cd ..`
 
@@ -78,7 +89,7 @@ function btoa(str) {
 ```
 
 
-- A "CompileC" error can happen after removing a dependency. You may have to manually remove node_modules and pods (both `ios/Pods` and `~/Library/Caches/CocoaPods`) and reinstall them... but even that may not work and sometimes I just clone a new copy and install anew. (I've also seen it work to just rerun the app.
+- A "CompileC" error can happen after removing a dependency. You may have to manually remove node_modules and pods (both `ios/Pods` and `~/Library/Caches/CocoaPods`) and reinstall them... but even that may not work and sometimes I just clone a new copy and install anew. (I've also seen it work to just rerun the app.)
 
 
 ```
@@ -163,6 +174,9 @@ Unable to lookup in current state: Shutdown
 - Builds may get: "In .../node_modules/react-native-sodium/libsodium/libsodium-ios/lib/libsodium.a(libsodium_la-aead_chacha20poly1305.o), building for iOS Simulator, but linking in object file built for iOS, file '.../node_modules/react-native-sodium/libsodium/libsodium-ios/lib/libsodium.a' for architecture arm64" when building on M1. Open a terminal "using Rosetta" and run from there. (You may have to check out a clean set of source files.) (I would sure like to find a way to run natively!)
 
 - Compilation may complain about "node->getLayout().hadOverflow() |" in Yoga.cpp on Xcode 14.3. Edit node_modules/react-native/ReactCommon/yoga/yoga/Yoga.cpp and change the line to make it double: "||" (Only necessary on line 2285.)
+
+- Got "Error: ENOENT: no such file or directory, lstat 'node_modules'"? That's weird because we fixed this with the .yarnrc.yml file. See https://chatgpt.com/share/620491ee-31e7-4a04-8750-0f2746a448d2
+
 
 
 
