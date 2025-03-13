@@ -10,6 +10,8 @@ See next plans in the 'mobile' tasks inside its [prject task list](https://raw.g
 
 ## Dependencies
 
+Note that the 'android-attempt' branch may have more recent instructions.
+
 - One way is with asdf-vm.com (which is the only way I can get the deploy to work): `. /opt/homebrew/opt/asdf/libexec/asdf.sh`
 
 - The following is for tea.xyz, which works for me for development until I try to deploy (eg. `bundle exec fastlane beta` because "mkmf.rb can't find header files for ruby")
